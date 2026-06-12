@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JurídicosWeb — Dashboard Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0a0f1e;color:#e2e8f0;min-height:100vh;}
+.top-bar{background:#0f1629;border-bottom:1px solid #1e2d4a;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-weight:900;font-size:1.1rem;color:#d4a017;}
+.live-dot{display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#94a3b8;}
+.live-dot::before{content:'';width:8px;height:8px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.main{padding:20px 24px;}
+.section-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin:0 0 12px;font-weight:700;}
+
+/* KPI Cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:28px;}
+.kpi-card{background:#0f1629;border:1px solid #1e2d4a;border-radius:12px;padding:16px;}
+.kpi-card .label{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-card .value{font-size:2rem;font-weight:900;color:#fff;line-height:1;}
+.kpi-card .sub{font-size:0.72rem;color:#94a3b8;margin-top:5px;}
+.kpi-card .icon{font-size:1.2rem;margin-bottom:8px;}
+.kpi-card.gold .value{color:#d4a017;}
+.kpi-card.green .value{color:#22c55e;}
+.kpi-card.red .value{color:#ef4444;}
+.kpi-card.blue .value{color:#60a5fa;}
+
+/* Funnel */
+.funnel-wrap{background:#0f1629;border:1px solid #1e2d4a;border-radius:12px;padding:20px;margin-bottom:28px;}
+.funnel-step{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.funnel-bar-wrap{flex:1;background:#1e2d4a;border-radius:6px;height:32px;overflow:hidden;position:relative;}
+.funnel-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 12px;font-size:0.78rem;font-weight:700;transition:width .8s ease;white-space:nowrap;}
+.funnel-label{width:180px;font-size:0.78rem;color:#94a3b8;flex-shrink:0;}
+.funnel-pct{width:50px;text-align:right;font-size:0.78rem;font-weight:700;color:#d4a017;flex-shrink:0;}
+.f1{background:linear-gradient(90deg,#1e40af,#3b82f6);}
+.f2{background:linear-gradient(90deg,#065f46,#10b981);}
+.f3{background:linear-gradient(90deg,#78350f,#f59e0b);}
+.f4{background:linear-gradient(90deg,#7c2d12,#ef4444);}
+.f5{background:linear-gradient(90deg,#581c87,#a855f7);}
+
+/* Tabla leads recientes */
+.table-wrap{background:#0f1629;border:1px solid #1e2d4a;border-radius:12px;overflow:hidden;margin-bottom:28px;}
+.table-header{padding:14px 20px;border-bottom:1px solid #1e2d4a;display:flex;align-items:center;justify-content:space-between;}
+.table-header h3{font-size:0.85rem;font-weight:700;color:#fff;}
+table{width:100%;border-collapse:collapse;}
+th{background:#0a0f1e;padding:10px 16px;font-size:0.7rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;text-align:left;}
+td{padding:11px 16px;font-size:0.8rem;border-bottom:1px solid #1a2540;color:#e2e8f0;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;}
+.badge-pending{background:rgba(245,158,11,0.15);color:#f59e0b;}
+.badge-paid{background:rgba(34,197,94,0.15);color:#22c55e;}
+.badge-form{background:rgba(96,165,250,0.15);color:#60a5fa;}
+
+/* Gauge conversión */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:28px;}
+.gauge-card{background:#0f1629;border:1px solid #1e2d4a;border-radius:12px;padding:18px;text-align:center;}
+.gauge-card .g-title{font-size:0.72rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:12px;}
+.gauge-ring{position:relative;width:90px;height:90px;margin:0 auto 12px;}
+.gauge-ring svg{transform:rotate(-90deg);}
+.gauge-ring .bg{stroke:#1e2d4a;fill:none;stroke-width:8;}
+.gauge-ring .fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s ease;}
+.gauge-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;}
+.g-sub{font-size:0.75rem;color:#94a3b8;}
+
+/* Config GA */
+.config-box{background:#0f1629;border:1.5px solid #d4a017;border-radius:12px;padding:18px;margin-bottom:20px;}
+.config-box h3{color:#d4a017;font-size:0.85rem;margin-bottom:10px;}
+.config-box p{color:#94a3b8;font-size:0.78rem;line-height:1.7;}
+.config-box code{background:#1e2d4a;color:#60a5fa;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:0.78rem;}
+
+/* Sheet link */
+.sheet-link{background:linear-gradient(135deg,#065f46,#10b981);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px;text-decoration:none;margin-bottom:20px;}
+.sheet-link span{color:#fff;font-weight:700;font-size:0.85rem;}
+
+/* Responsive */
+@media(max-width:600px){
+  .funnel-label{width:110px;font-size:0.7rem;}
+  .kpi-card .value{font-size:1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">⚖️ JurídicosWeb — Analytics</div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="live-dot">En vivo</div>
+    <span id="last-update" style="font-size:0.72rem;color:#475569;">Actualizando...</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Config GA4 ── -->
+  <div class="config-box" id="config-box">
+    <h3>⚙️ Configurar Google Analytics 4 (una sola vez)</h3>
+    <p>Para datos reales necesita conectar GA4:<br>
+    1. Cree una cuenta en <strong>analytics.google.com</strong> → Nuevo sitio web → <code>juridicosweb.com</code><br>
+    2. Copie el <strong>Measurement ID</strong> (formato <code>G-XXXXXXXXXX</code>)<br>
+    3. En el <code>index.html</code> reemplace <code>G-XXXXXXXXXX</code> por su ID real<br>
+    4. En GA4 → Eventos: verá <code>consulta_iniciada</code>, <code>formulario_enviado</code>, <code>pago_iniciado</code>, <code>pago_confirmado</code><br><br>
+    Mientras tanto este dashboard muestra los datos de <strong>este navegador</strong> (localStorage).</p>
+    <button onclick="document.getElementById('config-box').style.display='none'" style="background:#1e2d4a;border:none;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.75rem;margin-top:8px;">Entendido, ocultar</button>
+  </div>
+
+  <!-- ── KPIs ── -->
+  <p class="section-title">Resumen de hoy</p>
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="icon"><i class="fas fa-eye" style="color:#60a5fa;"></i></div>
+      <div class="label">Visitas Landing</div>
+      <div class="value" id="kpi-visitas">—</div>
+      <div class="sub">Sesiones únicas hoy</div>
+    </div>
+    <div class="kpi-card">
+      <div class="icon"><i class="fas fa-search" style="color:#94a3b8;"></i></div>
+      <div class="label">Consultas SIMIT</div>
+      <div class="value" id="kpi-consultas">—</div>
+      <div class="sub">Iniciaron consulta</div>
+    </div>
+    <div class="kpi-card">
+      <div class="icon"><i class="fas fa-file-alt" style="color:#f59e0b;"></i></div>
+      <div class="label">Formularios</div>
+      <div class="value" id="kpi-forms">—</div>
+      <div class="sub">Datos enviados</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="icon"><i class="fas fa-credit-card" style="color:#22c55e;"></i></div>
+      <div class="label">Pagos iniciados</div>
+      <div class="value" id="kpi-pagos">—</div>
+      <div class="sub">Clic en Wompi</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="icon"><i class="fas fa-check-circle" style="color:#d4a017;"></i></div>
+      <div class="label">Pagos confirmados</div>
+      <div class="value" id="kpi-confirmados">—</div>
+      <div class="sub">Ingreso estimado hoy</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="icon"><i class="fas fa-dollar-sign" style="color:#ef4444;"></i></div>
+      <div class="label">Ingresos</div>
+      <div class="value" id="kpi-ingresos">—</div>
+      <div class="sub">$45K × confirmados</div>
+    </div>
+  </div>
+
+  <!-- ── Funnel ── -->
+  <p class="section-title">Funnel de conversión</p>
+  <div class="funnel-wrap">
+    <div class="funnel-step">
+      <div class="funnel-label">1. Visitan la página</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar f1" id="fb1" style="width:100%">100%</div></div>
+      <div class="funnel-pct" id="fp1">—</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">2. Inician consulta</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar f2" id="fb2" style="width:0%"></div></div>
+      <div class="funnel-pct" id="fp2">—</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">3. Ven resultado</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar f3" id="fb3" style="width:0%"></div></div>
+      <div class="funnel-pct" id="fp3">—</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">4. Llenan formulario</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar f4" id="fb4" style="width:0%"></div></div>
+      <div class="funnel-pct" id="fp4">—</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">5. Inician pago</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar f5" id="fb5" style="width:0%"></div></div>
+      <div class="funnel-pct" id="fp5">—</div>
+    </div>
+  </div>
+
+  <!-- ── Gauges conversión ── -->
+  <p class="section-title">Tasas de conversión clave</p>
+  <div class="gauges">
+    <div class="gauge-card">
+      <div class="g-title">Visita → Consulta</div>
+      <div class="gauge-ring">
+        <svg viewBox="0 0 100 100" width="90" height="90">
+          <circle class="bg" cx="50" cy="50" r="38"/>
+          <circle class="fg" id="g1" cx="50" cy="50" r="38" stroke="#3b82f6" stroke-dasharray="239" stroke-dashoffset="239"/>
+        </svg>
+        <div class="gauge-center" id="g1v" style="color:#60a5fa;">—</div>
+      </div>
+      <div class="g-sub">De cada 100 visitas</div>
+    </div>
+    <div class="gauge-card">
+      <div class="g-title">Consulta → Formulario</div>
+      <div class="gauge-ring">
+        <svg viewBox="0 0 100 100" width="90" height="90">
+          <circle class="bg" cx="50" cy="50" r="38"/>
+          <circle class="fg" id="g2" cx="50" cy="50" r="38" stroke="#f59e0b" stroke-dasharray="239" stroke-dashoffset="239"/>
+        </svg>
+        <div class="gauge-center" id="g2v" style="color:#f59e0b;">—</div>
+      </div>
+      <div class="g-sub">Tasa de captura lead</div>
+    </div>
+    <div class="gauge-card">
+      <div class="g-title">Formulario → Pago</div>
+      <div class="gauge-ring">
+        <svg viewBox="0 0 100 100" width="90" height="90">
+          <circle class="bg" cx="50" cy="50" r="38"/>
+          <circle class="fg" id="g3" cx="50" cy="50" r="38" stroke="#a855f7" stroke-dasharray="239" stroke-dashoffset="239"/>
+        </svg>
+        <div class="gauge-center" id="g3v" style="color:#a855f7;">—</div>
+      </div>
+      <div class="g-sub">Conversión final</div>
+    </div>
+    <div class="gauge-card">
+      <div class="g-title">Sin pago (Remarketing)</div>
+      <div class="gauge-ring">
+        <svg viewBox="0 0 100 100" width="90" height="90">
+          <circle class="bg" cx="50" cy="50" r="38"/>
+          <circle class="fg" id="g4" cx="50" cy="50" r="38" stroke="#ef4444" stroke-dasharray="239" stroke-dashoffset="239"/>
+        </svg>
+        <div class="gauge-center" id="g4v" style="color:#ef4444;">—</div>
+      </div>
+      <div class="g-sub">Leads a recuperar</div>
+    </div>
+  </div>
+
+  <!-- ── Tabla leads del Sheet ── -->
+  <p class="section-title">Leads recientes (Google Sheet)</p>
+
+  <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1KVXRarjnV2z01pLBm_FjZJC3rowLxiF1RWV23lh4F34/edit#gid=0" target="_blank">
+    <i class="fas fa-table-cells" style="color:#fff;font-size:1.2rem;"></i>
+    <span>Abrir Google Sheet completo →</span>
+    <i class="fas fa-external-link-alt" style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-left:auto;"></i>
+  </a>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>Leads capturados</h3>
+      <span style="font-size:0.72rem;color:#64748b;" id="sheet-status">Cargando...</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>WhatsApp</th>
+            <th>Ciudad</th>
+            <th># Multas</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="leads-table-body">
+          <tr><td colspan="7" style="text-align:center;color:#475569;padding:24px;">Cargando datos del Sheet...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="font-size:0.72rem;color:#334155;text-align:center;padding-bottom:20px;">
+    JurídicosWeb Analytics · Datos en tiempo real · Google Analytics 4 + Google Sheets
+  </p>
+</div>
+
+<script>
+var SHEET_ID = '1KVXRarjnV2z01pLBm_FjZJC3rowLxiF1RWV23lh4F34';
+var SHEET_NAME = encodeURIComponent('📥 Leads');
+
+// ── Leer eventos desde localStorage (este navegador) ────────────────────────
+function leerEventos(){
+  try{
+    var raw = localStorage.getItem('jw_eventos');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function contarEvento(eventos, nombre){
+  return eventos.filter(function(e){ return e.e === nombre; }).length;
+}
+
+function actualizarKPIs(){
+  var eventos = leerEventos();
+  var visitas    = parseInt(localStorage.getItem('jw_visitas')||'0') || 1;
+  var consultas  = contarEvento(eventos, 'consulta_iniciada');
+  var resultados = contarEvento(eventos, 'resultado_mostrado');
+  var forms      = contarEvento(eventos, 'formulario_enviado');
+  var pagos      = contarEvento(eventos, 'pago_iniciado');
+  var confirmados= contarEvento(eventos, 'pago_confirmado');
+  var ingresos   = confirmados * 45000;
+
+  // KPIs
+  document.getElementById('kpi-visitas').textContent     = visitas;
+  document.getElementById('kpi-consultas').textContent   = consultas;
+  document.getElementById('kpi-forms').textContent       = forms;
+  document.getElementById('kpi-pagos').textContent       = pagos;
+  document.getElementById('kpi-confirmados').textContent = confirmados;
+  document.getElementById('kpi-ingresos').textContent    = '$'+ingresos.toLocaleString('es-CO');
+
+  // Funnel
+  var pasos = [visitas, consultas, resultados, forms, pagos];
+  var ids = ['fb1','fb2','fb3','fb4','fb5'];
+  var pids= ['fp1','fp2','fp3','fp4','fp5'];
+  pasos.forEach(function(v, i){
+    var pct = visitas > 0 ? Math.round((v/visitas)*100) : 0;
+    var bar = document.getElementById(ids[i]);
+    var lbl = document.getElementById(pids[i]);
+    if(bar){ bar.style.width = Math.max(pct,2)+'%'; bar.textContent = v; }
+    if(lbl){ lbl.textContent = pct+'%'; }
+  });
+
+  // Gauges
+  function setGauge(id, vid, num, den, color){
+    var pct = den > 0 ? Math.min(Math.round((num/den)*100), 100) : 0;
+    var offset = 239 - (239 * pct / 100);
+    var el = document.getElementById(id);
+    var vel = document.getElementById(vid);
+    if(el) el.style.strokeDashoffset = offset;
+    if(vel) vel.textContent = pct+'%';
+  }
+  setGauge('g1','g1v', consultas,   visitas,   '#3b82f6');
+  setGauge('g2','g2v', forms,       consultas, '#f59e0b');
+  setGauge('g3','g3v', pagos,       forms,     '#a855f7');
+  var sinPago = forms - confirmados;
+  setGauge('g4','g4v', sinPago,     forms,     '#ef4444');
+
+  document.getElementById('last-update').textContent =
+    'Actualizado: ' + new Date().toLocaleTimeString('es-CO');
+}
+
+// ── Leer leads del Google Sheet via GViz ────────────────────────────────────
+function cargarLeads(){
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+SHEET_NAME;
+  fetch(url)
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      var json = JSON.parse(txt.replace(/^[^\{]+/, '').replace(/\);?\s*$/, ''));
+      var rows = (json.table && json.table.rows) ? json.table.rows : [];
+      var tbody = document.getElementById('leads-table-body');
+
+      if(rows.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#475569;padding:24px;">No hay leads aún. Llena el formulario en la landing para ver datos aquí.</td></tr>';
+        document.getElementById('sheet-status').textContent = 'Sin datos';
+        return;
+      }
+
+      var html = '';
+      rows.slice(1).reverse().slice(0, 20).forEach(function(r){
+        var c = r.c || [];
+        var get = function(i){ return c[i] && c[i].v ? String(c[i].v) : '—'; };
+        var estado = get(8);
+        var badgeClass = estado.includes('CONFIRMADO') ? 'badge-paid'
+          : estado.includes('Pendiente') || estado.includes('PENDIENTE') ? 'badge-pending'
+          : 'badge-form';
+        var estadoCorto = estado.replace('PENDIENTE PAGO – Remarketing','⏳ Sin pago').replace('PAGO CONFIRMADO','✅ Pagado');
+        html +=
+          '<tr>' +
+          '<td style="color:#64748b;font-size:0.72rem;">'+get(0).substring(0,16)+'</td>' +
+          '<td style="font-weight:600;">'+get(1)+'</td>' +
+          '<td style="color:#94a3b8;">'+get(2)+'</td>' +
+          '<td><a href="https://wa.me/57'+get(4).replace(/\D/g,'')+'" target="_blank" style="color:#22c55e;">'+get(4)+'</a></td>' +
+          '<td>'+get(6)+'</td>' +
+          '<td style="text-align:center;font-weight:700;color:#d4a017;">'+get(7)+'</td>' +
+          '<td><span class="badge '+badgeClass+'">'+estadoCorto+'</span></td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+      document.getElementById('sheet-status').textContent = (rows.length-1) + ' leads totales';
+    })
+    .catch(function(){
+      document.getElementById('sheet-status').textContent = 'Sheet privado o sin datos';
+      document.getElementById('leads-table-body').innerHTML =
+        '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:20px;">⚠️ El Sheet debe ser público (compartir → "Cualquiera con el enlace puede ver")</td></tr>';
+    });
+}
+
+// ── Registrar visita ────────────────────────────────────────────────────────
+var v = parseInt(localStorage.getItem('jw_visitas')||'0');
+localStorage.setItem('jw_visitas', v+1);
+
+// ── Iniciar ─────────────────────────────────────────────────────────────────
+actualizarKPIs();
+cargarLeads();
+setInterval(actualizarKPIs, 10000);
+setInterval(cargarLeads, 30000);
+</script>
+</body>
+</html>
