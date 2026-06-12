@@ -5,6 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>JurídicosWeb | Elimina tus Fotomultas – Gratis Consultar</title>
 <meta name="description" content="5.8 millones de fotomultas serán anuladas en Colombia. Consulta gratis si las tuyas aplican. Derechos de petición desde $45.000.">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T3DH24J2');</script>
+<!-- End Google Tag Manager -->
+<!-- Google Analytics 4 directo (respaldo) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBKTML924W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-CBKTML924W');
+
+  function jwTrack(evento, params){
+    try{
+      gtag('event', evento, Object.assign({ event_category:'juridicosweb' }, params||{}));
+      dataLayer.push(Object.assign({ event: evento }, params||{}));
+      var hist = JSON.parse(localStorage.getItem('jw_eventos')||'[]');
+      hist.push({ e: evento, p: params, t: Date.now() });
+      if(hist.length > 200) hist = hist.slice(-200);
+      localStorage.setItem('jw_eventos', JSON.stringify(hist));
+    } catch(err){}
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -381,6 +407,10 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T3DH24J2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <!-- NAV -->
 <nav id="nav">
@@ -1044,6 +1074,7 @@ function iniciarConsulta(){
     alert('Por favor ingresa '+(tipo==='cedula'?'tu número de cédula':'la placa del vehículo'));
     return;
   }
+  jwTrack('consulta_iniciada', { tipo: tipo });
   goToStep(2);
   animarLoader(val,tipo);
 }
@@ -1281,6 +1312,7 @@ function mostrarBotonRegreso(){
 
 function mostrarResultados(multas,val,tipo,apiData){
   // Siempre usar el flujo de selector de multas
+  jwTrack('resultado_mostrado', { tipo: tipo });
   mostrarSelectorMultas(val, tipo);
 }
 
@@ -1522,6 +1554,7 @@ function validarYContinuar(){
   // Guardar lead INMEDIATAMENTE (antes del pago) para remarketing
   var datosLead = recogerDatosFormulario();
   guardarLead(datosLead);
+  jwTrack('formulario_enviado', { ciudad: datosLead.ciudad, multas: datosLead.multasSeleccionadas });
   goToStep(5);
 }
 
@@ -1544,8 +1577,7 @@ var _pagoTimerID = null;
 var _pagoToastID = null;
 
 function confirmarTramite(){
-  // Wompi se abre en nueva pestaña. NO interrumpir — el cliente está pagando.
-  // Después de 5 minutos aparece un toast discreto preguntando si ya terminó.
+  jwTrack('pago_iniciado', { plan: pagoSel, valor: pagoSel==='inmediato'?45000:19800 });
   if(_pagoTimerID) clearTimeout(_pagoTimerID);
   _pagoTimerID = setTimeout(function(){ mostrarToastPago(); }, 5 * 60 * 1000); // 5 minutos
 
@@ -1632,6 +1664,7 @@ function cerrarToastPago(){
 }
 
 function confirmarPagoRealizado(){
+  jwTrack('pago_confirmado', { plan: pagoSel, valor: pagoSel==='inmediato'?45000:19800 });
   // Notificar a Kommo que este lead confirmó el pago
   if(GUARDAR_LEAD_URL){
     var nombres = document.getElementById('frm-nombres') ? document.getElementById('frm-nombres').value.trim() : '';
@@ -1684,30 +1717,31 @@ function recogerDatosFormulario(){
 
 function guardarLead(datos){
   if(!GUARDAR_LEAD_URL){ return; }
-  // Guardar en localStorage como respaldo antes de enviar
   try { localStorage.setItem('jweb_lead_pendiente', JSON.stringify(datos)); } catch(e){}
 
   var enviar = function(){
+    // SIN Content-Type: application/json para evitar preflight CORS en Apps Script
+    // Apps Script recibe igual via e.postData.contents
     return fetch(GUARDAR_LEAD_URL, {
-      method  : 'POST',
-      headers : {'Content-Type':'application/json'},
-      body    : JSON.stringify(datos),
+      method : 'POST',
+      body   : JSON.stringify(datos),
     })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d.ok){
-        try{ localStorage.removeItem('jweb_lead_pendiente'); }catch(e){}
-        console.log('✅ Lead guardado en Sheet');
-      }
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      try{
+        var d = JSON.parse(txt);
+        if(d.ok){ try{localStorage.removeItem('jweb_lead_pendiente');}catch(e){} console.log('✅ Lead guardado'); }
+        else { console.warn('Apps Script error:', d.error); }
+      } catch(e){ console.log('Respuesta Apps Script:', txt.substring(0,100)); }
     });
   };
 
-  // Intento 1 → si falla, reintento a los 8 segundos
   enviar().catch(function(){
     setTimeout(function(){
-      enviar().catch(function(e){ console.warn('⚠️ Lead no guardado:', e); });
+      enviar().catch(function(e){ console.warn('⚠️ Lead no guardado después de reintento:', e); });
     }, 8000);
   });
+}
 }
 
 function enviarCorreoCliente(){
@@ -1830,4 +1864,3 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 });
 </script>
 </body>
-</html>
