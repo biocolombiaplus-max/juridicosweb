@@ -733,7 +733,16 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 
       <!-- STEP 4: FORMULARIO DE REGISTRO -->
       <div class="step-panel" id="sp4">
-        <p style="color:var(--gray);font-size:0.85rem;margin-bottom:18px;line-height:1.6;">Completa tus datos para generar el Derecho de Petición. Lo recibirás en tu correo en <strong>máx. 2 horas</strong>.</p>
+        <!-- Encabezado motivador del formulario -->
+        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+            <i class="fas fa-file-signature" style="color:#fff;font-size:0.95rem;"></i>
+          </div>
+          <div>
+            <p style="font-size:0.85rem;font-weight:800;color:#15803d;margin:0 0 3px;">¡Casi listo! Solo necesitamos tus datos</p>
+            <p style="font-size:0.76rem;color:#166534;margin:0;line-height:1.5;">Con esta información generamos tu Derecho de Petición personalizado. Lo recibirás en tu correo en <strong>máx. 2 horas</strong>.</p>
+          </div>
+        </div>
         <div class="form-grid2">
           <div class="fg"><label>Nombres *</label><input type="text" id="frm-nombres" placeholder="Tus nombres"></div>
           <div class="fg"><label>Apellidos *</label><input type="text" id="frm-apellidos" placeholder="Tus apellidos"></div>
@@ -759,9 +768,15 @@ footer{background:#050e1e;padding:50px 5% 28px;}
           </div>
         </div>
         <div style="margin-top:20px;">
-          <button class="btn btn-shimmer btn-full" style="padding:18px;font-size:1rem;border-radius:12px;letter-spacing:.3px;" onclick="validarYContinuar()"><i class="fas fa-paper-plane"></i> Enviar Datos e Iniciar Trámite</button>
+          <button class="btn btn-shimmer btn-full" style="padding:18px;font-size:1rem;border-radius:12px;letter-spacing:.3px;font-weight:800;" onclick="validarYContinuar()">
+            <i class="fas fa-check-circle" style="margin-right:8px;"></i>Confirmar y continuar
+          </button>
         </div>
-        <p style="font-size:0.73rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt"></i> Tus datos son confidenciales y solo se usan para generar tu documento legal</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;">
+          <span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Datos seguros</span>
+          <span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-user-shield" style="color:#16a34a;"></i>Privacidad garantizada</span>
+          <span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i>Sin spam</span>
+        </div>
       </div>
 
       <!-- STEP 5: PAGO -->
@@ -1426,15 +1441,34 @@ function seleccionarMultas(n){
       sel.appendChild(div);
     }
     document.getElementById('btn-continuar-sel').innerHTML =
-      '<button class="btn btn-red btn-full btn-pulse" onclick="goToStep(4)" style="padding:17px;font-size:1rem;font-weight:800;border-radius:13px;border:none;cursor:pointer;width:100%;">' +
-      '<i class="fas fa-trash-alt" style="margin-right:8px;"></i>Eliminar '+n+' multa'+(n>1?'s':'')+' – Continuar</button>' +
-      '<p style="font-size:0.72rem;color:var(--gray);text-align:center;margin:8px 0 0;">Valor del proceso: <strong>$45.000 por secretaría</strong></p>';
+      '<button onclick="iniciarFormularioDesdeSelector('+n+')" style="width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:13px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(22,163,74,0.4);">' +
+      '<div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);pointer-events:none;"></div>' +
+      '<div style="display:flex;align-items:center;justify-content:center;gap:12px;">' +
+      '<div style="width:38px;height:38px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+      '<i class="fas fa-file-alt" style="color:#fff;font-size:1rem;"></i></div>' +
+      '<div style="text-align:left;">' +
+      '<p style="color:#fff;font-size:1rem;font-weight:900;margin:0;line-height:1.2;">Iniciar trámite — Es gratis</p>' +
+      '<p style="color:rgba(255,255,255,0.82);font-size:0.76rem;margin:3px 0 0;font-weight:500;">Diligencia el formulario en 2 minutos</p>' +
+      '</div>' +
+      '<i class="fas fa-arrow-right" style="color:#fff;font-size:1rem;margin-left:auto;flex-shrink:0;"></i>' +
+      '</div></button>' +
+      '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;">' +
+      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Confidencial</span>' +
+      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i>Sin compromiso</span>' +
+      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-check-circle" style="color:#16a34a;"></i>100% digital</span>' +
+      '</div>';
   }
 }
 
 function mostrarLimiteMas4(){
   var msg = document.getElementById('msg-limite');
   if(msg){ msg.style.display='block'; msg.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+
+var _multasSeleccionadas = 1;
+function iniciarFormularioDesdeSelector(n){
+  _multasSeleccionadas = n || 1;
+  goToStep(4);
 }
 
 function generarMultasDemo(val){
