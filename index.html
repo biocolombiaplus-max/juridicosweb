@@ -1519,9 +1519,8 @@ function validarYContinuar(){
   if(!waOk){alert('Ingresa un WhatsApp válido (10 dígitos, ej: 3159318400)');return;}
   if(!validarEmail()){alert('Ingresa un correo electrónico válido');return;}
 
-  // Guardar lead en Kommo como "Nuevo Lead – Pendiente Pago"
+  // Guardar lead INMEDIATAMENTE (antes del pago) para remarketing
   var datosLead = recogerDatosFormulario();
-  datosLead.estadoPago = 'Pendiente';
   guardarLead(datosLead);
   goToStep(5);
 }
@@ -1661,33 +1660,54 @@ function volverAlPago(){
 }
 
 function recogerDatosFormulario(){
-  var resultEl = document.getElementById('result-content');
+  var cedInput = document.getElementById('si-cedula');
+  var plaInput = document.getElementById('si-placa');
+  var cedConsultada = cedInput ? cedInput.value.trim() : '';
+  var plaConsultada = plaInput ? plaInput.value.trim() : '';
   return {
     nombres       : document.getElementById('frm-nombres').value.trim(),
     apellidos     : document.getElementById('frm-apellidos').value.trim(),
-    cedula        : document.getElementById('frm-cedula').value.trim(),
-    placa         : document.getElementById('frm-placa').value.trim()||'',
+    cedula        : document.getElementById('frm-cedula').value.trim() || cedConsultada,
+    placa         : document.getElementById('frm-placa').value.trim() || plaConsultada,
     whatsapp      : document.getElementById('frm-whatsapp').value.trim(),
     email         : document.getElementById('frm-email').value.trim(),
     direccion     : document.getElementById('frm-dir').value.trim(),
     ciudad        : document.getElementById('frm-ciudad').value,
     dpto          : document.getElementById('frm-dpto').value,
-    plan          : pagoSel==='inmediato'?'Pago Inmediato $45.000':'Adelanto $19.800',
-    tipoServicio  : tipoServicio,
-    multasResumen : resultEl ? resultEl.innerText.substring(0,300).replace(/\n/g,' ') : '',
+    plan          : 'Pendiente selección',
+    multasSeleccionadas: _multasSeleccionadas || 1,
+    estadoPago    : 'PENDIENTE PAGO – Remarketing',
+    fuente        : 'Landing juridicosweb.com',
+    fechaLead     : new Date().toLocaleString('es-CO'),
   };
 }
 
 function guardarLead(datos){
   if(!GUARDAR_LEAD_URL){ return; }
-  fetch(GUARDAR_LEAD_URL, {
-    method  : 'POST',
-    headers : {'Content-Type':'application/json'},
-    body    : JSON.stringify(datos),
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){ console.log('Lead guardado:', d.guardado); })
-  .catch(function(e){ console.warn('Error guardando lead:', e); });
+  // Guardar en localStorage como respaldo antes de enviar
+  try { localStorage.setItem('jweb_lead_pendiente', JSON.stringify(datos)); } catch(e){}
+
+  var enviar = function(){
+    return fetch(GUARDAR_LEAD_URL, {
+      method  : 'POST',
+      headers : {'Content-Type':'application/json'},
+      body    : JSON.stringify(datos),
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.ok){
+        try{ localStorage.removeItem('jweb_lead_pendiente'); }catch(e){}
+        console.log('✅ Lead guardado en Sheet');
+      }
+    });
+  };
+
+  // Intento 1 → si falla, reintento a los 8 segundos
+  enviar().catch(function(){
+    setTimeout(function(){
+      enviar().catch(function(e){ console.warn('⚠️ Lead no guardado:', e); });
+    }, 8000);
+  });
 }
 
 function enviarCorreoCliente(){
