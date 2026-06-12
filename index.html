@@ -301,6 +301,7 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 /* Results */
 .result-wrap{animation:fadeIn .4s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes fadeOut{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-6px);}}
 @keyframes slideUpFade{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 @keyframes slideDownFade{from{opacity:1;transform:translateX(-50%) translateY(0);}to{opacity:0;transform:translateX(-50%) translateY(20px);}}
 .result-header{background:var(--navy);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
@@ -872,8 +873,8 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 <script>
 // ===================== CONFIGURACIÓN =====================
 var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbwA0z7RWNAU9lvnFAYlZi2enfvtk5jBSeJKJlQcmOAYSgAIJuGtWPS7RjIMwcRhlHJi/exec';
-var SIMIT_PROXY_URL    = GOOGLE_SHEET_URL;  // Apps Script consulta SIMIT real
-var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;  // Formulario → Google Sheets directamente
+var SIMIT_PROXY_URL    = 'https://simit-proxy.TU-SUBDOMINIO.workers.dev';  // ← reemplaza con tu URL de Cloudflare Worker
+var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 var EMAILJS_SERVICE_ID  = '';
 var EMAILJS_TEMPLATE_ID = '';
 var EMAILJS_PUBLIC_KEY  = '';
@@ -1078,22 +1079,21 @@ function animarLoader(val,tipo){
       .then(function(data){
         if(data.success){
           apiResult={multas:data.multas, raw:data};
-        } else if(data.modo==='redirect'){
-          apiResult={multas:null, raw:data, redirect:true};
         } else {
-          apiResult={multas:[], raw:data};
+          apiResult={multas:null, raw:{modo:'redirect'}, redirect:true};
         }
         apiListo=true;
         intentarMostrar();
       })
       .catch(function(){
-        apiResult={multas:generarMultasDemo(val), raw:null};
+        apiResult={multas:null, raw:{modo:'redirect'}, redirect:true};
         apiListo=true;
         intentarMostrar();
       });
   } else {
+    // Sin proxy → llevar al usuario a consultar en SIMIT oficial
     setTimeout(function(){
-      apiResult={multas:generarMultasDemo(val), raw:null};
+      apiResult={multas:null, raw:{modo:'redirect'}, redirect:true};
       apiListo=true;
       intentarMostrar();
     }, 800);
@@ -1103,47 +1103,165 @@ function animarLoader(val,tipo){
 function consultarSIMITReal(val, tipo){ /* legacy — reemplazada por animarLoader */ }
 
 function manejarRedirectSIMIT(data, val, tipo){
-  // Mostrar panel intermedio invitando al usuario a consultar en SIMIT
   document.getElementById('sp2').classList.remove('active');
   document.getElementById('sp3').classList.add('active');
-  document.getElementById('mmodal-title').textContent = '🔍 Consulta directa en SIMIT';
+  document.getElementById('mmodal-title').textContent = '🔍 Consulta en SIMIT';
 
-  var htmlRedirect =
-    '<div style="text-align:center;padding:10px 0 16px;">' +
-    '<div style="font-size:3rem;margin-bottom:12px;">🏛️</div>' +
-    '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;margin-bottom:10px;">Consulta en el SIMIT Oficial</h3>' +
-    '<p style="color:var(--gray);font-size:0.87rem;line-height:1.7;margin-bottom:16px;">Para garantizarte datos 100% reales, abriremos el sitio oficial del SIMIT. Consulta allí con tu ' +
-    (tipo==='cedula'?'cédula <strong>'+val+'</strong>':'placa <strong>'+val+'</strong>') +
-    ' y luego regresa aquí.</p>' +
-    '<div style="background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:14px;margin-bottom:18px;text-align:left;">' +
-    '<p style="font-size:0.82rem;color:var(--navy);line-height:1.8;">' +
-    '<strong>Pasos rápidos:</strong><br>' +
-    '① Haz clic en el botón de abajo<br>' +
-    '② En el SIMIT, ingresa tu '+(tipo==='cedula'?'cédula':'placa')+': <strong>'+val+'</strong><br>' +
-    '③ Ve tus multas y cierra esa ventana<br>' +
-    '④ Regresa aquí y haz clic en "Ya consulté, tengo multas"' +
-    '</p></div>' +
-    '<a href="https://consulta.simit.org.co/Simit/indexA.jsp" target="_blank" class="btn btn-navy btn-full" style="margin-bottom:10px;text-decoration:none;padding:15px;" onclick="mostrarBotonRegreso()">' +
-    '<i class="fas fa-external-link-alt"></i> Abrir SIMIT Oficial Ahora</a>' +
-    '<div id="btn-regreso" style="display:none;">' +
-    '<button class="btn btn-red btn-full" onclick="goToStep(4)" style="padding:15px;">' +
-    '<i class="fas fa-check"></i> Ya consulté, quiero eliminar mis multas</button>' +
+  var etiqueta = tipo==='cedula' ? 'Cédula' : 'Placa';
+  var simitUrl = 'https://consulta.simit.org.co/Simit/indexA.jsp';
+
+  var html =
+    // ── Fase 1: pantalla inicial ──────────────────────────────────────────────
+    '<div id="simit-fase1">' +
+
+    // Dato destacado (lo primero que ve el usuario)
+    '<div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">' +
+    '<div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(212,160,23,0.08);border-radius:50%;"></div>' +
+    '<p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Consultar en SIMIT</p>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+    '<div>' +
+    '<div style="color:#fff;font-size:1.6rem;font-weight:900;letter-spacing:3px;line-height:1;">'+val+'</div>' +
+    '<div style="color:#94a3b8;font-size:0.75rem;margin-top:3px;">'+etiqueta+'</div>' +
     '</div>' +
-    '<p style="font-size:0.75rem;color:var(--gray);margin-top:12px;">El botón "Ya consulté" aparecerá 5 segundos después de abrir el SIMIT</p>' +
-    '</div>';
+    '<button onclick="copiarDato(\''+val+'\')" style="background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;" id="btn-copiar">' +
+    '<i class="fas fa-copy"></i> Copiar</button>' +
+    '</div>' +
+    '</div>' +
 
-  document.getElementById('result-content').innerHTML = htmlRedirect;
+    // Instrucciones compactas
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
+    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">1</span></div>' +
+    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Abre el SIMIT oficial</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Se abrirá sin cerrar esta página</p></div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
+    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">2</span></div>' +
+    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Ingresa <span style="color:var(--gold);">'+val+'</span> y consulta</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Usa el botón <strong>Copiar</strong> de arriba</p></div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
+    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">3</span></div>' +
+    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Regresa y toca el botón rojo</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Te aparece al volver aquí</p></div>' +
+    '</div>' +
+    '</div>' +
+
+    // Botón principal — abre popup/pestaña
+    '<button onclick="abrirSIMIT(\''+simitUrl+'\',\''+val+'\')" class="btn btn-navy btn-full" style="padding:17px;font-size:1rem;font-weight:800;border-radius:13px;margin-bottom:10px;width:100%;border:none;cursor:pointer;">' +
+    '<i class="fas fa-external-link-alt" style="margin-right:8px;"></i>Consultar en SIMIT Oficial</button>' +
+
+    '<p style="font-size:0.72rem;color:#94a3b8;text-align:center;margin:0;">Esta página permanece abierta mientras consultas en SIMIT</p>' +
+    '</div>' + // fin fase1
+
+    // ── Fase 2: pantalla de espera (se muestra tras abrir SIMIT) ─────────────
+    '<div id="simit-fase2" style="display:none;">' +
+
+    // Animación de espera
+    '<div style="text-align:center;padding:10px 0 20px;">' +
+    '<div style="position:relative;width:80px;height:80px;margin:0 auto 16px;">' +
+    '<div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(212,160,23,0.2);"></div>' +
+    '<div id="simit-spinner" style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--gold);animation:spin 1s linear infinite;"></div>' +
+    '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><i class="fas fa-search" style="color:var(--gold);font-size:22px;"></i></div>' +
+    '</div>' +
+    '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;font-size:1.1rem;margin:0 0 6px;">Esperando tu consulta…</h3>' +
+    '<p style="color:var(--gray);font-size:0.83rem;margin:0;">Tenemos <strong>'+val+'</strong> listo para cuando vuelvas</p>' +
+    '</div>' +
+
+    // Recordatorio del dato
+    '<div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">' +
+    '<div><p style="color:#94a3b8;font-size:0.7rem;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">'+etiqueta+' a consultar</p>' +
+    '<p style="color:#fff;font-size:1.35rem;font-weight:900;letter-spacing:3px;margin:0;">'+val+'</p></div>' +
+    '<button onclick="copiarDato(\''+val+'\')" style="background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:8px 12px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;" id="btn-copiar2">' +
+    '<i class="fas fa-copy"></i> Copiar</button>' +
+    '</div>' +
+
+    // Botones de resultado (sticky en mobile)
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">' +
+    '<button class="btn btn-red btn-full btn-pulse" onclick="goToStep(4)" style="padding:18px;font-size:1rem;font-weight:800;border-radius:13px;border:none;cursor:pointer;width:100%;">' +
+    '<i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i>¡Tengo multas! — Quiero Eliminarlas</button>' +
+    '<button onclick="sinMultasSIMIT()" style="background:#f0f4ff;border:2px solid var(--border);border-radius:13px;padding:15px;font-size:0.92rem;font-weight:700;color:var(--navy);cursor:pointer;width:100%;">' +
+    '<i class="fas fa-check-circle" style="margin-right:8px;color:var(--green);"></i>No tengo multas / Quiero verificar</button>' +
+    '</div>' +
+
+    '<div style="text-align:center;">' +
+    '<button onclick="mostrarFase1Simit()" style="background:none;border:none;color:var(--gray);font-size:0.78rem;cursor:pointer;text-decoration:underline;">' +
+    '← Volver a las instrucciones</button>' +
+    '</div>' +
+    '</div>'; // fin fase2
+
+  document.getElementById('result-content').innerHTML = html;
   for(var i=1;i<=5;i++){
     var d=document.getElementById('sd'+i);
     if(d) d.classList.toggle('active', i<=3);
   }
 }
 
-function mostrarBotonRegreso(){
+function abrirSIMIT(url, val){
+  // En desktop abrir popup; en móvil nueva pestaña
+  var esMovil = window.innerWidth < 768;
+  if(!esMovil){
+    var popup = window.open(url, 'simit_consulta',
+      'width=900,height=650,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+    if(!popup || popup.closed){
+      // Popup bloqueado → nueva pestaña
+      window.open(url, '_blank');
+    }
+  } else {
+    window.open(url, '_blank');
+  }
+  // Mostrar fase de espera
+  var f1 = document.getElementById('simit-fase1');
+  var f2 = document.getElementById('simit-fase2');
+  if(f1) f1.style.cssText = 'animation:fadeOut .3s ease forwards;';
   setTimeout(function(){
-    var btn = document.getElementById('btn-regreso');
-    if(btn){ btn.style.display='block'; }
-  }, 5000);
+    if(f1) f1.style.display='none';
+    if(f2){ f2.style.display='block'; f2.style.animation='fadeIn .4s ease'; }
+  }, 280);
+}
+
+function mostrarFase1Simit(){
+  var f1 = document.getElementById('simit-fase1');
+  var f2 = document.getElementById('simit-fase2');
+  if(f2) f2.style.display='none';
+  if(f1){ f1.style.display='block'; f1.style.animation='fadeIn .3s ease'; }
+}
+
+function copiarDato(val){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(val).then(function(){
+      var b1 = document.getElementById('btn-copiar');
+      var b2 = document.getElementById('btn-copiar2');
+      [b1,b2].forEach(function(b){ if(b){ b.innerHTML='<i class="fas fa-check"></i> Copiado'; b.style.background='rgba(46,199,109,0.15)'; b.style.borderColor='rgba(46,199,109,0.5)'; b.style.color='var(--green)'; } });
+      setTimeout(function(){
+        [b1,b2].forEach(function(b){ if(b){ b.innerHTML='<i class="fas fa-copy"></i> Copiar'; b.style.background='rgba(212,160,23,0.15)'; b.style.borderColor='rgba(212,160,23,0.4)'; b.style.color='var(--gold)'; } });
+      }, 2000);
+    });
+  } else {
+    // Fallback para iOS Safari antiguo
+    var ta = document.createElement('textarea');
+    ta.value = val; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+function sinMultasSIMIT(){
+  document.getElementById('sp3').classList.remove('active');
+  document.getElementById('sp3').classList.add('done');
+  // Mostrar mensaje de celebración antes de ir a paso 4
+  var rc = document.getElementById('result-content');
+  if(rc){
+    rc.innerHTML =
+      '<div style="text-align:center;padding:24px 16px;">' +
+      '<div style="font-size:3.5rem;margin-bottom:14px;">🎉</div>' +
+      '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;font-size:1.2rem;margin-bottom:10px;">¡Excelentes noticias!</h3>' +
+      '<p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:20px;">Si el SIMIT no muestra multas, estás libre.<br>Si tienes alguna duda o quieres asesoría personalizada, escríbenos por WhatsApp.</p>' +
+      '<a href="https://wa.me/573159318400?text=Hola%2C+consulté+en+SIMIT+y+quiero+verificar+mi+situación" target="_blank" class="btn btn-wa btn-full" style="text-decoration:none;padding:15px;font-size:0.95rem;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;">' +
+      '<i class="fab fa-whatsapp"></i> Hablar con un asesor gratis</a>' +
+      '</div>';
+  }
+}
+
+function mostrarBotonRegreso(){
+  // Mantener por compatibilidad — ya no se usa en el nuevo flujo
 }
 
 function mostrarResultados(multas,val,tipo,apiData){
@@ -1158,9 +1276,10 @@ function mostrarResultados(multas,val,tipo,apiData){
   var total=apiData&&apiData.totalDeuda?apiData.totalDeuda:multas.reduce(function(a,m){return a+m.valor;},0);
 
   // Etiqueta de fuente de datos
-  var fuenteTag = SIMIT_PROXY_URL
+  var esReal = apiData && apiData.modo === 'real';
+  var fuenteTag = esReal
     ? '<span style="background:rgba(46,199,109,0.12);color:var(--green);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700;margin-left:8px;">✅ DATOS REALES SIMIT</span>'
-    : '<span style="background:rgba(212,160,23,0.12);color:var(--gold);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700;margin-left:8px;">MUESTRA ILUSTRATIVA</span>';
+    : '';
 
   var html='<div class="result-header"><h4>'+(tipo==='cedula'?'C.C. ':'Placa ')+val+fuenteTag+'</h4><div class="r-count">'+multas.length+' comparendo(s)</div></div>';
 
