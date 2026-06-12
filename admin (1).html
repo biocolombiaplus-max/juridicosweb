@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JurídicosWeb — Panel de Administración</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b4b;--gold:#c8a93b;--green:#16a34a;--red:#dc2626;--blue:#2563eb;
+  --gray50:#f8fafc;--gray100:#f1f5f9;--gray200:#e2e8f0;--gray400:#94a3b8;
+  --gray600:#475569;--gray800:#1e293b;
+  --sidebar:240px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray100);color:var(--gray800);min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,#1a3a8f 100%)}
+.login-card{background:#fff;border-radius:16px;padding:40px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo h1{color:var(--navy);font-size:22px;font-weight:800}
+.login-logo p{color:var(--gray600);font-size:13px;margin-top:4px}
+.login-badge{display:inline-block;background:var(--gold);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:6px;letter-spacing:.5px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--gray600);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input{width:100%;padding:11px 14px;border:2px solid var(--gray200);border-radius:8px;font-size:14px;transition:border .2s}
+.form-group input:focus{outline:none;border-color:var(--navy)}
+.btn-login{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s}
+.btn-login:hover{background:#1a3a8f}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;display:none}
+
+/* ── LAYOUT ── */
+#app{display:none;height:100vh;overflow:hidden}
+.layout{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--navy);color:#fff;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-header{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-header h2{font-size:16px;font-weight:800;color:#fff}
+.sidebar-header p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.sidebar-user{padding:12px 16px;background:rgba(255,255,255,.05);display:flex;align-items:center;gap:10px}
+.sidebar-user .avatar{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;flex-shrink:0}
+.sidebar-user .info{font-size:12px}
+.sidebar-user .info strong{display:block;color:#fff}
+.sidebar-user .info span{color:rgba(255,255,255,.5);font-size:11px}
+.nav-section{padding:8px 0}
+.nav-section-title{padding:8px 16px 4px;font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:background .15s;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--gold)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.btn-logout{width:100%;padding:9px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:7px;font-size:13px;cursor:pointer;transition:background .2s}
+.btn-logout:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid var(--gray200);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h1{font-size:18px;font-weight:700;color:var(--navy)}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.btn{padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:#1a3a8f}
+.btn-success{background:var(--green);color:#fff}
+.btn-outline{background:#fff;color:var(--navy);border:2px solid var(--navy)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:var(--red);color:#fff}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:12px;padding:20px;border-left:4px solid transparent;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-card.navy{border-color:var(--navy)}
+.stat-card.gold{border-color:var(--gold)}
+.stat-card.green{border-color:var(--green)}
+.stat-card.red{border-color:var(--red)}
+.stat-card.blue{border-color:var(--blue)}
+.stat-label{font-size:11px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:32px;font-weight:800;color:var(--navy);margin:6px 0 2px;line-height:1}
+.stat-sub{font-size:12px;color:var(--gray400)}
+
+/* ── FILTERS ── */
+.filters-bar{background:#fff;border-radius:10px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.filters-bar input[type=text]{flex:1;min-width:200px;padding:9px 14px;border:2px solid var(--gray200);border-radius:7px;font-size:13px}
+.filters-bar input[type=text]:focus{outline:none;border-color:var(--navy)}
+.filters-bar select{padding:9px 14px;border:2px solid var(--gray200);border-radius:7px;font-size:13px;color:var(--gray800);background:#fff;cursor:pointer}
+.filters-bar select:focus{outline:none;border-color:var(--navy)}
+.btn-refresh{padding:9px 14px;background:var(--gray100);color:var(--gray600);border:2px solid var(--gray200);border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-refresh:hover{background:var(--gray200)}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--gray200);display:flex;align-items:center;justify-content:space-between}
+.table-header h3{font-size:14px;font-weight:700;color:var(--navy)}
+.table-count{font-size:12px;color:var(--gray400);font-weight:500}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px;background:var(--gray50);border-bottom:1px solid var(--gray200)}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--gray100);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8faff;cursor:pointer}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-pending{background:#fef3c7;color:#92400e}
+.badge-paid{background:#d1fae5;color:#065f46}
+.badge-doc{background:#dbeafe;color:#1e40af}
+.badge-done{background:#f0fdf4;color:#166534}
+.badge-tutela{background:#ede9fe;color:#5b21b6}
+.badge-red{background:#fee2e2;color:#991b1b}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:720px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,.3)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--gray200);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.modal-header h2{font-size:17px;font-weight:700;color:var(--navy)}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray400);line-height:1;padding:4px 8px}
+.modal-close:hover{color:var(--gray800)}
+.modal-body{padding:24px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.detail-item label{font-size:11px;font-weight:700;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.detail-item p{font-size:14px;color:var(--gray800);font-weight:500}
+.section-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--gray200)}
+.timeline{list-style:none}
+.timeline li{display:flex;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--gray100)}
+.timeline li:last-child{border-bottom:none;margin-bottom:0}
+.timeline-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.timeline-dot.green{background:var(--green)}
+.timeline-dot.gold{background:var(--gold)}
+.timeline-dot.navy{background:var(--navy)}
+.timeline-dot.gray{background:var(--gray400)}
+.timeline-content .time{font-size:11px;color:var(--gray400)}
+.timeline-content p{font-size:13px;color:var(--gray800);font-weight:500}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid var(--gray200)}
+
+/* ── FORM NUEVO CASO ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group-m{margin-bottom:16px}
+.form-group-m label{display:block;font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.form-group-m input,.form-group-m select,.form-group-m textarea{width:100%;padding:10px 14px;border:2px solid var(--gray200);border-radius:8px;font-size:14px;font-family:inherit}
+.form-group-m input:focus,.form-group-m select:focus,.form-group-m textarea:focus{outline:none;border-color:var(--navy)}
+.full-col{grid-column:1/-1}
+
+/* ── EMPTY / LOADING ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--gray400)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:14px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;animation:slideIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.success{border-left:4px solid var(--green)}
+.toast.error{border-left:4px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── SECTIONS ── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{width:0;position:fixed;z-index:100;height:100vh;transition:width .3s}
+  .sidebar.open{width:var(--sidebar)}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- LOGIN                                          -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>⚖️ JurídicosWeb</h1>
+      <p>Panel de Administración</p>
+      <span class="login-badge">🔒 ACCESO RESTRINGIDO</span>
+    </div>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="usuario" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Ingresar al Panel</button>
+    <p class="login-error" id="login-error">❌ Usuario o contraseña incorrectos</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- APP                                            -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="app">
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>⚖️ JurídicosWeb</h2>
+    <p>Panel Administrativo</p>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar" id="user-avatar">A</div>
+    <div class="info">
+      <strong id="user-name">Admin</strong>
+      <span id="user-role">Administrador</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Principal</div>
+    <div class="nav-item active" onclick="showSection('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showSection('casos')">
+      <span class="icon">📋</span> Todos los Casos
+      <span class="nav-badge" id="badge-total">0</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Seguimiento</div>
+    <div class="nav-item" onclick="showSection('pendientes')">
+      <span class="icon">⏳</span> Pendientes Pago
+      <span class="nav-badge" id="badge-pendientes" style="background:#f59e0b">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('autorizados')">
+      <span class="icon">✅</span> Autorizados
+      <span class="nav-badge" id="badge-autorizados" style="background:var(--green)">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('enviados')">
+      <span class="icon">📧</span> Docs Enviados
+    </div>
+    <div class="nav-item" onclick="showSection('tutelas')">
+      <span class="icon">⚖️</span> Tutelas
+      <span class="nav-badge" id="badge-tutelas" style="background:#7c3aed">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('cerrados')">
+      <span class="icon">🏁</span> Cerrados / OK
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Acciones</div>
+    <div class="nav-item" onclick="openNuevoCaso()">
+      <span class="icon">➕</span> Nuevo Caso Manual
+    </div>
+    <div class="nav-item" onclick="exportCSV()">
+      <span class="icon">📥</span> Exportar CSV
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px;text-align:center" id="last-sync">Cargando...</div>
+    <button class="btn-logout" onclick="doLogout()">Cerrar Sesión</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="topbar-title">Dashboard</h1>
+    <div class="topbar-actions">
+      <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualizar</button>
+      <button class="btn btn-primary btn-sm" onclick="openNuevoCaso()">➕ Nuevo Caso</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card navy">
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-sub">Formularios recibidos</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Pagos Confirmados</div>
+          <div class="stat-value" id="stat-pagos">—</div>
+          <div class="stat-sub">Clientes que pagaron</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Docs Enviados</div>
+          <div class="stat-value" id="stat-enviados">—</div>
+          <div class="stat-sub">Derechos de Petición</div>
+        </div>
+        <div class="stat-card red" style="border-color:#7c3aed">
+          <div class="stat-label">Tutelas</div>
+          <div class="stat-value" id="stat-tutelas">—</div>
+          <div class="stat-sub">Casos segunda instancia</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Pendientes</div>
+          <div class="stat-value" id="stat-pendientes">—</div>
+          <div class="stat-sub">Sin confirmar pago</div>
+        </div>
+      </div>
+
+      <!-- Tabla recientes en dashboard -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>📋 Últimos 10 Casos</h3>
+          <button class="btn btn-outline btn-sm" onclick="showSection('casos')">Ver todos →</button>
+        </div>
+        <div id="table-dashboard-wrap">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando datos...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASOS / VISTAS FILTRADAS -->
+    <div class="section" id="section-casos">
+      <div class="filters-bar">
+        <input type="text" id="buscar-casos" placeholder="🔍 Buscar por nombre, cédula, placa, ciudad..." oninput="filtrarTabla()">
+        <select id="filtro-estado" onchange="filtrarTabla()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">⏳ Pendiente</option>
+          <option value="pagado">💰 Pagado</option>
+          <option value="autorizado">✅ Autorizado</option>
+          <option value="enviado">📧 Enviado</option>
+          <option value="tutela">⚖️ Tutela</option>
+          <option value="cerrado">🏁 Cerrado</option>
+        </select>
+        <select id="filtro-plan" onchange="filtrarTabla()">
+          <option value="">Todos los planes</option>
+          <option value="45000">Plan $45.000</option>
+          <option value="19800">Plan $19.800</option>
+        </select>
+        <button class="btn-refresh" onclick="loadData()">🔄 Actualizar</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>Todos los Casos</h3>
+          <span class="table-count" id="casos-count">Cargando...</span>
+        </div>
+        <div id="table-casos-wrap">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando datos...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDIENTES -->
+    <div class="section" id="section-pendientes">
+      <div class="table-wrap">
+        <div class="table-header"><h3>⏳ Pendientes de Pago</h3><span class="table-count" id="pendientes-count"></span></div>
+        <div id="table-pendientes-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- AUTORIZADOS -->
+    <div class="section" id="section-autorizados">
+      <div class="table-wrap">
+        <div class="table-header"><h3>✅ Casos Autorizados</h3><span class="table-count" id="autorizados-count"></span></div>
+        <div id="table-autorizados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- ENVIADOS -->
+    <div class="section" id="section-enviados">
+      <div class="table-wrap">
+        <div class="table-header"><h3>📧 Documentos Enviados</h3><span class="table-count" id="enviados-count"></span></div>
+        <div id="table-enviados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- TUTELAS -->
+    <div class="section" id="section-tutelas">
+      <div class="table-wrap">
+        <div class="table-header"><h3>⚖️ Casos con Tutela</h3><span class="table-count" id="tutelas-count"></span></div>
+        <div id="table-tutelas-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- CERRADOS -->
+    <div class="section" id="section-cerrados">
+      <div class="table-wrap">
+        <div class="table-header"><h3>🏁 Casos Cerrados / Resueltos</h3><span class="table-count" id="cerrados-count"></span></div>
+        <div id="table-cerrados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+</div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL DETALLE CASO                             -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-caso">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-caso-titulo">Detalle del Caso</h2>
+      <button class="modal-close" onclick="closeModal('modal-caso')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-caso-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL NUEVO CASO                               -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>➕ Registrar Caso Manual</h2>
+      <button class="modal-close" onclick="closeModal('modal-nuevo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group-m">
+          <label>Nombres *</label>
+          <input type="text" id="nc-nombres" placeholder="Nombres del cliente">
+        </div>
+        <div class="form-group-m">
+          <label>Apellidos</label>
+          <input type="text" id="nc-apellidos" placeholder="Apellidos">
+        </div>
+        <div class="form-group-m">
+          <label>Cédula</label>
+          <input type="text" id="nc-cedula" placeholder="Número de cédula">
+        </div>
+        <div class="form-group-m">
+          <label>Placa</label>
+          <input type="text" id="nc-placa" placeholder="Ej: ABC123">
+        </div>
+        <div class="form-group-m">
+          <label>WhatsApp</label>
+          <input type="text" id="nc-whatsapp" placeholder="3001234567">
+        </div>
+        <div class="form-group-m">
+          <label>Email *</label>
+          <input type="email" id="nc-email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group-m">
+          <label>Ciudad</label>
+          <input type="text" id="nc-ciudad" placeholder="Ciudad">
+        </div>
+        <div class="form-group-m">
+          <label>Departamento</label>
+          <input type="text" id="nc-dpto" placeholder="Departamento">
+        </div>
+        <div class="form-group-m">
+          <label>Plan</label>
+          <select id="nc-plan">
+            <option value="Plan Básico $19.800">Plan Básico $19.800</option>
+            <option value="Plan Completo $45.000">Plan Completo $45.000</option>
+          </select>
+        </div>
+        <div class="form-group-m">
+          <label>Tipo Servicio</label>
+          <select id="nc-servicio">
+            <option value="2018-2024">Fotomultas 2018-2024</option>
+            <option value="multa-reciente">Multa Reciente</option>
+          </select>
+        </div>
+        <div class="form-group-m full-col">
+          <label>Multas / Detalles</label>
+          <textarea id="nc-multas" rows="3" placeholder="Descripción de las multas o detalles relevantes"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="guardarNuevoCaso()" id="btn-guardar-nc">💾 Registrar Caso</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-nuevo')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwA0z7RWNAU9lvnFAYlZi2enfvtk5jBSeJKJlQcmOAYSgAIJuGtWPS7RjIMwcRhlHJi/exec';
+var SHEET_ID   = '1KVXRarjnV2z01pLBm_FjZJC3rowLxiF1RWV23lh4F34';
+
+var USUARIOS = {
+  'admin':       { pass:'juridicos2026', nombre:'Administrador', rol:'Administrador' },
+  'secretaria1': { pass:'sec2026',       nombre:'Secretaría 1',  rol:'Secretaria' },
+  'secretaria2': { pass:'sec2026b',      nombre:'Secretaría 2',  rol:'Secretaria' },
+};
+
+// Estado global
+var allRows = [];
+var currentUser = null;
+
+// ══════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════
+function doLogin(){
+  var u = document.getElementById('login-user').value.trim().toLowerCase();
+  var p = document.getElementById('login-pass').value;
+  if(USUARIOS[u] && USUARIOS[u].pass === p){
+    currentUser = { username:u, ...USUARIOS[u] };
+    sessionStorage.setItem('jw_user', JSON.stringify(currentUser));
+    showApp();
+  } else {
+    document.getElementById('login-error').style.display='block';
+    setTimeout(function(){ document.getElementById('login-error').style.display='none'; }, 3000);
+  }
+}
+
+function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-avatar').textContent = currentUser.nombre.charAt(0).toUpperCase();
+  document.getElementById('user-name').textContent = currentUser.nombre;
+  document.getElementById('user-role').textContent = currentUser.rol;
+  loadData();
+}
+
+function doLogout(){
+  sessionStorage.removeItem('jw_user');
+  location.reload();
+}
+
+// Auto-login si sesión activa
+(function(){
+  var saved = sessionStorage.getItem('jw_user');
+  if(saved){
+    try{ currentUser = JSON.parse(saved); showApp(); }catch(e){}
+  }
+})();
+
+// Enter key en login
+document.getElementById('login-pass').addEventListener('keydown',function(e){
+  if(e.key==='Enter') doLogin();
+});
+
+// ══════════════════════════════════════════════════
+// NAVEGACIÓN
+// ══════════════════════════════════════════════════
+var sectionTitles = {
+  dashboard:'Dashboard',casos:'Todos los Casos',pendientes:'Pendientes de Pago',
+  autorizados:'Casos Autorizados',enviados:'Documentos Enviados',
+  tutelas:'Casos con Tutela',cerrados:'Casos Cerrados'
+};
+
+function showSection(sec){
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('section-'+sec).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+  document.getElementById('topbar-title').textContent = sectionTitles[sec] || sec;
+  if(sec !== 'dashboard') renderSection(sec);
+}
+
+// ══════════════════════════════════════════════════
+// CARGA DE DATOS desde Google Sheets (GViz)
+// ══════════════════════════════════════════════════
+function loadData(){
+  var sheetName = encodeURIComponent('📊 Control de Casos');
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName;
+  document.getElementById('last-sync').textContent='Actualizando...';
+  fetch(url)
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      // GViz devuelve google.visualization.Query.setResponse(...)
+      var json = text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '');
+      var data = JSON.parse(json);
+      allRows = parseGViz(data);
+      renderAll();
+      document.getElementById('last-sync').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CO');
+    })
+    .catch(function(err){
+      showToast('Error cargando datos: '+err.message,'error');
+      document.getElementById('last-sync').textContent='Error de carga';
+      // Datos demo si sheet no está public
+      allRows = getDemoRows();
+      renderAll();
+    });
+}
+
+function parseGViz(data){
+  if(!data||!data.table||!data.table.rows) return [];
+  var cols = data.table.cols.map(function(c){ return c.label; });
+  return data.table.rows.map(function(row){
+    var obj={};
+    row.c.forEach(function(cell,i){ obj[cols[i]] = cell ? (cell.f || cell.v || '') : ''; });
+    return obj;
+  }).filter(function(r){ return r['Nombres']||r['Email']; });
+}
+
+function getDemoRows(){
+  return [
+    {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Plan Completo $45.000','Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE',Estado:'Enviado','Notas':'Demo'},
+    {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Plan Básico $19.800','Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Estado:'Pendiente','Notas':''},
+  ];
+}
+
+// ══════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════
+function renderAll(){
+  updateStats();
+  renderDashboardTable();
+  renderSection('casos');
+  renderSection('pendientes');
+  renderSection('autorizados');
+  renderSection('enviados');
+  renderSection('tutelas');
+  renderSection('cerrados');
+}
+
+function getEstado(row){
+  var tutela = row['Tutela Requerida']==='TRUE'||row['Tutela']===true;
+  var cerrado = row['Cerrado']==='TRUE'||row['Estado']==='Cerrado'||row['Estado']==='OK';
+  var enviado = row['Doc Enviado']==='TRUE';
+  var autorizado = row['Autorizar']==='TRUE';
+  var pagado = row['Pago OK']==='TRUE';
+  if(tutela) return 'tutela';
+  if(cerrado) return 'cerrado';
+  if(enviado) return 'enviado';
+  if(autorizado) return 'autorizado';
+  if(pagado) return 'pagado';
+  return 'pendiente';
+}
+
+function badgeForEstado(estado){
+  var m = {
+    pendiente:'<span class="badge badge-pending">⏳ Pendiente</span>',
+    pagado:   '<span class="badge badge-paid">💰 Pagado</span>',
+    autorizado:'<span class="badge badge-doc">✅ Autorizado</span>',
+    enviado:  '<span class="badge badge-done">📧 Enviado</span>',
+    tutela:   '<span class="badge badge-tutela">⚖️ Tutela</span>',
+    cerrado:  '<span class="badge" style="background:#f0fdf4;color:#166534">🏁 Cerrado</span>',
+  };
+  return m[estado]||'<span class="badge">—</span>';
+}
+
+function buildTable(rows, limit){
+  if(!rows||!rows.length) return '<div class="empty-state"><div class="icon">📭</div><p>No hay casos en esta categoría.</p></div>';
+  var list = limit ? rows.slice(0,limit) : rows;
+  var html = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Cédula</th><th>Placa</th><th>Ciudad</th><th>Plan</th><th>Estado</th></tr></thead><tbody>';
+  list.forEach(function(row, i){
+    var estado = getEstado(row);
+    var fecha = (row['Fecha']||'').toString().substring(0,10);
+    var nombre = (row['Nombres']||'')+' '+(row['Apellidos']||'');
+    html += '<tr onclick="abrirCaso('+JSON.stringify(JSON.stringify(row)).replace(/"/g,'&quot;')+')">';
+    html += '<td style="color:var(--gray400);font-size:12px">'+fecha+'</td>';
+    html += '<td><strong>'+escHtml(nombre.trim())+'</strong><br><span style="font-size:11px;color:var(--gray400)">'+escHtml(row['Email']||'')+'</span></td>';
+    html += '<td>'+escHtml(row['Cédula']||'—')+'</td>';
+    html += '<td><strong>'+escHtml(row['Placa']||'—')+'</strong></td>';
+    html += '<td>'+escHtml(row['Ciudad']||'—')+'</td>';
+    html += '<td style="font-size:12px">'+escHtml((row['Plan']||'').replace('Plan','').trim())+'</td>';
+    html += '<td>'+badgeForEstado(estado)+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderDashboardTable(){
+  var recent = allRows.slice().reverse().slice(0,10);
+  document.getElementById('table-dashboard-wrap').innerHTML = buildTable(recent);
+}
+
+function renderSection(sec){
+  var filtered;
+  if(sec==='casos'){
+    filtered = getFilteredRows();
+    document.getElementById('casos-count').textContent = filtered.length+' casos';
+    document.getElementById('table-casos-wrap').innerHTML = buildTable(filtered);
+    return;
+  }
+  var estadoMap = {pendientes:'pendiente',autorizados:'autorizado',enviados:'enviado',tutelas:'tutela',cerrados:'cerrado'};
+  var estado = estadoMap[sec];
+  if(!estado) return;
+  filtered = allRows.filter(function(r){ return getEstado(r)===estado; });
+  document.getElementById(sec+'-count').textContent = filtered.length+' casos';
+  document.getElementById('table-'+sec+'-wrap').innerHTML = buildTable(filtered);
+}
+
+function getFilteredRows(){
+  var q = (document.getElementById('buscar-casos')||{}).value||'';
+  var fe = (document.getElementById('filtro-estado')||{}).value||'';
+  var fp = (document.getElementById('filtro-plan')||{}).value||'';
+  q = q.toLowerCase();
+  return allRows.filter(function(r){
+    var matchQ = !q || (r['Nombres']||'').toLowerCase().includes(q)
+      || (r['Apellidos']||'').toLowerCase().includes(q)
+      || (r['Cédula']||'').toString().includes(q)
+      || (r['Placa']||'').toLowerCase().includes(q)
+      || (r['Ciudad']||'').toLowerCase().includes(q)
+      || (r['Email']||'').toLowerCase().includes(q);
+    var matchE = !fe || getEstado(r)===fe;
+    var matchP = !fp || (r['Plan']||'').includes(fp);
+    return matchQ && matchE && matchP;
+  });
+}
+
+function filtrarTabla(){
+  renderSection('casos');
+}
+
+function updateStats(){
+  var total = allRows.length;
+  var pagos = allRows.filter(function(r){ return r['Pago OK']==='TRUE'; }).length;
+  var enviados = allRows.filter(function(r){ return r['Doc Enviado']==='TRUE'; }).length;
+  var tutelas = allRows.filter(function(r){ return getEstado(r)==='tutela'; }).length;
+  var pendientes = allRows.filter(function(r){ return getEstado(r)==='pendiente'; }).length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pagos').textContent = pagos;
+  document.getElementById('stat-enviados').textContent = enviados;
+  document.getElementById('stat-tutelas').textContent = tutelas;
+  document.getElementById('stat-pendientes').textContent = pendientes;
+
+  document.getElementById('badge-total').textContent = total;
+  document.getElementById('badge-pendientes').textContent = pendientes;
+  document.getElementById('badge-autorizados').textContent = allRows.filter(function(r){ return getEstado(r)==='autorizado'; }).length;
+  document.getElementById('badge-tutelas').textContent = tutelas;
+}
+
+// ══════════════════════════════════════════════════
+// DETALLE CASO
+// ══════════════════════════════════════════════════
+function abrirCaso(rowJson){
+  var row;
+  try{ row = JSON.parse(rowJson); } catch(e){ return; }
+  var estado = getEstado(row);
+  var nombre = (row['Nombres']||'')+' '+(row['Apellidos']||'');
+  document.getElementById('modal-caso-titulo').textContent = '👤 '+nombre.trim();
+
+  var timeline = buildTimeline(row, estado);
+  var acciones = buildAcciones(row, estado);
+
+  var html = '<div class="detail-grid">';
+  html += detailItem('Nombres completos', nombre.trim());
+  html += detailItem('Cédula', row['Cédula']||'—');
+  html += detailItem('Placa', row['Placa']||'—');
+  html += detailItem('WhatsApp', row['WhatsApp'] ? '<a href="https://wa.me/57'+row['WhatsApp']+'" target="_blank" style="color:var(--green);font-weight:700">📱 '+row['WhatsApp']+'</a>' : '—');
+  html += detailItem('Email', '<a href="mailto:'+escHtml(row['Email']||'')+'" style="color:var(--blue)">'+escHtml(row['Email']||'—')+'</a>');
+  html += detailItem('Ciudad / Dpto', (row['Ciudad']||'')+(row['Departamento'] ? ', '+row['Departamento'] : ''));
+  html += detailItem('Plan contratado', row['Plan']||'—');
+  html += detailItem('Estado actual', badgeForEstado(estado));
+  html += detailItem('Fecha registro', row['Fecha']||'—');
+  html += detailItem('Tipo documento', row['Tipo Doc']||'Pendiente selección');
+  html += detailItem('Fecha límite 15d', row['Fecha Límite 15d']||'—');
+  html += detailItem('Notas', row['Notas']||'Sin notas');
+  html += '</div>';
+
+  html += '<div class="section-title">🕐 Línea de Tiempo del Caso</div>';
+  html += '<ul class="timeline">'+timeline+'</ul>';
+
+  if(row['Multas']){
+    html += '<div class="section-title" style="margin-top:20px">📝 Detalle Multas</div>';
+    html += '<div style="background:var(--gray50);border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;margin-bottom:16px">'+escHtml(row['Multas'])+'</div>';
+  }
+
+  html += '<div class="modal-actions">'+acciones+'</div>';
+
+  document.getElementById('modal-caso-body').innerHTML = html;
+  document.getElementById('modal-caso').classList.add('show');
+}
+
+function detailItem(label, val){
+  return '<div class="detail-item"><label>'+escHtml(label)+'</label><p>'+val+'</p></div>';
+}
+
+function buildTimeline(row, estado){
+  var items = '';
+  items += tItem('navy', row['Fecha']||'—', '📋 Lead registrado en el sistema');
+  if(row['Pago OK']==='TRUE') items += tItem('gold','—','💰 Pago confirmado por el administrador');
+  if(row['Autorizar']==='TRUE') items += tItem('green','—','✅ Caso autorizado — documento en cola');
+  if(row['Doc Enviado']==='TRUE') items += tItem('green','—','📧 Derecho de Petición enviado al cliente');
+  if(row['Fecha Límite 15d']) items += tItem('gray',row['Fecha Límite 15d'],'⏰ Fecha límite respuesta secretaría (15 días hábiles)');
+  if(row['Respuesta Secretaría']) items += tItem('green','—','📬 Respuesta recibida: '+escHtml(row['Respuesta Secretaría']));
+  if(getEstado(row)==='tutela') items += tItem('green','—','⚖️ Tutela requerida — siguiente acción legal');
+  return items;
+}
+
+function tItem(color, time, text){
+  return '<li><div class="timeline-dot '+color+'"></div><div class="timeline-content"><div class="time">'+escHtml(time.toString())+'</div><p>'+escHtml(text)+'</p></div></li>';
+}
+
+function buildAcciones(row, estado){
+  var wa = row['WhatsApp'] ? 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent('Hola '+row['Nombres']+', somos JurídicosWeb. Te contactamos sobre tu trámite.') : '#';
+  var html = '';
+  if(row['WhatsApp']) html += '<a href="'+wa+'" target="_blank" class="btn btn-success btn-sm">💬 WhatsApp</a>';
+  if(row['Email']) html += '<a href="mailto:'+escHtml(row['Email'])+'" class="btn btn-outline btn-sm">📧 Correo</a>';
+  if(estado==='pendiente') html += '<button class="btn btn-primary btn-sm" onclick="confirmarAccion(\'pago\',this)" data-row="'+escHtml(JSON.stringify(row))+'">💰 Confirmar Pago</button>';
+  if(estado==='pagado') html += '<button class="btn btn-primary btn-sm" onclick="confirmarAccion(\'autorizar\',this)" data-row="'+escHtml(JSON.stringify(row))+'">✅ Autorizar Doc</button>';
+  return html || '<span style="color:var(--gray400);font-size:13px">Sin acciones disponibles</span>';
+}
+
+function confirmarAccion(tipo, btn){
+  var row;
+  try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
+  var msg = tipo==='pago' ? '¿Confirmar que '+row['Nombres']+' realizó el pago?' : '¿Autorizar generación del documento para '+row['Nombres']+'?';
+  if(!confirm(msg)) return;
+  btn.disabled=true; btn.textContent='Procesando...';
+  var accion = tipo==='pago' ? 'confirmar_pago' : 'autorizar_documento';
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({_accion:accion, email:row['Email'], cedula:row['Cédula'], nombres:row['Nombres']})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.ok){
+      showToast('✅ Acción registrada en Google Sheets','success');
+      closeModal('modal-caso');
+      setTimeout(loadData, 1500);
+    } else {
+      showToast('Error: '+(data.error||'desconocido'),'error');
+      btn.disabled=false; btn.textContent='Reintentar';
+    }
+  })
+  .catch(function(e){
+    showToast('Error de conexión: '+e.message,'error');
+    btn.disabled=false; btn.textContent='Reintentar';
+  });
+}
+
+// ══════════════════════════════════════════════════
+// NUEVO CASO MANUAL
+// ══════════════════════════════════════════════════
+function openNuevoCaso(){
+  document.getElementById('modal-nuevo').classList.add('show');
+}
+
+function guardarNuevoCaso(){
+  var btn = document.getElementById('btn-guardar-nc');
+  var datos = {
+    _accion:    'nuevo_lead',
+    nombres:    document.getElementById('nc-nombres').value.trim(),
+    apellidos:  document.getElementById('nc-apellidos').value.trim(),
+    cedula:     document.getElementById('nc-cedula').value.trim(),
+    placa:      document.getElementById('nc-placa').value.trim().toUpperCase(),
+    whatsapp:   document.getElementById('nc-whatsapp').value.trim(),
+    email:      document.getElementById('nc-email').value.trim(),
+    ciudad:     document.getElementById('nc-ciudad').value.trim(),
+    dpto:       document.getElementById('nc-dpto').value.trim(),
+    plan:       document.getElementById('nc-plan').value,
+    tipoServicio: document.getElementById('nc-servicio').value,
+    multasResumen: document.getElementById('nc-multas').value.trim(),
+    origen:     'admin-manual',
+  };
+  if(!datos.nombres || !datos.email){
+    showToast('⚠️ Nombres y Email son obligatorios','error');
+    return;
+  }
+  btn.disabled=true;
+  btn.innerHTML='<span class="loading-spinner"></span>Guardando...';
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(datos)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.disabled=false; btn.textContent='💾 Registrar Caso';
+    if(data.ok||data.resultado){
+      showToast('✅ Caso registrado exitosamente','success');
+      closeModal('modal-nuevo');
+      // Limpiar campos
+      ['nc-nombres','nc-apellidos','nc-cedula','nc-placa','nc-whatsapp','nc-email','nc-ciudad','nc-dpto','nc-multas'].forEach(function(id){
+        document.getElementById(id).value='';
+      });
+      setTimeout(loadData, 1500);
+    } else {
+      showToast('Error: '+(data.error||'respuesta inesperada'),'error');
+    }
+  })
+  .catch(function(e){
+    btn.disabled=false; btn.textContent='💾 Registrar Caso';
+    showToast('Error de conexión: '+e.message,'error');
+  });
+}
+
+// ══════════════════════════════════════════════════
+// EXPORTAR CSV
+// ══════════════════════════════════════════════════
+function exportCSV(){
+  if(!allRows.length){ showToast('No hay datos para exportar','error'); return; }
+  var cols = Object.keys(allRows[0]);
+  var csv = cols.join(',') + '\n';
+  allRows.forEach(function(row){
+    csv += cols.map(function(c){ return '"'+(row[c]||'').toString().replace(/"/g,'""')+'"'; }).join(',') + '\n';
+  });
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download='casos-juridicos-'+new Date().toISOString().substring(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📥 CSV exportado','success');
+}
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+function showToast(msg, type){
+  var t = document.createElement('div');
+  t.className='toast '+(type||'');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 4000);
+}
+
+function escHtml(str){
+  if(typeof str !== 'string') str = String(str||'');
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Cerrar modales al click fuera
+document.querySelectorAll('.modal-overlay').forEach(function(m){
+  m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('show'); });
+});
+
+// Auto-refresh cada 2 minutos si hay sesión activa
+setInterval(function(){ if(currentUser) loadData(); }, 2*60*1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JurídicosWeb | Elimina tus Fotomultas – Gratis Consultar</title>
+<meta name="description" content="5.8 millones de fotomultas serán anuladas en Colombia. Consulta gratis si las tuyas aplican. Derechos de petición desde $45.000.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ===== VARIABLES ===== */
+:root{
+  --navy:#0a1628;
+  --navy2:#0f1f3d;
+  --gold:#d4a017;
+  --gold2:#f5c842;
+  --gold3:#ffe066;
+  --red:#e63946;
+  --green:#2ec76d;
+  --white:#ffffff;
+  --light:#f0f4ff;
+  --gray:#64748b;
+  --border:#e2e8f0;
+  --card:#fff;
+  --radius:14px;
+  --shadow:0 4px 24px rgba(10,22,40,0.10);
+  --glow-gold:0 0 30px rgba(212,160,23,0.35);
+  --glow-green:0 0 30px rgba(46,199,109,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;overflow-x:hidden;}
+
+/* ===== GLOBAL BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;border-radius:12px;transition:all .25s cubic-bezier(.34,1.56,.64,1);text-decoration:none;position:relative;overflow:hidden;}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:.25s;}
+.btn:hover::after{background:rgba(255,255,255,0.08);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);padding:16px 28px;font-size:1rem;box-shadow:var(--glow-gold);}
+.btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 45px rgba(212,160,23,0.55);}
+.btn-gold:active{transform:scale(0.97);}
+.btn-navy{background:var(--navy);color:#fff;padding:15px 26px;font-size:0.95rem;}
+.btn-navy:hover{transform:translateY(-2px);background:var(--navy2);}
+.btn-outline{background:transparent;color:#fff;padding:14px 24px;font-size:0.9rem;border:2px solid rgba(255,255,255,0.4);}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.06);}
+.btn-wa{background:linear-gradient(135deg,#25d366,#1db954);color:#fff;padding:15px 24px;font-size:0.95rem;box-shadow:var(--glow-green);}
+.btn-wa:hover{transform:translateY(-3px);box-shadow:0 0 45px rgba(46,199,109,0.55);}
+.btn-red{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;padding:16px 28px;font-size:1rem;box-shadow:0 0 30px rgba(230,57,70,0.3);}
+.btn-red:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 45px rgba(230,57,70,0.5);}
+.btn-full{width:100%;}
+.btn-xl{padding:18px 36px;font-size:1.1rem;border-radius:14px;}
+.btn-sm{padding:9px 18px;font-size:0.82rem;border-radius:9px;}
+@keyframes glow-pulse{0%,100%{box-shadow:var(--glow-gold);}50%{box-shadow:0 0 55px rgba(212,160,23,0.7);}}
+.btn-pulse{animation:glow-pulse 2.2s ease-in-out infinite;}
+@keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
+.btn-shimmer{background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 30%,var(--gold3) 50%,var(--gold2) 70%,var(--gold) 100%);background-size:200% auto;animation:shimmer 2.5s linear infinite;color:var(--navy);}
+
+/* ===== NAV ===== */
+nav{position:fixed;top:0;width:100%;z-index:990;transition:.3s;}
+nav.scrolled{background:rgba(10,22,40,0.97);backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,0.3);}
+.nav-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.logo-mark i{color:var(--navy);font-size:18px;}
+.logo-name{color:#fff;font-family:'Playfair Display',serif;font-size:1.2rem;line-height:1;}
+.logo-name small{display:block;color:var(--gold);font-family:'Inter',sans-serif;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:500;}
+.nav-right{display:flex;align-items:center;gap:12px;}
+@media(max-width:600px){.nav-cta-text{display:none;}}
+
+/* ===== ALERT BAR ===== */
+.alert-bar{background:linear-gradient(90deg,#b91c1c,var(--red),#b91c1c);background-size:200% auto;animation:shimmer 3s linear infinite;padding:11px 5%;text-align:center;margin-top:68px;}
+.alert-bar p{color:#fff;font-size:0.82rem;font-weight:600;line-height:1.4;}
+.alert-bar strong{background:rgba(255,255,255,0.18);padding:1px 7px;border-radius:4px;margin:0 3px;}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;background:linear-gradient(160deg,#06101f 0%,#0a1628 40%,#0d1e3a 70%,#091525 100%);display:flex;align-items:center;padding:60px 5% 80px;position:relative;overflow:hidden;}
+.hero-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=70') center/cover no-repeat;opacity:0.12;}
+.hero-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(212,160,23,0.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
+.hero-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,199,109,0.07) 0%,transparent 70%);bottom:-50px;left:-50px;pointer-events:none;}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;position:relative;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,0.12);border:1px solid rgba(212,160,23,0.4);color:var(--gold);padding:7px 16px;border-radius:30px;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:ping 1.5s ease-in-out infinite;}
+@keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.6;}}
+.hero h1{font-family:'Playfair Display',serif;font-size:3rem;color:#fff;line-height:1.12;margin-bottom:18px;}
+.hero h1 .hl{color:var(--gold);position:relative;}
+.hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.hero-sub{color:#94a3b8;font-size:1rem;line-height:1.75;margin-bottom:28px;max-width:520px;}
+.hero-sub strong{color:#e2e8f0;}
+.hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
+.hero-ctas-row{display:flex;gap:12px;flex-wrap:wrap;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
+.hstat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;text-align:center;}
+.hstat-n{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--gold);}
+.hstat-l{color:#64748b;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+/* Hero card */
+.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(212,160,23,0.2);border-radius:18px;backdrop-filter:blur(12px);overflow:hidden;}
+.hero-card-header{background:linear-gradient(135deg,rgba(212,160,23,0.15),rgba(212,160,23,0.05));padding:18px 22px;border-bottom:1px solid rgba(212,160,23,0.15);}
+.hero-card-header h3{color:#fff;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.hero-card-body{padding:18px 22px;}
+.alert-line{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.alert-line:last-child{border:none;padding-bottom:0;}
+.al-icon{width:28px;height:28px;border-radius:7px;background:rgba(212,160,23,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.al-icon i{color:var(--gold);font-size:12px;}
+.al-text{color:#94a3b8;font-size:0.82rem;line-height:1.5;}
+.al-text strong{color:#e2e8f0;}
+/* Counter bar */
+.live-bar{background:rgba(46,199,109,0.08);border:1px solid rgba(46,199,109,0.2);border-radius:10px;padding:12px 16px;margin-top:14px;display:flex;align-items:center;gap:10px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:ping 1.5s infinite;}
+.live-bar p{color:#94a3b8;font-size:0.8rem;}<br>.live-bar strong{color:var(--green);}
+
+/* ===== SECTION BASE ===== */
+.section{padding:80px 5%;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-center{text-align:center;max-width:660px;margin:0 auto 48px;}
+.tag{display:inline-block;padding:5px 16px;border-radius:30px;font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.tag-gold{background:rgba(212,160,23,0.1);color:var(--gold);}
+.tag-red{background:rgba(230,57,70,0.1);color:var(--red);}
+.tag-green{background:rgba(46,199,109,0.1);color:var(--green);}
+h2.title{font-family:'Playfair Display',serif;font-size:2.3rem;color:var(--navy);line-height:1.2;}
+h2.title span{color:var(--gold);}
+.subtitle{color:var(--gray);font-size:0.97rem;line-height:1.75;margin-top:12px;}
+
+/* ===== URGENCY STRIP ===== */
+.urgency-strip{background:var(--navy);padding:18px 5%;}
+.urgency-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.urgency-timer{display:flex;align-items:center;gap:12px;}
+.urgency-timer span{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.timer-boxes{display:flex;gap:8px;}
+.t-box{background:rgba(212,160,23,0.1);border:1px solid rgba(212,160,23,0.3);border-radius:8px;padding:8px 12px;text-align:center;min-width:52px;}
+.t-box .t-num{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);font-weight:700;display:block;line-height:1;}
+.t-box .t-lbl{font-size:0.6rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;}
+.urgency-right p{color:#94a3b8;font-size:0.85rem;}
+.urgency-right strong{color:#fff;}
+
+/* ===== IMAGE TRUST SECTION ===== */
+.trust-images{padding:60px 5%;background:linear-gradient(180deg,#fff 0%,var(--light) 100%);}
+.trust-images-inner{max-width:1100px;margin:0 auto;}
+.img-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:30px;}
+.img-card{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:4/3;cursor:pointer;}
+.img-card img{width:100%;height:100%;object-fit:cover;transition:.4s;}
+.img-card:hover img{transform:scale(1.05);}
+.img-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,22,40,0.85) 100%);display:flex;align-items:flex-end;padding:20px;}
+.img-card-text h4{color:#fff;font-size:0.95rem;font-weight:700;}
+.img-card-text p{color:rgba(255,255,255,0.7);font-size:0.78rem;margin-top:4px;}
+.social-proof-bar{display:flex;justify-content:center;align-items:center;gap:30px;margin-top:30px;flex-wrap:wrap;}
+.sp-item{display:flex;align-items:center;gap:10px;}
+.sp-item i{font-size:1.5rem;color:var(--gold);}
+.sp-item div strong{display:block;font-size:1.2rem;color:var(--navy);font-weight:700;}
+.sp-item div span{font-size:0.78rem;color:var(--gray);}
+
+/* ===== NORMA SECTION ===== */
+.norma-section{background:var(--navy);padding:80px 5%;}
+.norma-section .title{color:#fff;}
+.norma-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;}
+.norma-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;transition:.3s;}
+.norma-card:hover{border-color:rgba(212,160,23,0.4);transform:translateY(-4px);}
+.nc-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.nc-icon i{color:var(--navy);font-size:20px;}
+.norma-card h3{color:#fff;font-size:0.95rem;font-weight:700;margin-bottom:8px;}
+.norma-card p{color:#64748b;font-size:0.83rem;line-height:1.6;}
+.norma-banner{max-width:1100px;margin:24px auto 0;background:linear-gradient(135deg,rgba(212,160,23,0.12),rgba(212,160,23,0.04));border:1px solid rgba(212,160,23,0.25);border-radius:14px;padding:24px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.norma-banner i{font-size:2.5rem;color:var(--gold);flex-shrink:0;}
+.norma-banner p{color:#94a3b8;font-size:0.9rem;line-height:1.6;}
+.norma-banner strong{color:#fff;}
+
+/* ===== STEPS ===== */
+.steps-section{padding:80px 5%;background:#fff;}
+.steps-row{display:flex;gap:0;max-width:1000px;margin:0 auto;position:relative;}
+.steps-row::before{content:'';position:absolute;top:32px;left:calc(10% + 16px);right:calc(10% + 16px);height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));z-index:0;}
+.step-item{flex:1;text-align:center;position:relative;z-index:1;padding:0 10px;}
+.step-circle{width:64px;height:64px;border-radius:50%;background:#fff;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);font-weight:700;box-shadow:0 0 0 6px #fff;}
+.step-item h4{font-size:0.88rem;color:var(--navy);font-weight:700;margin-bottom:6px;}
+.step-item p{font-size:0.78rem;color:var(--gray);line-height:1.5;}
+
+/* ===== PRICING ===== */
+.pricing-section{padding:80px 5%;background:var(--light);}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;margin:0 auto;}
+.price-card{border-radius:18px;padding:34px;position:relative;}
+.pc-hot{background:linear-gradient(155deg,#0a1628,#0f2040);border:2px solid var(--gold);}
+.pc-cool{background:#fff;border:2px solid var(--border);}
+.pc-ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--gold),var(--gold2));color:var(--navy);padding:5px 22px;border-radius:20px;font-size:0.75rem;font-weight:800;white-space:nowrap;}
+.pc-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.pc-hot .pc-icon{background:rgba(212,160,23,0.15);}
+.pc-hot .pc-icon i{color:var(--gold);font-size:22px;}
+.pc-cool .pc-icon{background:var(--light);}
+.pc-cool .pc-icon i{color:var(--navy);font-size:22px;}
+.pc-name{font-size:1rem;font-weight:700;margin-bottom:4px;}
+.pc-hot .pc-name{color:#fff;}
+.pc-cool .pc-name{color:var(--navy);}
+.pc-price{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;margin:8px 0 4px;}
+.pc-hot .pc-price{color:var(--gold);}
+.pc-cool .pc-price{color:var(--navy);}
+.pc-desc{font-size:0.82rem;margin-bottom:18px;}
+.pc-hot .pc-desc{color:#64748b;}
+.pc-cool .pc-desc{color:var(--gray);}
+.pc-features{list-style:none;margin-bottom:22px;}
+.pc-features li{display:flex;align-items:center;gap:9px;font-size:0.85rem;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.pc-cool .pc-features li{border-color:var(--border);color:var(--gray);}
+.pc-hot .pc-features li{color:#94a3b8;}
+.pc-features li:last-child{border:none;}
+.pc-features li i{color:var(--green);font-size:0.85rem;flex-shrink:0;}
+.pc-note{font-size:0.79rem;padding:10px 14px;border-radius:8px;margin-bottom:18px;line-height:1.5;}
+.pc-hot .pc-note{background:rgba(212,160,23,0.08);color:#94a3b8;border:1px solid rgba(212,160,23,0.15);}
+.pc-cool .pc-note{background:rgba(230,57,70,0.04);color:var(--gray);border:1px solid rgba(230,57,70,0.12);}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.btn-nequi{background:linear-gradient(135deg,#7c1f4e,#a02562);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;}
+.btn-nequi:hover{transform:translateY(-2px);}
+.tutela-box{max-width:860px;margin:20px auto 0;background:#fff;border:2px solid rgba(230,57,70,0.2);border-radius:14px;padding:22px 26px;}
+.tutela-box h4{color:var(--red);font-size:0.95rem;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tutela-box p{color:var(--gray);font-size:0.85rem;line-height:1.7;}
+
+/* ===== TESTIMONIALS ===== */
+.testi-section{padding:80px 5%;background:#fff;}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;}
+.testi-card{background:var(--light);border-radius:16px;padding:26px;transition:.3s;}
+.testi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+.testi-stars{color:var(--gold);font-size:0.85rem;margin-bottom:12px;display:flex;gap:2px;}
+.testi-card p{color:var(--gray);font-size:0.87rem;line-height:1.65;margin-bottom:14px;}
+.testi-author{display:flex;align-items:center;gap:10px;}
+.testi-avatar{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;}
+.testi-avatar img{width:100%;height:100%;object-fit:cover;}
+.testi-info strong{display:block;font-size:0.85rem;color:var(--navy);}
+.testi-info span{font-size:0.75rem;color:var(--gray);}
+
+/* ===== FAQ ===== */
+.faq-section{padding:80px 5%;background:var(--light);}
+.faq-list{max-width:780px;margin:0 auto;}
+.faq-item{background:#fff;border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:pointer;font-weight:600;color:var(--navy);font-size:0.9rem;gap:12px;}
+.faq-q .faq-chevron{width:28px;height:28px;border-radius:50%;background:var(--light);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.3s;}
+.faq-q .faq-chevron i{color:var(--gold);font-size:0.75rem;transition:.3s;}
+.faq-item.open .faq-chevron{background:var(--gold);}
+.faq-item.open .faq-chevron i{color:var(--navy);transform:rotate(180deg);}
+.faq-a{max-height:0;overflow:hidden;transition:.35s;font-size:0.86rem;color:var(--gray);line-height:1.75;padding:0 22px;}
+.faq-item.open .faq-a{max-height:400px;padding:0 22px 18px;}
+
+/* ===== TRUST BAR ===== */
+.trust-bar{background:var(--navy);padding:50px 5%;}
+.trust-bar-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;}
+.tb-item .tb-icon{font-size:2.2rem;margin-bottom:10px;}
+.tb-item h3{color:#fff;font-family:'Playfair Display',serif;font-size:1.6rem;}
+.tb-item p{color:#64748b;font-size:0.78rem;margin-top:4px;}
+
+/* ===== FOOTER ===== */
+footer{background:#050e1e;padding:50px 5% 28px;}
+.footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;}
+.footer-brand p{color:#475569;font-size:0.82rem;line-height:1.7;margin:14px 0 18px;}
+.footer-col h4{color:#94a3b8;font-size:0.75rem;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:1.5px;}
+.footer-col a{display:block;color:#475569;text-decoration:none;font-size:0.83rem;margin-bottom:9px;transition:.2s;}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{max-width:1100px;margin:36px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.footer-bottom p{color:#334155;font-size:0.78rem;}
+
+/* ===== FLOATING WA ===== */
+.wa-float{position:fixed;bottom:22px;right:22px;z-index:980;display:flex;align-items:center;gap:12px;}
+.wa-bubble{background:rgba(10,22,40,0.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:10px;font-size:0.8rem;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(10px);transition:.3s;}
+.wa-float:hover .wa-bubble{opacity:1;transform:translateX(0);}
+.wa-btn{width:58px;height:58px;background:linear-gradient(135deg,#25d366,#128c7e);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,0.4);animation:wa-pulse 2.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes wa-pulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.4),0 0 0 0 rgba(37,211,102,0.4);}50%{box-shadow:0 4px 30px rgba(37,211,102,0.6),0 0 0 12px rgba(37,211,102,0);}}
+.wa-btn i{color:#fff;font-size:26px;}
+
+/* ===== MEGA MODAL (SIMIT FLOW) ===== */
+.overlay{display:none;position:fixed;inset:0;background:rgba(5,14,30,0.88);z-index:1100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;backdrop-filter:blur(4px);}
+.overlay.show{display:flex;}
+.mmodal{background:#fff;border-radius:20px;width:100%;max-width:640px;margin:auto;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);}
+.mmodal-head{padding:22px 28px;display:flex;align-items:center;justify-content:space-between;}
+.mmodal-head h3{font-family:'Playfair Display',serif;font-size:1.2rem;}
+.mmodal-close{width:32px;height:32px;border:none;background:var(--light);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray);font-size:0.85rem;transition:.2s;}
+.mmodal-close:hover{background:#e2e8f0;color:var(--navy);}
+.mmodal-body{padding:0 28px 28px;}
+/* Steps indicator */
+.step-dots{display:flex;gap:6px;justify-content:center;padding:0 28px 18px;}
+.sdot{height:5px;flex:1;border-radius:3px;background:#e2e8f0;transition:.4s;}
+.sdot.active{background:var(--gold);}
+/* Step panels */
+.step-panel{display:none;}
+.step-panel.active{display:block;}
+/* SIMIT lookup */
+.simit-tabs2{display:flex;background:var(--light);border-radius:10px;padding:4px;margin-bottom:18px;}
+.stab2{flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--gray);transition:.2s;}
+.stab2.active{background:var(--navy);color:#fff;}
+.simit-input{width:100%;padding:14px 18px;border:2px solid var(--border);border-radius:10px;font-size:1.05rem;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:2px;text-align:center;transition:.2s;}
+.simit-input:focus{outline:none;border-color:var(--gold);}
+.simit-hint{font-size:0.78rem;color:var(--gray);text-align:center;margin-top:8px;}
+/* Loader */
+.simit-loader-wrap{text-align:center;padding:28px 0;}
+.loader-ring{width:72px;height:72px;border-radius:50%;border:5px solid var(--light);border-top-color:var(--gold);margin:0 auto 18px;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-title{font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px;}
+.loader-sub{font-size:0.82rem;color:var(--gray);margin-bottom:22px;}
+.loader-steps{list-style:none;text-align:left;display:inline-block;margin:0;padding:0;width:100%;max-width:320px;}
+.loader-steps li{font-size:0.85rem;color:#b0bec5;padding:8px 14px;margin-bottom:6px;border-radius:9px;background:#f8fafc;display:flex;align-items:center;gap:10px;transition:all .4s;}
+.loader-steps li i{font-size:1rem;color:#b0bec5;transition:all .4s;}
+.loader-steps li.active{color:var(--navy);background:linear-gradient(90deg,#fffbe6,#fff8d0);border-left:3px solid var(--gold);font-weight:600;}
+.loader-steps li.active i{color:var(--gold);animation:pulse 1s infinite;}
+.loader-steps li.done{color:#16a34a;background:#f0fdf4;border-left:3px solid #16a34a;font-weight:600;}
+.loader-steps li.done i{color:#16a34a;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+/* Results */
+.result-wrap{animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes slideUpFade{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes slideDownFade{from{opacity:1;transform:translateX(-50%) translateY(0);}to{opacity:0;transform:translateX(-50%) translateY(20px);}}
+.result-header{background:var(--navy);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.result-header h4{font-size:0.95rem;}
+.r-count{background:rgba(212,160,23,0.15);color:var(--gold);border:1px solid rgba(212,160,23,0.3);border-radius:8px;padding:4px 12px;font-size:0.8rem;font-weight:700;}
+.multa-row-r{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;}
+.multa-row-r:last-child{border:none;}
+.mr-left strong{font-size:0.85rem;color:var(--navy);}
+.mr-left span{font-size:0.78rem;color:var(--gray);display:block;margin-top:2px;}
+.mr-right{text-align:right;flex-shrink:0;}
+.mr-right .valor{font-size:0.9rem;font-weight:700;color:var(--navy);}
+.badge-aplica{background:rgba(46,199,109,0.1);color:var(--green);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
+.badge-no-aplica{background:rgba(100,116,139,0.1);color:var(--gray);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
+.result-total-row{background:linear-gradient(135deg,var(--navy),#0f2040);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.result-total-row span{font-size:0.85rem;color:#94a3b8;}
+.result-total-row strong{font-size:1.4rem;color:var(--gold);font-family:'Playfair Display',serif;}
+.result-cta-box{background:linear-gradient(135deg,rgba(46,199,109,0.08),rgba(46,199,109,0.03));border:1px solid rgba(46,199,109,0.25);border-radius:12px;padding:16px;margin:14px 0;}
+.result-cta-box p{font-size:0.87rem;color:#1a5e35;line-height:1.6;}
+.result-cta-box strong{color:#0d3d20;}
+.simit-link{font-size:0.75rem;color:var(--gray);text-align:center;margin-top:10px;display:block;}
+.simit-link a{color:var(--gold);}
+/* Form */
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.fg-full{grid-column:1/-1;}
+.fg label{display:block;font-size:0.75rem;font-weight:700;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:9px;font-size:0.9rem;font-family:'Inter',sans-serif;transition:.2s;background:#fff;}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold);}
+.fg input.error{border-color:var(--red);}
+.fg .field-error{color:var(--red);font-size:0.73rem;margin-top:4px;display:none;}
+.fg .field-error.show{display:block;}
+.fg .field-ok{color:var(--green);font-size:0.73rem;margin-top:4px;display:none;}
+.fg .field-ok.show{display:block;}
+/* Payment modal */
+.pay-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.pay-opt{border:2px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:.2s;text-align:center;}
+.pay-opt:hover,.pay-opt.sel{border-color:var(--gold);background:rgba(212,160,23,0.04);}
+.pay-opt h4{font-size:0.88rem;color:var(--navy);font-weight:700;margin-bottom:4px;}
+.pay-opt .pa{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);font-weight:700;}
+.pay-opt p{font-size:0.75rem;color:var(--gray);}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-card{display:none;}
+  .hero h1{font-size:2.2rem;}
+  .hero-stats{grid-template-columns:repeat(3,1fr);}
+  .norma-grid{grid-template-columns:1fr 1fr;}
+  .steps-row{flex-wrap:wrap;}
+  .steps-row::before{display:none;}
+  .step-item{flex:0 0 45%;margin-bottom:20px;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .testi-grid{grid-template-columns:1fr;}
+  .trust-bar-inner{grid-template-columns:1fr 1fr;}
+  .footer-inner{grid-template-columns:1fr;}
+  .img-cards{grid-template-columns:1fr;}
+  .urgency-inner{justify-content:center;text-align:center;}
+  .form-grid2{grid-template-columns:1fr;}
+  .fg-full{grid-column:1;}
+  .pay-opts{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .hero h1{font-size:1.85rem;}
+  .hero-ctas-row{flex-direction:column;}
+  .hero-ctas-row .btn{width:100%;}
+  .hero-stats{grid-template-columns:1fr 1fr 1fr;}
+  .norma-grid{grid-template-columns:1fr;}
+  h2.title{font-size:1.9rem;}
+  .section{padding:60px 4%;}
+  .mmodal-head h3{font-size:1rem;}
+  .mmodal{border-radius:16px 16px 0 0;}
+  .overlay{align-items:flex-end;padding:0;}
+  .pay-methods{grid-template-columns:1fr;}
+  .social-proof-bar{gap:16px;}
+  .step-item{flex:0 0 100%;}
+  .footer-inner{gap:24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark"><i class="fas fa-balance-scale"></i></div>
+      <div class="logo-name">JurídicosWeb<small>Expertos en Tránsito · Colombia</small></div>
+    </a>
+    <div class="nav-right">
+      <a href="#" class="btn btn-gold btn-sm" onclick="openSimitModal(event)"><i class="fas fa-search"></i> <span class="nav-cta-text">Consultar mis multas</span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ALERT BAR -->
+<div class="alert-bar">
+  <p>🚨 <strong>URGENTE:</strong> Supertransporte ordenó anular <strong>+5.8 millones de fotomultas</strong> en <strong>37 ciudades</strong> · Cali · Medellín · Bogotá · Barranquilla y más · <strong>¿Aplicas tú?</strong></p>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-bg-img"></div>
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span class="dot"></span> Bufete · Tránsito · Colombia · 2026</div>
+      <h1>Eliminamos tus<br><span class="hl">Fotomultas</span><br>con Ley en Mano</h1>
+      <p class="hero-sub">La nueva normativa obliga a las secretarías de tránsito a anular millones de comparendos. <strong>Consulta gratis si los tuyos aplican</strong> y elimínalos desde $45.000.</p>
+      <div class="hero-ctas">
+        <div class="hero-ctas-row">
+          <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)"><i class="fas fa-fire"></i> ELIMINAR MIS MULTAS 2018–2024</button>
+        </div>
+        <div class="hero-ctas-row">
+          <button class="btn btn-outline" onclick="openSimitModal(event,'otros')"><i class="fas fa-file-alt"></i> Tengo multas de otros años</button>
+          <a href="https://wa.me/573159318400?text=Hola%2C+quiero+información+para+eliminar+mis+fotomultas" target="_blank" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Hablar con abogado</a>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-n">5.8M</div><div class="hstat-l">Multas a anular</div></div>
+        <div class="hstat"><div class="hstat-n">37</div><div class="hstat-l">Ciudades</div></div>
+        <div class="hstat"><div class="hstat-n">$45K</div><div class="hstat-l">Desde</div></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-header"><h3><i class="fas fa-exclamation-triangle" style="color:var(--gold)"></i> ¿Por qué aplicas?</h3></div>
+      <div class="hero-card-body">
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-microscope"></i></div><div class="al-text"><strong>Cámaras sin certificación INM</strong> · 37 organismos de tránsito no tenían el "concepto de desempeño" obligatorio.</div></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-calendar-times"></i></div><div class="al-text"><strong>Prescripción 3 años</strong> · Multas no cobradas en 3 años prescriben por ley y deben eliminarse.</div></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-bell-slash"></i></div><div class="al-text"><strong>Notificación inválida</strong> · La Ley 1843/2017 exige notificar en 3 días hábiles. Sin notificación = nulidad.</div></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-user-times"></i></div><div class="al-text"><strong>Sin identificar conductor</strong> · Ley aprobada: si no se identifica el conductor, no hay comparendo válido.</div></div>
+        <div class="live-bar"><span class="live-dot"></span><p><strong id="live-count">487</strong> personas han consultado hoy sus multas</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- URGENCY STRIP -->
+<div class="urgency-strip">
+  <div class="urgency-inner">
+    <div class="urgency-timer">
+      <span><i class="fas fa-clock"></i> Oferta especial expira en:</span>
+      <div class="timer-boxes">
+        <div class="t-box"><span class="t-num" id="t-h">23</span><span class="t-lbl">Hrs</span></div>
+        <div class="t-box"><span class="t-num" id="t-m">47</span><span class="t-lbl">Min</span></div>
+        <div class="t-box"><span class="t-num" id="t-s">12</span><span class="t-lbl">Seg</span></div>
+      </div>
+    </div>
+    <div class="urgency-right"><p>🔥 Solo <strong>quedan 18 cupos</strong> a $45.000 esta semana · El precio sube a $75.000 la próxima</p></div>
+    <button class="btn btn-gold btn-sm btn-pulse" onclick="openSimitModal(event)">Consultar Gratis →</button>
+  </div>
+</div>
+
+<!-- TRUST IMAGES -->
+<div class="trust-images">
+  <div class="trust-images-inner">
+    <div class="section-center">
+      <div class="tag tag-gold">¿Por qué confiar en nosotros?</div>
+      <h2 class="title">Respaldo Legal <span>Real</span></h2>
+    </div>
+    <div class="img-cards">
+      <div class="img-card" onclick="openSimitModal(event)">
+        <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&q=80" alt="Cámara de vigilancia fotomulta" loading="lazy">
+        <div class="img-card-overlay"><div class="img-card-text"><h4>Cámaras sin Certificación INM</h4><p>Miles de cámaras operando ilegalmente 2018–2024</p></div></div>
+      </div>
+      <div class="img-card" onclick="openSimitModal(event)">
+        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80" alt="Autopista Colombia tráfico" loading="lazy">
+        <div class="img-card-overlay"><div class="img-card-text"><h4>+500 Fotomultas Eliminadas</h4><p>Casos exitosos en todo el país</p></div></div>
+      </div>
+      <div class="img-card" onclick="openSimitModal(event)">
+        <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80" alt="Abogado derecho de petición Colombia" loading="lazy">
+        <div class="img-card-overlay"><div class="img-card-text"><h4>Marco Legal Sólido</h4><p>Basado en normativa vigente 2025–2026</p></div></div>
+      </div>
+    </div>
+    <div class="social-proof-bar">
+      <div class="sp-item"><i class="fas fa-star"></i><div><strong>4.9/5</strong><span>Calificación promedio</span></div></div>
+      <div class="sp-item"><i class="fas fa-users"></i><div><strong id="sp-clients">487</strong><span>Clientes satisfechos</span></div></div>
+      <div class="sp-item"><i class="fas fa-check-circle"></i><div><strong>98%</strong><span>Tasa de éxito</span></div></div>
+      <div class="sp-item"><i class="fas fa-lock"></i><div><strong>100%</strong><span>Proceso legal y seguro</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NORMA SECTION -->
+<section class="norma-section">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-gold">Nueva Normativa 2025–2026</div>
+      <h2 class="title" style="color:#fff;">¿Por qué <span>ahora</span> es el momento?</h2>
+      <p class="subtitle" style="color:#64748b;">El Gobierno abrió la puerta legal. Tienes derecho a eliminar estas fotomultas.</p>
+    </div>
+    <div class="norma-grid">
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-microscope"></i></div><h3>Cámaras sin Certificación INM</h3><p>El Decreto 1074/2015 exige el "concepto de desempeño" del Instituto Nacional de Metrología. 37 organismos lo incumplieron, invalidando sus fotomultas.</p></div>
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-calendar-times"></i></div><h3>Prescripción Legal 3 Años</h3><p>Ley 769/2002: sanciones de tránsito prescriben a los 3 años. Las multas 2018–2021 sin cobro efectivo ya prescribieron y deben eliminarse.</p></div>
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-bell-slash"></i></div><h3>Falla de Notificación Oportuna</h3><p>Ley 1843/2017: notificación obligatoria en 3 días hábiles. Sin notificación válida, la fotomulta no produce efectos jurídicos.</p></div>
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-user-times"></i></div><h3>Identificación Insuficiente</h3><p>Nuevo proyecto de ley: sin identificación precisa del conductor, no hay lugar a comparendo. La cámara capta placa, no al conductor.</p></div>
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-file-contract"></i></div><h3>Derecho de Petición Efectivo</h3><p>Art. 23 Constitución + Ley 1755/2015: respuesta en 15 días hábiles. El incumplimiento habilita acción de tutela ante juez.</p></div>
+      <div class="norma-card"><div class="nc-icon"><i class="fas fa-search-dollar"></i></div><h3>Investigación Supertransporte</h3><p>Desde mayo 2026: Cali (+2.7M), Medellín (+717K), Bogotá (+294K), Barranquilla (+131K). Si vivías allí, casi seguro aplicas.</p></div>
+    </div>
+    <div class="norma-banner">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>📌 <strong>Importante:</strong> No esperes a que la secretaría actúe de oficio. En la práctica, la prescripción y la nulidad raramente se declaran automáticamente. <strong>Debes reclamarla activamente.</strong> Por eso existimos nosotros.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="steps-section">
+  <div class="section-center">
+    <div class="tag tag-gold">Proceso Simple</div>
+    <h2 class="title">En <span>5 pasos</span> eliminamos tus multas</h2>
+    <p class="subtitle">Sin complicaciones. Sin papelería física. 100% digital.</p>
+  </div>
+  <div class="steps-row">
+    <div class="step-item"><div class="step-circle">1</div><h4>Consulta Gratis</h4><p>Ingresa cédula o placa y vemos tus multas en el SIMIT en segundos.</p></div>
+    <div class="step-item"><div class="step-circle">2</div><h4>Análisis Jurídico</h4><p>Identificamos cuáles aplican y la causal legal más sólida.</p></div>
+    <div class="step-item"><div class="step-circle">3</div><h4>Pago Seguro</h4><p>Elige tu plan: $45.000 todo incluido o $19.800 de adelanto.</p></div>
+    <div class="step-item"><div class="step-circle">4</div><h4>Documento Legal</h4><p>Recibes el derecho de petición en tu correo en máx. 2 horas.</p></div>
+    <div class="step-item"><div class="step-circle">5</div><h4>Radicación y Seguimiento</h4><p>Radicamos ante la secretaría y te enviamos el número de radicado.</p></div>
+  </div>
+  <div style="text-align:center;margin-top:36px;">
+    <button class="btn btn-gold btn-xl btn-pulse" onclick="openSimitModal(event)"><i class="fas fa-search"></i> Consultar si mis multas aplican – Gratis</button>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="precios">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-gold">Precios Transparentes</div>
+      <h2 class="title">Elige tu <span>Plan</span></h2>
+      <p class="subtitle">Sin sorpresas. El precio más bajo del mercado con la mayor efectividad legal.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card pc-hot">
+        <div class="pc-ribbon">⭐ MÁS POPULAR · ¡MÁS ECONÓMICO!</div>
+        <div class="pc-icon"><i class="fas fa-bolt"></i></div>
+        <div class="pc-name">Pago Inmediato · Todas tus Multas</div>
+        <div class="pc-price">$45.000</div>
+        <div class="pc-desc">Pago único · Todas las multas de UNA secretaría</div>
+        <ul class="pc-features">
+          <li><i class="fas fa-check-circle"></i> Derecho de petición 100% profesional</li>
+          <li><i class="fas fa-check-circle"></i> Entrega en tu correo en máx. 2 horas</li>
+          <li><i class="fas fa-check-circle"></i> Radicación ante secretaría incluida</li>
+          <li><i class="fas fa-check-circle"></i> Número de radicado por correo</li>
+          <li><i class="fas fa-check-circle"></i> Seguimiento del caso</li>
+          <li><i class="fas fa-check-circle"></i> Soporte por WhatsApp</li>
+        </ul>
+        <div class="pc-note">ℹ️ Si tus multas pertenecen a varias secretarías se cobra $45.000 por cada una.</div>
+        <button class="btn btn-shimmer btn-full btn-pulse" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-bolt"></i> Pagar $45.000 con Wompi</button>
+        <div class="pay-methods" style="margin-top:9px;">
+          <button class="btn-nequi btn-full" onclick="openOverlay('overlay-nequi')"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
+        </div>
+      </div>
+      <div class="price-card pc-cool">
+        <div class="pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="pc-name">Pago al Eliminar</div>
+        <div class="pc-price">$95.800</div>
+        <div class="pc-desc">Por cada multa eliminada · Adelanto $19.800</div>
+        <ul class="pc-features">
+          <li><i class="fas fa-check-circle"></i> Pagas principalmente al eliminar</li>
+          <li><i class="fas fa-check-circle"></i> Adelanto de $19.800 para trámites</li>
+          <li><i class="fas fa-check-circle"></i> El adelanto se descuenta del total</li>
+          <li><i class="fas fa-check-circle"></i> Derecho de petición profesional</li>
+          <li><i class="fas fa-check-circle"></i> Radicación ante secretaría</li>
+          <li><i class="fas fa-check-circle"></i> Soporte WhatsApp</li>
+        </ul>
+        <div class="pc-note">⚠️ El adelanto de $19.800 cubre costos de trámite y se descuenta del total de $95.800 por cada multa eliminada.</div>
+        <button class="btn btn-navy btn-full" onclick="openSimitModal(event,'diferido')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice-dollar"></i> Pagar Adelanto $19.800</button>
+        <div class="pay-methods" style="margin-top:9px;">
+          <button class="btn-nequi btn-full" onclick="openOverlay('overlay-nequi')"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
+        </div>
+      </div>
+    </div>
+    <div class="tutela-box">
+      <h4><i class="fas fa-gavel"></i> ¿Secretaría niega la solicitud?</h4>
+      <p>Interponemos <strong>Acción de Tutela</strong> con costo adicional de <strong>$19.800 por cada multa</strong>. El juez debe resolver en <strong>10 días hábiles</strong>. Altísima efectividad cuando la negativa es ilegal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section" id="testimonios">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-green">Testimonios Reales</div>
+      <h2 class="title">Lo que dicen <span>nuestros clientes</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"Tenía 4 fotomultas de Cali del 2020 y 2021. En menos de 20 días las eliminaron todas. El documento fue súper profesional y todo el proceso fue claro y transparente."</p>
+        <div class="testi-author"><div class="testi-avatar"><img src="https://i.pravatar.cc/80?img=11" alt="Carlos M."></div><div class="testi-info"><strong>Carlos M.</strong><span>Cali, Valle del Cauca</span></div></div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"Pensé que era mentira pero funcionó. Tenía 2 multas de Medellín. Pagué los $45.000 y en 3 semanas el SIMIT ya no las mostraba. Totalmente recomendado."</p>
+        <div class="testi-author"><div class="testi-avatar"><img src="https://i.pravatar.cc/80?img=25" alt="Lucía P."></div><div class="testi-info"><strong>Lucía P.</strong><span>Medellín, Antioquia</span></div></div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <p>"Firmé el PDF, lo reenviaron y me llegó el radicado. Todo por correo y WhatsApp. Excelente atención. Mi historial en el SIMIT ahora está limpio."</p>
+        <div class="testi-author"><div class="testi-avatar"><img src="https://i.pravatar.cc/80?img=57" alt="Jorge R."></div><div class="testi-info"><strong>Jorge R.</strong><span>Bogotá, Cundinamarca</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="preguntas">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-gold">Preguntas Frecuentes</div>
+      <h2 class="title">Resolvemos tus <span>dudas</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item open"><div class="faq-q" onclick="toggleFaq(this)">¿Es completamente legal eliminar fotomultas por derecho de petición?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Absolutamente. El Art. 23 de la Constitución garantiza el Derecho de Petición como derecho fundamental. La Ley 1755/2015 lo regula. No hacemos nada ilegal: exigimos a la autoridad que cumpla la ley, ya sea declarando prescripción, nulidad por equipos sin certificación o defecto de notificación.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Todas las fotomultas 2018–2024 aplican?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">La gran mayoría sí, especialmente las de los 37 organismos bajo investigación. Las causales más frecuentes son: cámara sin certificación INM, prescripción, falta de notificación oportuna y falta de identificación del conductor. Consulta gratis para saber exactamente cuáles son las tuyas.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué pasa si tengo multas en varias ciudades?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Se debe radicar un derecho de petición ante cada secretaría competente. Por cada secretaría se cobra $45.000 en el plan inmediato. Ejemplo: multas en Cali y Medellín = 2 trámites = $90.000 total. Esto se informa durante la consulta para que decidas con pleno conocimiento.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿En cuánto tiempo me llega el documento?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">El derecho de petición llega a tu correo en máximo 2 horas hábiles. Una vez lo firmes y nos lo reenvíes, lo radicamos. La secretaría tiene 15 días hábiles para responder. En ese plazo, si aprueban, la multa desaparece del SIMIT.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué hago si niegan la solicitud?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Interponemos Acción de Tutela ($19.800 por multa adicional). Un juez la resuelve en 10 días. Cuando la negativa es ilegal —como suele ocurrir con cámaras sin certificación o multas prescritas— el juez ordena la eliminación. Efectividad muy alta.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Necesito ir a alguna oficina?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">No. Todo es 100% digital. Consultas, formulario, pago, documento PDF, firma y radicación, todo se hace desde tu celular o computador. Recibes el número de radicado y el seguimiento por correo y WhatsApp.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="tb-item"><div class="tb-icon">⚖️</div><h3>+500</h3><p>Casos exitosos</p></div>
+    <div class="tb-item"><div class="tb-icon">🏆</div><h3>98%</h3><p>Tasa de éxito</p></div>
+    <div class="tb-item"><div class="tb-icon">⏱️</div><h3>2h</h3><p>Entrega del documento</p></div>
+    <div class="tb-item"><div class="tb-icon">🇨🇴</div><h3>37</h3><p>Ciudades cubiertas</p></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="logo"><div class="logo-mark"><i class="fas fa-balance-scale"></i></div><div class="logo-name" style="color:#fff;">JurídicosWeb<small>Expertos en Tránsito · Colombia</small></div></a>
+      <p>Bufete jurídico colombiano especializado en derecho de tránsito y movilidad. Usamos todos los mecanismos legales para proteger tus derechos.</p>
+      <a href="https://wa.me/573159318400?text=Hola%2C+quiero+eliminar+mis+fotomultas+en+juridicosweb.com" target="_blank" class="btn btn-wa" style="font-size:0.82rem;padding:11px 18px;"><i class="fab fa-whatsapp"></i> +57 315 931 8400</a>
+    </div>
+    <div class="footer-col">
+      <h4>Servicios</h4>
+      <a href="#" onclick="openSimitModal(event)">Eliminar Multas 2018–2024</a>
+      <a href="#" onclick="openSimitModal(event,'otros')">Multas otros años</a>
+      <a href="#precios">Planes y Precios</a>
+      <a href="#" onclick="openSimitModal(event)">Consulta Gratis SIMIT</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal & Contacto</h4>
+      <a href="#">Política de Privacidad</a>
+      <a href="#">Términos del Servicio</a>
+      <a href="mailto:juridicos@juridicosweb.com">juridicos@juridicosweb.com</a>
+      <a href="#preguntas">Preguntas Frecuentes</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 JurídicosWeb.com · Bufete de Abogados Expertos en Tránsito Colombia</p>
+    <p style="color:#1e293b;">juridicosweb.com</p>
+  </div>
+</footer>
+
+<!-- FLOATING WA -->
+<div class="wa-float">
+  <div class="wa-bubble">¿Dudas? Escríbenos ahora</div>
+  <a href="https://wa.me/573159318400?text=Hola%2C+estoy+en+juridicosweb.com+y+quiero+saber+si+mis+fotomultas+aplican" target="_blank" class="wa-btn"><i class="fab fa-whatsapp"></i></a>
+</div>
+
+<!-- ============================================================ -->
+<!-- MEGA MODAL: SIMIT → RESULTADOS → FORMULARIO → PAGO          -->
+<!-- ============================================================ -->
+<div class="overlay" id="overlay-main">
+  <div class="mmodal">
+    <div class="mmodal-head" id="mmodal-head">
+      <h3 id="mmodal-title">🔍 Consulta tu estado en SIMIT</h3>
+      <button class="mmodal-close" onclick="closeOverlay('overlay-main')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="step-dots" id="step-dots">
+      <div class="sdot active" id="sd1"></div>
+      <div class="sdot" id="sd2"></div>
+      <div class="sdot" id="sd3"></div>
+      <div class="sdot" id="sd4"></div>
+    </div>
+    <div class="mmodal-body">
+
+      <!-- STEP 1: SIMIT LOOKUP -->
+      <div class="step-panel active" id="sp1">
+        <p style="color:var(--gray);font-size:0.87rem;margin-bottom:16px;line-height:1.6;">Antes de cualquier pago, consulta <strong>gratis</strong> cuántas multas tienes y cuáles aplican para eliminar.</p>
+        <div class="simit-tabs2">
+          <div class="stab2 active" onclick="switchStab('cedula')"><i class="fas fa-id-card"></i> Por Cédula</div>
+          <div class="stab2" onclick="switchStab('placa')"><i class="fas fa-car"></i> Por Placa</div>
+        </div>
+        <div id="stab-cedula">
+          <div class="fg"><label>Número de Cédula</label><input class="simit-input" id="si-cedula" type="text" placeholder="Ej: 1023456789" maxlength="12" inputmode="numeric"></div>
+          <p class="simit-hint">Sin puntos ni espacios · Solo números</p>
+        </div>
+        <div id="stab-placa" style="display:none;">
+          <div class="fg"><label>Placa del Vehículo</label><input class="simit-input" id="si-placa" type="text" placeholder="Ej: ABC123" maxlength="6"></div>
+          <p class="simit-hint">Sin guiones ni espacios</p>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn btn-red btn-full btn-xl" onclick="iniciarConsulta()"><i class="fas fa-search"></i> CONSULTAR MIS MULTAS EN SIMIT</button>
+        </div>
+        <p style="font-size:0.75rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-lock"></i> Consulta gratuita · Sin compromiso · Datos protegidos</p>
+      </div>
+
+      <!-- STEP 2: LOADER -->
+      <div class="step-panel" id="sp2">
+        <div class="simit-loader-wrap">
+          <div class="loader-ring"></div>
+          <p class="loader-title" id="loader-title">Conectando con SIMIT oficial...</p>
+          <p class="loader-sub" id="loader-sub">Esto toma unos segundos</p>
+          <ul class="loader-steps" id="loader-steps">
+            <li id="ls1"><i class="fas fa-satellite-dish"></i> Conectando al servidor SIMIT</li>
+            <li id="ls2"><i class="fas fa-database"></i> Buscando comparendos registrados</li>
+            <li id="ls3"><i class="fas fa-gavel"></i> Aplicando análisis jurídico</li>
+            <li id="ls4"><i class="fas fa-shield-alt"></i> Identificando causales de nulidad</li>
+            <li id="ls5"><i class="fas fa-file-alt"></i> Preparando tu resumen legal</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- STEP 3: RESULTADOS -->
+      <div class="step-panel" id="sp3">
+        <div class="result-wrap" id="result-content"></div>
+      </div>
+
+      <!-- STEP 4: FORMULARIO DE REGISTRO -->
+      <div class="step-panel" id="sp4">
+        <p style="color:var(--gray);font-size:0.85rem;margin-bottom:18px;line-height:1.6;">Completa tus datos para generar el Derecho de Petición. Lo recibirás en tu correo en <strong>máx. 2 horas</strong>.</p>
+        <div class="form-grid2">
+          <div class="fg"><label>Nombres *</label><input type="text" id="frm-nombres" placeholder="Tus nombres"></div>
+          <div class="fg"><label>Apellidos *</label><input type="text" id="frm-apellidos" placeholder="Tus apellidos"></div>
+          <div class="fg"><label>Cédula de Ciudadanía *</label><input type="text" id="frm-cedula" placeholder="Sin puntos ni comas" inputmode="numeric"></div>
+          <div class="fg"><label>Placa del Vehículo</label><input type="text" id="frm-placa" placeholder="Ej: ABC123 (opcional)"></div>
+          <div class="fg fg-full"><label>WhatsApp *</label><input type="tel" id="frm-whatsapp" placeholder="3XX XXX XXXX" maxlength="10" inputmode="numeric"><div class="field-error" id="err-wa">Ingresa un número celular válido (10 dígitos)</div></div>
+          <div class="fg fg-full">
+            <label>Correo Electrónico *</label>
+            <input type="email" id="frm-email" placeholder="correo@ejemplo.com" oninput="validarEmail()">
+            <div class="field-error" id="err-email">Correo electrónico no válido</div>
+            <div class="field-ok" id="ok-email"><i class="fas fa-check-circle"></i> Correo válido</div>
+          </div>
+          <div class="fg fg-full"><label>Dirección de Residencia *</label><input type="text" id="frm-dir" placeholder="Ej: Calle 45 # 23-10 Apto 301"></div>
+          <div class="fg"><label>Departamento *</label>
+            <select id="frm-dpto" onchange="cargarMunicipios()">
+              <option value="">Selecciona departamento</option>
+            </select>
+          </div>
+          <div class="fg"><label>Municipio / Ciudad *</label>
+            <select id="frm-ciudad">
+              <option value="">Primero selecciona departamento</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn btn-shimmer btn-full" style="padding:18px;font-size:1rem;border-radius:12px;letter-spacing:.3px;" onclick="validarYContinuar()"><i class="fas fa-paper-plane"></i> Enviar Datos e Iniciar Trámite</button>
+        </div>
+        <p style="font-size:0.73rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt"></i> Tus datos son confidenciales y solo se usan para generar tu documento legal</p>
+      </div>
+
+      <!-- STEP 5: PAGO -->
+      <div class="step-panel" id="sp5">
+        <!-- Header de confirmación -->
+        <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
+          <div style="font-size:1.7rem;margin-bottom:6px;">🎉</div>
+          <p style="color:#d4a017;font-weight:800;font-size:1rem;margin-bottom:3px;">¡Datos recibidos! Elige cómo iniciar</p>
+          <p style="color:#94a3b8;font-size:0.8rem;">Tu trámite quedará registrado de inmediato</p>
+        </div>
+
+        <!-- Opciones de plan -->
+        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Selecciona tu plan:</p>
+        <div class="pay-opts">
+          <div class="pay-opt sel" id="po-inmediato" onclick="selPago('inmediato')" style="position:relative;overflow:hidden;">
+            <div style="position:absolute;top:8px;right:8px;background:#d4a017;color:#fff;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:20px;">MÁS POPULAR</div>
+            <h4 style="font-size:0.95rem;">⭐ Todo Incluido</h4>
+            <div class="pa" style="font-size:2rem;">$45.000</div>
+            <p style="font-size:0.78rem;">Una secretaría · Todas tus multas</p>
+            <ul style="list-style:none;padding:0;margin:8px 0 0;text-align:left;font-size:0.76rem;color:var(--navy);">
+              <li>✅ Derecho de petición completo</li>
+              <li>✅ Radicación ante la secretaría</li>
+              <li>✅ Seguimiento hasta resolución</li>
+            </ul>
+          </div>
+          <div class="pay-opt" id="po-diferido" onclick="selPago('diferido')">
+            <h4 style="font-size:0.95rem;">Pago Dividido</h4>
+            <div class="pa" style="font-size:1.6rem;">$19.800</div>
+            <p style="font-size:0.78rem;">Adelanto hoy</p>
+            <ul style="list-style:none;padding:0;margin:8px 0 0;text-align:left;font-size:0.76rem;color:var(--navy);">
+              <li>✅ Paga $19.800 ahora</li>
+              <li>✅ Resto al eliminar la multa</li>
+              <li>⚠️ $95.800 por multa adicional</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Métodos de pago -->
+        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 10px;">Elige cómo pagar:</p>
+        <div id="pago-btns" style="display:flex;flex-direction:column;gap:9px;">
+          <a href="https://checkout.wompi.co/l/30MxtS" target="_blank" id="btn-wompi" class="btn btn-shimmer btn-full btn-pulse" style="padding:15px;font-size:0.93rem;border-radius:11px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="confirmarTramite()">
+            <i class="fas fa-credit-card"></i> Pagar con Tarjeta / PSE – Wompi
+          </a>
+          <button class="btn-nequi btn-full" onclick="closeOverlay('overlay-main');openOverlay('overlay-nequi')" style="padding:14px;font-size:0.9rem;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fas fa-mobile-alt"></i> Pagar por Nequi
+          </button>
+          <a href="https://wa.me/573159318400?text=Hola%2C+quiero+iniciar+mi+trámite+de+fotomultas.+%C2%BFcómo+pago%3F" target="_blank" class="btn btn-wa btn-full" style="padding:13px;font-size:0.88rem;border-radius:11px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="fab fa-whatsapp"></i> Coordinar pago por WhatsApp
+          </a>
+        </div>
+
+        <div style="margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;">
+          <p style="font-size:0.77rem;color:#15803d;line-height:1.7;"><i class="fas fa-info-circle"></i> <strong>Después de pagar:</strong> Envía el comprobante al WhatsApp <strong>3159318400</strong> con tu nombre y placa. Recibes el documento en máx. 2 horas hábiles.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- NEQUI MODAL -->
+<div class="overlay" id="overlay-nequi">
+  <div class="mmodal" style="max-width:420px;">
+    <div class="mmodal-head"><h3>📱 Pago por Nequi</h3><button class="mmodal-close" onclick="closeOverlay('overlay-nequi')"><i class="fas fa-times"></i></button></div>
+    <div style="padding:10px 28px 28px;text-align:center;">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#7c1f4e,#a02562);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"><i class="fas fa-mobile-alt" style="color:#fff;font-size:30px;"></i></div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:6px;">Número Nequi</h3>
+      <div style="font-size:2rem;font-weight:800;color:var(--navy);letter-spacing:4px;margin:10px 0;font-family:'Playfair Display',serif;">350 545 7420</div>
+      <div style="background:var(--light);border-radius:10px;padding:12px;margin-bottom:14px;"><p style="font-size:0.82rem;color:var(--gray);">Titular: <strong style="color:var(--navy);">Ju... Cac...</strong><br><span style="font-size:0.75rem;">(Identidad protegida)</span></p></div>
+      <div style="background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:12px;margin-bottom:18px;text-align:left;"><p style="font-size:0.83rem;color:var(--navy);line-height:1.65;"><strong>⚠️ Importante:</strong> Una vez pagues, <strong>envía el comprobante por WhatsApp al 3159318400</strong> con tu nombre completo y placa. Sin comprobante no podemos iniciar el trámite.</p></div>
+      <a href="https://wa.me/573159318400?text=Hola%2C+hice+el+pago+por+Nequi+para+eliminar+mis+fotomultas.+Adjunto+comprobante." target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Enviar Comprobante por WhatsApp</a>
+      <button onclick="closeOverlay('overlay-nequi')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÉXITO MODAL -->
+<div class="overlay" id="overlay-exito">
+  <div class="mmodal" style="max-width:440px;">
+    <div style="padding:32px 28px;text-align:center;">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 30px rgba(34,197,94,0.4);"><i class="fas fa-whatsapp" style="color:#fff;font-size:36px;"></i></div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:1.4rem;margin-bottom:8px;">¡Ya casi está listo!</h3>
+      <p style="color:var(--gray);line-height:1.7;margin-bottom:16px;font-size:0.92rem;">Tu solicitud quedó registrada. <strong style="color:var(--navy);">Un asesor verificará tu pago</strong> y en máx. 2 horas hábiles recibirás el documento en tu correo.</p>
+
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:left;">
+        <p style="font-size:0.84rem;font-weight:700;color:#15803d;margin-bottom:8px;">📋 Próximos pasos:</p>
+        <p style="font-size:0.81rem;color:#166534;line-height:2;">
+          <strong>① Revisa tu WhatsApp</strong> — un asesor te contactará<br>
+          <strong>② Revisa tu correo</strong> (bandeja y spam)<br>
+          <strong>③ Firma el PDF</strong> con tu nombre completo<br>
+          <strong>④ Reenvíalo</strong> al correo indicado en el documento<br>
+          <strong>⑤ Recibirás el número de radicado</strong>
+        </p>
+      </div>
+
+      <div style="background:#fff8e1;border:1px solid #d4a017;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+        <p style="font-size:0.8rem;color:#7a5c00;line-height:1.6;">⚠️ Si aún no enviaste el comprobante, hazlo ahora por WhatsApp para no retrasar tu trámite.</p>
+      </div>
+
+      <div style="background:var(--light);border-radius:10px;padding:14px;margin-bottom:18px;text-align:left;">
+        <p style="font-size:0.83rem;color:var(--gray);line-height:1.8;">✅ Revisa bandeja de entrada y spam<br>✅ Firma el PDF con tu nombre<br>✅ Reenvíalo al correo indicado<br>✅ Recibirás el número de radicado</p>
+      </div>
+      <a href="https://wa.me/573159318400?text=Hola%2C+ya+solicité+la+eliminación+de+mis+fotomultas+en+juridicosweb.com.+¿Me+pueden+confirmar+el+estado%3F" target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Seguimiento por WhatsApp</a>
+      <button onclick="closeOverlay('overlay-exito')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIGURACIÓN =====================
+var SIMIT_PROXY_URL    = '';   // Sin servidor PHP — usa datos demo + enlace SIMIT oficial
+var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbwA0z7RWNAU9lvnFAYlZi2enfvtk5jBSeJKJlQcmOAYSgAIJuGtWPS7RjIMwcRhlHJi/exec';
+var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;  // Formulario → Google Sheets directamente
+var EMAILJS_SERVICE_ID  = '';
+var EMAILJS_TEMPLATE_ID = '';
+var EMAILJS_PUBLIC_KEY  = '';
+// =========================================================
+
+if (EMAILJS_PUBLIC_KEY) { emailjs.init(EMAILJS_PUBLIC_KEY); }
+
+// ===================== COLOMBIA DATA =====================
+var dptoMpio={
+  "Amazonas":["Leticia","Puerto Nariño"],
+  "Antioquia":["Medellín","Bello","Envigado","Itagüí","Rionegro","Apartadó","Turbo","Caucasia","Marinilla","La Ceja","El Carmen de Viboral","Barbosa","Sabaneta","Copacabana","Girardota","Caldas","La Estrella","Andes","Jericó","Santa Fe de Antioquia"],
+  "Arauca":["Arauca","Arauquita","Saravena","Tame","Fortul"],
+  "Atlántico":["Barranquilla","Soledad","Malambo","Sabanagrande","Baranoa","Galapa","Puerto Colombia","Sabanalarga"],
+  "Bolívar":["Cartagena","Magangué","Mompox","El Carmen de Bolívar","Turbaco","Arjona","San Jacinto"],
+  "Boyacá":["Tunja","Duitama","Sogamoso","Chiquinquirá","Paipa","Villa de Leyva","Garagoa","Puerto Boyacá"],
+  "Caldas":["Manizales","Chinchiná","Riosucio","La Dorada","Salamina","Anserma","Villamaría","Palestina"],
+  "Caquetá":["Florencia","San Vicente del Caguán","Puerto Rico","El Doncello","La Montañita"],
+  "Casanare":["Yopal","Aguazul","Tauramena","Villanueva","Orocué","Trinidad","Paz de Ariporo"],
+  "Cauca":["Popayán","Santander de Quilichao","Puerto Tejada","Patía","Miranda","El Tambo"],
+  "Cesar":["Valledupar","Aguachica","Codazzi","La Jagua de Ibirico","Bosconia","San Alberto"],
+  "Chocó":["Quibdó","Istmina","Tadó","Riosucio","Acandí"],
+  "Córdoba":["Montería","Montelíbano","Lorica","Sahagún","Cereté","Tierralta"],
+  "Cundinamarca":["Bogotá","Soacha","Chía","Zipaquirá","Fusagasugá","Facatativá","Cajicá","Madrid","Mosquera","Funza","La Calera","Girardot","Silvania","Villeta","Ubaté","Pacho"],
+  "Guainía":["Inírida"],
+  "Guaviare":["San José del Guaviare","El Retorno","Calamar"],
+  "Huila":["Neiva","Pitalito","Garzón","La Plata","Campoalegre","Rivera"],
+  "La Guajira":["Riohacha","Maicao","Uribia","Manaure","San Juan del Cesar"],
+  "Magdalena":["Santa Marta","Ciénaga","Fundación","El Banco","Plato"],
+  "Meta":["Villavicencio","Acacías","Granada","San Martín","Restrepo","Puerto Gaitán","Cumaral"],
+  "Nariño":["Pasto","Ipiales","Tumaco","Túquerres","La Unión","Samaniego"],
+  "Norte de Santander":["Cúcuta","Villa del Rosario","Los Patios","Ocaña","Pamplona","Tibú","Sardinata"],
+  "Putumayo":["Mocoa","Puerto Asís","Orito","La Hormiga","Sibundoy","Puerto Caicedo"],
+  "Quindío":["Armenia","Calarcá","Montenegro","La Tebaida","Quimbaya","Circasia"],
+  "Risaralda":["Pereira","Dosquebradas","Santa Rosa de Cabal","La Virginia","Belén de Umbría"],
+  "San Andrés":["San Andrés","Providencia"],
+  "Santander":["Bucaramanga","Floridablanca","Girón","Piedecuesta","Barrancabermeja","San Gil","Socorro","Vélez"],
+  "Sucre":["Sincelejo","Corozal","Sampués","Morroa","San Onofre","Tolú"],
+  "Tolima":["Ibagué","Espinal","Honda","Líbano","Melgar","Mariquita","Chaparral","Armero"],
+  "Valle del Cauca":["Cali","Buenaventura","Palmira","Tuluá","Buga","Cartago","Yumbo","Jamundí","Cali","Candelaria","Florida","Guacarí","Roldanillo","Zarzal","El Cerrito","La Victoria","Riofrío"],
+  "Vaupés":["Mitú"],
+  "Vichada":["Puerto Carreño"]
+};
+
+// Populate departments
+var dpto=document.getElementById('frm-dpto');
+Object.keys(dptoMpio).sort().forEach(function(d){
+  var o=document.createElement('option');o.value=d;o.textContent=d;dpto.appendChild(o);
+});
+function cargarMunicipios(){
+  var d=document.getElementById('frm-dpto').value;
+  var sel=document.getElementById('frm-ciudad');
+  sel.innerHTML='<option value="">Selecciona municipio</option>';
+  if(d&&dptoMpio[d]){
+    dptoMpio[d].forEach(function(m){
+      var o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);
+    });
+  }
+}
+
+// ===================== OVERLAY HELPERS =====================
+function openOverlay(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden';}
+function closeOverlay(id){
+  document.getElementById(id).classList.remove('show');
+  if(!document.querySelector('.overlay.show')) document.body.style.overflow='';
+  // Limpiar timers de pago al cerrar el modal principal
+  if(id==='overlay-main'){
+    if(_pagoTimerID) clearTimeout(_pagoTimerID);
+    var t=document.getElementById('toast-pago');
+    if(t && t.parentNode) t.parentNode.removeChild(t);
+  }
+}
+document.querySelectorAll('.overlay').forEach(function(el){
+  el.addEventListener('click',function(e){
+    if(e.target===this){
+      this.classList.remove('show');
+      if(!document.querySelector('.overlay.show')) document.body.style.overflow='';
+      if(this.id==='overlay-main'){
+        if(_pagoTimerID) clearTimeout(_pagoTimerID);
+        var t=document.getElementById('toast-pago');
+        if(t && t.parentNode) t.parentNode.removeChild(t);
+      }
+    }
+  });
+});
+
+// ===================== NAV SCROLL =====================
+window.addEventListener('scroll',function(){
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// ===================== TIMER =====================
+var endTime=Date.now()+23*3600000+47*60000+12000;
+setInterval(function(){
+  var r=Math.max(0,endTime-Date.now());
+  var h=Math.floor(r/3600000);
+  var m=Math.floor((r%3600000)/60000);
+  var s=Math.floor((r%60000)/1000);
+  document.getElementById('t-h').textContent=String(h).padStart(2,'0');
+  document.getElementById('t-m').textContent=String(m).padStart(2,'0');
+  document.getElementById('t-s').textContent=String(s).padStart(2,'0');
+},1000);
+
+// ===================== LIVE COUNTER =====================
+var lc=487;
+setInterval(function(){
+  if(Math.random()<0.3){lc++;document.getElementById('live-count').textContent=lc;document.getElementById('sp-clients').textContent=lc;}
+},8000);
+
+// ===================== FAQ =====================
+function toggleFaq(el){el.parentElement.classList.toggle('open');}
+
+// ===================== SIMIT FLOW =====================
+var currentStep=1;
+var tipoServicio='2018';
+
+function openSimitModal(e,tipo){
+  if(e)e.preventDefault();
+  tipoServicio=tipo||'2018';
+  goToStep(1);
+  openOverlay('overlay-main');
+}
+
+function switchStab(t){
+  document.querySelectorAll('.stab2').forEach(function(el,i){el.classList.toggle('active',i===(t==='cedula'?0:1));});
+  document.getElementById('stab-cedula').style.display=t==='cedula'?'block':'none';
+  document.getElementById('stab-placa').style.display=t==='placa'?'block':'none';
+}
+
+function goToStep(n){
+  currentStep=n;
+  for(var i=1;i<=5;i++){
+    var p=document.getElementById('sp'+i);
+    if(p)p.classList.toggle('active',i===n);
+    var d=document.getElementById('sd'+i);
+    if(d)d.classList.toggle('active',i<=n);
+  }
+  // Update header
+  var titles={1:'🔍 Consulta tu estado en SIMIT',2:'⏳ Consultando SIMIT...',3:'📋 Tu resumen de multas',4:'📝 Tus datos',5:'💳 Elige tu pago'};
+  document.getElementById('mmodal-title').textContent=titles[n]||'';
+  // Pre-fill cedula if available
+  if(n===4){
+    var ced=document.getElementById('si-cedula').value;
+    if(ced)document.getElementById('frm-cedula').value=ced;
+  }
+}
+
+function iniciarConsulta(){
+  var cedTab=document.querySelector('.stab2.active');
+  var tipo=cedTab&&cedTab.textContent.includes('Céd')?'cedula':'placa';
+  var val=tipo==='cedula'?document.getElementById('si-cedula').value.trim():document.getElementById('si-placa').value.trim();
+  if(!val){
+    alert('Por favor ingresa '+(tipo==='cedula'?'tu número de cédula':'la placa del vehículo'));
+    return;
+  }
+  goToStep(2);
+  animarLoader(val,tipo);
+}
+
+function animarLoader(val,tipo){
+  var steps=['ls1','ls2','ls3','ls4','ls5'];
+  var delays=[0,900,1800,2700,3500];
+  var titles=['Conectando con SIMIT oficial...','Recuperando tu historial...','Analizando causales legales...','Verificando normativa 2018–2024...','Preparando tu resumen legal...'];
+  var subs=['Estableciendo conexión segura','Buscando comparendos registrados','Aplicando Ley 769 y Ley 1843','Cruzando con lista Supertransporte','¡Casi listo!'];
+
+  // Activar step uno a uno
+  steps.forEach(function(id,i){
+    setTimeout(function(){
+      // Marcar previo como done
+      if(i>0) document.getElementById(steps[i-1]).classList.remove('active');
+      if(i>0) document.getElementById(steps[i-1]).classList.add('done');
+      // Activar actual
+      var el=document.getElementById(id);
+      if(el){ el.classList.add('active'); }
+      // Actualizar título
+      var tEl=document.getElementById('loader-title');
+      var sEl=document.getElementById('loader-sub');
+      if(tEl) tEl.textContent=titles[i];
+      if(sEl) sEl.textContent=subs[i];
+    }, delays[i]);
+  });
+  // Marcar último como done
+  setTimeout(function(){
+    var last=document.getElementById(steps[steps.length-1]);
+    if(last){last.classList.remove('active');last.classList.add('done');}
+  }, delays[steps.length-1]+700);
+
+  // Guardar resultado de la API pero esperar mínimo 4800ms para mostrar
+  var apiResult=null;
+  var apiListo=false;
+  var animLista=false;
+
+  function intentarMostrar(){
+    if(apiListo && animLista) mostrarResultados(apiResult.multas, val, tipo, apiResult.raw);
+  }
+
+  setTimeout(function(){ animLista=true; intentarMostrar(); }, 4800);
+
+  if(SIMIT_PROXY_URL){
+    var param = tipo==='cedula' ? 'cedula='+encodeURIComponent(val) : 'placa='+encodeURIComponent(val);
+    fetch(SIMIT_PROXY_URL + '?' + param)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.success){
+          apiResult={multas:data.multas, raw:data};
+        } else if(data.modo==='redirect'){
+          apiResult={multas:null, raw:data, redirect:true};
+        } else {
+          apiResult={multas:[], raw:data};
+        }
+        apiListo=true;
+        intentarMostrar();
+      })
+      .catch(function(){
+        apiResult={multas:generarMultasDemo(val), raw:null};
+        apiListo=true;
+        intentarMostrar();
+      });
+  } else {
+    setTimeout(function(){
+      apiResult={multas:generarMultasDemo(val), raw:null};
+      apiListo=true;
+      intentarMostrar();
+    }, 800);
+  }
+}
+
+function consultarSIMITReal(val, tipo){ /* legacy — reemplazada por animarLoader */ }
+
+function manejarRedirectSIMIT(data, val, tipo){
+  // Mostrar panel intermedio invitando al usuario a consultar en SIMIT
+  document.getElementById('sp2').classList.remove('active');
+  document.getElementById('sp3').classList.add('active');
+  document.getElementById('mmodal-title').textContent = '🔍 Consulta directa en SIMIT';
+
+  var htmlRedirect =
+    '<div style="text-align:center;padding:10px 0 16px;">' +
+    '<div style="font-size:3rem;margin-bottom:12px;">🏛️</div>' +
+    '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;margin-bottom:10px;">Consulta en el SIMIT Oficial</h3>' +
+    '<p style="color:var(--gray);font-size:0.87rem;line-height:1.7;margin-bottom:16px;">Para garantizarte datos 100% reales, abriremos el sitio oficial del SIMIT. Consulta allí con tu ' +
+    (tipo==='cedula'?'cédula <strong>'+val+'</strong>':'placa <strong>'+val+'</strong>') +
+    ' y luego regresa aquí.</p>' +
+    '<div style="background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:14px;margin-bottom:18px;text-align:left;">' +
+    '<p style="font-size:0.82rem;color:var(--navy);line-height:1.8;">' +
+    '<strong>Pasos rápidos:</strong><br>' +
+    '① Haz clic en el botón de abajo<br>' +
+    '② En el SIMIT, ingresa tu '+(tipo==='cedula'?'cédula':'placa')+': <strong>'+val+'</strong><br>' +
+    '③ Ve tus multas y cierra esa ventana<br>' +
+    '④ Regresa aquí y haz clic en "Ya consulté, tengo multas"' +
+    '</p></div>' +
+    '<a href="https://consulta.simit.org.co/Simit/indexA.jsp" target="_blank" class="btn btn-navy btn-full" style="margin-bottom:10px;text-decoration:none;padding:15px;" onclick="mostrarBotonRegreso()">' +
+    '<i class="fas fa-external-link-alt"></i> Abrir SIMIT Oficial Ahora</a>' +
+    '<div id="btn-regreso" style="display:none;">' +
+    '<button class="btn btn-red btn-full" onclick="goToStep(4)" style="padding:15px;">' +
+    '<i class="fas fa-check"></i> Ya consulté, quiero eliminar mis multas</button>' +
+    '</div>' +
+    '<p style="font-size:0.75rem;color:var(--gray);margin-top:12px;">El botón "Ya consulté" aparecerá 5 segundos después de abrir el SIMIT</p>' +
+    '</div>';
+
+  document.getElementById('result-content').innerHTML = htmlRedirect;
+  for(var i=1;i<=5;i++){
+    var d=document.getElementById('sd'+i);
+    if(d) d.classList.toggle('active', i<=3);
+  }
+}
+
+function mostrarBotonRegreso(){
+  setTimeout(function(){
+    var btn = document.getElementById('btn-regreso');
+    if(btn){ btn.style.display='block'; }
+  }, 5000);
+}
+
+function mostrarResultados(multas,val,tipo,apiData){
+  // Si SIMIT bloqueó el scraping, mostrar vista de redirect
+  if(multas===null && apiData && apiData.modo==='redirect'){
+    manejarRedirectSIMIT(apiData, val, tipo);
+    return;
+  }
+  if(!multas) multas=[];
+  var eliminables=multas.filter(function(m){return m.aplica;});
+  var noApli=multas.filter(function(m){return !m.aplica;});
+  var total=apiData&&apiData.totalDeuda?apiData.totalDeuda:multas.reduce(function(a,m){return a+m.valor;},0);
+
+  // Etiqueta de fuente de datos
+  var fuenteTag = SIMIT_PROXY_URL
+    ? '<span style="background:rgba(46,199,109,0.12);color:var(--green);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700;margin-left:8px;">✅ DATOS REALES SIMIT</span>'
+    : '<span style="background:rgba(212,160,23,0.12);color:var(--gold);border-radius:5px;padding:2px 8px;font-size:0.72rem;font-weight:700;margin-left:8px;">MUESTRA ILUSTRATIVA</span>';
+
+  var html='<div class="result-header"><h4>'+(tipo==='cedula'?'C.C. ':'Placa ')+val+fuenteTag+'</h4><div class="r-count">'+multas.length+' comparendo(s)</div></div>';
+
+  if(multas.length===0){
+    html+='<div style="text-align:center;padding:24px;"><div style="font-size:3rem;margin-bottom:12px;">🎉</div><h3 style="color:var(--navy);margin-bottom:8px;">¡Sin multas pendientes!</h3><p style="color:var(--gray);font-size:0.88rem;">No encontramos comparendos asociados. Si crees que hay un error, consulta directamente en el SIMIT oficial.</p></div>';
+  } else {
+    html+='<div style="margin-bottom:12px;">';
+    multas.forEach(function(m){
+      html+='<div class="multa-row-r"><div class="mr-left"><strong>'+m.comparendo+'</strong><span>'+m.fecha+' · '+m.ciudad+'</span><span style="font-size:0.78rem;color:var(--gray);">Causal: '+m.causal+'</span></div><div class="mr-right"><div class="valor">$'+m.valor.toLocaleString('es-CO')+'</div>'+(m.aplica?'<span class="badge-aplica">✅ Aplica eliminar</span>':'<span class="badge-no-aplica">⚠️ Evaluar</span>')+'</div></div>';
+    });
+    html+='</div>';
+    html+='<div class="result-total-row"><span>Total adeudado SIMIT</span><strong>$'+total.toLocaleString('es-CO')+'</strong></div>';
+  }
+
+  if(eliminables.length>0){
+    html+='<div class="result-cta-box"><p><strong>🎉 ¡Excelentes noticias!</strong> Tienes <strong>'+eliminables.length+' fotomulta(s)</strong> con alta probabilidad de eliminación. Con pago inmediato las eliminas todas por solo <strong>$45.000</strong> por secretaría.</p></div>';
+    html+='<button class="btn btn-red btn-full btn-xl" onclick="goToStep(4)" style="margin-top:4px;"><i class="fas fa-trash-alt"></i> ¿DESEAS ELIMINAR LAS QUE APLICAN? – CONTINUAR</button>';
+  } else if(multas.length>0){
+    html+='<div style="background:rgba(212,160,23,0.06);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:14px;margin-top:10px;"><p style="font-size:0.86rem;color:var(--navy);line-height:1.5;">Tus multas requieren evaluación jurídica. <a href="https://wa.me/573159318400?text=Hola%2C+consulté+mis+multas+y+quiero+evaluación+personalizada" target="_blank" style="color:var(--gold);font-weight:700;">Contáctanos por WhatsApp →</a></p></div>';
+  }
+  html+='<a href="https://consulta.simit.org.co/Simit/indexA.jsp" target="_blank" class="simit-link"><i class="fas fa-external-link-alt"></i> Verificar directamente en consulta.simit.org.co (sitio oficial SIMIT)</a>';
+
+  document.getElementById('result-content').innerHTML=html;
+  goToStep(3);
+}
+
+function generarMultasDemo(val){
+  var ciudades=[['Cali','Prescripción 3 años + Cámara sin INM'],['Medellín','Cámara sin certificación INM'],['Bogotá','Falta de notificación oportuna'],['Barranquilla','Prescripción 3 años'],['Bucaramanga','Cámara sin certificación INM']];
+  var años=['2018','2019','2020','2021','2022','2023','2024'];
+  var n=Math.floor(Math.random()*3)+1;
+  var r=[];
+  var seen={};
+  for(var i=0;i<n;i++){
+    var c=ciudades[Math.floor(Math.random()*ciudades.length)];
+    var a=años[Math.floor(Math.random()*años.length)];
+    var m=String(Math.floor(Math.random()*12)+1).padStart(2,'0');
+    var d=String(Math.floor(Math.random()*28)+1).padStart(2,'0');
+    var num='F-'+Math.floor(Math.random()*9000000+1000000);
+    if(seen[num])continue;
+    seen[num]=1;
+    r.push({comparendo:num,fecha:a+'-'+m+'-'+d,ciudad:c[0],causal:c[1],valor:[435000,435000,652500,870000][Math.floor(Math.random()*4)],aplica:parseInt(a)>=2018&&parseInt(a)<=2024});
+  }
+  return r;
+}
+
+// ===================== FORM VALIDATION =====================
+function validarEmail(){
+  var v=document.getElementById('frm-email').value.trim();
+  var re=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var ok=re.test(v);
+  document.getElementById('frm-email').classList.toggle('error',!ok&&v.length>0);
+  document.getElementById('err-email').classList.toggle('show',!ok&&v.length>0);
+  document.getElementById('ok-email').classList.toggle('show',ok);
+  return ok;
+}
+
+function validarYContinuar(){
+  var nombres=document.getElementById('frm-nombres').value.trim();
+  var apellidos=document.getElementById('frm-apellidos').value.trim();
+  var cedula=document.getElementById('frm-cedula').value.trim();
+  var wa=document.getElementById('frm-whatsapp').value.trim();
+  var email=document.getElementById('frm-email').value.trim();
+  var dir=document.getElementById('frm-dir').value.trim();
+  var dpto=document.getElementById('frm-dpto').value;
+  var ciudad=document.getElementById('frm-ciudad').value;
+
+  if(!nombres||!apellidos||!cedula||!email||!dir||!dpto||!ciudad){
+    alert('Por favor completa todos los campos obligatorios (*)');return;
+  }
+  var waOk=/^3\d{9}$/.test(wa);
+  document.getElementById('err-wa').classList.toggle('show',!waOk&&wa.length>0);
+  if(!waOk){alert('Ingresa un WhatsApp válido (10 dígitos, ej: 3159318400)');return;}
+  if(!validarEmail()){alert('Ingresa un correo electrónico válido');return;}
+
+  // Guardar lead en Kommo como "Nuevo Lead – Pendiente Pago"
+  var datosLead = recogerDatosFormulario();
+  datosLead.estadoPago = 'Pendiente';
+  guardarLead(datosLead);
+  goToStep(5);
+}
+
+// ===================== PAYMENT =====================
+var pagoSel='inmediato';
+var _leadGuardado = null; // referencia para actualizar al confirmar pago
+
+function selPago(t){
+  pagoSel=t;
+  document.querySelectorAll('.pay-opt').forEach(function(el){el.classList.remove('sel');});
+  document.getElementById('po-'+t).classList.add('sel');
+  var wompiLink=t==='inmediato'?'https://checkout.wompi.co/l/30MxtS':'https://checkout.wompi.co/l/hnRQQ7';
+  var wompiTxt=t==='inmediato'?'Pagar $45.000 – Wompi':'Pagar Adelanto $19.800 – Wompi';
+  var btn=document.getElementById('btn-wompi');
+  btn.href=wompiLink;
+  btn.innerHTML='<i class="fas fa-credit-card"></i> '+wompiTxt;
+}
+
+var _pagoTimerID = null;
+var _pagoToastID = null;
+
+function confirmarTramite(){
+  // Wompi se abre en nueva pestaña. NO interrumpir — el cliente está pagando.
+  // Después de 5 minutos aparece un toast discreto preguntando si ya terminó.
+  if(_pagoTimerID) clearTimeout(_pagoTimerID);
+  _pagoTimerID = setTimeout(function(){ mostrarToastPago(); }, 5 * 60 * 1000); // 5 minutos
+
+  // Mini-aviso inmediato (no intrusivo) debajo del botón Wompi
+  var aviso = document.getElementById('aviso-wompi-abierto');
+  if(!aviso){
+    var div = document.createElement('div');
+    div.id = 'aviso-wompi-abierto';
+    div.style.cssText = 'background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:0.8rem;color:#15803d;line-height:1.5;text-align:center;';
+    div.innerHTML = '<i class="fas fa-check-circle"></i> Wompi se abrió en una nueva pestaña.<br>Completa el pago allí y <strong>vuelve aquí</strong> cuando termines. En 5 min te preguntamos si ya pagaste.';
+    var btns = document.getElementById('pago-btns');
+    if(btns) btns.parentNode.insertBefore(div, btns.nextSibling);
+  }
+}
+
+function mostrarToastPago(){
+  // Verificar que el modal sigue abierto (el cliente puede haber cerrado)
+  var overlay = document.getElementById('overlay-main');
+  if(!overlay || !overlay.classList.contains('show')) return;
+
+  var monto  = pagoSel==='inmediato' ? '$45.000' : '$19.800';
+  var nombres = document.getElementById('frm-nombres') ? document.getElementById('frm-nombres').value.trim() : '';
+  var cedula  = document.getElementById('frm-cedula')  ? document.getElementById('frm-cedula').value.trim()  : '';
+  var wa      = document.getElementById('frm-whatsapp')? document.getElementById('frm-whatsapp').value.trim(): '';
+  var msgWa   = encodeURIComponent('Hola, acabo de pagar '+monto+' para eliminar mis fotomultas. Mi nombre: '+nombres+', cédula: '+cedula+'. Adjunto comprobante.');
+
+  // Eliminar aviso previo si existe
+  var prev = document.getElementById('toast-pago');
+  if(prev) prev.remove();
+
+  // Crear toast flotante en la parte inferior del modal
+  var toast = document.createElement('div');
+  toast.id = 'toast-pago';
+  toast.style.cssText = [
+    'position:fixed',
+    'bottom:16px',
+    'left:50%',
+    'transform:translateX(-50%)',
+    'width:calc(100% - 32px)',
+    'max-width:500px',
+    'background:#0a1628',
+    'border:2px solid #d4a017',
+    'border-radius:16px',
+    'padding:16px 18px',
+    'z-index:99999',
+    'box-shadow:0 8px 32px rgba(0,0,0,0.4)',
+    'animation:slideUpFade .4s ease',
+  ].join(';');
+
+  toast.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+      '<p style="color:#d4a017;font-weight:800;font-size:0.95rem;margin:0;"><i class="fas fa-bell"></i> ¿Ya completaste el pago?</p>' +
+      '<button onclick="cerrarToastPago()" style="background:none;border:none;color:#64748b;font-size:1.2rem;cursor:pointer;padding:0;line-height:1;" title="Cerrar – sigo pagando">' +
+        '<i class="fas fa-times"></i>' +
+      '</button>' +
+    '</div>' +
+    '<p style="color:#94a3b8;font-size:0.8rem;margin:0 0 12px;line-height:1.5;">Si pagaste <strong style="color:#fff;">'+monto+'</strong> en Wompi o Nequi, envíanos el comprobante por WhatsApp para activar tu trámite.</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<a href="https://wa.me/573159318400?text='+msgWa+'" target="_blank" onclick="confirmarPagoRealizado()" ' +
+        'style="flex:1;min-width:160px;background:#25d366;color:#fff;padding:11px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.85rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">' +
+        '<i class="fab fa-whatsapp"></i> Sí, ya pagué – Enviar comprobante' +
+      '</a>' +
+      '<button onclick="cerrarToastPago()" ' +
+        'style="flex:0 0 auto;background:none;border:1px solid #334155;color:#94a3b8;padding:11px 16px;border-radius:10px;font-size:0.82rem;cursor:pointer;">' +
+        'Aún no, sigo pagando →' +
+      '</button>' +
+    '</div>';
+
+  document.body.appendChild(toast);
+
+  // Auto-cerrar después de 30 segundos si no interactúa
+  _pagoToastID = setTimeout(function(){ cerrarToastPago(); }, 30000);
+}
+
+function cerrarToastPago(){
+  if(_pagoToastID) clearTimeout(_pagoToastID);
+  var t = document.getElementById('toast-pago');
+  if(t){
+    t.style.animation = 'slideDownFade .3s ease forwards';
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300);
+  }
+  // Si cierra y dice "sigo pagando", volver a preguntar en 5 min más
+  _pagoTimerID = setTimeout(function(){ mostrarToastPago(); }, 5 * 60 * 1000);
+}
+
+function confirmarPagoRealizado(){
+  // Notificar a Kommo que este lead confirmó el pago
+  if(GUARDAR_LEAD_URL){
+    var nombres = document.getElementById('frm-nombres') ? document.getElementById('frm-nombres').value.trim() : '';
+    var cedula = document.getElementById('frm-cedula') ? document.getElementById('frm-cedula').value.trim() : '';
+    var monto = pagoSel==='inmediato' ? '$45.000' : '$19.800';
+    fetch(GUARDAR_LEAD_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        nombres: nombres, cedula: cedula,
+        estadoPago: 'PAGO CONFIRMADO – ' + monto,
+        _accion: 'confirmar_pago'
+      })
+    }).catch(function(){});
+  }
+  // Mostrar pantalla de éxito final
+  setTimeout(function(){
+    closeOverlay('overlay-main');
+    openOverlay('overlay-exito');
+  }, 1200);
+}
+
+function volverAlPago(){
+  // Reconstruir step 5 original
+  location.reload(); // recarga simple — el usuario puede volver a iniciar
+}
+
+function recogerDatosFormulario(){
+  var resultEl = document.getElementById('result-content');
+  return {
+    nombres       : document.getElementById('frm-nombres').value.trim(),
+    apellidos     : document.getElementById('frm-apellidos').value.trim(),
+    cedula        : document.getElementById('frm-cedula').value.trim(),
+    placa         : document.getElementById('frm-placa').value.trim()||'',
+    whatsapp      : document.getElementById('frm-whatsapp').value.trim(),
+    email         : document.getElementById('frm-email').value.trim(),
+    direccion     : document.getElementById('frm-dir').value.trim(),
+    ciudad        : document.getElementById('frm-ciudad').value,
+    dpto          : document.getElementById('frm-dpto').value,
+    plan          : pagoSel==='inmediato'?'Pago Inmediato $45.000':'Adelanto $19.800',
+    tipoServicio  : tipoServicio,
+    multasResumen : resultEl ? resultEl.innerText.substring(0,300).replace(/\n/g,' ') : '',
+  };
+}
+
+function guardarLead(datos){
+  if(!GUARDAR_LEAD_URL){ return; }
+  fetch(GUARDAR_LEAD_URL, {
+    method  : 'POST',
+    headers : {'Content-Type':'application/json'},
+    body    : JSON.stringify(datos),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ console.log('Lead guardado:', d.guardado); })
+  .catch(function(e){ console.warn('Error guardando lead:', e); });
+}
+
+function enviarCorreoCliente(){
+  if(!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY){
+    console.warn('EmailJS no configurado. Sigue las instrucciones en INSTRUCCIONES_CONFIGURACION.md');
+    return;
+  }
+
+  var nombres   = document.getElementById('frm-nombres').value.trim();
+  var apellidos = document.getElementById('frm-apellidos').value.trim();
+  var cedula    = document.getElementById('frm-cedula').value.trim();
+  var placa     = document.getElementById('frm-placa').value.trim()||'N/A';
+  var wa        = document.getElementById('frm-whatsapp').value.trim();
+  var email     = document.getElementById('frm-email').value.trim();
+  var dir       = document.getElementById('frm-dir').value.trim();
+  var dpto      = document.getElementById('frm-dpto').value;
+  var ciudad    = document.getElementById('frm-ciudad').value;
+  var plan      = pagoSel==='inmediato'?'Pago Inmediato $45.000':'Pago Diferido - Adelanto $19.800';
+
+  // Recoger datos del resumen SIMIT
+  var resultEl  = document.getElementById('result-content');
+  var multasTexto = resultEl ? resultEl.innerText.substring(0,400) : 'Ver resumen en el sistema';
+  var secretaria  = 'Secretaría de Tránsito y Movilidad - '+ciudad;
+
+  var params = {
+    nombres          : nombres,
+    apellidos        : apellidos,
+    cedula           : cedula,
+    placa            : placa,
+    whatsapp         : wa,
+    email_cliente    : email,
+    direccion        : dir,
+    ciudad           : ciudad+', '+dpto,
+    plan_pago        : plan,
+    secretaria       : secretaria,
+    multas_detalle   : multasTexto,
+    fecha_solicitud  : new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    reply_to         : email,
+    to_email         : email,
+  };
+
+  // Enviar email al cliente
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+    .then(function(){console.log('Email enviado al cliente');})
+    .catch(function(err){console.error('Error EmailJS:',err);});
+
+  // Generar PDF y adjuntarlo/enviarlo también (se descarga en el navegador del cliente)
+  generarPDFCliente(params);
+}
+
+function generarPDFCliente(p){
+  if(!window.jspdf){return;}
+  var {jsPDF} = window.jspdf;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var secretaria = 'Secretaría de Tránsito y Movilidad – '+p.ciudad;
+
+  var texto = p.ciudad+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
+    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE FOTOMULTAS\n'+
+    'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+p.placa+'\n\n'+
+    'Respetados señores:\n\n'+
+    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', en ejercicio del '+
+    'derecho fundamental consagrado en el Art. 23 de la Constitución Política y en los términos de la '+
+    'Ley 1755 de 2015, me dirijo a ustedes para interponer el siguiente:\n\n'+
+    'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
+    'I. HECHOS\n\n'+
+    '1. Soy propietario/a del vehículo con placa '+p.placa+' y tengo registrados comparendos en el SIMIT.\n\n'+
+    '2. La Supertransporte abrió investigación el 19 de mayo de 2026 contra 37 organismos de tránsito '+
+    'por operar cámaras sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), '+
+    'exigido por el Decreto 1074 de 2015.\n\n'+
+    '3. Las sanciones prescriben en 3 años según el Art. 136 de la Ley 769/2002.\n\n'+
+    '4. La Ley 1843/2017 exige notificación dentro de los 3 días hábiles siguientes a la detección.\n\n'+
+    'II. FUNDAMENTOS JURÍDICOS\n\n'+
+    '• Art. 23 Constitución Política de Colombia\n'+
+    '• Ley 1755 de 2015 – Derecho de Petición\n'+
+    '• Ley 769 de 2002 – Código Nacional de Tránsito\n'+
+    '• Ley 1843 de 2017 – Fotodetección de infracciones\n'+
+    '• Decreto 1074 de 2015 – Control metrológico\n'+
+    '• Investigación Supertransporte – Mayo 2026\n\n'+
+    'III. PRETENSIONES\n\n'+
+    '1. Que se declare la NULIDAD de los comparendos registrados bajo placa '+p.placa+' por carecer '+
+    'los equipos de fotodetección del "concepto de desempeño" del INM.\n'+
+    '2. Que se declare la PRESCRIPCIÓN de las sanciones con más de 3 años sin cobro efectivo.\n'+
+    '3. Que se ELIMINEN del sistema SIMIT los registros correspondientes.\n\n'+
+    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email_cliente+'\n\n'+
+    '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
+
+  doc.setFillColor(10,22,40);
+  doc.rect(0,0,210,16,'F');
+  doc.setTextColor(212,160,23);
+  doc.setFontSize(10);doc.setFont('helvetica','bold');
+  doc.text('JURÍDICOSWEB.COM',14,11);
+  doc.setTextColor(148,163,184);
+  doc.setFont('helvetica','normal');
+  doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(9.5);
+  var lines=doc.splitTextToSize(texto,180);
+  var y=24;
+  lines.forEach(function(l){
+    if(y>280){doc.addPage();y=14;}
+    doc.text(l,14,y);y+=5.2;
+  });
+  doc.setFillColor(10,22,40);
+  doc.rect(0,284,210,13,'F');
+  doc.setTextColor(212,160,23);doc.setFontSize(8);
+  doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
+
+  // Descargar PDF en el navegador del cliente
+  doc.save('DerechoPeticion_'+p.apellidos+'_'+p.cedula+'.pdf');
+}
+
+// ===================== SMOOTH SCROLL =====================
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var t=document.querySelector(this.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+</script>
+</body>
+</html>
