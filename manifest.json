@@ -1,0 +1,17 @@
+{
+  "name": "JurídicosWeb - Elimina tus Fotomultas",
+  "short_name": "JurídicosWeb",
+  "description": "Consulta tus multas en el SIMIT, descubre cuáles puedes eliminar por derecho de petición y tramita todo desde tu celular.",
+  "start_url": "/?pwa=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "lang": "es-CO",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

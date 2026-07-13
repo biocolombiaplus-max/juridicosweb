@@ -8,6 +8,16 @@
 <meta http-equiv="Expires" content="0">
 <title>JurídicosWeb | Elimina tus Fotomultas – Gratis Consultar</title>
 <meta name="description" content="5.8 millones de fotomultas serán anuladas en Colombia. Consulta gratis si las tuyas aplican. Derechos de petición desde $45.000.">
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JurídicosWeb">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -39,6 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://checkout.wompi.co/widget.js"></script>
 <style>
 /* ===== VARIABLES ===== */
 :root{
@@ -388,6 +399,42 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .pay-opt h4{font-size:0.88rem;color:var(--navy);font-weight:700;margin-bottom:4px;}
 .pay-opt .pa{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);font-weight:700;}
 .pay-opt p{font-size:0.75rem;color:var(--gray);}
+
+/* ===== DOCUMENTO / BORRADOR ===== */
+.doc-preview{position:relative;background:#fdfdfb;border:1px solid var(--border);border-radius:12px;padding:20px 18px;max-height:340px;overflow-y:auto;font-size:0.78rem;line-height:1.75;color:#2a2a3a;white-space:pre-wrap;box-shadow:inset 0 2px 10px rgba(0,0,0,0.04);}
+.doc-preview::before{content:'BORRADOR';position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:2.8rem;font-weight:900;color:rgba(230,57,70,0.1);letter-spacing:4px;pointer-events:none;white-space:nowrap;z-index:1;}
+.doc-preview-wrap{position:relative;}
+.doc-lock-badge{position:absolute;top:-10px;right:10px;background:var(--red);color:#fff;font-size:0.68rem;font-weight:800;padding:4px 12px;border-radius:20px;box-shadow:0 3px 10px rgba(230,57,70,0.4);z-index:2;}
+.doc-final::before{content:'';display:none;}
+.doc-final{border-color:#bbf7d0;background:#fdfffe;}
+
+/* ===== PAGO: verificación ===== */
+.pago-verify{text-align:center;padding:30px 10px;}
+.pago-verify .vring{width:60px;height:60px;border-radius:50%;border:5px solid var(--light);border-top-color:var(--gold);margin:0 auto 16px;animation:spin .8s linear infinite;}
+
+/* ===== SUBIR DOCUMENTO FIRMADO ===== */
+.upload-box{border:2px dashed var(--border);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;}
+.upload-box:hover,.upload-box.drag{border-color:var(--gold);background:rgba(212,160,23,0.04);}
+.upload-box input[type=file]{display:none;}
+.upload-file-chip{display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:0.82rem;color:#15803d;}
+
+/* ===== INSTALAR APP (PWA) ===== */
+.install-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:1200;background:linear-gradient(135deg,#0a1628,#1a3a6b);border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:slideUpFade .4s ease;padding-bottom:calc(14px + env(safe-area-inset-bottom));}
+.install-banner.show{display:flex;}
+.install-banner img{width:42px;height:42px;border-radius:11px;flex-shrink:0;}
+.install-banner .ib-txt{flex:1;}
+.install-banner .ib-txt strong{color:#fff;font-size:0.86rem;display:block;}
+.install-banner .ib-txt span{color:#94a3b8;font-size:0.74rem;}
+.install-banner button{flex-shrink:0;}
+.install-close{background:none!important;border:none;color:#64748b;font-size:1.1rem;cursor:pointer;padding:4px 6px!important;}
+
+/* ===== SAFE AREA / MOBILE APP FEEL ===== */
+body{padding-bottom:env(safe-area-inset-bottom);}
+.mmodal-body{padding-bottom:calc(28px + env(safe-area-inset-bottom));}
+@media(max-width:600px){
+  .mmodal{max-height:92vh;display:flex;flex-direction:column;}
+  .mmodal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -786,6 +833,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <a href="https://wa.me/573159318400?text=Hola%2C+estoy+en+juridicosweb.com+y+quiero+saber+si+mis+fotomultas+aplican" target="_blank" class="wa-btn"><i class="fab fa-whatsapp"></i></a>
 </div>
 
+<!-- INSTALAR APP (PWA) -->
+<div class="install-banner" id="install-banner">
+  <img src="/icons/icon-192.png" alt="JurídicosWeb">
+  <div class="ib-txt"><strong>Instala JurídicosWeb</strong><span>Acceso directo desde tu pantalla de inicio</span></div>
+  <button class="btn btn-gold btn-sm" onclick="instalarPWA()">Instalar</button>
+  <button class="install-close" onclick="cerrarInstallBanner()"><i class="fas fa-times"></i></button>
+</div>
+
 <!-- ============================================================ -->
 <!-- MEGA MODAL: SIMIT → RESULTADOS → FORMULARIO → PAGO          -->
 <!-- ============================================================ -->
@@ -799,6 +854,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="sdot active" id="sd1"></div>
       <div class="sdot" id="sd2"></div>
       <div class="sdot" id="sd3"></div>
+      <div class="sdot" id="sd4"></div>
+      <div class="sdot" id="sd5"></div>
+      <div class="sdot" id="sd6"></div>
     </div>
     <div class="mmodal-body">
 
@@ -844,67 +902,109 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="result-wrap" id="result-content"></div>
       </div>
 
-      <!-- STEP 4: oculto - flujo directo a WA sin formulario -->
-      <div class="step-panel" id="sp4" style="display:none;">
-        <input type="hidden" id="frm-nombres"><input type="hidden" id="frm-apellidos">
-        <input type="hidden" id="frm-cedula"><input type="hidden" id="frm-placa">
-        <input type="hidden" id="frm-whatsapp"><input type="hidden" id="frm-email">
-        <input type="hidden" id="frm-dir"><select id="frm-dpto" style="display:none"></select><select id="frm-ciudad" style="display:none"></select>
-        <div id="err-wa" style="display:none"></div><div id="err-email" style="display:none"></div><div id="ok-email" style="display:none"></div>
+      <!-- STEP 4: FORMULARIO DE DATOS -->
+      <div class="step-panel" id="sp4">
+        <p style="color:var(--gray);font-size:0.85rem;margin-bottom:14px;line-height:1.6;">Con estos datos preparamos tu <strong>derecho de petición</strong>. Aún no se realiza ningún cobro.</p>
+        <div class="form-grid2">
+          <div class="fg"><label>Nombres</label><input id="frm-nombres" type="text" placeholder="Juan Carlos"></div>
+          <div class="fg"><label>Apellidos</label><input id="frm-apellidos" type="text" placeholder="Pérez Gómez"></div>
+          <div class="fg"><label>Cédula</label><input id="frm-cedula" type="text" inputmode="numeric" placeholder="1023456789"></div>
+          <div class="fg"><label>Placa (si aplica)</label><input id="frm-placa" type="text" placeholder="ABC123"></div>
+          <div class="fg"><label>WhatsApp</label><input id="frm-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567"><div class="field-error" id="err-wa">Ingresa un WhatsApp válido</div></div>
+          <div class="fg"><label>Correo electrónico</label><input id="frm-email" type="email" placeholder="tucorreo@ejemplo.com" onkeyup="validarEmail()"><div class="field-error" id="err-email">Correo inválido</div><div class="field-ok" id="ok-email">✓ Correo válido</div></div>
+          <div class="fg fg-full"><label>Dirección de notificación (RUNT)</label><input id="frm-dir" type="text" placeholder="Calle 00 # 00-00"></div>
+          <div class="fg"><label>Departamento</label><select id="frm-dpto" onchange="cargarMunicipios()"><option value="">Selecciona</option></select></div>
+          <div class="fg"><label>Ciudad</label><select id="frm-ciudad"><option value="">Selecciona municipio</option></select></div>
+        </div>
+        <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin:14px 0 10px;"><i class="fas fa-lock"></i> Tus datos solo se usan para tu trámite legal</p>
+        <button class="btn btn-red btn-full btn-xl" onclick="validarYVerBorrador()"><i class="fas fa-file-signature"></i> Ver borrador de mi documento</button>
       </div>
 
-      <!-- STEP 5: PAGO -->
+      <!-- STEP 5: BORRADOR (antes de pagar) -->
       <div class="step-panel" id="sp5">
-        <!-- Header de confirmación -->
-        <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
-          <div style="font-size:1.7rem;margin-bottom:6px;">🎉</div>
-          <p style="color:#d4a017;font-weight:800;font-size:1rem;margin-bottom:3px;">¡Datos recibidos! Elige cómo iniciar</p>
-          <p style="color:#94a3b8;font-size:0.8rem;">Tu trámite quedará registrado de inmediato</p>
+        <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:14px 16px;margin-bottom:14px;text-align:center;">
+          <p style="color:#d4a017;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-eye"></i> Así se ve tu Derecho de Petición</p>
+          <p style="color:#94a3b8;font-size:0.78rem;">Revísalo. Solo se desbloquea la versión final y firmable al confirmar el pago.</p>
         </div>
-
-        <!-- Opciones de plan -->
-        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Selecciona tu plan:</p>
+        <div class="doc-preview-wrap">
+          <span class="doc-lock-badge"><i class="fas fa-lock"></i> Vista previa</span>
+          <div class="doc-preview" id="doc-preview-text"></div>
+        </div>
+        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;">Selecciona tu plan:</p>
         <div class="pay-opts">
           <div class="pay-opt sel" id="po-inmediato" onclick="selPago('inmediato')" style="position:relative;overflow:hidden;">
             <div style="position:absolute;top:8px;right:8px;background:#d4a017;color:#fff;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:20px;">MÁS POPULAR</div>
             <h4 style="font-size:0.95rem;">⭐ Todo Incluido</h4>
             <div class="pa" style="font-size:2rem;">$45.000</div>
             <p style="font-size:0.78rem;">Una secretaría · Todas tus multas</p>
-            <ul style="list-style:none;padding:0;margin:8px 0 0;text-align:left;font-size:0.76rem;color:var(--navy);">
-              <li>✅ Derecho de petición completo</li>
-              <li>✅ Radicación ante la secretaría</li>
-              <li>✅ Seguimiento hasta resolución</li>
-            </ul>
           </div>
           <div class="pay-opt" id="po-diferido" onclick="selPago('diferido')">
             <h4 style="font-size:0.95rem;">Pago Dividido</h4>
             <div class="pa" style="font-size:1.6rem;">$19.800</div>
             <p style="font-size:0.78rem;">Adelanto hoy</p>
-            <ul style="list-style:none;padding:0;margin:8px 0 0;text-align:left;font-size:0.76rem;color:var(--navy);">
-              <li>✅ Paga $19.800 ahora</li>
-              <li>✅ Resto al eliminar la multa</li>
-              <li>⚠️ $95.800 por multa adicional</li>
-            </ul>
           </div>
         </div>
+        <button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-lock-open"></i> <span id="btn-ir-pago-txt">Confirmar y pagar $45.000</span></button>
+        <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i> Pago verificado automáticamente · Documento final al instante</p>
+      </div>
 
-        <!-- Métodos de pago -->
-        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 10px;">Elige cómo pagar:</p>
-        <div id="pago-btns" style="display:flex;flex-direction:column;gap:9px;">
-          <a href="https://checkout.wompi.co/l/30MxtS" target="_blank" id="btn-wompi" class="btn btn-shimmer btn-full btn-pulse" style="padding:15px;font-size:0.93rem;border-radius:11px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="confirmarTramite()">
-            <i class="fas fa-credit-card"></i> Pagar con Tarjeta / PSE – Wompi
-          </a>
-          <button class="btn-nequi btn-full" onclick="closeOverlay('overlay-main');openOverlay('overlay-nequi')" style="padding:14px;font-size:0.9rem;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i class="fas fa-mobile-alt"></i> Pagar por Nequi
-          </button>
-          <a href="https://wa.me/573159318400?text=Hola%2C+quiero+iniciar+mi+trámite+de+fotomultas.+%C2%BFcómo+pago%3F" target="_blank" class="btn btn-wa btn-full" style="padding:13px;font-size:0.88rem;border-radius:11px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i class="fab fa-whatsapp"></i> Coordinar pago por WhatsApp
-          </a>
+      <!-- STEP 6: PAGO -->
+      <div class="step-panel" id="sp6">
+        <div id="pago-wrap">
+          <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
+            <div style="font-size:1.7rem;margin-bottom:6px;">🔒</div>
+            <p style="color:#d4a017;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $45.000</p>
+            <p style="color:#94a3b8;font-size:0.8rem;">Al aprobarse, tu documento final se genera automáticamente</p>
+          </div>
+          <div id="pago-btns" style="display:flex;flex-direction:column;gap:9px;">
+            <button id="btn-wompi" class="btn btn-shimmer btn-full btn-pulse" style="padding:15px;font-size:0.93rem;border-radius:11px;" onclick="pagarConWompi()">
+              <i class="fas fa-credit-card"></i> Pagar con Tarjeta / PSE / Bancolombia – Wompi
+            </button>
+            <button class="btn-nequi btn-full" onclick="closeOverlay('overlay-main');openOverlay('overlay-nequi')" style="padding:14px;font-size:0.9rem;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <i class="fas fa-mobile-alt"></i> Pagar por Nequi
+            </button>
+          </div>
+          <div style="margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;">
+            <p style="font-size:0.77rem;color:#15803d;line-height:1.7;"><i class="fas fa-info-circle"></i> Con Wompi, tu pago se verifica <strong>automáticamente</strong>: no necesitas enviar comprobante para tu documento. Con Nequi, confírmalo por WhatsApp.</p>
+          </div>
         </div>
+        <div id="pago-verificando" class="pago-verify" style="display:none;">
+          <div class="vring"></div>
+          <p style="font-weight:800;color:var(--navy);margin-bottom:4px;">Verificando tu pago con Wompi…</p>
+          <p style="color:var(--gray);font-size:0.85rem;">No cierres esta ventana</p>
+        </div>
+      </div>
 
-        <div style="margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;">
-          <p style="font-size:0.77rem;color:#15803d;line-height:1.7;"><i class="fas fa-info-circle"></i> <strong>Después de pagar:</strong> Envía el comprobante al WhatsApp <strong>3159318400</strong> con tu nombre y placa. Recibes el documento en máx. 2 horas hábiles.</p>
+      <!-- STEP 7: DOCUMENTO FINAL -->
+      <div class="step-panel" id="sp7">
+        <div style="background:linear-gradient(135deg,#16a34a,#15803d);border-radius:14px;padding:16px 18px;margin-bottom:16px;text-align:center;">
+          <div style="font-size:1.8rem;margin-bottom:6px;">✅</div>
+          <p style="color:#fff;font-weight:800;font-size:1rem;margin-bottom:3px;">¡Pago confirmado! Tu documento está listo</p>
+          <p style="color:rgba(255,255,255,0.85);font-size:0.8rem;">Descárgalo, fírmalo y súbelo aquí para radicarlo</p>
         </div>
+        <div class="doc-preview-wrap">
+          <div class="doc-preview doc-final" id="doc-final-text"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
+          <button class="btn btn-navy btn-full" onclick="descargarPDFFinal()"><i class="fas fa-download"></i> Descargar PDF para firmar</button>
+        </div>
+        <div style="background:var(--light);border-radius:10px;padding:14px;margin:16px 0;text-align:left;">
+          <p style="font-size:0.83rem;color:var(--gray);line-height:1.9;">
+            <strong>① Descarga</strong> el PDF de arriba<br>
+            <strong>② Fírmalo</strong> (a mano, o firma digital) con tu nombre completo<br>
+            <strong>③ Súbelo aquí</strong> firmado — nosotros lo radicamos ante la secretaría correspondiente
+          </p>
+        </div>
+        <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Subir documento firmado:</p>
+        <label class="upload-box" id="upload-box">
+          <input type="file" id="file-firmado" accept="application/pdf,image/*" onchange="onArchivoFirmadoSeleccionado(event)">
+          <i class="fas fa-cloud-upload-alt" style="font-size:1.8rem;color:var(--gold);margin-bottom:8px;display:block;"></i>
+          <p style="font-size:0.85rem;color:var(--navy);font-weight:700;margin-bottom:2px;">Toca para subir el PDF firmado</p>
+          <p style="font-size:0.72rem;color:var(--gray);">o una foto clara de la firma</p>
+        </label>
+        <div id="archivo-chip"></div>
+        <button class="btn btn-red btn-full btn-xl" style="margin-top:14px;" id="btn-radicar" onclick="radicarDocumento()" disabled><i class="fas fa-paper-plane"></i> Radicar mi derecho de petición</button>
+        <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:10px;">¿Prefieres que lo hagamos por ti? <a href="https://wa.me/573159318400" target="_blank" style="color:var(--gold);">Envíalo por WhatsApp</a></p>
       </div>
 
     </div>
@@ -921,7 +1021,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div style="font-size:2rem;font-weight:800;color:var(--navy);letter-spacing:4px;margin:10px 0;font-family:'Playfair Display',serif;">350 545 7420</div>
       <div style="background:var(--light);border-radius:10px;padding:12px;margin-bottom:14px;"><p style="font-size:0.82rem;color:var(--gray);">Titular: <strong style="color:var(--navy);">Ju... Cac...</strong><br><span style="font-size:0.75rem;">(Identidad protegida)</span></p></div>
       <div style="background:rgba(212,160,23,0.08);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:12px;margin-bottom:18px;text-align:left;"><p style="font-size:0.83rem;color:var(--navy);line-height:1.65;"><strong>⚠️ Importante:</strong> Una vez pagues, <strong>envía el comprobante por WhatsApp al 3159318400</strong> con tu nombre completo y placa. Sin comprobante no podemos iniciar el trámite.</p></div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+hice+el+pago+por+Nequi+para+eliminar+mis+fotomultas.+Adjunto+comprobante." target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Enviar Comprobante por WhatsApp</a>
+      <a href="https://wa.me/573159318400?text=Hola%2C+hice+el+pago+por+Nequi+para+eliminar+mis+fotomultas.+Adjunto+comprobante." target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;" onclick="nequiComprobanteEnviado()"><i class="fab fa-whatsapp"></i> Enviar Comprobante por WhatsApp</a>
       <button onclick="closeOverlay('overlay-nequi')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>
     </div>
   </div>
@@ -930,31 +1030,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- ÉXITO MODAL -->
 <div class="overlay" id="overlay-exito">
   <div class="mmodal" style="max-width:440px;">
-    <div style="padding:32px 28px;text-align:center;">
-      <div style="width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 30px rgba(34,197,94,0.4);"><i class="fas fa-whatsapp" style="color:#fff;font-size:36px;"></i></div>
-      <h3 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:1.4rem;margin-bottom:8px;">¡Ya casi está listo!</h3>
-      <p style="color:var(--gray);line-height:1.7;margin-bottom:16px;font-size:0.92rem;">Tu solicitud quedó registrada. <strong style="color:var(--navy);">Un asesor verificará tu pago</strong> y en máx. 2 horas hábiles recibirás el documento en tu correo.</p>
-
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:left;">
-        <p style="font-size:0.84rem;font-weight:700;color:#15803d;margin-bottom:8px;">📋 Próximos pasos:</p>
-        <p style="font-size:0.81rem;color:#166534;line-height:2;">
-          <strong>① Revisa tu WhatsApp</strong> — un asesor te contactará<br>
-          <strong>② Revisa tu correo</strong> (bandeja y spam)<br>
-          <strong>③ Firma el PDF</strong> con tu nombre completo<br>
-          <strong>④ Reenvíalo</strong> al correo indicado en el documento<br>
-          <strong>⑤ Recibirás el número de radicado</strong>
-        </p>
-      </div>
-
-      <div style="background:#fff8e1;border:1px solid #d4a017;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
-        <p style="font-size:0.8rem;color:#7a5c00;line-height:1.6;">⚠️ Si aún no enviaste el comprobante, hazlo ahora por WhatsApp para no retrasar tu trámite.</p>
-      </div>
-
-      <div style="background:var(--light);border-radius:10px;padding:14px;margin-bottom:18px;text-align:left;">
-        <p style="font-size:0.83rem;color:var(--gray);line-height:1.8;">✅ Revisa bandeja de entrada y spam<br>✅ Firma el PDF con tu nombre<br>✅ Reenvíalo al correo indicado<br>✅ Recibirás el número de radicado</p>
-      </div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+ya+solicité+la+eliminación+de+mis+fotomultas+en+juridicosweb.com.+¿Me+pueden+confirmar+el+estado%3F" target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Seguimiento por WhatsApp</a>
-      <button onclick="closeOverlay('overlay-exito')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>
+    <div style="padding:32px 28px;text-align:center;" id="exito-body">
+      <!-- contenido inyectado por mostrarExito() -->
     </div>
   </div>
 </div>
@@ -967,7 +1044,24 @@ var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 var EMAILJS_SERVICE_ID  = '';
 var EMAILJS_TEMPLATE_ID = '';
 var EMAILJS_PUBLIC_KEY  = '';
+// Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
+// La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
+var WOMPI_PUBLIC_KEY    = '';
+// URL de un Apps Script (mismo patrón que GOOGLE_SHEET_URL) que reciba el PDF firmado en base64
+// y lo reenvíe a la secretaría de tránsito correspondiente + lo guarde en Drive.
+var RADICAR_UPLOAD_URL  = '';
 // =========================================================
+
+// Directorio de radicación por ciudad. IMPORTANTE: se deja vacío a propósito.
+// Cada secretaría de tránsito tiene su propio canal oficial (correo, formulario web o
+// ventanilla virtual — p.ej. Bogotá NO usa un correo público, usa un formulario en
+// movilidadbogota.gov.co/radicacionwebsdm). Verifica y agrega aquí solo canales confirmados
+// por el equipo legal; una dirección incorrecta significa que el cliente paga y su petición
+// nunca llega. Mientras una ciudad no esté aquí, el sistema radica manualmente (ver radicarDocumento()).
+var SECRETARIAS_RADICACION = {
+  // 'Bogotá': { tipo:'formulario', url:'https://www.movilidadbogota.gov.co/radicacionwebsdm/formulario.php' },
+  // 'Medellín': { tipo:'email', valor:'correo-verificado@medellin.gov.co' },
+};
 
 if (EMAILJS_PUBLIC_KEY) { emailjs.init(EMAILJS_PUBLIC_KEY); }
 
@@ -1028,23 +1122,12 @@ function openOverlay(id){document.getElementById(id).classList.add('show');docum
 function closeOverlay(id){
   document.getElementById(id).classList.remove('show');
   if(!document.querySelector('.overlay.show')) document.body.style.overflow='';
-  // Limpiar timers de pago al cerrar el modal principal
-  if(id==='overlay-main'){
-    if(_pagoTimerID) clearTimeout(_pagoTimerID);
-    var t=document.getElementById('toast-pago');
-    if(t && t.parentNode) t.parentNode.removeChild(t);
-  }
 }
 document.querySelectorAll('.overlay').forEach(function(el){
   el.addEventListener('click',function(e){
     if(e.target===this){
       this.classList.remove('show');
       if(!document.querySelector('.overlay.show')) document.body.style.overflow='';
-      if(this.id==='overlay-main'){
-        if(_pagoTimerID) clearTimeout(_pagoTimerID);
-        var t=document.getElementById('toast-pago');
-        if(t && t.parentNode) t.parentNode.removeChild(t);
-      }
     }
   });
 });
@@ -1094,16 +1177,26 @@ function switchStab(t){
 
 function goToStep(n){
   currentStep=n;
-  for(var i=1;i<=5;i++){
+  for(var i=1;i<=7;i++){
     var p=document.getElementById('sp'+i);
     if(p)p.classList.toggle('active',i===n);
   }
-  for(var i=1;i<=3;i++){
+  var dotStep = n<=2 ? 1 : n-1; // el loader (paso 2) no tiene punto propio
+  for(var i=1;i<=6;i++){
     var d=document.getElementById('sd'+i);
-    if(d)d.classList.toggle('active',i<=n);
+    if(d)d.classList.toggle('active',i<=dotStep);
   }
-  var titles={1:'🔍 Consulta tu estado en SIMIT',2:'⏳ Verificando con SIMIT...',3:'✅ Resultado — Elige tu plan'};
+  var titles={
+    1:'🔍 Consulta tu estado en SIMIT',
+    2:'⏳ Verificando con SIMIT...',
+    3:'✅ Resultado — Elige tu plan',
+    4:'📝 Tus datos',
+    5:'👁️ Borrador de tu documento',
+    6:'🔒 Pago seguro',
+    7:'📤 Firmar y radicar'
+  };
   document.getElementById('mmodal-title').textContent=titles[n]||'';
+  document.querySelector('.mmodal-body').scrollTop = 0;
 }
 
 function iniciarConsulta(){
@@ -1534,10 +1627,11 @@ function mostrarSelectorMultas(val, tipo, servicio){
     '<div style="background:rgba(212,160,23,0.08);border-radius:8px;padding:9px 12px;margin-bottom:12px;">' +
     '<p style="font-size:0.72rem;color:#7a5c00;margin:0;line-height:1.7;"><strong>Piensalo asi:</strong> Una sola multa en el SIMIT vale mas de $650.000. Si tienes 3 multas eso es casi $2.000.000 en deuda. Por $45.000 — menos que un domicilio — las eliminamos TODAS. Es la decision mas inteligente que puedes tomar hoy.</p>' +
     '</div>' +
-    '<a href="' + waBase + msgInmediato + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'inmediato\',valor:45000})" ' +
-    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#25d366,#1a9e45);color:#fff;padding:15px;border-radius:11px;text-decoration:none;font-size:0.95rem;font-weight:800;box-shadow:0 4px 18px rgba(37,211,102,0.45);letter-spacing:.2px;">' +
-    '<i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Quiero este plan — Hablar con asesor' +
-    '</a>' +
+    '<button onclick="elegirPlan(\'inmediato\',\'' + val + '\',\'' + tipo + '\')" ' +
+    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#d4a017,#f5c842);color:#0a1628;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(212,160,23,0.45);letter-spacing:.2px;">' +
+    '<i class="fas fa-file-signature" style="font-size:1.1rem;"></i>Quiero este plan — Continuar' +
+    '</button>' +
+    '<a href="' + waBase + msgInmediato + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'inmediato\',valor:45000})" style="display:block;text-align:center;margin-top:8px;font-size:0.74rem;color:var(--gray);text-decoration:underline;">Prefiero hablar primero con un asesor</a>' +
     '</div>' +
     '</div>' +
 
@@ -1563,10 +1657,11 @@ function mostrarSelectorMultas(val, tipo, servicio){
     '<div style="background:#fff8e1;border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:9px 12px;margin-bottom:12px;">' +
     '<p style="font-size:0.71rem;color:#7a5c00;margin:0;line-height:1.65;"><i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i><strong>Importante:</strong> El adelanto de $19.800 cubre los costos del tramite legal. Si al eliminar la multa no se cancela el valor acordado ($95.800), el comparendo debe ser re-registrado en el SIMIT por mandato legal. Siempre recomendamos el Plan Todo Incluido por mayor ahorro y tranquilidad.</p>' +
     '</div>' +
-    '<a href="' + waBase + msgDiferido + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'diferido\',valor:19800})" ' +
-    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#25d366,#1a9e45);color:#fff;padding:13px;border-radius:11px;text-decoration:none;font-size:0.88rem;font-weight:700;box-shadow:0 3px 12px rgba(37,211,102,0.3);">' +
-    '<i class="fab fa-whatsapp" style="font-size:1.1rem;"></i>Elegir este plan — Hablar con asesor' +
-    '</a>' +
+    '<button onclick="elegirPlan(\'diferido\',\'' + val + '\',\'' + tipo + '\')" ' +
+    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 3px 12px rgba(10,22,40,0.3);">' +
+    '<i class="fas fa-file-signature" style="font-size:1rem;"></i>Elegir este plan — Continuar' +
+    '</button>' +
+    '<a href="' + waBase + msgDiferido + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'diferido\',valor:19800})" style="display:block;text-align:center;margin-top:8px;font-size:0.74rem;color:var(--gray);text-decoration:underline;">Prefiero hablar primero con un asesor</a>' +
     '</div>' +
     '</div>' +
 
@@ -1585,74 +1680,14 @@ function mostrarSelectorMultas(val, tipo, servicio){
   }
 }
 
-function seleccionarMultas(n){
-  // Marcar botón activo
-  document.querySelectorAll('.btn-multa-sel').forEach(function(b){
-    b.classList.toggle('activo', parseInt(b.dataset.n) === n);
-  });
-  // Ocultar mensaje de límite si estaba visible
-  var msgL = document.getElementById('msg-limite');
-  if(msgL) msgL.style.display='none';
-
-  // Mostrar bloque de continuar
-  var sel = document.getElementById('selector-bloque');
-  if(sel){
-    // Insertar o actualizar botón de continuar
-    var existing = document.getElementById('btn-continuar-sel');
-    if(!existing){
-      var div = document.createElement('div');
-      div.id = 'btn-continuar-sel';
-      div.style.marginTop = '12px';
-      sel.appendChild(div);
-    }
-    document.getElementById('btn-continuar-sel').innerHTML =
-      '<button onclick="iniciarFormularioDesdeSelector('+n+')" style="width:100%;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:13px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 4px 20px rgba(22,163,74,0.4);">' +
-      '<div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);pointer-events:none;"></div>' +
-      '<div style="display:flex;align-items:center;justify-content:center;gap:12px;">' +
-      '<div style="width:38px;height:38px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-      '<i class="fas fa-file-alt" style="color:#fff;font-size:1rem;"></i></div>' +
-      '<div style="text-align:left;">' +
-      '<p style="color:#fff;font-size:1rem;font-weight:900;margin:0;line-height:1.2;">Iniciar trámite — Es gratis</p>' +
-      '<p style="color:rgba(255,255,255,0.82);font-size:0.76rem;margin:3px 0 0;font-weight:500;">Diligencia el formulario en 2 minutos</p>' +
-      '</div>' +
-      '<i class="fas fa-arrow-right" style="color:#fff;font-size:1rem;margin-left:auto;flex-shrink:0;"></i>' +
-      '</div></button>' +
-      '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;">' +
-      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Confidencial</span>' +
-      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i>Sin compromiso</span>' +
-      '<span style="font-size:0.71rem;color:var(--gray);display:flex;align-items:center;gap:3px;"><i class="fas fa-check-circle" style="color:#16a34a;"></i>100% digital</span>' +
-      '</div>';
-  }
-}
-
-function mostrarLimiteMas4(){
-  var msg = document.getElementById('msg-limite');
-  if(msg){ msg.style.display='block'; msg.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-}
-
-var _multasSeleccionadas = 1;
-function iniciarFormularioDesdeSelector(n){
-  _multasSeleccionadas = n || 1;
+// ===================== ELEGIR PLAN → FORMULARIO =====================
+var pagoSel='inmediato';
+function elegirPlan(plan, val, tipo){
+  pagoSel = plan;
+  if(tipo==='cedula'){ document.getElementById('frm-cedula').value = val; }
+  else { document.getElementById('frm-placa').value = val; }
+  jwTrack('plan_elegido', { plan: plan });
   goToStep(4);
-}
-
-function generarMultasDemo(val){
-  var ciudades=[['Cali','Prescripción 3 años + Cámara sin INM'],['Medellín','Cámara sin certificación INM'],['Bogotá','Falta de notificación oportuna'],['Barranquilla','Prescripción 3 años'],['Bucaramanga','Cámara sin certificación INM']];
-  var años=['2018','2019','2020','2021','2022','2023','2024'];
-  var n=Math.floor(Math.random()*3)+1;
-  var r=[];
-  var seen={};
-  for(var i=0;i<n;i++){
-    var c=ciudades[Math.floor(Math.random()*ciudades.length)];
-    var a=años[Math.floor(Math.random()*años.length)];
-    var m=String(Math.floor(Math.random()*12)+1).padStart(2,'0');
-    var d=String(Math.floor(Math.random()*28)+1).padStart(2,'0');
-    var num='F-'+Math.floor(Math.random()*9000000+1000000);
-    if(seen[num])continue;
-    seen[num]=1;
-    r.push({comparendo:num,fecha:a+'-'+m+'-'+d,ciudad:c[0],causal:c[1],valor:[435000,435000,652500,870000][Math.floor(Math.random()*4)],aplica:parseInt(a)>=2018&&parseInt(a)<=2024});
-  }
-  return r;
 }
 
 // ===================== FORM VALIDATION =====================
@@ -1664,165 +1699,6 @@ function validarEmail(){
   document.getElementById('err-email').classList.toggle('show',!ok&&v.length>0);
   document.getElementById('ok-email').classList.toggle('show',ok);
   return ok;
-}
-
-function validarYContinuar(){
-  var nombres=document.getElementById('frm-nombres').value.trim();
-  var apellidos=document.getElementById('frm-apellidos').value.trim();
-  var cedula=document.getElementById('frm-cedula').value.trim();
-  var wa=document.getElementById('frm-whatsapp').value.trim();
-  var email=document.getElementById('frm-email').value.trim();
-  var dir=document.getElementById('frm-dir').value.trim();
-  var dpto=document.getElementById('frm-dpto').value;
-  var ciudad=document.getElementById('frm-ciudad').value;
-
-  if(!nombres||!apellidos||!cedula||!email||!dir||!dpto||!ciudad){
-    alert('Por favor completa todos los campos obligatorios (*)');return;
-  }
-  var waOk=/^3\d{9}$/.test(wa);
-  document.getElementById('err-wa').classList.toggle('show',!waOk&&wa.length>0);
-  if(!waOk){alert('Ingresa un WhatsApp válido (10 dígitos, ej: 3159318400)');return;}
-  if(!validarEmail()){alert('Ingresa un correo electrónico válido');return;}
-
-  // Guardar lead INMEDIATAMENTE (antes del pago) para remarketing
-  var datosLead = recogerDatosFormulario();
-  guardarLead(datosLead);
-  jwTrack('formulario_enviado', { ciudad: datosLead.ciudad, multas: datosLead.multasSeleccionadas });
-  goToStep(5);
-}
-
-// ===================== PAYMENT =====================
-var pagoSel='inmediato';
-var _leadGuardado = null; // referencia para actualizar al confirmar pago
-
-function selPago(t){
-  pagoSel=t;
-  document.querySelectorAll('.pay-opt').forEach(function(el){el.classList.remove('sel');});
-  document.getElementById('po-'+t).classList.add('sel');
-  var wompiLink=t==='inmediato'?'https://checkout.wompi.co/l/30MxtS':'https://checkout.wompi.co/l/hnRQQ7';
-  var wompiTxt=t==='inmediato'?'Pagar $45.000 – Wompi':'Pagar Adelanto $19.800 – Wompi';
-  var btn=document.getElementById('btn-wompi');
-  btn.href=wompiLink;
-  btn.innerHTML='<i class="fas fa-credit-card"></i> '+wompiTxt;
-}
-
-var _pagoTimerID = null;
-var _pagoToastID = null;
-
-function confirmarTramite(){
-  jwTrack('pago_iniciado', { plan: pagoSel, valor: pagoSel==='inmediato'?45000:19800 });
-  if(_pagoTimerID) clearTimeout(_pagoTimerID);
-  _pagoTimerID = setTimeout(function(){ mostrarToastPago(); }, 5 * 60 * 1000); // 5 minutos
-
-  // Mini-aviso inmediato (no intrusivo) debajo del botón Wompi
-  var aviso = document.getElementById('aviso-wompi-abierto');
-  if(!aviso){
-    var div = document.createElement('div');
-    div.id = 'aviso-wompi-abierto';
-    div.style.cssText = 'background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:0.8rem;color:#15803d;line-height:1.5;text-align:center;';
-    div.innerHTML = '<i class="fas fa-check-circle"></i> Wompi se abrió en una nueva pestaña.<br>Completa el pago allí y <strong>vuelve aquí</strong> cuando termines. En 5 min te preguntamos si ya pagaste.';
-    var btns = document.getElementById('pago-btns');
-    if(btns) btns.parentNode.insertBefore(div, btns.nextSibling);
-  }
-}
-
-function mostrarToastPago(){
-  // Verificar que el modal sigue abierto (el cliente puede haber cerrado)
-  var overlay = document.getElementById('overlay-main');
-  if(!overlay || !overlay.classList.contains('show')) return;
-
-  var monto  = pagoSel==='inmediato' ? '$45.000' : '$19.800';
-  var nombres = document.getElementById('frm-nombres') ? document.getElementById('frm-nombres').value.trim() : '';
-  var cedula  = document.getElementById('frm-cedula')  ? document.getElementById('frm-cedula').value.trim()  : '';
-  var wa      = document.getElementById('frm-whatsapp')? document.getElementById('frm-whatsapp').value.trim(): '';
-  var msgWa   = encodeURIComponent('Hola, acabo de pagar '+monto+' para eliminar mis fotomultas. Mi nombre: '+nombres+', cédula: '+cedula+'. Adjunto comprobante.');
-
-  // Eliminar aviso previo si existe
-  var prev = document.getElementById('toast-pago');
-  if(prev) prev.remove();
-
-  // Crear toast flotante en la parte inferior del modal
-  var toast = document.createElement('div');
-  toast.id = 'toast-pago';
-  toast.style.cssText = [
-    'position:fixed',
-    'bottom:16px',
-    'left:50%',
-    'transform:translateX(-50%)',
-    'width:calc(100% - 32px)',
-    'max-width:500px',
-    'background:#0a1628',
-    'border:2px solid #d4a017',
-    'border-radius:16px',
-    'padding:16px 18px',
-    'z-index:99999',
-    'box-shadow:0 8px 32px rgba(0,0,0,0.4)',
-    'animation:slideUpFade .4s ease',
-  ].join(';');
-
-  toast.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
-      '<p style="color:#d4a017;font-weight:800;font-size:0.95rem;margin:0;"><i class="fas fa-bell"></i> ¿Ya completaste el pago?</p>' +
-      '<button onclick="cerrarToastPago()" style="background:none;border:none;color:#64748b;font-size:1.2rem;cursor:pointer;padding:0;line-height:1;" title="Cerrar – sigo pagando">' +
-        '<i class="fas fa-times"></i>' +
-      '</button>' +
-    '</div>' +
-    '<p style="color:#94a3b8;font-size:0.8rem;margin:0 0 12px;line-height:1.5;">Si pagaste <strong style="color:#fff;">'+monto+'</strong> en Wompi o Nequi, envíanos el comprobante por WhatsApp para activar tu trámite.</p>' +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      '<a href="https://wa.me/573159318400?text='+msgWa+'" target="_blank" onclick="confirmarPagoRealizado()" ' +
-        'style="flex:1;min-width:160px;background:#25d366;color:#fff;padding:11px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.85rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">' +
-        '<i class="fab fa-whatsapp"></i> Sí, ya pagué – Enviar comprobante' +
-      '</a>' +
-      '<button onclick="cerrarToastPago()" ' +
-        'style="flex:0 0 auto;background:none;border:1px solid #334155;color:#94a3b8;padding:11px 16px;border-radius:10px;font-size:0.82rem;cursor:pointer;">' +
-        'Aún no, sigo pagando →' +
-      '</button>' +
-    '</div>';
-
-  document.body.appendChild(toast);
-
-  // Auto-cerrar después de 30 segundos si no interactúa
-  _pagoToastID = setTimeout(function(){ cerrarToastPago(); }, 30000);
-}
-
-function cerrarToastPago(){
-  if(_pagoToastID) clearTimeout(_pagoToastID);
-  var t = document.getElementById('toast-pago');
-  if(t){
-    t.style.animation = 'slideDownFade .3s ease forwards';
-    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 300);
-  }
-  // Si cierra y dice "sigo pagando", volver a preguntar en 5 min más
-  _pagoTimerID = setTimeout(function(){ mostrarToastPago(); }, 5 * 60 * 1000);
-}
-
-function confirmarPagoRealizado(){
-  jwTrack('pago_confirmado', { plan: pagoSel, valor: pagoSel==='inmediato'?45000:19800 });
-  // Notificar a Kommo que este lead confirmó el pago
-  if(GUARDAR_LEAD_URL){
-    var nombres = document.getElementById('frm-nombres') ? document.getElementById('frm-nombres').value.trim() : '';
-    var cedula = document.getElementById('frm-cedula') ? document.getElementById('frm-cedula').value.trim() : '';
-    var monto = pagoSel==='inmediato' ? '$45.000' : '$19.800';
-    fetch(GUARDAR_LEAD_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        nombres: nombres, cedula: cedula,
-        estadoPago: 'PAGO CONFIRMADO – ' + monto,
-        _accion: 'confirmar_pago'
-      })
-    }).catch(function(){});
-  }
-  // Mostrar pantalla de éxito final
-  setTimeout(function(){
-    closeOverlay('overlay-main');
-    openOverlay('overlay-exito');
-  }, 1200);
-}
-
-function volverAlPago(){
-  // Reconstruir step 5 original
-  location.reload(); // recarga simple — el usuario puede volver a iniciar
 }
 
 function recogerDatosFormulario(){
@@ -1840,12 +1716,328 @@ function recogerDatosFormulario(){
     direccion     : document.getElementById('frm-dir').value.trim(),
     ciudad        : document.getElementById('frm-ciudad').value,
     dpto          : document.getElementById('frm-dpto').value,
-    plan          : 'Pendiente selección',
-    multasSeleccionadas: _multasSeleccionadas || 1,
+    plan          : pagoSel==='inmediato' ? 'Pago Inmediato $45.000' : 'Pago Diferido - Adelanto $19.800',
     estadoPago    : 'PENDIENTE PAGO – Remarketing',
     fuente        : 'Landing juridicosweb.com',
     fechaLead     : new Date().toLocaleString('es-CO'),
   };
+}
+
+// Datos + texto del documento ya generado, disponibles tras aprobar el pago
+var _leadGuardado = null;
+var _documentoDatos = null;
+var _documentoTexto = null;
+
+function validarYVerBorrador(){
+  var nombres=document.getElementById('frm-nombres').value.trim();
+  var apellidos=document.getElementById('frm-apellidos').value.trim();
+  var cedula=document.getElementById('frm-cedula').value.trim();
+  var wa=document.getElementById('frm-whatsapp').value.trim();
+  var email=document.getElementById('frm-email').value.trim();
+  var dir=document.getElementById('frm-dir').value.trim();
+  var dpto=document.getElementById('frm-dpto').value;
+  var ciudad=document.getElementById('frm-ciudad').value;
+
+  if(!nombres||!apellidos||!cedula||!email||!dir||!dpto||!ciudad){
+    alert('Por favor completa todos los campos obligatorios');return;
+  }
+  var waOk=/^3\d{9}$/.test(wa);
+  document.getElementById('err-wa').classList.toggle('show',!waOk&&wa.length>0);
+  if(!waOk){alert('Ingresa un WhatsApp válido (10 dígitos, ej: 3159318400)');return;}
+  if(!validarEmail()){alert('Ingresa un correo electrónico válido');return;}
+
+  // Guardar lead INMEDIATAMENTE (antes del pago) para remarketing
+  var datosLead = recogerDatosFormulario();
+  _leadGuardado = datosLead;
+  guardarLead(datosLead);
+  jwTrack('formulario_enviado', { ciudad: datosLead.ciudad });
+
+  document.getElementById('doc-preview-text').textContent = construirTextoPeticion(datosLead);
+  selPago(pagoSel);
+  goToStep(5);
+}
+
+function selPago(t){
+  pagoSel=t;
+  document.querySelectorAll('.pay-opt').forEach(function(el){el.classList.remove('sel');});
+  var opt=document.getElementById('po-'+t); if(opt) opt.classList.add('sel');
+  var monto = t==='inmediato' ? '$45.000' : '$19.800';
+  var btnTxt = document.getElementById('btn-ir-pago-txt');
+  if(btnTxt) btnTxt.textContent = 'Confirmar y pagar '+monto;
+  var pt = document.getElementById('pago-titulo');
+  if(pt) pt.textContent = 'Confirma tu pago — '+monto;
+}
+
+function irAPago(){
+  document.getElementById('pago-wrap').style.display='block';
+  document.getElementById('pago-verificando').style.display='none';
+  selPago(pagoSel);
+  goToStep(6);
+}
+
+// ===================== DOCUMENTO (borrador y final comparten el mismo texto) ====
+function construirTextoPeticion(p){
+  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var secretaria = 'Secretaría de Tránsito y Movilidad – '+p.ciudad;
+
+  return p.ciudad+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
+    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE FOTOMULTAS\n'+
+    'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+(p.placa||'N/A')+'\n\n'+
+    'Respetados señores:\n\n'+
+    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', en ejercicio del '+
+    'derecho fundamental consagrado en el Art. 23 de la Constitución Política y en los términos de la '+
+    'Ley 1755 de 2015, me dirijo a ustedes para interponer el siguiente:\n\n'+
+    'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
+    'I. HECHOS\n\n'+
+    '1. Soy propietario/a del vehículo con placa '+(p.placa||'N/A')+' y tengo registrados comparendos en el SIMIT.\n\n'+
+    '2. La Supertransporte abrió investigación el 19 de mayo de 2026 contra 37 organismos de tránsito '+
+    'por operar cámaras sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), '+
+    'exigido por el Decreto 1074 de 2015.\n\n'+
+    '3. Las sanciones prescriben en 3 años según el Art. 136 de la Ley 769/2002.\n\n'+
+    '4. La Ley 1843/2017 exige notificación dentro de los 3 días hábiles siguientes a la detección.\n\n'+
+    'II. FUNDAMENTOS JURÍDICOS\n\n'+
+    '• Art. 23 Constitución Política de Colombia\n'+
+    '• Ley 1755 de 2015 – Derecho de Petición\n'+
+    '• Ley 769 de 2002 – Código Nacional de Tránsito\n'+
+    '• Ley 1843 de 2017 – Fotodetección de infracciones\n'+
+    '• Decreto 1074 de 2015 – Control metrológico\n'+
+    '• Investigación Supertransporte – Mayo 2026\n\n'+
+    'III. PRETENSIONES\n\n'+
+    '1. Que se declare la NULIDAD de los comparendos registrados bajo placa '+(p.placa||'N/A')+' por carecer '+
+    'los equipos de fotodetección del "concepto de desempeño" del INM.\n'+
+    '2. Que se declare la PRESCRIPCIÓN de las sanciones con más de 3 años sin cobro efectivo.\n'+
+    '3. Que se ELIMINEN del sistema SIMIT los registros correspondientes.\n\n'+
+    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+'\n\n'+
+    '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
+}
+
+function generarPDFDoc(p, texto){
+  if(!window.jspdf){return;}
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+  doc.setFillColor(10,22,40);
+  doc.rect(0,0,210,16,'F');
+  doc.setTextColor(212,160,23);
+  doc.setFontSize(10);doc.setFont('helvetica','bold');
+  doc.text('JURÍDICOSWEB.COM',14,11);
+  doc.setTextColor(148,163,184);
+  doc.setFont('helvetica','normal');
+  doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(9.5);
+  var lines=doc.splitTextToSize(texto,180);
+  var y=24;
+  lines.forEach(function(l){
+    if(y>280){doc.addPage();y=14;}
+    doc.text(l,14,y);y+=5.2;
+  });
+  doc.setFillColor(10,22,40);
+  doc.rect(0,284,210,13,'F');
+  doc.setTextColor(212,160,23);doc.setFontSize(8);
+  doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
+
+  doc.save('DerechoPeticion_'+(p.apellidos||'cliente')+'_'+(p.cedula||'')+'.pdf');
+}
+
+function descargarPDFFinal(){
+  if(!_documentoDatos || !_documentoTexto){ alert('Aún no se ha generado tu documento final.'); return; }
+  jwTrack('pdf_descargado', {});
+  generarPDFDoc(_documentoDatos, _documentoTexto);
+}
+
+// ===================== PAGO — Wompi Widget (verificación automática, sin backend) ====
+function pagarConWompi(){
+  if(!WOMPI_PUBLIC_KEY || typeof WidgetCheckout === 'undefined'){
+    alert('El pago en línea aún no está activado. Escríbenos por WhatsApp y coordinamos tu pago.');
+    return;
+  }
+  var monto = pagoSel==='inmediato' ? 45000 : 19800;
+  var datos = _leadGuardado || recogerDatosFormulario();
+  var referencia = 'JW-' + Date.now();
+  jwTrack('pago_iniciado', { plan: pagoSel, valor: monto, referencia: referencia });
+
+  var checkout = new WidgetCheckout({
+    currency: 'COP',
+    amountInCents: monto * 100,
+    reference: referencia,
+    publicKey: WOMPI_PUBLIC_KEY,
+    redirectUrl: location.origin + location.pathname,
+    customerData: {
+      email: datos.email,
+      fullName: (datos.nombres||'') + ' ' + (datos.apellidos||''),
+      phoneNumber: (datos.whatsapp||'').replace(/\D/g,''),
+      phoneNumberPrefix: '+57',
+      legalId: datos.cedula,
+      legalIdType: 'CC'
+    }
+  });
+
+  checkout.open(function(result){
+    var transaction = result && result.transaction;
+    if(transaction && transaction.id){
+      verificarTransaccionWompi(transaction.id);
+    }
+  });
+}
+
+function wompiApiBase(){
+  return WOMPI_PUBLIC_KEY.indexOf('test') !== -1 ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1';
+}
+
+function verificarTransaccionWompi(id, intentos){
+  intentos = intentos || 0;
+  document.getElementById('pago-wrap').style.display='none';
+  document.getElementById('pago-verificando').style.display='block';
+
+  fetch(wompiApiBase() + '/transactions/' + id)
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      var status = json.data && json.data.status;
+      if(status === 'APPROVED'){
+        onPagoAprobado(json.data);
+      } else if(status === 'DECLINED' || status === 'ERROR' || status === 'VOIDED'){
+        onPagoFallido(status);
+      } else if(intentos < 25){
+        setTimeout(function(){ verificarTransaccionWompi(id, intentos+1); }, 3000);
+      } else {
+        onPagoFallido('TIMEOUT');
+      }
+    })
+    .catch(function(){
+      if(intentos < 6){ setTimeout(function(){ verificarTransaccionWompi(id, intentos+1); }, 4000); }
+      else { onPagoFallido('ERROR_RED'); }
+    });
+}
+
+function onPagoFallido(motivo){
+  document.getElementById('pago-verificando').style.display='none';
+  document.getElementById('pago-wrap').style.display='block';
+  alert('No pudimos confirmar tu pago (' + motivo + '). Si el dinero salió de tu cuenta, escríbenos por WhatsApp con tu comprobante y lo verificamos manualmente.');
+}
+
+function onPagoAprobado(txData){
+  var monto = pagoSel==='inmediato' ? 45000 : 19800;
+  jwTrack('pago_aprobado', { plan: pagoSel, valor: monto, wompi_id: txData && txData.id });
+
+  var datos = _leadGuardado || recogerDatosFormulario();
+  datos.estadoPago = 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : '');
+  guardarLead(datos);
+
+  _documentoDatos = datos;
+  _documentoTexto = construirTextoPeticion(datos);
+  document.getElementById('doc-final-text').textContent = _documentoTexto;
+  enviarCorreoCliente(datos, _documentoTexto);
+  goToStep(7);
+}
+
+function enviarCorreoCliente(datos, texto){
+  if(!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY){
+    console.warn('EmailJS no configurado. Sigue las instrucciones en INSTRUCCIONES_CONFIGURACION.md');
+    return;
+  }
+  var plan = pagoSel==='inmediato'?'Pago Inmediato $45.000':'Pago Diferido - Adelanto $19.800';
+  var params = {
+    nombres          : datos.nombres,
+    apellidos        : datos.apellidos,
+    cedula           : datos.cedula,
+    placa            : datos.placa||'N/A',
+    whatsapp         : datos.whatsapp,
+    email_cliente    : datos.email,
+    direccion        : datos.direccion,
+    ciudad           : datos.ciudad+', '+datos.dpto,
+    plan_pago        : plan,
+    secretaria       : 'Secretaría de Tránsito y Movilidad - '+datos.ciudad,
+    documento_texto  : texto.substring(0,1400),
+    fecha_solicitud  : new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    reply_to         : datos.email,
+    to_email         : datos.email,
+  };
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+    .then(function(){console.log('Email enviado al cliente');})
+    .catch(function(err){console.error('Error EmailJS:',err);});
+}
+
+// ===================== ÉXITO MODAL (dos variantes) =====================
+function mostrarExito(tipo){
+  var body = document.getElementById('exito-body');
+  if(!body) return;
+  if(tipo === 'radicado'){
+    body.innerHTML =
+      '<div style="width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 30px rgba(34,197,94,0.4);"><i class="fas fa-paper-plane" style="color:#fff;font-size:32px;"></i></div>' +
+      '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);font-size:1.4rem;margin-bottom:8px;">¡Documento recibido!</h3>' +
+      '<p style="color:var(--gray);line-height:1.7;margin-bottom:16px;font-size:0.92rem;">Ya tenemos tu <strong style="color:var(--navy);">derecho de petición firmado</strong>. Nuestro equipo lo radica ante la secretaría correspondiente y te compartimos el número de radicado por correo y WhatsApp.</p>' +
+      '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:18px;text-align:left;">' +
+      '<p style="font-size:0.83rem;color:#166534;line-height:1.9;">✅ Documento firmado recibido<br>✅ Pago confirmado<br>⏳ Radicación ante la secretaría (24–48h hábiles)<br>⏳ Respuesta de la secretaría (máx. 15 días hábiles)</p>' +
+      '</div>' +
+      '<a href="https://wa.me/573159318400?text=Hola%2C+ya+envi%C3%A9+mi+documento+firmado+en+juridicosweb.com.+%C2%BFMe+confirman+el+radicado%3F" target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Seguimiento por WhatsApp</a>' +
+      '<button onclick="closeOverlay(\'overlay-exito\')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>';
+  } else {
+    body.innerHTML =
+      '<div style="width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 30px rgba(34,197,94,0.4);"><i class="fas fa-whatsapp" style="color:#fff;font-size:36px;"></i></div>' +
+      '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);font-size:1.4rem;margin-bottom:8px;">¡Ya casi está listo!</h3>' +
+      '<p style="color:var(--gray);line-height:1.7;margin-bottom:16px;font-size:0.92rem;">Tu solicitud quedó registrada. <strong style="color:var(--navy);">Un asesor verificará tu pago por Nequi</strong> y en máx. 2 horas hábiles recibirás tu documento en el correo, listo para firmar.</p>' +
+      '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:18px;text-align:left;">' +
+      '<p style="font-size:0.84rem;font-weight:700;color:#15803d;margin-bottom:8px;">📋 Próximos pasos:</p>' +
+      '<p style="font-size:0.81rem;color:#166534;line-height:2;"><strong>① Un asesor confirma tu pago</strong><br><strong>② Revisa tu correo</strong> (bandeja y spam)<br><strong>③ Firma el PDF</strong> con tu nombre completo<br><strong>④ Súbelo de nuevo</strong> a la app para que lo radiquemos</p>' +
+      '</div>' +
+      '<a href="https://wa.me/573159318400?text=Hola%2C+ya+solicité+la+eliminación+de+mis+fotomultas+en+juridicosweb.com.+¿Me+pueden+confirmar+el+estado%3F" target="_blank" class="btn btn-wa btn-full" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Seguimiento por WhatsApp</a>' +
+      '<button onclick="closeOverlay(\'overlay-exito\')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>';
+  }
+}
+
+// ===================== NEQUI (verificación manual) =====================
+function nequiComprobanteEnviado(){
+  jwTrack('pago_nequi_comprobante', { plan: pagoSel });
+  closeOverlay('overlay-nequi');
+  closeOverlay('overlay-main');
+  mostrarExito('nequi');
+  openOverlay('overlay-exito');
+}
+
+// ===================== FIRMA Y RADICACIÓN =====================
+var _archivoFirmadoBase64 = null;
+var _archivoFirmadoNombre = null;
+
+function onArchivoFirmadoSeleccionado(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 8*1024*1024){ alert('El archivo es muy grande (máx. 8MB).'); e.target.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    _archivoFirmadoBase64 = ev.target.result;
+    _archivoFirmadoNombre = file.name;
+    var chip = document.getElementById('archivo-chip');
+    if(chip){
+      chip.innerHTML = '<div class="upload-file-chip"><i class="fas fa-file-pdf"></i> '+file.name+' <i class="fas fa-check-circle" style="margin-left:auto;color:#16a34a;"></i></div>';
+    }
+    var btn = document.getElementById('btn-radicar');
+    if(btn) btn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function radicarDocumento(){
+  var datos = _documentoDatos || _leadGuardado || recogerDatosFormulario();
+  var canal = SECRETARIAS_RADICACION[datos.ciudad];
+  jwTrack('documento_radicado', { ciudad: datos.ciudad, canal_conocido: !!canal });
+
+  if(RADICAR_UPLOAD_URL){
+    fetch(RADICAR_UPLOAD_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        nombres: datos.nombres, apellidos: datos.apellidos, cedula: datos.cedula,
+        email: datos.email, whatsapp: datos.whatsapp, ciudad: datos.ciudad, dpto: datos.dpto,
+        canalRadicacion: canal || null,
+        archivoNombre: _archivoFirmadoNombre,
+        archivoBase64: _archivoFirmadoBase64,
+        _accion: 'radicar_documento'
+      })
+    }).catch(function(){});
+  }
+  closeOverlay('overlay-main');
+  mostrarExito('radicado');
+  openOverlay('overlay-exito');
 }
 
 function guardarLead(datos){
@@ -1876,124 +2068,50 @@ function guardarLead(datos){
   });
 }
 
-function enviarCorreoCliente(){
-  if(!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY){
-    console.warn('EmailJS no configurado. Sigue las instrucciones en INSTRUCCIONES_CONFIGURACION.md');
-    return;
-  }
-
-  var nombres   = document.getElementById('frm-nombres').value.trim();
-  var apellidos = document.getElementById('frm-apellidos').value.trim();
-  var cedula    = document.getElementById('frm-cedula').value.trim();
-  var placa     = document.getElementById('frm-placa').value.trim()||'N/A';
-  var wa        = document.getElementById('frm-whatsapp').value.trim();
-  var email     = document.getElementById('frm-email').value.trim();
-  var dir       = document.getElementById('frm-dir').value.trim();
-  var dpto      = document.getElementById('frm-dpto').value;
-  var ciudad    = document.getElementById('frm-ciudad').value;
-  var plan      = pagoSel==='inmediato'?'Pago Inmediato $45.000':'Pago Diferido - Adelanto $19.800';
-
-  // Recoger datos del resumen SIMIT
-  var resultEl  = document.getElementById('result-content');
-  var multasTexto = resultEl ? resultEl.innerText.substring(0,400) : 'Ver resumen en el sistema';
-  var secretaria  = 'Secretaría de Tránsito y Movilidad - '+ciudad;
-
-  var params = {
-    nombres          : nombres,
-    apellidos        : apellidos,
-    cedula           : cedula,
-    placa            : placa,
-    whatsapp         : wa,
-    email_cliente    : email,
-    direccion        : dir,
-    ciudad           : ciudad+', '+dpto,
-    plan_pago        : plan,
-    secretaria       : secretaria,
-    multas_detalle   : multasTexto,
-    fecha_solicitud  : new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
-    reply_to         : email,
-    to_email         : email,
-  };
-
-  // Enviar email al cliente
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-    .then(function(){console.log('Email enviado al cliente');})
-    .catch(function(err){console.error('Error EmailJS:',err);});
-
-  // Generar PDF y adjuntarlo/enviarlo también (se descarga en el navegador del cliente)
-  generarPDFCliente(params);
-}
-
-function generarPDFCliente(p){
-  if(!window.jspdf){return;}
-  var {jsPDF} = window.jspdf;
-  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
-  var secretaria = 'Secretaría de Tránsito y Movilidad – '+p.ciudad;
-
-  var texto = p.ciudad+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
-    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE FOTOMULTAS\n'+
-    'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+p.placa+'\n\n'+
-    'Respetados señores:\n\n'+
-    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', en ejercicio del '+
-    'derecho fundamental consagrado en el Art. 23 de la Constitución Política y en los términos de la '+
-    'Ley 1755 de 2015, me dirijo a ustedes para interponer el siguiente:\n\n'+
-    'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
-    'I. HECHOS\n\n'+
-    '1. Soy propietario/a del vehículo con placa '+p.placa+' y tengo registrados comparendos en el SIMIT.\n\n'+
-    '2. La Supertransporte abrió investigación el 19 de mayo de 2026 contra 37 organismos de tránsito '+
-    'por operar cámaras sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), '+
-    'exigido por el Decreto 1074 de 2015.\n\n'+
-    '3. Las sanciones prescriben en 3 años según el Art. 136 de la Ley 769/2002.\n\n'+
-    '4. La Ley 1843/2017 exige notificación dentro de los 3 días hábiles siguientes a la detección.\n\n'+
-    'II. FUNDAMENTOS JURÍDICOS\n\n'+
-    '• Art. 23 Constitución Política de Colombia\n'+
-    '• Ley 1755 de 2015 – Derecho de Petición\n'+
-    '• Ley 769 de 2002 – Código Nacional de Tránsito\n'+
-    '• Ley 1843 de 2017 – Fotodetección de infracciones\n'+
-    '• Decreto 1074 de 2015 – Control metrológico\n'+
-    '• Investigación Supertransporte – Mayo 2026\n\n'+
-    'III. PRETENSIONES\n\n'+
-    '1. Que se declare la NULIDAD de los comparendos registrados bajo placa '+p.placa+' por carecer '+
-    'los equipos de fotodetección del "concepto de desempeño" del INM.\n'+
-    '2. Que se declare la PRESCRIPCIÓN de las sanciones con más de 3 años sin cobro efectivo.\n'+
-    '3. Que se ELIMINEN del sistema SIMIT los registros correspondientes.\n\n'+
-    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email_cliente+'\n\n'+
-    '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
-
-  doc.setFillColor(10,22,40);
-  doc.rect(0,0,210,16,'F');
-  doc.setTextColor(212,160,23);
-  doc.setFontSize(10);doc.setFont('helvetica','bold');
-  doc.text('JURÍDICOSWEB.COM',14,11);
-  doc.setTextColor(148,163,184);
-  doc.setFont('helvetica','normal');
-  doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
-  doc.setTextColor(0,0,0);
-  doc.setFontSize(9.5);
-  var lines=doc.splitTextToSize(texto,180);
-  var y=24;
-  lines.forEach(function(l){
-    if(y>280){doc.addPage();y=14;}
-    doc.text(l,14,y);y+=5.2;
-  });
-  doc.setFillColor(10,22,40);
-  doc.rect(0,284,210,13,'F');
-  doc.setTextColor(212,160,23);doc.setFontSize(8);
-  doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
-
-  // Descargar PDF en el navegador del cliente
-  doc.save('DerechoPeticion_'+p.apellidos+'_'+p.cedula+'.pdf');
-}
-
 // ===================== SMOOTH SCROLL =====================
 document.querySelectorAll('a[href^="#"]').forEach(function(a){
   a.addEventListener('click',function(e){
-    var t=document.querySelector(this.getAttribute('href'));
+    var href=this.getAttribute('href');
+    if(!href||href.length<2) return;
+    var t=document.querySelector(href);
     if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
   });
 });
+
+// ===================== PWA: service worker + instalación =====================
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
+
+var _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  if(localStorage.getItem('jw_install_oculto')) return;
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  setTimeout(function(){
+    var b=document.getElementById('install-banner');
+    if(b) b.classList.add('show');
+  }, 4000);
+});
+
+function instalarPWA(){
+  cerrarInstallBanner();
+  if(!_deferredInstallPrompt) return;
+  _deferredInstallPrompt.prompt();
+  _deferredInstallPrompt.userChoice.then(function(choice){
+    jwTrack('pwa_instalada', { resultado: choice.outcome });
+    _deferredInstallPrompt = null;
+  });
+}
+
+function cerrarInstallBanner(){
+  var b=document.getElementById('install-banner');
+  if(b) b.classList.remove('show');
+  try{ localStorage.setItem('jw_install_oculto','1'); }catch(e){}
+}
 </script>
 </body>
 </html>
