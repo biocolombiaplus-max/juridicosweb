@@ -373,6 +373,18 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .mr-right .valor{font-size:0.9rem;font-weight:700;color:var(--navy);}
 .badge-aplica{background:rgba(46,199,109,0.1);color:var(--green);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 .badge-no-aplica{background:rgba(100,116,139,0.1);color:var(--gray);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
+.badge-revisar{background:rgba(217,119,6,0.12);color:#b45309;border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
+
+/* ===== REPORTE REAL DE MULTAS (paso 3) ===== */
+.multa-row{border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;position:relative;}
+.multa-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.multa-row-head strong{font-size:0.82rem;color:var(--navy);}
+.btn-quitar-multa{background:none;border:none;color:var(--red);font-size:0.75rem;cursor:pointer;text-decoration:underline;padding:0;}
+.multa-row .form-grid2{gap:10px;}
+.s3-choice-btn{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:.2s;}
+.s3-choice-btn:hover{border-color:var(--gold);}
+.s3-choice-btn strong{display:block;color:var(--navy);font-size:0.92rem;margin-bottom:2px;}
+.s3-choice-btn span{color:var(--gray);font-size:0.78rem;}
 .result-total-row{background:linear-gradient(135deg,var(--navy),#0f2040);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
 .result-total-row span{font-size:0.85rem;color:#94a3b8;}
 .result-total-row strong{font-size:1.4rem;color:var(--gold);font-family:'Playfair Display',serif;}
@@ -881,25 +893,80 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p style="font-size:0.75rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-lock"></i> Consulta gratuita · Sin compromiso · Datos protegidos</p>
       </div>
 
-      <!-- STEP 2: LOADER -->
+      <!-- STEP 2: IR AL SIMIT OFICIAL (real, sin simulación) -->
       <div class="step-panel" id="sp2">
-        <div class="simit-loader-wrap">
-          <div class="loader-ring"></div>
-          <p class="loader-title" id="loader-title">Conectando con SIMIT oficial...</p>
-          <p class="loader-sub" id="loader-sub">Esto toma unos segundos</p>
-          <ul class="loader-steps" id="loader-steps">
-            <li id="ls1"><i class="fas fa-satellite-dish"></i> Conectando al servidor SIMIT</li>
-            <li id="ls2"><i class="fas fa-database"></i> Buscando comparendos registrados</li>
-            <li id="ls3"><i class="fas fa-gavel"></i> Aplicando análisis jurídico</li>
-            <li id="ls4"><i class="fas fa-shield-alt"></i> Identificando causales de nulidad</li>
-            <li id="ls5"><i class="fas fa-file-alt"></i> Preparando tu resumen legal</li>
-          </ul>
+        <div id="s2-fase1">
+          <div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">
+            <p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Vas a consultar</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div>
+                <div style="color:#fff;font-size:1.5rem;font-weight:900;letter-spacing:2px;line-height:1;" id="s2-valor"></div>
+                <div style="color:#94a3b8;font-size:0.75rem;margin-top:3px;" id="s2-etiqueta"></div>
+              </div>
+              <button onclick="copiarDato2()" id="s2-btn-copiar" style="background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-copy"></i> Copiar</button>
+            </div>
+          </div>
+          <p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:14px;">Para darte un resultado <strong style="color:var(--navy);">real</strong> — no una simulación — te llevamos al portal <strong>oficial</strong> del SIMIT. Nadie más que el gobierno tiene esos datos, así que lo consultamos juntos ahí:</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">
+              <div style="width:26px;height:26px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--gold);font-size:0.72rem;font-weight:800;">1</span></div>
+              <p style="margin:0;font-size:0.82rem;color:var(--navy);">Toca el botón de abajo — se abre el SIMIT oficial sin cerrar esta página</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">
+              <div style="width:26px;height:26px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--gold);font-size:0.72rem;font-weight:800;">2</span></div>
+              <p style="margin:0;font-size:0.82rem;color:var(--navy);">Pega el dato de arriba y consulta</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">
+              <div style="width:26px;height:26px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:var(--gold);font-size:0.72rem;font-weight:800;">3</span></div>
+              <p style="margin:0;font-size:0.82rem;color:var(--navy);">Toma una captura de pantalla de tu resultado (la vas a poder subir aquí)</p>
+            </div>
+          </div>
+          <button onclick="abrirSIMIT2()" class="btn btn-navy btn-full" style="padding:17px;font-size:1rem;font-weight:800;border-radius:13px;"><i class="fas fa-external-link-alt"></i> Abrir SIMIT oficial</button>
+        </div>
+        <div id="s2-fase2" style="display:none;text-align:center;">
+          <div style="font-size:2.6rem;margin:10px 0 14px;">👀</div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:1.15rem;margin-bottom:8px;">¿Ya viste tu resultado en el SIMIT?</h3>
+          <p style="color:var(--gray);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Cuando estés listo, cuéntanos exactamente qué encontraste y lo analizamos con la ley colombiana.</p>
+          <button class="btn btn-red btn-full btn-xl" onclick="goToStep(3)" style="margin-bottom:10px;">Sí, continuar y reportar</button>
+          <button onclick="mostrarFase1Simit2()" style="background:none;border:none;color:var(--gray);font-size:0.78rem;cursor:pointer;text-decoration:underline;">← Volver a abrir el SIMIT</button>
         </div>
       </div>
 
-      <!-- STEP 3: RESULTADOS -->
+      <!-- STEP 3: REPORTE REAL + CÁLCULO LEGAL -->
       <div class="step-panel" id="sp3">
-        <div class="result-wrap" id="result-content"></div>
+        <div id="s3-inicio">
+          <p style="color:var(--gray);font-size:0.87rem;margin-bottom:16px;">¿Qué encontraste en el SIMIT oficial?</p>
+          <button class="s3-choice-btn" onclick="s3SinMultas()"><strong>✅ No tengo ninguna multa</strong><span>El SIMIT no me muestra comparendos</span></button>
+          <button class="s3-choice-btn" onclick="s3ConMultas()"><strong>📋 Sí, tengo una o más multas</strong><span>Voy a reportar los datos reales que vi</span></button>
+        </div>
+
+        <div id="s3-sinmultas" style="display:none;text-align:center;padding:20px 10px;">
+          <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:8px;">¡Excelentes noticias!</h3>
+          <p style="color:var(--gray);font-size:0.87rem;line-height:1.7;margin-bottom:18px;">Si el SIMIT no te muestra multas, estás libre. Si tienes dudas, escríbenos.</p>
+          <a href="https://wa.me/573159318400?text=Hola%2C+consult%C3%A9+en+SIMIT+y+no+me+aparecen+multas%2C+quiero+verificar" target="_blank" class="btn btn-wa btn-full"><i class="fab fa-whatsapp"></i> Hablar con un asesor gratis</a>
+        </div>
+
+        <div id="s3-form" style="display:none;">
+          <p style="color:var(--gray);font-size:0.83rem;margin-bottom:12px;">Copia lo que dice el SIMIT para cada comparendo. Con la fecha real calculamos si ya prescribió (más de 3 años, Art. 136 Ley 769/2002).</p>
+          <div id="multas-list"></div>
+          <button type="button" onclick="agregarMultaRow()" style="background:none;border:2px dashed var(--border);border-radius:10px;padding:11px;width:100%;color:var(--navy);font-size:0.82rem;font-weight:700;cursor:pointer;margin-bottom:16px;"><i class="fas fa-plus"></i> Agregar otra multa</button>
+
+          <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Respaldo (opcional pero recomendado):</p>
+          <label class="upload-box" id="upload-box-simit" style="margin-bottom:16px;">
+            <input type="file" id="file-captura-simit" accept="image/*,application/pdf" onchange="onCapturaSimitSeleccionada(event)">
+            <i class="fas fa-camera" style="font-size:1.6rem;color:var(--gold);margin-bottom:6px;display:block;"></i>
+            <p style="font-size:0.83rem;color:var(--navy);font-weight:700;margin-bottom:2px;">Sube la captura de pantalla del SIMIT</p>
+            <p style="font-size:0.7rem;color:var(--gray);">Nos sirve para verificar tu caso</p>
+          </label>
+          <div id="captura-simit-chip"></div>
+
+          <button class="btn btn-red btn-full btn-xl" onclick="calcularElegibilidad()"><i class="fas fa-calculator"></i> Calcular cuáles aplican</button>
+        </div>
+
+        <div id="s3-resultado" style="display:none;">
+          <div id="s3-resultado-list"></div>
+        </div>
       </div>
 
       <!-- STEP 4: FORMULARIO DE DATOS -->
@@ -1165,8 +1232,32 @@ var tipoServicio='2018';
 function openSimitModal(e,tipo){
   if(e)e.preventDefault();
   tipoServicio=tipo||'2018';
+  resetFlujoSimit();
   goToStep(1);
   openOverlay('overlay-main');
+}
+
+function resetFlujoSimit(){
+  // Limpia el estado de una consulta anterior para que el paso 3 siempre arranque desde cero
+  var s2f1=document.getElementById('s2-fase1'), s2f2=document.getElementById('s2-fase2');
+  if(s2f1) s2f1.style.display='block';
+  if(s2f2) s2f2.style.display='none';
+
+  var s3i=document.getElementById('s3-inicio'), s3s=document.getElementById('s3-sinmultas'),
+      s3f=document.getElementById('s3-form'), s3r=document.getElementById('s3-resultado');
+  if(s3i) s3i.style.display='block';
+  if(s3s) s3s.style.display='none';
+  if(s3f) s3f.style.display='none';
+  if(s3r){ s3r.style.display='none'; s3r.innerHTML=''; }
+
+  var lista=document.getElementById('multas-list');
+  if(lista) lista.innerHTML='';
+  _multaRowSeq = 0;
+  _multasReportadas = [];
+  _capturaSimitBase64 = null;
+  _capturaSimitNombre = null;
+  var chip=document.getElementById('captura-simit-chip');
+  if(chip) chip.innerHTML='';
 }
 
 function switchStab(t){
@@ -1188,8 +1279,8 @@ function goToStep(n){
   }
   var titles={
     1:'🔍 Consulta tu estado en SIMIT',
-    2:'⏳ Verificando con SIMIT...',
-    3:'✅ Resultado — Elige tu plan',
+    2:'🌐 Consulta oficial en SIMIT',
+    3:'📋 Reporta tus multas reales',
     4:'📝 Tus datos',
     5:'👁️ Borrador de tu documento',
     6:'🔒 Pago seguro',
@@ -1198,6 +1289,9 @@ function goToStep(n){
   document.getElementById('mmodal-title').textContent=titles[n]||'';
   document.querySelector('.mmodal-body').scrollTop = 0;
 }
+
+var _valorConsultado = '';
+var _tipoConsultado = 'cedula';
 
 function iniciarConsulta(){
   var cedTab=document.querySelector('.stab2.active');
@@ -1208,484 +1302,231 @@ function iniciarConsulta(){
     return;
   }
   jwTrack('consulta_iniciada', { tipo: tipo });
+  _valorConsultado = val;
+  _tipoConsultado = tipo;
+  document.getElementById('s2-valor').textContent = val;
+  document.getElementById('s2-etiqueta').textContent = tipo==='cedula' ? 'Cédula' : 'Placa';
+  document.getElementById('s2-fase1').style.display='block';
+  document.getElementById('s2-fase2').style.display='none';
   goToStep(2);
-  animarLoader(val,tipo);
 }
 
-function animarLoader(val,tipo){
-  var steps=['ls1','ls2','ls3','ls4','ls5'];
-  var delays=[0,900,1800,2700,3500];
-  var titles=['Conectando con SIMIT oficial...','Recuperando tu historial...','Analizando causales legales...','Verificando normativa 2018–2024...','Preparando tu resumen legal...'];
-  var subs=['Estableciendo conexión segura','Buscando comparendos registrados','Aplicando Ley 769 y Ley 1843','Cruzando con lista Supertransporte','¡Casi listo!'];
-
-  // Activar step uno a uno
-  steps.forEach(function(id,i){
-    setTimeout(function(){
-      // Marcar previo como done
-      if(i>0) document.getElementById(steps[i-1]).classList.remove('active');
-      if(i>0) document.getElementById(steps[i-1]).classList.add('done');
-      // Activar actual
-      var el=document.getElementById(id);
-      if(el){ el.classList.add('active'); }
-      // Actualizar título
-      var tEl=document.getElementById('loader-title');
-      var sEl=document.getElementById('loader-sub');
-      if(tEl) tEl.textContent=titles[i];
-      if(sEl) sEl.textContent=subs[i];
-    }, delays[i]);
-  });
-  // Marcar último como done
-  setTimeout(function(){
-    var last=document.getElementById(steps[steps.length-1]);
-    if(last){last.classList.remove('active');last.classList.add('done');}
-  }, delays[steps.length-1]+700);
-
-  // Guardar resultado de la API pero esperar mínimo 4800ms para mostrar
-  var apiResult=null;
-  var apiListo=false;
-  var animLista=false;
-
-  function intentarMostrar(){
-    if(apiListo && animLista) mostrarResultados(apiResult.multas, val, tipo, apiResult.raw);
-  }
-
-  setTimeout(function(){ animLista=true; intentarMostrar(); }, 4800);
-
-  if(SIMIT_PROXY_URL){
-    var param = tipo==='cedula' ? 'cedula='+encodeURIComponent(val) : 'placa='+encodeURIComponent(val);
-    fetch(SIMIT_PROXY_URL + '?' + param)
-      .then(function(r){ return r.json(); })
-      .then(function(data){
-        if(data.success){
-          apiResult={multas:data.multas, raw:data};
-        } else {
-          apiResult={multas:[], raw:{modo:'selector'}};
-        }
-        apiListo=true;
-        intentarMostrar();
-      })
-      .catch(function(){
-        apiResult={multas:[], raw:{modo:'selector'}};
-        apiListo=true;
-        intentarMostrar();
-      });
-  } else {
-    // Sin proxy → mostrar selector de multas directamente
-    setTimeout(function(){
-      apiResult={multas:[], raw:{modo:'selector'}};
-      apiListo=true;
-      intentarMostrar();
-    }, 800);
-  }
-}
-
-function consultarSIMITReal(val, tipo){ /* legacy — reemplazada por animarLoader */ }
-
-function manejarRedirectSIMIT(data, val, tipo){
-  document.getElementById('sp2').classList.remove('active');
-  document.getElementById('sp3').classList.add('active');
-  document.getElementById('mmodal-title').textContent = '🔍 Consulta en SIMIT';
-
-  var etiqueta = tipo==='cedula' ? 'Cédula' : 'Placa';
-  var simitUrl = 'https://consulta.simit.org.co/Simit/indexA.jsp';
-
-  var html =
-    // ── Fase 1: pantalla inicial ──────────────────────────────────────────────
-    '<div id="simit-fase1">' +
-
-    // Dato destacado (lo primero que ve el usuario)
-    '<div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">' +
-    '<div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:rgba(212,160,23,0.08);border-radius:50%;"></div>' +
-    '<p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Consultar en SIMIT</p>' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
-    '<div>' +
-    '<div style="color:#fff;font-size:1.6rem;font-weight:900;letter-spacing:3px;line-height:1;">'+val+'</div>' +
-    '<div style="color:#94a3b8;font-size:0.75rem;margin-top:3px;">'+etiqueta+'</div>' +
-    '</div>' +
-    '<button onclick="copiarDato(\''+val+'\')" style="background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;" id="btn-copiar">' +
-    '<i class="fas fa-copy"></i> Copiar</button>' +
-    '</div>' +
-    '</div>' +
-
-    // Instrucciones compactas
-    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
-    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
-    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">1</span></div>' +
-    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Abre el SIMIT oficial</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Se abrirá sin cerrar esta página</p></div>' +
-    '</div>' +
-    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
-    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">2</span></div>' +
-    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Ingresa <span style="color:var(--gold);">'+val+'</span> y consulta</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Usa el botón <strong>Copiar</strong> de arriba</p></div>' +
-    '</div>' +
-    '<div style="display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border-radius:10px;padding:12px 14px;">' +
-    '<div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;"><span style="color:var(--gold);font-size:0.75rem;font-weight:800;">3</span></div>' +
-    '<div><p style="margin:0;font-size:0.85rem;font-weight:700;color:var(--navy);">Regresa y toca el botón rojo</p><p style="margin:3px 0 0;font-size:0.78rem;color:var(--gray);">Te aparece al volver aquí</p></div>' +
-    '</div>' +
-    '</div>' +
-
-    // Botón principal — abre popup/pestaña
-    '<button onclick="abrirSIMIT(\''+simitUrl+'\',\''+val+'\')" class="btn btn-navy btn-full" style="padding:17px;font-size:1rem;font-weight:800;border-radius:13px;margin-bottom:10px;width:100%;border:none;cursor:pointer;">' +
-    '<i class="fas fa-external-link-alt" style="margin-right:8px;"></i>Consultar en SIMIT Oficial</button>' +
-
-    '<p style="font-size:0.72rem;color:#94a3b8;text-align:center;margin:0;">Esta página permanece abierta mientras consultas en SIMIT</p>' +
-    '</div>' + // fin fase1
-
-    // ── Fase 2: pantalla de espera (se muestra tras abrir SIMIT) ─────────────
-    '<div id="simit-fase2" style="display:none;">' +
-
-    // Animación de espera
-    '<div style="text-align:center;padding:10px 0 20px;">' +
-    '<div style="position:relative;width:80px;height:80px;margin:0 auto 16px;">' +
-    '<div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(212,160,23,0.2);"></div>' +
-    '<div id="simit-spinner" style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--gold);animation:spin 1s linear infinite;"></div>' +
-    '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><i class="fas fa-search" style="color:var(--gold);font-size:22px;"></i></div>' +
-    '</div>' +
-    '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;font-size:1.1rem;margin:0 0 6px;">Esperando tu consulta…</h3>' +
-    '<p style="color:var(--gray);font-size:0.83rem;margin:0;">Tenemos <strong>'+val+'</strong> listo para cuando vuelvas</p>' +
-    '</div>' +
-
-    // Recordatorio del dato
-    '<div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">' +
-    '<div><p style="color:#94a3b8;font-size:0.7rem;margin:0 0 3px;text-transform:uppercase;letter-spacing:1px;">'+etiqueta+' a consultar</p>' +
-    '<p style="color:#fff;font-size:1.35rem;font-weight:900;letter-spacing:3px;margin:0;">'+val+'</p></div>' +
-    '<button onclick="copiarDato(\''+val+'\')" style="background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:8px 12px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;" id="btn-copiar2">' +
-    '<i class="fas fa-copy"></i> Copiar</button>' +
-    '</div>' +
-
-    // Botones de resultado (sticky en mobile)
-    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">' +
-    '<button class="btn btn-red btn-full btn-pulse" onclick="goToStep(4)" style="padding:18px;font-size:1rem;font-weight:800;border-radius:13px;border:none;cursor:pointer;width:100%;">' +
-    '<i class="fas fa-exclamation-triangle" style="margin-right:8px;"></i>¡Tengo multas! — Quiero Eliminarlas</button>' +
-    '<button onclick="sinMultasSIMIT()" style="background:#f0f4ff;border:2px solid var(--border);border-radius:13px;padding:15px;font-size:0.92rem;font-weight:700;color:var(--navy);cursor:pointer;width:100%;">' +
-    '<i class="fas fa-check-circle" style="margin-right:8px;color:var(--green);"></i>No tengo multas / Quiero verificar</button>' +
-    '</div>' +
-
-    '<div style="text-align:center;">' +
-    '<button onclick="mostrarFase1Simit()" style="background:none;border:none;color:var(--gray);font-size:0.78rem;cursor:pointer;text-decoration:underline;">' +
-    '← Volver a las instrucciones</button>' +
-    '</div>' +
-    '</div>'; // fin fase2
-
-  document.getElementById('result-content').innerHTML = html;
-  for(var i=1;i<=5;i++){
-    var d=document.getElementById('sd'+i);
-    if(d) d.classList.toggle('active', i<=3);
-  }
-}
-
-function abrirSIMIT(url, val){
-  // En desktop abrir popup; en móvil nueva pestaña
+function abrirSIMIT2(){
+  var url = 'https://consulta.simit.org.co/Simit/indexA.jsp';
   var esMovil = window.innerWidth < 768;
   if(!esMovil){
-    var popup = window.open(url, 'simit_consulta',
-      'width=900,height=650,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
-    if(!popup || popup.closed){
-      // Popup bloqueado → nueva pestaña
-      window.open(url, '_blank');
-    }
+    var popup = window.open(url, 'simit_consulta', 'width=900,height=650,scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+    if(!popup || popup.closed){ window.open(url, '_blank'); }
   } else {
     window.open(url, '_blank');
   }
-  // Mostrar fase de espera
-  var f1 = document.getElementById('simit-fase1');
-  var f2 = document.getElementById('simit-fase2');
-  if(f1) f1.style.cssText = 'animation:fadeOut .3s ease forwards;';
-  setTimeout(function(){
-    if(f1) f1.style.display='none';
-    if(f2){ f2.style.display='block'; f2.style.animation='fadeIn .4s ease'; }
-  }, 280);
+  jwTrack('simit_oficial_abierto', { tipo: _tipoConsultado });
+  document.getElementById('s2-fase1').style.display='none';
+  document.getElementById('s2-fase2').style.display='block';
 }
 
-function mostrarFase1Simit(){
-  var f1 = document.getElementById('simit-fase1');
-  var f2 = document.getElementById('simit-fase2');
-  if(f2) f2.style.display='none';
-  if(f1){ f1.style.display='block'; f1.style.animation='fadeIn .3s ease'; }
+function mostrarFase1Simit2(){
+  document.getElementById('s2-fase2').style.display='none';
+  document.getElementById('s2-fase1').style.display='block';
 }
 
-function copiarDato(val){
+function copiarDato2(){
+  var val = _valorConsultado;
+  var btn = document.getElementById('s2-btn-copiar');
+  var marcarCopiado = function(){
+    if(!btn) return;
+    btn.innerHTML='<i class="fas fa-check"></i> Copiado';
+    btn.style.background='rgba(46,199,109,0.15)'; btn.style.borderColor='rgba(46,199,109,0.5)'; btn.style.color='var(--green)';
+    setTimeout(function(){
+      btn.innerHTML='<i class="fas fa-copy"></i> Copiar';
+      btn.style.background='rgba(212,160,23,0.15)'; btn.style.borderColor='rgba(212,160,23,0.4)'; btn.style.color='var(--gold)';
+    }, 2000);
+  };
   if(navigator.clipboard){
-    navigator.clipboard.writeText(val).then(function(){
-      var b1 = document.getElementById('btn-copiar');
-      var b2 = document.getElementById('btn-copiar2');
-      [b1,b2].forEach(function(b){ if(b){ b.innerHTML='<i class="fas fa-check"></i> Copiado'; b.style.background='rgba(46,199,109,0.15)'; b.style.borderColor='rgba(46,199,109,0.5)'; b.style.color='var(--green)'; } });
-      setTimeout(function(){
-        [b1,b2].forEach(function(b){ if(b){ b.innerHTML='<i class="fas fa-copy"></i> Copiar'; b.style.background='rgba(212,160,23,0.15)'; b.style.borderColor='rgba(212,160,23,0.4)'; b.style.color='var(--gold)'; } });
-      }, 2000);
-    });
+    navigator.clipboard.writeText(val).then(marcarCopiado);
   } else {
-    // Fallback para iOS Safari antiguo
     var ta = document.createElement('textarea');
     ta.value = val; ta.style.position='fixed'; ta.style.opacity='0';
     document.body.appendChild(ta); ta.select(); document.execCommand('copy');
     document.body.removeChild(ta);
+    marcarCopiado();
   }
 }
 
-function sinMultasSIMIT(){
-  document.getElementById('sp3').classList.remove('active');
-  document.getElementById('sp3').classList.add('done');
-  // Mostrar mensaje de celebración antes de ir a paso 4
-  var rc = document.getElementById('result-content');
-  if(rc){
-    rc.innerHTML =
-      '<div style="text-align:center;padding:24px 16px;">' +
-      '<div style="font-size:3.5rem;margin-bottom:14px;">🎉</div>' +
-      '<h3 style="color:var(--navy);font-family:\'Playfair Display\',serif;font-size:1.2rem;margin-bottom:10px;">¡Excelentes noticias!</h3>' +
-      '<p style="color:var(--gray);font-size:0.88rem;line-height:1.7;margin-bottom:20px;">Si el SIMIT no muestra multas, estás libre.<br>Si tienes alguna duda o quieres asesoría personalizada, escríbenos por WhatsApp.</p>' +
-      '<a href="https://wa.me/573159318400?text=Hola%2C+consulté+en+SIMIT+y+quiero+verificar+mi+situación" target="_blank" class="btn btn-wa btn-full" style="text-decoration:none;padding:15px;font-size:0.95rem;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;">' +
-      '<i class="fab fa-whatsapp"></i> Hablar con un asesor gratis</a>' +
-      '</div>';
-  }
+// ===================== PASO 3: REPORTE REAL (sin datos inventados) =====================
+function s3SinMultas(){
+  jwTrack('reporte_sin_multas', {});
+  document.getElementById('s3-inicio').style.display='none';
+  document.getElementById('s3-sinmultas').style.display='block';
 }
 
-function mostrarBotonRegreso(){
-  // Mantener por compatibilidad — ya no se usa en el nuevo flujo
+function s3ConMultas(){
+  document.getElementById('s3-inicio').style.display='none';
+  document.getElementById('s3-form').style.display='block';
+  if(!document.querySelector('.multa-row')) agregarMultaRow();
 }
 
-function mostrarResultados(multas,val,tipo,apiData){
-  jwTrack('resultado_mostrado', { tipo: tipo, servicio: tipoServicio });
-  mostrarSelectorMultas(val, tipo, tipoServicio);
+var _multaRowSeq = 0;
+function agregarMultaRow(){
+  _multaRowSeq++;
+  var id = _multaRowSeq;
+  var wrap = document.getElementById('multas-list');
+  var div = document.createElement('div');
+  div.className = 'multa-row';
+  div.id = 'multa-row-'+id;
+  var n = wrap.children.length + 1;
+  div.innerHTML =
+    '<div class="multa-row-head"><strong>Multa #'+n+'</strong>'+(n>1?'<button type="button" class="btn-quitar-multa" onclick="quitarMultaRow('+id+')">Quitar</button>':'')+'</div>'+
+    '<div class="form-grid2">'+
+      '<div class="fg"><label>Fecha de la infracción</label><input type="date" class="mr-fecha" max="'+new Date().toISOString().slice(0,10)+'"></div>'+
+      '<div class="fg"><label>Valor de la multa</label><input type="number" class="mr-valor" placeholder="435000" inputmode="numeric"></div>'+
+      '<div class="fg fg-full"><label>Ciudad / organismo de tránsito</label><input type="text" class="mr-ciudad" placeholder="Ej: Secretaría de Movilidad de Bogotá"></div>'+
+      '<div class="fg fg-full"><label>¿Te notificaron formalmente (carta/correo certificado) dentro de los 3 días hábiles?</label>'+
+        '<select class="mr-notif"><option value="si">Sí, me notificaron a tiempo</option><option value="no">No, nunca me notificaron</option><option value="nose" selected>No estoy seguro/a</option></select>'+
+      '</div>'+
+    '</div>';
+  wrap.appendChild(div);
 }
 
-// ─── Generador determinístico de datos de multa (basado en el valor ingresado) ──
-function generarDatoMulta(val){
-  // Usar los dígitos del valor para generar datos consistentes (mismo usuario = mismos datos)
-  var seed = 0;
-  for(var i=0;i<val.length;i++) seed += val.charCodeAt(i) * (i+1);
+function quitarMultaRow(id){
+  var el = document.getElementById('multa-row-'+id);
+  if(el) el.remove();
+  document.querySelectorAll('.multa-row').forEach(function(row,i){
+    var h = row.querySelector('.multa-row-head strong');
+    if(h) h.textContent = 'Multa #'+(i+1);
+  });
+}
 
-  var valores = [287400, 345000, 412600, 518000, 621000, 756000, 890500, 1024000, 1236000, 1540000];
-  var causales = [
-    'Exceso de velocidad (Art. 77 Ley 769)',
-    'No acatar señal de tránsito (Art. 60 Ley 769)',
-    'Violación semáforo en rojo (Art. 79 Ley 769)',
-    'No uso de cinturón de seguridad (Art. 82 Ley 769)',
-    'Infracción carril exclusivo (Art. 60 Ley 769)',
-  ];
-  var años  = ['2019','2020','2021','2022','2023'];
-  var meses = ['02','03','05','07','08','09','11'];
-
-  var idx  = seed % valores.length;
-  var cidx = seed % causales.length;
-  var aidx = seed % años.length;
-  var midx = (seed * 3) % meses.length;
-  var dia  = String((seed % 25) + 1).padStart(2, '0');
-
-  // Número de comparendo realista (formato colombiano)
-  var numComp = val.substring(0,3) + '-' + String((seed % 89000) + 10000) + '-' + años[aidx].substring(2);
-
-  return {
-    comparendo: numComp,
-    fecha: dia + '/' + meses[midx] + '/' + años[aidx],
-    causal: causales[cidx],
-    valor: valores[idx],
-    estado: 'En cobro coactivo – Ejecutoriado',
+var _capturaSimitBase64 = null;
+var _capturaSimitNombre = null;
+function onCapturaSimitSeleccionada(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 8*1024*1024){ alert('El archivo es muy grande (máx. 8MB).'); e.target.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    _capturaSimitBase64 = ev.target.result;
+    _capturaSimitNombre = file.name;
+    var chip = document.getElementById('captura-simit-chip');
+    if(chip) chip.innerHTML = '<div class="upload-file-chip"><i class="fas fa-file-image"></i> '+file.name+' <i class="fas fa-check-circle" style="margin-left:auto;color:#16a34a;"></i></div>';
   };
+  reader.readAsDataURL(file);
 }
 
-function mostrarSelectorMultas(val, tipo, servicio){
-  document.getElementById('sp2').classList.remove('active');
-  document.getElementById('sp3').classList.add('active');
-  document.getElementById('mmodal-title').textContent = 'Resultado — Elige tu plan';
+// ── Cálculo legal real: prescripción (Art. 136 Ley 769/2002) y notificación (Ley 1843/2017) ──
+var _multasReportadas = [];
+function calcularElegibilidad(){
+  var rows = document.querySelectorAll('.multa-row');
+  var lista = [];
+  var faltaFecha = false;
+  rows.forEach(function(row){
+    var fecha = row.querySelector('.mr-fecha').value;
+    var valor = row.querySelector('.mr-valor').value;
+    var ciudad = row.querySelector('.mr-ciudad').value.trim();
+    var notif = row.querySelector('.mr-notif').value;
+    if(!fecha){ faltaFecha = true; return; }
+    var fechaObj = new Date(fecha+'T00:00:00');
+    var edadAnios = (Date.now() - fechaObj.getTime()) / (1000*60*60*24*365.25);
+    var estado, causal;
+    if(edadAnios >= 3){
+      estado='aplica'; causal='Prescripción: más de 3 años sin cobro efectivo (Art. 136, Ley 769 de 2002).';
+    } else if(notif==='no'){
+      estado='aplica'; causal='Notificación defectuosa: no fuiste notificado formalmente (Ley 1843 de 2017).';
+    } else if(notif==='nose'){
+      estado='revisar'; causal='Posible notificación defectuosa — un abogado debe confirmar cómo y cuándo te notificaron.';
+    } else {
+      estado='no_aplica'; causal='Por ahora no cumple causal de prescripción ni de notificación defectuosa, según lo reportado.';
+    }
+    lista.push({ fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, estado:estado, causal:causal });
+  });
 
-  var etiqueta = tipo === 'cedula' ? 'C.C.' : 'Placa';
-  servicio = servicio || '2018';
-
-  // Keyword WA según tipo de caso
-  var keyword = servicio === 'prescripcion' ? 'MULTA-PRESCRITA' :
-                servicio === 'reciente'      ? 'MULTA-RECIENTE'  : 'INICIAR-TRAMITE';
-
-  var msgInmediato = encodeURIComponent(
-    keyword + '\n\nHola, acabo de consultar en juridicosweb.com y quiero iniciar el tramite.\n\n' +
-    etiqueta + ': ' + val + '\n' +
-    'Plan elegido: TODO INCLUIDO - $45.000\n\n' +
-    'Quedo listo para recibir instrucciones de pago. Gracias.'
-  );
-  var msgDiferido = encodeURIComponent(
-    keyword + '\n\nHola, acabo de consultar en juridicosweb.com y quiero iniciar el tramite.\n\n' +
-    etiqueta + ': ' + val + '\n' +
-    'Plan elegido: PAGO AL ELIMINAR - Adelanto $19.800\n\n' +
-    'Quedo esperando instrucciones para el adelanto. Gracias.'
-  );
-
-  // Bloque legal según tipo de caso
-  var bloqueLegal = '';
-  if(servicio === 'prescripcion'){
-    bloqueLegal =
-      '<div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid rgba(14,165,233,0.3);border-radius:12px;padding:14px 16px;margin-bottom:14px;">' +
-      '<p style="font-size:0.8rem;font-weight:800;color:#0369a1;margin:0 0 6px;"><i class="fas fa-hourglass-end" style="margin-right:6px;"></i>Tu caso: PRESCRIPCION DE LA MULTA</p>' +
-      '<p style="font-size:0.78rem;color:#0c4a6e;margin:0 0 10px;line-height:1.65;">La ley colombiana es clara: toda multa de transito que lleve <strong>mas de 3 anos sin cobro efectivo prescribe</strong> (Art. 136, Ley 769/2002). Esto significa que la deuda pierde validez legal y la secretaria esta obligada a eliminarla del SIMIT si se la exiges formalmente.</p>' +
-      '<div style="background:rgba(255,255,255,0.6);border-radius:8px;padding:9px 12px;display:flex;align-items:flex-start;gap:8px;">' +
-      '<i class="fas fa-gavel" style="color:#0369a1;font-size:0.85rem;flex-shrink:0;margin-top:1px;"></i>' +
-      '<p style="font-size:0.72rem;color:#0c4a6e;margin:0;line-height:1.6;"><strong>Fundamento:</strong> Art. 136 Ley 769/2002 · Prescripcion de sanciones de transito · La secretaria tiene 15 dias habiles para responder y eliminar el registro.</p>' +
-      '</div>' +
-      '</div>';
-  } else if(servicio === 'reciente'){
-    bloqueLegal =
-      '<div style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid rgba(234,88,12,0.3);border-radius:12px;padding:14px 16px;margin-bottom:14px;">' +
-      '<p style="font-size:0.8rem;font-weight:800;color:#c2410c;margin:0 0 6px;"><i class="fas fa-bell-slash" style="margin-right:6px;"></i>Tu caso: NOTIFICACION DEFECTUOSA</p>' +
-      '<p style="font-size:0.78rem;color:#7c2d12;margin:0 0 10px;line-height:1.65;">La Ley 1843 de 2017 obliga a las secretarias a notificarte la multa en <strong>maximo 3 dias habiles</strong> desde que la camara la capturo, a la direccion que tienes registrada en el RUNT. Si esto no se cumplio, la multa tiene causal de nulidad y puede eliminarse.</p>' +
-      '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">' +
-      '<div style="background:rgba(255,255,255,0.6);border-radius:7px;padding:7px 11px;display:flex;align-items:center;gap:8px;">' +
-      '<i class="fas fa-clock" style="color:#c2410c;font-size:0.75rem;flex-shrink:0;"></i>' +
-      '<span style="font-size:0.72rem;color:#7c2d12;font-weight:600;">Te notificaron despues de 13 dias habiles desde la fecha de la multa</span>' +
-      '</div>' +
-      '<div style="background:rgba(255,255,255,0.6);border-radius:7px;padding:7px 11px;display:flex;align-items:center;gap:8px;">' +
-      '<i class="fas fa-envelope-open" style="color:#c2410c;font-size:0.75rem;flex-shrink:0;"></i>' +
-      '<span style="font-size:0.72rem;color:#7c2d12;font-weight:600;">Nunca te llegó notificacion formal a tu direccion del RUNT</span>' +
-      '</div>' +
-      '<div style="background:rgba(255,255,255,0.6);border-radius:7px;padding:7px 11px;display:flex;align-items:center;gap:8px;">' +
-      '<i class="fas fa-exclamation-circle" style="color:#c2410c;font-size:0.75rem;flex-shrink:0;"></i>' +
-      '<span style="font-size:0.72rem;color:#7c2d12;font-weight:600;">La notificacion tenia errores en tus datos o fue enviada a otra direccion</span>' +
-      '</div>' +
-      '</div>' +
-      '<div style="background:rgba(255,255,255,0.6);border-radius:8px;padding:9px 12px;display:flex;align-items:flex-start;gap:8px;">' +
-      '<i class="fas fa-gavel" style="color:#c2410c;font-size:0.85rem;flex-shrink:0;margin-top:1px;"></i>' +
-      '<p style="font-size:0.72rem;color:#7c2d12;margin:0;line-height:1.6;"><strong>Fundamento:</strong> Ley 1843/2017 Art. 6 · Decreto 431/2017 · Notificacion invalida = nulidad del comparendo.</p>' +
-      '</div>' +
-      '</div>';
-  } else {
-    bloqueLegal =
-      '<div style="background:rgba(212,160,23,0.06);border:1px solid rgba(212,160,23,0.25);border-radius:10px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;">' +
-      '<i class="fas fa-balance-scale" style="color:var(--gold);font-size:1rem;flex-shrink:0;margin-top:1px;"></i>' +
-      '<div>' +
-      '<p style="font-size:0.78rem;color:var(--navy);font-weight:800;margin:0 0 3px;">Fundamento legal confirmado</p>' +
-      '<p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.55;">Ley 1843 de 2017 + Investigacion Supertransporte 2026. Tus multas califican para ser eliminadas del SIMIT mediante proceso legal.</p>' +
-      '</div>' +
-      '</div>';
+  if(lista.length===0){
+    alert(faltaFecha ? 'Ingresa al menos la fecha de cada multa que reportes.' : 'Agrega al menos una multa.');
+    return;
   }
-  var waBase = 'https://wa.me/573159318400?text=';
+  jwTrack('multas_reportadas', { cantidad: lista.length });
+  _multasReportadas = lista;
+  mostrarResultadoReal(lista);
+}
+
+function badgeInfo(estado){
+  if(estado==='aplica') return {clase:'badge-aplica', texto:'Aplica para eliminar'};
+  if(estado==='revisar') return {clase:'badge-revisar', texto:'Por revisar con un abogado'};
+  return {clase:'badge-no-aplica', texto:'No aplica por ahora'};
+}
+
+function mostrarResultadoReal(lista){
+  document.getElementById('s3-form').style.display='none';
+  var wrap = document.getElementById('s3-resultado');
+  wrap.style.display='block';
+
+  var aplican = lista.filter(function(m){return m.estado==='aplica';});
+  var revisar = lista.filter(function(m){return m.estado==='revisar';});
+
+  var filasHtml = lista.map(function(m,i){
+    var b = badgeInfo(m.estado);
+    var fechaFmt = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+    var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : 'Valor no indicado';
+    return '<div class="multa-row-r"><div class="mr-left"><strong>Multa #'+(i+1)+' · '+fechaFmt+'</strong><span>'+(m.ciudad||'Ciudad no indicada')+'</span>'+
+      '<span style="display:block;margin-top:4px;color:var(--navy);font-size:0.75rem;">'+m.causal+'</span>'+
+      '<span class="'+b.clase+'">'+b.texto+'</span></div><div class="mr-right"><div class="valor">'+valorFmt+'</div></div></div>';
+  }).join('');
 
   var html =
-    // ── Encabezado resultado ─────────────────────────────────────────────────
-    '<div style="background:linear-gradient(135deg,#0a1628,#1a3a6b);border-radius:14px;padding:14px 16px;margin-bottom:14px;">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
-    '<div>' +
-    '<p style="color:#94a3b8;font-size:0.67rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 3px;">' + etiqueta + ' consultado</p>' +
-    '<p style="color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:2px;margin:0;">' + val + '</p>' +
-    '</div>' +
-    '<div style="background:rgba(46,199,109,0.18);border:1px solid rgba(46,199,109,0.45);border-radius:8px;padding:6px 12px;text-align:center;">' +
-    '<p style="color:#4ade80;font-size:0.62rem;font-weight:800;text-transform:uppercase;margin:0 0 1px;">Estado</p>' +
-    '<p style="color:#fff;font-size:0.85rem;font-weight:900;margin:0;">Aplica para eliminar</p>' +
-    '</div>' +
-    '</div>' +
-    // Resumen sin tipo de multa — solo causales legales
-    '<div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:9px 12px;display:flex;align-items:flex-start;gap:8px;">' +
-    '<i class="fas fa-shield-alt" style="color:var(--gold);font-size:0.85rem;flex-shrink:0;margin-top:1px;"></i>' +
-    '<p style="color:#cbd5e1;font-size:0.73rem;margin:0;line-height:1.55;">Se identificaron comparendos con causales de nulidad vigentes. Aplican para tramitar Derecho de Peticion ante la secretaria de transito.</p>' +
-    '</div>' +
-    '</div>' +
+    '<div class="result-header"><h4>Resultado de tu reporte</h4><span class="r-count">'+lista.length+' multa'+(lista.length>1?'s':'')+'</span></div>'+
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-bottom:16px;">'+filasHtml+'</div>';
 
-    // ── Bloque legal dinámico según tipo de caso ─────────────────────────────
-    bloqueLegal +
-
-    // ── Título ───────────────────────────────────────────────────────────────
-    '<p style="font-size:0.8rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:0 0 12px;text-align:center;">Elige como iniciar tu tramite</p>' +
-
-    // ── PLAN RECOMENDADO: $45.000 ────────────────────────────────────────────
-    '<div style="border:2.5px solid #d4a017;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(212,160,23,0.2);">' +
-    '<div style="background:linear-gradient(90deg,#d4a017,#f5c842);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;">' +
-    '<span style="font-size:0.7rem;font-weight:800;color:#0a1628;letter-spacing:.5px;">RECOMENDADO — EL QUE MAS TE CONVIENE</span>' +
-    '<span style="font-size:0.68rem;font-weight:700;color:#0a1628;background:rgba(0,0,0,0.12);padding:2px 8px;border-radius:20px;">El mas popular</span>' +
-    '</div>' +
-    '<div style="padding:14px 16px;">' +
-    // Impacto visual: valor multa vs precio servicio
-    '<div style="background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1.5px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px;">' +
-    '<p style="font-size:0.7rem;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;">Cuanto te cuesta NO eliminarlas</p>' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
-    '<div style="text-align:center;">' +
-    '<p style="font-size:0.65rem;color:var(--gray);margin:0 0 2px;">Una sola multa vale</p>' +
-    '<p style="font-size:1.3rem;font-weight:900;color:#dc2626;margin:0;line-height:1;">$650.000+</p>' +
-    '<p style="font-size:0.62rem;color:var(--gray);margin:2px 0 0;">en el SIMIT</p>' +
-    '</div>' +
-    '<div style="font-size:1.4rem;color:#94a3b8;font-weight:300;">vs</div>' +
-    '<div style="text-align:center;">' +
-    '<p style="font-size:0.65rem;color:var(--gray);margin:0 0 2px;">Las eliminamos TODAS por</p>' +
-    '<p style="font-size:1.3rem;font-weight:900;color:#16a34a;margin:0;line-height:1;">$45.000</p>' +
-    '<p style="font-size:0.62rem;color:#16a34a;font-weight:700;margin:2px 0 0;">pago unico total</p>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
-    '<div>' +
-    '<p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Todo Incluido</p>' +
-    '<p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">Una secretaria · Todas tus multas incluidas</p>' +
-    '</div>' +
-    '<div style="text-align:right;flex-shrink:0;">' +
-    '<p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$45.000</p>' +
-    '<p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">pago unico · sin sorpresas</p>' +
-    '</div>' +
-    '</div>' +
-    // Beneficios
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">' +
-    '<div style="background:#f0fdf4;border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;flex-shrink:0;"></i><span style="font-size:0.72rem;color:var(--navy);font-weight:600;">Derecho de peticion</span></div>' +
-    '<div style="background:#f0fdf4;border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;flex-shrink:0;"></i><span style="font-size:0.72rem;color:var(--navy);font-weight:600;">Radicacion incluida</span></div>' +
-    '<div style="background:#f0fdf4;border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;flex-shrink:0;"></i><span style="font-size:0.72rem;color:var(--navy);font-weight:600;">Seguimiento completo</span></div>' +
-    '<div style="background:#f0fdf4;border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.75rem;flex-shrink:0;"></i><span style="font-size:0.72rem;color:var(--navy);font-weight:600;">Soporte WhatsApp</span></div>' +
-    '</div>' +
-    // Por qué es mejor
-    '<div style="background:rgba(212,160,23,0.08);border-radius:8px;padding:9px 12px;margin-bottom:12px;">' +
-    '<p style="font-size:0.72rem;color:#7a5c00;margin:0;line-height:1.7;"><strong>Piensalo asi:</strong> Una sola multa en el SIMIT vale mas de $650.000. Si tienes 3 multas eso es casi $2.000.000 en deuda. Por $45.000 — menos que un domicilio — las eliminamos TODAS. Es la decision mas inteligente que puedes tomar hoy.</p>' +
-    '</div>' +
-    '<button onclick="elegirPlan(\'inmediato\',\'' + val + '\',\'' + tipo + '\')" ' +
-    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#d4a017,#f5c842);color:#0a1628;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(212,160,23,0.45);letter-spacing:.2px;">' +
-    '<i class="fas fa-file-signature" style="font-size:1.1rem;"></i>Quiero este plan — Continuar' +
-    '</button>' +
-    '<a href="' + waBase + msgInmediato + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'inmediato\',valor:45000})" style="display:block;text-align:center;margin-top:8px;font-size:0.74rem;color:var(--gray);text-decoration:underline;">Prefiero hablar primero con un asesor</a>' +
-    '</div>' +
-    '</div>' +
-
-    // ── PLAN ALTERNATIVO: $19.800 ────────────────────────────────────────────
-    '<div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;margin-bottom:14px;">' +
-    '<div style="padding:14px 16px;">' +
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
-    '<div>' +
-    '<p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Pago al Eliminar</p>' +
-    '<p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">Para quienes prefieren pagar principalmente despues</p>' +
-    '</div>' +
-    '<div style="text-align:right;flex-shrink:0;">' +
-    '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$19.800</p>' +
-    '<p style="font-size:0.65rem;color:var(--gray);margin:1px 0 0;">adelanto inicial</p>' +
-    '</div>' +
-    '</div>' +
-    '<ul style="list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:5px;">' +
-    '<li style="font-size:0.74rem;color:var(--navy);display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.72rem;"></i>Adelanto de $19.800 para iniciar tramites</li>' +
-    '<li style="font-size:0.74rem;color:var(--navy);display:flex;align-items:center;gap:6px;"><i class="fas fa-check-circle" style="color:#16a34a;font-size:0.72rem;"></i>Derecho de peticion + radicacion</li>' +
-    '<li style="font-size:0.74rem;color:var(--gray);display:flex;align-items:center;gap:6px;"><i class="fas fa-info-circle" style="color:#94a3b8;font-size:0.72rem;"></i>$95.800 por cada multa al momento de eliminar</li>' +
-    '</ul>' +
-    // Aviso importante
-    '<div style="background:#fff8e1;border:1px solid rgba(212,160,23,0.4);border-radius:8px;padding:9px 12px;margin-bottom:12px;">' +
-    '<p style="font-size:0.71rem;color:#7a5c00;margin:0;line-height:1.65;"><i class="fas fa-exclamation-triangle" style="margin-right:4px;"></i><strong>Importante:</strong> El adelanto de $19.800 cubre los costos del tramite legal. Si al eliminar la multa no se cancela el valor acordado ($95.800), el comparendo debe ser re-registrado en el SIMIT por mandato legal. Siempre recomendamos el Plan Todo Incluido por mayor ahorro y tranquilidad.</p>' +
-    '</div>' +
-    '<button onclick="elegirPlan(\'diferido\',\'' + val + '\',\'' + tipo + '\')" ' +
-    'style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 3px 12px rgba(10,22,40,0.3);">' +
-    '<i class="fas fa-file-signature" style="font-size:1rem;"></i>Elegir este plan — Continuar' +
-    '</button>' +
-    '<a href="' + waBase + msgDiferido + '" target="_blank" onclick="jwTrack(\'pago_iniciado\',{plan:\'diferido\',valor:19800})" style="display:block;text-align:center;margin-top:8px;font-size:0.74rem;color:var(--gray);text-decoration:underline;">Prefiero hablar primero con un asesor</a>' +
-    '</div>' +
-    '</div>' +
-
-    // ── Sello de confianza ───────────────────────────────────────────────────
-    '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 0;">' +
-    '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Proceso 100% legal</span>' +
-    '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-headset" style="color:#16a34a;"></i>Asesor responde en minutos</span>' +
-    '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i>98% exito</span>' +
-    '</div>';
-
-  document.getElementById('result-content').innerHTML = html;
-
-  for(var i=1;i<=3;i++){
-    var d=document.getElementById('sd'+i);
-    if(d) d.classList.toggle('active', i<=3);
+  if(aplican.length > 0){
+    html += renderPlanes(aplican.length);
+  } else if(revisar.length > 0){
+    html +=
+      '<div class="result-cta-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid rgba(234,88,12,0.25);">'+
+      '<p style="color:#7c2d12;font-size:0.85rem;line-height:1.6;"><strong>Ninguna de tus multas prescribió todavía</strong>, pero hay '+revisar.length+' con posible notificación defectuosa. Un abogado necesita revisar cómo te notificaron antes de cobrarte nada.</p>'+
+      '</div>'+
+      '<a href="https://wa.me/573159318400?text=Hola%2C+report%C3%A9+mis+multas+en+juridicosweb.com+y+quiero+que+revisen+si+aplican" target="_blank" class="btn btn-wa btn-full"><i class="fab fa-whatsapp"></i> Revisar mi caso gratis con un abogado</a>';
+  } else {
+    html +=
+      '<div class="result-cta-box">'+
+      '<p style="font-size:0.85rem;line-height:1.6;">Según lo que reportaste, tus multas <strong>todavía no cumplen</strong> ninguna causal de prescripción o notificación defectuosa. Eso puede cambiar con el tiempo, o puede haber otra causal que un abogado sí identifique revisando tu caso a fondo.</p>'+
+      '</div>'+
+      '<a href="https://wa.me/573159318400?text=Hola%2C+report%C3%A9+mis+multas+en+juridicosweb.com+y+quiero+una+revisi%C3%B3n+m%C3%A1s+a+fondo" target="_blank" class="btn btn-wa btn-full"><i class="fab fa-whatsapp"></i> Pedir revisión gratuita con un abogado</a>';
   }
+
+  wrap.innerHTML = html;
+}
+
+function renderPlanes(numAplican){
+  return (
+    '<p style="font-size:0.8rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 12px;text-align:center;">'+numAplican+' de tus multas aplican — elige cómo iniciar</p>'+
+    '<div style="border:2.5px solid #d4a017;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(212,160,23,0.2);">'+
+    '<div style="background:linear-gradient(90deg,#d4a017,#f5c842);padding:6px 16px;"><span style="font-size:0.7rem;font-weight:800;color:#0a1628;letter-spacing:.5px;">RECOMENDADO</span></div>'+
+    '<div style="padding:14px 16px;">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">'+
+    '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Todo Incluido</p><p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">Una secretaría · '+(numAplican>1?'Las '+numAplican+' multas que aplican':'La multa que aplica')+'</p></div>'+
+    '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$45.000</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">pago único</p></div>'+
+    '</div>'+
+    '<button onclick="elegirPlan(\'inmediato\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#d4a017,#f5c842);color:#0a1628;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(212,160,23,0.45);">'+
+    '<i class="fas fa-file-signature"></i>Quiero este plan — Continuar</button>'+
+    '</div></div>'+
+    '<div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;margin-bottom:14px;">'+
+    '<div style="padding:14px 16px;">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">'+
+    '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Pago al Eliminar</p><p style="font-size:0.73rem;color:var(--gray);margin:0;">Adelanto hoy, resto al eliminar</p></div>'+
+    '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$19.800</p></div>'+
+    '</div>'+
+    '<button onclick="elegirPlan(\'diferido\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;">'+
+    '<i class="fas fa-file-signature"></i>Elegir este plan — Continuar</button>'+
+    '</div></div>'+
+    '<div style="text-align:center;"><a href="https://wa.me/573159318400?text=Hola%2C+quiero+hablar+con+un+asesor+sobre+mis+multas" target="_blank" style="font-size:0.76rem;color:var(--gray);text-decoration:underline;">Prefiero hablar primero con un asesor</a></div>'
+  );
 }
 
 // ===================== ELEGIR PLAN → FORMULARIO =====================
 var pagoSel='inmediato';
-function elegirPlan(plan, val, tipo){
+function elegirPlan(plan){
   pagoSel = plan;
-  if(tipo==='cedula'){ document.getElementById('frm-cedula').value = val; }
-  else { document.getElementById('frm-placa').value = val; }
+  if(_tipoConsultado==='cedula'){ document.getElementById('frm-cedula').value = _valorConsultado; }
+  else { document.getElementById('frm-placa').value = _valorConsultado; }
   jwTrack('plan_elegido', { plan: plan });
   goToStep(4);
 }
@@ -1720,6 +1561,9 @@ function recogerDatosFormulario(){
     estadoPago    : 'PENDIENTE PAGO – Remarketing',
     fuente        : 'Landing juridicosweb.com',
     fechaLead     : new Date().toLocaleString('es-CO'),
+    multasReportadas   : JSON.stringify(_multasReportadas||[]),
+    capturaSimitNombre : _capturaSimitNombre || null,
+    capturaSimitBase64 : _capturaSimitBase64 || null,
   };
 }
 
@@ -1780,8 +1624,35 @@ function construirTextoPeticion(p){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
   var secretaria = 'Secretaría de Tránsito y Movilidad – '+p.ciudad;
 
+  // Multas que el propio cliente reportó y que el sistema calculó como aplicables — nunca genéricas.
+  var aplican = (_multasReportadas||[]).filter(function(m){ return m.estado==='aplica'; });
+  var hayPrescritas = aplican.some(function(m){ return m.causal.indexOf('Prescripción')===0; });
+  var hayNotif = aplican.some(function(m){ return m.causal.indexOf('Notificación')===0; });
+
+  var hechosMultas;
+  if(aplican.length){
+    hechosMultas = aplican.map(function(m,i){
+      var f = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+      var valorTxt = m.valor ? ' por valor de $'+Number(m.valor).toLocaleString('es-CO') : '';
+      return (i+1)+'. Comparendo de fecha '+f+valorTxt+(m.ciudad?', registrado ante '+m.ciudad:'')+'. '+m.causal;
+    }).join('\n\n');
+  } else {
+    hechosMultas = '1. Tengo registrado(s) comparendo(s) en el Sistema Integrado de Información sobre Multas y Sanciones de Tránsito (SIMIT) a mi nombre y/o al de mi vehículo.';
+  }
+
+  var fundamentoPrescripcion = hayPrescritas ?
+    '• Art. 136, Ley 769 de 2002 – Prescripción de las sanciones de tránsito a los tres (3) años.\n' : '';
+  var fundamentoNotif = hayNotif ?
+    '• Ley 1843 de 2017 y Decreto 431 de 2017 – Notificación de infracciones detectadas por medios técnicos dentro de los tres (3) días hábiles siguientes.\n' : '';
+
+  var pretensiones = [];
+  if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN de las sanciones relacionadas en el numeral correspondiente de los HECHOS, por haber transcurrido más de tres (3) años sin cobro efectivo.');
+  if(hayNotif) pretensiones.push('Que se declare la NULIDAD de los comparendos relacionados por notificación defectuosa o inexistente, conforme a la Ley 1843 de 2017.');
+  pretensiones.push('Que, en consecuencia, se ELIMINEN del sistema SIMIT los registros correspondientes a los comparendos aquí relacionados.');
+  var pretensionesTxt = pretensiones.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
+
   return p.ciudad+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
-    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE FOTOMULTAS\n'+
+    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE COMPARENDOS\n'+
     'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+(p.placa||'N/A')+'\n\n'+
     'Respetados señores:\n\n'+
     'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', en ejercicio del '+
@@ -1789,24 +1660,19 @@ function construirTextoPeticion(p){
     'Ley 1755 de 2015, me dirijo a ustedes para interponer el siguiente:\n\n'+
     'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
     'I. HECHOS\n\n'+
-    '1. Soy propietario/a del vehículo con placa '+(p.placa||'N/A')+' y tengo registrados comparendos en el SIMIT.\n\n'+
-    '2. La Supertransporte abrió investigación el 19 de mayo de 2026 contra 37 organismos de tránsito '+
-    'por operar cámaras sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), '+
-    'exigido por el Decreto 1074 de 2015.\n\n'+
-    '3. Las sanciones prescriben en 3 años según el Art. 136 de la Ley 769/2002.\n\n'+
-    '4. La Ley 1843/2017 exige notificación dentro de los 3 días hábiles siguientes a la detección.\n\n'+
+    hechosMultas + '\n\n'+
     'II. FUNDAMENTOS JURÍDICOS\n\n'+
-    '• Art. 23 Constitución Política de Colombia\n'+
-    '• Ley 1755 de 2015 – Derecho de Petición\n'+
-    '• Ley 769 de 2002 – Código Nacional de Tránsito\n'+
-    '• Ley 1843 de 2017 – Fotodetección de infracciones\n'+
-    '• Decreto 1074 de 2015 – Control metrológico\n'+
-    '• Investigación Supertransporte – Mayo 2026\n\n'+
+    '• Art. 23 Constitución Política de Colombia – Derecho de petición.\n'+
+    '• Ley 1755 de 2015 – Procedimiento del derecho de petición.\n'+
+    '• Ley 769 de 2002 – Código Nacional de Tránsito.\n'+
+    fundamentoPrescripcion +
+    fundamentoNotif +
+    '• Adicionalmente, la Superintendencia de Transporte adelanta investigaciones sobre el cumplimiento de los '+
+    'requisitos técnicos de los equipos de fotodetección (concepto de desempeño del INM exigido por el Decreto '+
+    '1074 de 2015), lo cual respalda la solicitud de que la administración verifique también la validez técnica '+
+    'de los comparendos aquí relacionados.\n\n'+
     'III. PRETENSIONES\n\n'+
-    '1. Que se declare la NULIDAD de los comparendos registrados bajo placa '+(p.placa||'N/A')+' por carecer '+
-    'los equipos de fotodetección del "concepto de desempeño" del INM.\n'+
-    '2. Que se declare la PRESCRIPCIÓN de las sanciones con más de 3 años sin cobro efectivo.\n'+
-    '3. Que se ELIMINEN del sistema SIMIT los registros correspondientes.\n\n'+
+    pretensionesTxt + '\n\n'+
     'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+'\n\n'+
     '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
 }
