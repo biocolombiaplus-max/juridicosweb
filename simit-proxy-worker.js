@@ -125,6 +125,7 @@ function adaptarRespuestaVerifik(raw) {
     estado: m.estadoComparendo || '',
     causalSugerida: m.descripcionInfraccion || '',
     placa: m.placavehiculo || '',
+    fotodeteccion: m.fotodeteccion === true,
   }));
   return { success: true, multas };
 }
