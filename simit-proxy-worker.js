@@ -83,6 +83,15 @@ export default {
       return json({ success: false, error: 'VERIFIK_TOKEN no configurado en el Worker' }, 500, cors);
     }
 
+    // Mientras la cuenta de Verifik esté en modo sandbox, sus resultados son
+    // simulados (normalmente "sin comparendos"). Mostrar eso como una consulta
+    // real sería engañoso, así que devolvemos success:false para que la app
+    // caiga al flujo manual honesto. En cuanto reemplaces este secreto por el
+    // token de Producción de Verifik, esto se activa solo — sin más cambios.
+    if (esTokenSandbox(env.VERIFIK_TOKEN)) {
+      return json({ success: false, error: 'Verifik está en modo sandbox (verificación de identidad pendiente)' }, 200, cors);
+    }
+
     try {
       const raw = await consultarVerifik(cedula, env.VERIFIK_TOKEN);
       const normalizado = adaptarRespuestaVerifik(raw);
@@ -92,6 +101,20 @@ export default {
     }
   },
 };
+
+// El JWT de Verifik incluye "mode":"sandbox" o "mode":"production" en su
+// payload — lo leemos sin librerías externas (decodificación base64url nativa
+// de Workers) para saber si los resultados son simulados o reales.
+function esTokenSandbox(token) {
+  try {
+    const payload = token.split('.')[1];
+    const normalizado = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const datos = JSON.parse(atob(normalizado));
+    return datos.mode === 'sandbox';
+  } catch (err) {
+    return false;
+  }
+}
 
 async function consultarVerifik(cedula, token) {
   const endpoint = `https://api.verifik.co/v2/co/simit/comparendos?documentType=CC&documentNumber=${encodeURIComponent(cedula)}`;
