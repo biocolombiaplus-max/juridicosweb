@@ -1275,6 +1275,7 @@ function resetFlujoSimit(){
   _multasReportadas = [];
   _capturaSimitBase64 = null;
   _capturaSimitNombre = null;
+  _placaAutoDetectada = '';
   var chip=document.getElementById('captura-simit-chip');
   if(chip) chip.innerHTML='';
 }
@@ -1402,9 +1403,18 @@ function mostrarMultasAutomaticas(multas){
     fEl.value = m.fecha || ''; fEl.disabled = true;
     vEl.value = m.valor || ''; vEl.disabled = true;
     cEl.value = m.ciudad || ''; cEl.disabled = true;
+    if(m.causalSugerida){
+      var infoEl = document.createElement('p');
+      infoEl.style.cssText = 'font-size:0.72rem;color:var(--gray);margin:6px 0 0;';
+      infoEl.innerHTML = '<i class="fas fa-info-circle"></i> Infracción registrada: '+m.causalSugerida;
+      fila.appendChild(infoEl);
+    }
+    if(m.placa) _placaAutoDetectada = m.placa;
     if(m.fecha) actualizarVistaPrevia(fEl);
   });
 }
+
+var _placaAutoDetectada = '';
 
 function abrirSIMIT2(){
   var url = 'https://consulta.simit.org.co/Simit/indexA.jsp';
@@ -1670,8 +1680,12 @@ function renderPlanes(aplican){
 var pagoSel='inmediato';
 function elegirPlan(plan){
   pagoSel = plan;
-  if(_tipoConsultado==='cedula'){ document.getElementById('frm-cedula').value = _valorConsultado; }
-  else { document.getElementById('frm-placa').value = _valorConsultado; }
+  if(_tipoConsultado==='cedula'){
+    document.getElementById('frm-cedula').value = _valorConsultado;
+    if(_placaAutoDetectada) document.getElementById('frm-placa').value = _placaAutoDetectada;
+  } else {
+    document.getElementById('frm-placa').value = _valorConsultado;
+  }
   jwTrack('plan_elegido', { plan: plan });
   goToStep(4);
 }
