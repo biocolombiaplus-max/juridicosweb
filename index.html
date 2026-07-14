@@ -895,6 +895,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- STEP 2: IR AL SIMIT OFICIAL (real, sin simulación) -->
       <div class="step-panel" id="sp2">
+        <div id="s2-auto-loader" style="display:none;">
+          <div class="simit-loader-wrap">
+            <div class="loader-ring"></div>
+            <p class="loader-title">Consultando el SIMIT oficial…</p>
+            <p class="loader-sub">Estamos verificando <strong id="s2-auto-valor"></strong> directamente con la fuente oficial</p>
+          </div>
+        </div>
         <div id="s2-fase1">
           <div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">
             <p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Vas a consultar</p>
@@ -952,7 +959,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div id="s3-form" style="display:none;">
-          <p style="color:var(--gray);font-size:0.83rem;margin-bottom:12px;">Copia lo que dice el SIMIT para cada comparendo. Con la fecha real calculamos si ya prescribió (más de 3 años, Art. 136 Ley 769/2002).</p>
+          <div id="s3-auto-aviso" style="display:none;background:rgba(46,199,109,0.08);border:1px solid rgba(46,199,109,0.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+            <p style="margin:0;font-size:0.78rem;color:#166534;line-height:1.6;"><i class="fas fa-check-circle"></i> <strong>Estos datos vienen directo de tu consulta oficial verificada</strong> — solo confírmanos si te notificaron cada multa.</p>
+          </div>
+          <p id="s3-form-intro" style="color:var(--gray);font-size:0.83rem;margin-bottom:12px;">Copia lo que dice el SIMIT para cada comparendo. Con la fecha real calculamos si ya prescribió (más de 3 años, Art. 136 Ley 769/2002).</p>
           <div id="multas-list"></div>
           <button type="button" onclick="agregarMultaRow()" style="background:none;border:2px dashed var(--border);border-radius:10px;padding:11px;width:100%;color:var(--navy);font-size:0.82rem;font-weight:700;cursor:pointer;margin-bottom:16px;"><i class="fas fa-plus"></i> Agregar otra multa</button>
 
@@ -1243,7 +1253,9 @@ function openSimitModal(e,tipo){
 
 function resetFlujoSimit(){
   // Limpia el estado de una consulta anterior para que el paso 3 siempre arranque desde cero
+  var s2auto=document.getElementById('s2-auto-loader');
   var s2f1=document.getElementById('s2-fase1'), s2f2=document.getElementById('s2-fase2');
+  if(s2auto) s2auto.style.display='none';
   if(s2f1) s2f1.style.display='block';
   if(s2f2) s2f2.style.display='none';
 
@@ -1253,6 +1265,9 @@ function resetFlujoSimit(){
   if(s3s) s3s.style.display='none';
   if(s3f) s3f.style.display='none';
   if(s3r){ s3r.style.display='none'; s3r.innerHTML=''; }
+  var s3aviso=document.getElementById('s3-auto-aviso'), s3intro=document.getElementById('s3-form-intro');
+  if(s3aviso) s3aviso.style.display='none';
+  if(s3intro) s3intro.style.display='block';
 
   var lista=document.getElementById('multas-list');
   if(lista) lista.innerHTML='';
@@ -1310,9 +1325,85 @@ function iniciarConsulta(){
   _tipoConsultado = tipo;
   document.getElementById('s2-valor').textContent = val;
   document.getElementById('s2-etiqueta').textContent = tipo==='cedula' ? 'Cédula' : 'Placa';
-  document.getElementById('s2-fase1').style.display='block';
-  document.getElementById('s2-fase2').style.display='none';
   goToStep(2);
+  intentarConsultaAutomatica(val, tipo);
+}
+
+// ── Consulta automática (Verifik/Apitude vía Cloudflare Worker) con respaldo manual ──
+// Mientras SIMIT_PROXY_URL no esté configurado (ver simit-proxy-worker.js), el
+// flujo cae directo al paso manual "Abrir SIMIT oficial" — nunca se inventa nada.
+function intentarConsultaAutomatica(val, tipo){
+  var proxyConfigurado = SIMIT_PROXY_URL && SIMIT_PROXY_URL.indexOf('TU-SUBDOMINIO')===-1;
+  var autoLoader = document.getElementById('s2-auto-loader');
+  var fase1 = document.getElementById('s2-fase1');
+  var fase2 = document.getElementById('s2-fase2');
+
+  if(!proxyConfigurado){
+    if(autoLoader) autoLoader.style.display='none';
+    if(fase1) fase1.style.display='block';
+    if(fase2) fase2.style.display='none';
+    return;
+  }
+
+  if(autoLoader) autoLoader.style.display='block';
+  if(fase1) fase1.style.display='none';
+  if(fase2) fase2.style.display='none';
+  var valorEl = document.getElementById('s2-auto-valor');
+  if(valorEl) valorEl.textContent = val;
+
+  var param = tipo==='cedula' ? 'cedula='+encodeURIComponent(val) : 'placa='+encodeURIComponent(val);
+  var inicio = Date.now();
+  jwTrack('consulta_automatica_iniciada', { tipo: tipo });
+
+  fetch(SIMIT_PROXY_URL + '?' + param)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var espera = Math.max(0, 1400 - (Date.now()-inicio));
+      setTimeout(function(){
+        if(data && data.success){
+          jwTrack('consulta_automatica_ok', { cantidad: (data.multas||[]).length });
+          mostrarMultasAutomaticas(data.multas||[]);
+        } else {
+          jwTrack('consulta_automatica_fallback', {});
+          if(autoLoader) autoLoader.style.display='none';
+          if(fase1) fase1.style.display='block';
+        }
+      }, espera);
+    })
+    .catch(function(){
+      jwTrack('consulta_automatica_error', {});
+      if(autoLoader) autoLoader.style.display='none';
+      if(fase1) fase1.style.display='block';
+    });
+}
+
+// Muestra en el paso 3 las multas reales que ya llegaron automáticamente —
+// solo falta que el cliente confirme la notificación de cada una (dato que
+// el proveedor de datos no entrega, porque es un hecho, no un registro).
+function mostrarMultasAutomaticas(multas){
+  goToStep(3);
+  document.getElementById('s3-inicio').style.display='none';
+
+  if(!multas.length){
+    s3SinMultas();
+    return;
+  }
+
+  document.getElementById('s3-form').style.display='block';
+  var aviso=document.getElementById('s3-auto-aviso'), intro=document.getElementById('s3-form-intro');
+  if(aviso) aviso.style.display='block';
+  if(intro) intro.style.display='none';
+
+  multas.forEach(function(m){
+    agregarMultaRow();
+    var filas = document.querySelectorAll('.multa-row');
+    var fila = filas[filas.length-1];
+    var fEl=fila.querySelector('.mr-fecha'), vEl=fila.querySelector('.mr-valor'), cEl=fila.querySelector('.mr-ciudad');
+    fEl.value = m.fecha || ''; fEl.disabled = true;
+    vEl.value = m.valor || ''; vEl.disabled = true;
+    cEl.value = m.ciudad || ''; cEl.disabled = true;
+    if(m.fecha) actualizarVistaPrevia(fEl);
+  });
 }
 
 function abrirSIMIT2(){
