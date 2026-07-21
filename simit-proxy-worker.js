@@ -14,13 +14,13 @@
  *      https://simit-proxy.tu-subdominio.workers.dev) y pégala en index.html,
  *      en la variable SIMIT_PROXY_URL (línea ~1113).
  *
- * ENDPOINT CONFIRMADO (verificado directamente en el panel de Verifik,
- * ai.verifik.co/postman?code=colombia_api_simit_subpoenas):
- *   GET https://api.verifik.co/v2/co/simit/comparendos
+ * ENDPOINT (ai.verifik.co/postman?code=colombia_api_simit_complete →
+ * "SIMIT - Consulta General por Documento de Identificación"):
+ *   GET https://api.verifik.co/v2/co/simit/consultar
  *   Headers: Accept: application/json, Authorization: Bearer <token>
- *   Params:  documentType (CC|CE|PA|RC|TI), documentNumber
- *   Costo:   0.3 créditos por consulta
- *   Respuesta real de ejemplo:
+ *   Params:  documentType (CC|CE|PA|RC|TI), documentNumber, includeCosts (true)
+ *   Costo:   0.4 créditos por consulta
+ *   Respuesta esperada (mismo esquema de comparendos documentado por Verifik):
  *     {
  *       "data": {
  *         "comparendos": [
@@ -117,7 +117,7 @@ function esTokenSandbox(token) {
 }
 
 async function consultarVerifik(cedula, token) {
-  const endpoint = `https://api.verifik.co/v2/co/simit/comparendos?documentType=CC&documentNumber=${encodeURIComponent(cedula)}`;
+  const endpoint = `https://api.verifik.co/v2/co/simit/consultar?documentType=CC&documentNumber=${encodeURIComponent(cedula)}&includeCosts=true`;
   const res = await fetch(endpoint, {
     headers: {
       Accept: 'application/json',
@@ -134,9 +134,12 @@ async function consultarVerifik(cedula, token) {
  * Convierte la respuesta real de Verifik al formato que espera index.html:
  *   { success: true, multas: [ { comparendo, fecha:'YYYY-MM-DD', valor:number,
  *     ciudad, estado }, ... ] }
+ * Se busca la lista de comparendos en las rutas donde Verifik suele anidarla
+ * (puede variar entre endpoints/versiones), para no romper si el nombre exacto
+ * del campo cambia.
  */
 function adaptarRespuestaVerifik(raw) {
-  const lista = raw?.data?.comparendos || [];
+  const lista = raw?.data?.comparendos || raw?.comparendos || raw?.data?.multas || raw?.multas || [];
   if (!Array.isArray(lista)) {
     return { success: false, error: 'Formato de respuesta inesperado de Verifik', raw };
   }
