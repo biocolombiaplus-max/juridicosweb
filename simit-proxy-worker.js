@@ -83,17 +83,24 @@ export default {
       return json({ success: false, error: 'VERIFIK_TOKEN no configurado en el Worker' }, 500, cors);
     }
 
+    // Al copiar/pegar el token en el dashboard de Cloudflare a veces se cuela
+    // un espacio, salto de línea o carácter invisible — eso rompe el header
+    // Authorization (solo acepta ASCII) y hace fallar la consulta real. Se
+    // limpia aquí para que el Worker no dependa de que el copy-paste sea
+    // perfecto.
+    const token = limpiarToken(env.VERIFIK_TOKEN);
+
     // Mientras la cuenta de Verifik esté en modo sandbox, sus resultados son
     // simulados (normalmente "sin comparendos"). Mostrar eso como una consulta
     // real sería engañoso, así que devolvemos success:false para que la app
     // caiga al flujo manual honesto. En cuanto reemplaces este secreto por el
     // token de Producción de Verifik, esto se activa solo — sin más cambios.
-    if (esTokenSandbox(env.VERIFIK_TOKEN)) {
+    if (esTokenSandbox(token)) {
       return json({ success: false, error: 'Verifik está en modo sandbox (verificación de identidad pendiente)' }, 200, cors);
     }
 
     try {
-      const raw = await consultarVerifik(cedula, env.VERIFIK_TOKEN);
+      const raw = await consultarVerifik(cedula, token);
       const normalizado = adaptarRespuestaVerifik(raw);
       return json(normalizado, 200, cors);
     } catch (err) {
@@ -101,6 +108,13 @@ export default {
     }
   },
 };
+
+// Un JWT válido solo contiene ASCII imprimible (base64url + puntos). Cualquier
+// otra cosa (espacios, saltos de línea, comillas "curvas" pegadas por error)
+// se descarta.
+function limpiarToken(token) {
+  return String(token).replace(/[^\x21-\x7E]/g, '');
+}
 
 // El JWT de Verifik incluye "mode":"sandbox" o "mode":"production" en su
 // payload — lo leemos sin librerías externas (decodificación base64url nativa
