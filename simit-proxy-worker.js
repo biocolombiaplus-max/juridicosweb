@@ -14,13 +14,20 @@
  *      https://simit-proxy.tu-subdominio.workers.dev) y pégala en index.html,
  *      en la variable SIMIT_PROXY_URL (línea ~1113).
  *
- * ENDPOINT (ai.verifik.co/postman?code=colombia_api_simit_complete →
- * "SIMIT - Consulta General por Documento de Identificación"):
- *   GET https://api.verifik.co/v2/co/simit/consultar
+ * ENDPOINT (ai.verifik.co/postman?code=colombia_api_simit_subpoenas →
+ * "SIMIT - Multas"):
+ *   GET https://api.verifik.co/v2/co/simit/comparendos
  *   Headers: Accept: application/json, Authorization: Bearer <token>
- *   Params:  documentType (CC|CE|PA|RC|TI), documentNumber, includeCosts (true)
- *   Costo:   0.4 créditos por consulta
- *   Respuesta esperada (mismo esquema de comparendos documentado por Verifik):
+ *   Params:  documentType (CC|CE|PA|RC|TI), documentNumber
+ *   Costo:   0.3 créditos por consulta
+ *
+ *   Nota: se probó también /v2/co/simit/consultar ("SIMIT - Consulta
+ *   General por Documento de Identificación") pero esa ruta devuelve 401
+ *   con el token de producción actual — parece requerir un plan/permiso
+ *   distinto en Verifik. Se usa /comparendos mientras se confirma con
+ *   soporte de Verifik.
+ *
+ *   Respuesta esperada:
  *     {
  *       "data": {
  *         "comparendos": [
@@ -131,7 +138,7 @@ function esTokenSandbox(token) {
 }
 
 async function consultarVerifik(cedula, token) {
-  const endpoint = `https://api.verifik.co/v2/co/simit/consultar?documentType=CC&documentNumber=${encodeURIComponent(cedula)}&includeCosts=true`;
+  const endpoint = `https://api.verifik.co/v2/co/simit/comparendos?documentType=CC&documentNumber=${encodeURIComponent(cedula)}`;
   const res = await fetch(endpoint, {
     headers: {
       Accept: 'application/json',
