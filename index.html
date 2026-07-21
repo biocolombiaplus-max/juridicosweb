@@ -208,6 +208,9 @@ h2.title span{color:var(--gold);}
 .img-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(46,16,101,0.2);}
 .img-card img{width:100%;height:100%;object-fit:cover;transition:.4s;}
 .img-card:hover img{transform:scale(1.05);}
+.icon-card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:.4s;}
+.icon-card-bg i{font-size:3.4rem;color:rgba(255,255,255,0.35);transition:.4s;}
+.img-card:hover .icon-card-bg i{transform:scale(1.12);color:rgba(255,255,255,0.5);}
 .img-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(46,16,101,0.85) 100%);display:flex;align-items:flex-end;padding:20px;}
 .img-card-text h4{color:#fff;font-size:0.95rem;font-weight:700;}
 .img-card-text p{color:rgba(255,255,255,0.7);font-size:0.78rem;margin-top:4px;}
@@ -682,19 +685,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="trust-images-inner">
     <div class="section-center">
       <div class="tag tag-gold">¿Por qué confiar en nosotros?</div>
-      <h2 class="title">Respaldo Legal <span>Real</span></h2>
+      <h2 class="title" style="color:#fff;">Respaldo Legal <span>Real</span></h2>
     </div>
     <div class="img-cards">
       <div class="img-card" onclick="openSimitModal(event)">
-        <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&q=80" alt="Cámara de vigilancia fotomulta" loading="lazy">
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#2e1065,#4c1d95);"><i class="fas fa-video-slash"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Cámaras sin Certificación INM</h4><p>Miles de cámaras operando ilegalmente 2018–2024</p></div></div>
       </div>
       <div class="img-card" onclick="openSimitModal(event)">
-        <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80" alt="Autopista Colombia tráfico" loading="lazy">
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#4c1d95,#2dd4bf);"><i class="fas fa-landmark"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Investigación Oficial 2026</h4><p>Hallazgo confirmado por Mintransporte y Supertransporte</p></div></div>
       </div>
       <div class="img-card" onclick="openSimitModal(event)">
-        <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80" alt="Abogado derecho de petición Colombia" loading="lazy">
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#2e1065,#6d28d9);"><i class="fas fa-scale-balanced"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Marco Legal Sólido</h4><p>Basado en normativa vigente 2025–2026</p></div></div>
       </div>
     </div>
