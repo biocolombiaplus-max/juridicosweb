@@ -232,6 +232,32 @@ h2.title span{color:var(--gold);}
 .norma-banner p{color:#94a3b8;font-size:0.9rem;line-height:1.6;}
 .norma-banner strong{color:#fff;}
 
+/* ===== DOCUMENT PREVIEW ===== */
+.docprev-section{padding:80px 5%;background:#fff;}
+.docprev-wrap{display:grid;grid-template-columns:1.1fr 0.9fr;gap:50px;align-items:center;max-width:1100px;margin:0 auto;}
+.doc-mock{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(46,16,101,0.18);padding:36px 32px;position:relative;overflow:hidden;border:1px solid var(--border);transform:rotate(-1deg);}
+.doc-mock-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:2px solid var(--navy);margin-bottom:20px;}
+.doc-mock-logo{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:1rem;display:flex;align-items:center;gap:8px;}
+.doc-mock-logo i{color:var(--gold);}
+.doc-mock-date{font-size:0.72rem;color:var(--gray);}
+.doc-mock-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);letter-spacing:1px;margin-bottom:6px;}
+.doc-mock-sub{font-size:0.72rem;color:var(--gray);margin-bottom:20px;font-style:italic;}
+.doc-mock-lines{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.doc-mock-line{height:8px;border-radius:4px;background:var(--light);}
+.doc-mock-line.hl{background:rgba(45,212,191,0.35);}
+.doc-mock-foot{font-size:0.68rem;color:var(--gray);border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:6px;}
+.doc-mock-foot i{color:var(--gold);}
+.doc-mock-watermark{position:absolute;top:18px;right:-38px;transform:rotate(35deg);background:rgba(45,212,191,0.9);color:#fff;font-size:0.62rem;font-weight:800;letter-spacing:1px;padding:4px 42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.docprev-points{display:flex;flex-direction:column;gap:22px;}
+.docprev-point{display:flex;gap:14px;align-items:flex-start;}
+.docprev-point i{color:var(--gold);font-size:1.2rem;margin-top:3px;flex-shrink:0;}
+.docprev-point strong{display:block;color:var(--navy);font-size:0.95rem;margin-bottom:3px;}
+.docprev-point span{color:var(--gray);font-size:0.85rem;line-height:1.55;}
+@media(max-width:900px){
+  .docprev-wrap{grid-template-columns:1fr;}
+  .doc-mock{transform:none;}
+}
+
 /* ===== STEPS ===== */
 .steps-section{padding:80px 5%;background:#fff;}
 .steps-row{display:flex;gap:0;max-width:1000px;margin:0 auto;position:relative;}
@@ -704,6 +730,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </section>
 
+<!-- DOCUMENT PREVIEW -->
+<section class="docprev-section">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-green">Así se ve tu documento</div>
+      <h2 class="title">Un derecho de petición <span>profesional</span></h2>
+      <p class="subtitle">No es una plantilla genérica. Cada documento cita la norma exacta que aplica a tu caso y va dirigido a la secretaría correcta.</p>
+    </div>
+    <div class="docprev-wrap">
+      <div class="doc-mock">
+        <div class="doc-mock-head">
+          <div class="doc-mock-logo"><i class="fas fa-balance-scale"></i> JurídicosWeb</div>
+          <div class="doc-mock-date">Bogotá D.C., 2026</div>
+        </div>
+        <div class="doc-mock-title">DERECHO DE PETICIÓN</div>
+        <div class="doc-mock-sub">Ref: Solicitud de revocatoria directa de comparendo — Art. 136, Ley 769 de 2002</div>
+        <div class="doc-mock-lines">
+          <div class="doc-mock-line" style="width:96%"></div>
+          <div class="doc-mock-line" style="width:88%"></div>
+          <div class="doc-mock-line" style="width:92%"></div>
+          <div class="doc-mock-line hl" style="width:70%"></div>
+          <div class="doc-mock-line" style="width:85%"></div>
+          <div class="doc-mock-line" style="width:60%"></div>
+        </div>
+        <div class="doc-mock-foot"><i class="fas fa-gavel"></i> Fundamento: Art. 23 Constitución Política · Ley 1755/2015 · Ley 769/2002</div>
+        <div class="doc-mock-watermark">EJEMPLO ILUSTRATIVO</div>
+      </div>
+      <div class="docprev-points">
+        <div class="docprev-point"><i class="fas fa-check-circle"></i><div><strong>Redactado para tu caso</strong><span>Con tus datos y el causal legal que realmente aplica, no una plantilla genérica.</span></div></div>
+        <div class="docprev-point"><i class="fas fa-check-circle"></i><div><strong>Lo ves antes de pagar</strong><span>El borrador completo se muestra en pantalla — confirmas que todo esté correcto antes de confirmar.</span></div></div>
+        <div class="docprev-point"><i class="fas fa-check-circle"></i><div><strong>Listo en tu correo en 2 horas</strong><span>PDF firmable, listo para radicar por tu cuenta o con nuestro servicio de radicación.</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section class="steps-section">
   <div class="section-center">
@@ -729,7 +791,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section-center">
       <div class="tag tag-gold">Precios Transparentes</div>
       <h2 class="title">Elige tu <span>Plan</span></h2>
-      <p class="subtitle">Sin sorpresas. El precio más bajo del mercado con la mayor efectividad legal.</p>
+      <p class="subtitle">Una multa de tránsito en Colombia puede superar los $400.000–$900.000. Eliminarla con nosotros cuesta desde $45.000 — y si tu caso no aplica, no pagas nada.</p>
     </div>
     <div class="pricing-grid pricing-grid-3">
       <div class="price-card pc-cool">
@@ -836,10 +898,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- TRUST BAR -->
 <div class="trust-bar">
   <div class="trust-bar-inner">
-    <div class="tb-item"><div class="tb-icon">⚖️</div><h3>+500</h3><p>Casos exitosos</p></div>
-    <div class="tb-item"><div class="tb-icon">🏆</div><h3>98%</h3><p>Tasa de éxito</p></div>
+    <div class="tb-item"><div class="tb-icon">⚖️</div><h3>5.8M+</h3><p>Fotomultas bajo investigación oficial</p></div>
+    <div class="tb-item"><div class="tb-icon">💰</div><h3>$0</h3><p>Pagas si tu caso no aplica</p></div>
     <div class="tb-item"><div class="tb-icon">⏱️</div><h3>2h</h3><p>Entrega del documento</p></div>
-    <div class="tb-item"><div class="tb-icon">🇨🇴</div><h3>37</h3><p>Ciudades cubiertas</p></div>
+    <div class="tb-item"><div class="tb-icon">🇨🇴</div><h3>37</h3><p>Organismos de tránsito investigados</p></div>
   </div>
 </div>
 
