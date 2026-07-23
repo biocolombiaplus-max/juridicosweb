@@ -258,11 +258,14 @@ h2.title span{color:var(--gold);}
 .doc-mock-logo{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:1rem;display:flex;align-items:center;gap:8px;}
 .doc-mock-logo i{color:var(--gold);}
 .doc-mock-date{font-size:0.72rem;color:var(--gray);}
-.doc-mock-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);letter-spacing:1px;margin-bottom:6px;}
-.doc-mock-sub{font-size:0.72rem;color:var(--gray);margin-bottom:20px;font-style:italic;}
-.doc-mock-lines{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
-.doc-mock-line{height:8px;border-radius:4px;background:var(--light);}
-.doc-mock-line.hl{background:rgba(45,212,191,0.35);}
+.doc-mock-title{font-family:'Playfair Display',serif;font-weight:800;font-size:1.1rem;color:var(--navy);letter-spacing:1px;margin-bottom:14px;text-align:center;}
+.doc-mock-addr{font-size:0.74rem;color:var(--navy);line-height:1.6;margin-bottom:12px;}
+.doc-mock-sub{font-size:0.72rem;color:var(--gray);margin-bottom:16px;font-style:italic;line-height:1.5;}
+.doc-mock-body{position:relative;max-height:190px;overflow:hidden;margin-bottom:14px;}
+.doc-mock-body p{font-size:0.72rem;color:#334155;line-height:1.7;text-align:justify;margin-bottom:10px;}
+.doc-mock-body strong{color:var(--navy);}
+.doc-mock-body .hl{background:rgba(45,212,191,0.3);padding:0 2px;border-radius:2px;}
+.doc-mock-fade{margin-top:-46px;height:46px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff);position:relative;z-index:1;}
 .doc-mock-foot{font-size:0.68rem;color:var(--gray);border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:6px;}
 .doc-mock-foot i{color:var(--gold);}
 .doc-mock-watermark{position:absolute;top:18px;right:-38px;transform:rotate(35deg);background:rgba(45,212,191,0.9);color:#fff;font-size:0.62rem;font-weight:800;letter-spacing:1px;padding:4px 42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
@@ -765,15 +768,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="doc-mock-date">Bogotá D.C., 2026</div>
         </div>
         <div class="doc-mock-title">DERECHO DE PETICIÓN</div>
-        <div class="doc-mock-sub">Ref: Solicitud de revocatoria directa de comparendo — Art. 136, Ley 769 de 2002</div>
-        <div class="doc-mock-lines">
-          <div class="doc-mock-line" style="width:96%"></div>
-          <div class="doc-mock-line" style="width:88%"></div>
-          <div class="doc-mock-line" style="width:92%"></div>
-          <div class="doc-mock-line hl" style="width:70%"></div>
-          <div class="doc-mock-line" style="width:85%"></div>
-          <div class="doc-mock-line" style="width:60%"></div>
+        <div class="doc-mock-addr">Señores<br><strong>SECRETARÍA DISTRITAL DE MOVILIDAD</strong><br>Bogotá D.C.</div>
+        <div class="doc-mock-sub">Ref: Solicitud de revocatoria directa por prescripción — Comparendo No. 11001000000202400000</div>
+        <div class="doc-mock-body">
+          <p><strong>JUAN PÉREZ GÓMEZ</strong>, identificado con cédula de ciudadanía No. 1.234.567.890, obrando en nombre propio, respetuosamente me dirijo a su despacho para ejercer mi derecho de petición consagrado en el <strong>artículo 23 de la Constitución Política</strong>, con fundamento en los siguientes hechos y peticiones:</p>
+          <p><strong>PRIMERO:</strong> Que se declare la <span class="hl">prescripción de la acción sancionatoria</span> derivada del comparendo de la referencia, impuesto el 15 de marzo de 2021, por haber transcurrido más de tres (3) años sin cobro efectivo, conforme al artículo 136 de la Ley 769 de 2002.</p>
+          <p><strong>SEGUNDO:</strong> Que en consecuencia, se ordene la eliminación del registro correspondiente en el Sistema...</p>
         </div>
+        <div class="doc-mock-fade"></div>
         <div class="doc-mock-foot"><i class="fas fa-gavel"></i> Fundamento: Art. 23 Constitución Política · Ley 1755/2015 · Ley 769/2002</div>
         <div class="doc-mock-watermark">EJEMPLO ILUSTRATIVO</div>
       </div>
