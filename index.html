@@ -189,7 +189,14 @@ h2.title span{color:var(--gold);}
 .subtitle{color:var(--gray);font-size:0.97rem;line-height:1.75;margin-top:12px;}
 
 /* ===== URGENCY STRIP ===== */
-.urgency-strip{background:linear-gradient(135deg,#2e1065,#4c1d95);padding:20px 5%;border-top:1px solid rgba(45,212,191,0.15);border-bottom:1px solid rgba(45,212,191,0.15);}
+.urgency-strip{background:linear-gradient(135deg,#2e1065,#4c1d95);padding:44px 5%;border-top:1px solid rgba(45,212,191,0.15);border-bottom:1px solid rgba(45,212,191,0.15);}
+.urgency-centered{max-width:640px;margin:0 auto;text-align:center;}
+.urgency-kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.14);border:1px solid rgba(45,212,191,0.35);color:var(--gold3);padding:6px 16px;border-radius:20px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
+.urgency-headline{color:#fff;font-size:1.25rem;line-height:1.5;margin-bottom:26px;}
+.urgency-headline strong{color:var(--gold3);}
+@media(max-width:600px){
+  .urgency-headline{font-size:1.05rem;}
+}
 .urgency-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
 .urgency-timer{display:flex;align-items:center;gap:14px;}
 .urgency-timer span{color:var(--gold);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;}
@@ -683,12 +690,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- URGENCY STRIP -->
 <div class="urgency-strip">
-  <div class="urgency-inner">
-    <div class="urgency-timer">
-      <span><i class="fas fa-triangle-exclamation" style="color:var(--gold);"></i> Investigación oficial en curso</span>
-    </div>
-    <div class="urgency-right"><p>Mintransporte y Supertransporte ya confirmaron irregularidades en <strong>37 organismos de tránsito</strong>. Mientras tanto, tu multa sigue activa en el SIMIT.</p></div>
-    <button class="btn btn-gold btn-sm btn-pulse" onclick="openSimitModal(event)">Consultar Gratis →</button>
+  <div class="urgency-centered">
+    <div class="urgency-kicker"><i class="fas fa-newspaper"></i> Como lo viste en las noticias</div>
+    <p class="urgency-headline">Las multas entre <strong>2018 y 2024</strong> de <strong>37 secretarías</strong> de movilidad o tránsito tenían errores — <strong>no deberías pagarlas</strong>.</p>
+    <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)">Consultar si mi multa aplica →</button>
   </div>
 </div>
 
