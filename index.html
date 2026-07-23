@@ -1056,6 +1056,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="https://wa.me/573159318400?text=Hola%2C+consult%C3%A9+en+SIMIT+y+no+me+aparecen+multas%2C+quiero+verificar" target="_blank" class="btn btn-wa btn-full"><i class="fab fa-whatsapp"></i> Hablar con un asesor gratis</a>
         </div>
 
+        <!-- Resultado vacío de la consulta AUTOMÁTICA (Verifik): a diferencia del
+             caso anterior (donde el cliente mismo vio el SIMIT oficial), aquí solo
+             tenemos el dato de un proveedor externo, que puede no capturar multas
+             ya en cobro coactivo. Por eso no declaramos "estás libre" todavía —
+             pedimos confirmar en la fuente oficial antes de decir algo definitivo. -->
+        <div id="s3-sinmultas-auto" style="display:none;text-align:center;padding:20px 10px;">
+          <div style="font-size:3rem;margin-bottom:12px;">🔎</div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:8px;">No encontramos comparendos activos</h3>
+          <p style="color:var(--gray);font-size:0.87rem;line-height:1.7;margin-bottom:10px;">Nuestra consulta automática no encontró nada a tu nombre. Pero para tu tranquilidad total —algunas multas ya en cobro coactivo a veces no aparecen en esta fuente— te recomendamos confirmarlo tú mismo directamente en el portal oficial.</p>
+          <button class="btn btn-navy btn-full" onclick="abrirSIMIT2()" style="margin-bottom:12px;"><i class="fas fa-external-link-alt"></i> Verificar en el SIMIT oficial</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-outline btn-full" style="color:var(--navy);border-color:var(--border);" onclick="s3SinMultas()">Confirmado, no tengo multas</button>
+            <button class="btn btn-red btn-full" onclick="s3ConMultas()">Sí encontré multas</button>
+          </div>
+        </div>
+
         <div id="s3-form" style="display:none;">
           <div id="s3-auto-aviso" style="display:none;background:rgba(46,199,109,0.08);border:1px solid rgba(46,199,109,0.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
             <p style="margin:0;font-size:0.78rem;color:#166534;line-height:1.6;"><i class="fas fa-check-circle"></i> <strong>Estos datos vienen directo de tu consulta oficial verificada</strong> — solo confírmanos si te notificaron cada multa.</p>
@@ -1360,9 +1376,11 @@ function resetFlujoSimit(){
   if(s2f2) s2f2.style.display='none';
 
   var s3i=document.getElementById('s3-inicio'), s3s=document.getElementById('s3-sinmultas'),
+      s3sa=document.getElementById('s3-sinmultas-auto'),
       s3f=document.getElementById('s3-form'), s3r=document.getElementById('s3-resultado');
   if(s3i) s3i.style.display='block';
   if(s3s) s3s.style.display='none';
+  if(s3sa) s3sa.style.display='none';
   if(s3f) s3f.style.display='none';
   if(s3r){ s3r.style.display='none'; s3r.innerHTML=''; }
   var s3aviso=document.getElementById('s3-auto-aviso'), s3intro=document.getElementById('s3-form-intro');
@@ -1486,7 +1504,7 @@ function mostrarMultasAutomaticas(multas){
   document.getElementById('s3-inicio').style.display='none';
 
   if(!multas.length){
-    s3SinMultas();
+    s3SinMultasAuto();
     return;
   }
 
@@ -1562,12 +1580,25 @@ function copiarDato2(){
 // ===================== PASO 3: REPORTE REAL (sin datos inventados) =====================
 function s3SinMultas(){
   jwTrack('reporte_sin_multas', {});
+  document.getElementById('s3-sinmultas-auto').style.display='none';
   document.getElementById('s3-inicio').style.display='none';
   document.getElementById('s3-sinmultas').style.display='block';
 }
 
+// La consulta automática (Verifik) no encontró nada — a diferencia de
+// s3SinMultas() (donde el cliente confirmó viendo el SIMIT oficial con sus
+// propios ojos), este resultado viene de un tercero que puede no capturar
+// multas en cobro coactivo avanzado. No se declara "estás libre" sin que el
+// cliente lo confirme en la fuente oficial.
+function s3SinMultasAuto(){
+  jwTrack('reporte_auto_sin_multas', {});
+  document.getElementById('s3-inicio').style.display='none';
+  document.getElementById('s3-sinmultas-auto').style.display='block';
+}
+
 function s3ConMultas(){
   document.getElementById('s3-inicio').style.display='none';
+  var auto=document.getElementById('s3-sinmultas-auto'); if(auto) auto.style.display='none';
   document.getElementById('s3-form').style.display='block';
   if(!document.querySelector('.multa-row')) agregarMultaRow();
 }
