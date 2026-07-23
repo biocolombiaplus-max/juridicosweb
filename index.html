@@ -144,7 +144,15 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .hero h1{font-family:'Playfair Display',serif;font-size:3rem;color:#fff;line-height:1.12;margin-bottom:18px;}
 .hero h1 .hl{color:var(--gold);position:relative;}
 .hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
-.hero-sub{color:#94a3b8;font-size:1rem;line-height:1.75;margin-bottom:28px;max-width:520px;}
+.hero-sub{color:#94a3b8;font-size:1rem;line-height:1.75;margin-bottom:16px;max-width:520px;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px;}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:0.76rem;font-weight:700;white-space:nowrap;}
+.hero-pill.blue{background:rgba(14,165,233,0.15);color:#38bdf8;border:1px solid rgba(14,165,233,0.4);}
+.hero-pill.orange{background:rgba(234,88,12,0.15);color:#fb923c;border:1px solid rgba(234,88,12,0.4);}
+.hero-pill.teal{background:rgba(45,212,191,0.15);color:#2dd4bf;border:1px solid rgba(45,212,191,0.4);}
+.hero-price-anchor{background:linear-gradient(90deg,rgba(45,212,191,0.16),rgba(45,212,191,0.05));border:1px solid rgba(45,212,191,0.35);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;color:#e2f8f5;font-size:0.88rem;}
+.hero-price-anchor i{color:#2dd4bf;}
+.hero-price-anchor strong{color:var(--gold);font-size:1rem;}
 .hero-sub strong{color:#e2e8f0;}
 .hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
 .hero-ctas-row{display:flex;gap:12px;flex-wrap:wrap;}
@@ -575,8 +583,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div>
       <div class="hero-badge"><span class="dot"></span> Bufete · Tránsito · Colombia · 2026</div>
       <h1>Deja de Pagar<br><span class="hl">Multas</span><br>que Ya No Debes</h1>
-      <p class="hero-sub">Cada día que esperas, tu dinero sigue en riesgo por una multa que la ley dice que puede eliminarse. Si <strong>prescribió</strong> (+3 años), tuvo <strong>notificación defectuosa</strong>, o es una fotomulta 2018–2024 sin certificación INM, <strong>consulta gratis si aplica</strong> y elimínala desde $45.000.</p>
+      <p class="hero-sub">Cada día que esperas, tu dinero sigue en riesgo por una multa que la ley dice que puede eliminarse.</p>
+      <div class="hero-pills">
+        <span class="hero-pill blue"><i class="fas fa-hourglass-end"></i> Prescripción +3 años</span>
+        <span class="hero-pill orange"><i class="fas fa-bell-slash"></i> Notificación defectuosa</span>
+        <span class="hero-pill teal"><i class="fas fa-camera"></i> Fotomulta sin INM</span>
+      </div>
       <div class="hero-ctas">
+
+        <!-- Ancla de precio/gratis -->
+        <div class="hero-price-anchor"><i class="fas fa-circle-check"></i> Consulta <strong>100% GRATIS</strong> · Elimínala desde <strong>$45.000</strong></div>
 
         <!-- Botón principal -->
         <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)" style="width:100%;font-size:1.25rem;padding:26px 24px;border-radius:16px;letter-spacing:.4px;box-shadow:0 10px 40px rgba(45,212,191,0.5);">
@@ -601,8 +617,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="width:34px;height:34px;background:rgba(14,165,233,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
               <i class="fas fa-hourglass-end" style="color:#38bdf8;font-size:0.95rem;"></i>
             </div>
-            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0 0 4px;line-height:1.2;">Multas con +3 años sin pagar</p>
-            <p style="color:rgba(255,255,255,0.55);font-size:0.68rem;margin:0;line-height:1.4;">Prescritas por ley · Se eliminan por tiempo</p>
+            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0;line-height:1.2;">Multas con +3 años sin pagar</p>
             <div style="margin-top:9px;display:flex;align-items:center;gap:4px;">
               <span style="color:#38bdf8;font-size:0.68rem;font-weight:700;">Ver mi caso</span>
               <i class="fas fa-arrow-right" style="color:#38bdf8;font-size:0.6rem;"></i>
@@ -617,8 +632,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="width:34px;height:34px;background:rgba(234,88,12,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
               <i class="fas fa-bell-slash" style="color:#fb923c;font-size:0.95rem;"></i>
             </div>
-            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0 0 4px;line-height:1.2;">Multas recientes mal notificadas</p>
-            <p style="color:rgba(255,255,255,0.55);font-size:0.68rem;margin:0;line-height:1.4;">Nunca te avisaron bien · Causal de nulidad</p>
+            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0;line-height:1.2;">Multas recientes mal notificadas</p>
             <div style="margin-top:9px;display:flex;align-items:center;gap:4px;">
               <span style="color:#fb923c;font-size:0.68rem;font-weight:700;">Ver mi caso</span>
               <i class="fas fa-arrow-right" style="color:#fb923c;font-size:0.6rem;"></i>
@@ -633,8 +647,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="width:34px;height:34px;background:rgba(45,212,191,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
               <i class="fas fa-camera" style="color:var(--gold);font-size:0.95rem;"></i>
             </div>
-            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0 0 4px;line-height:1.2;">Fotomulta 2018–2024 sin INM</p>
-            <p style="color:rgba(255,255,255,0.55);font-size:0.68rem;margin:0;line-height:1.4;">Cámara sin certificación · Investigación Supertransporte</p>
+            <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0;line-height:1.2;">Fotomulta 2018–2024 sin INM</p>
             <div style="margin-top:9px;display:flex;align-items:center;gap:4px;">
               <span style="color:var(--gold);font-size:0.68rem;font-weight:700;">Ver mi caso</span>
               <i class="fas fa-arrow-right" style="color:var(--gold);font-size:0.6rem;"></i>
@@ -657,13 +670,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
     <div class="hero-card">
-      <div class="hero-card-header"><h3><i class="fas fa-exclamation-triangle" style="color:var(--gold)"></i> ¿Por qué aplicas?</h3></div>
+      <div class="hero-card-header"><h3><i class="fas fa-shield-halved" style="color:var(--gold)"></i> Por qué confiar en nosotros</h3></div>
       <div class="hero-card-body">
-        <div class="alert-line"><div class="al-icon"><i class="fas fa-microscope"></i></div><div class="al-text"><strong>Cámaras sin certificación INM</strong> · 37 organismos de tránsito no tenían el "concepto de desempeño" obligatorio.</div></div>
-        <div class="alert-line"><div class="al-icon"><i class="fas fa-calendar-times"></i></div><div class="al-text"><strong>Prescripción 3 años</strong> · Multas no cobradas en 3 años prescriben por ley y deben eliminarse.</div></div>
-        <div class="alert-line"><div class="al-icon"><i class="fas fa-bell-slash"></i></div><div class="al-text"><strong>Notificación inválida</strong> · La Ley 1843/2017 exige notificar en 3 días hábiles. Sin notificación = nulidad.</div></div>
-        <div class="alert-line"><div class="al-icon"><i class="fas fa-user-times"></i></div><div class="al-text"><strong>Sin identificar conductor</strong> · Ley aprobada: si no se identifica el conductor, no hay comparendo válido.</div></div>
-        <div class="live-bar"><span class="live-dot"></span><p>Verificamos tu caso con <strong>datos reales del SIMIT</strong> — nunca un resultado inventado.</p></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-magnifying-glass"></i></div><div class="al-text"><strong>Verificación real del SIMIT</strong> — nunca un resultado inventado para presionarte.</div></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-scale-balanced"></i></div><div class="al-text"><strong>Fundamento 100% legal</strong> — cada documento cita la norma exacta que aplica.</div></div>
+        <div class="alert-line"><div class="al-icon"><i class="fas fa-hand-holding-dollar"></i></div><div class="al-text"><strong>$0 si no aplica</strong> — solo cobramos cuando tu caso realmente procede.</div></div>
+        <div class="live-bar"><span class="live-dot"></span><p><strong>37 organismos</strong> de tránsito bajo investigación oficial confirmada.</p></div>
       </div>
     </div>
   </div>
