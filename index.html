@@ -1541,6 +1541,11 @@ function mostrarMultasAutomaticas(multas){
     vEl.value = m.valor || ''; vEl.disabled = true;
     cEl.value = m.ciudad || ''; cEl.disabled = true;
     if(typeof m.fotodeteccion === 'boolean'){ fotoEl.value = m.fotodeteccion ? 'si' : 'no'; fotoEl.disabled = true; }
+    // Guardamos el estado real y la infracción tal como los reporta el SIMIT
+    // (vía Verifik) para que el motor legal los use en el análisis — no solo
+    // para mostrarlos como nota informativa.
+    fila.dataset.estadoSimit = m.estado || '';
+    fila.dataset.causalSugerida = m.causalSugerida || '';
     if(m.causalSugerida){
       var infoEl = document.createElement('p');
       infoEl.style.cssText = 'font-size:0.72rem;color:var(--gray);margin:6px 0 0;';
@@ -1692,7 +1697,26 @@ function onCapturaSimitSeleccionada(e){
 }
 
 // ── Cálculo legal real: prescripción (Art. 136 Ley 769/2002) y notificación (Ley 1843/2017) ──
+// Cada multa se evalúa con sus propios datos (fecha exacta, notificación
+// reportada, y — cuando vienen de la consulta automática — el estado y la
+// infracción reales que devuelve el SIMIT vía Verifik). El texto de
+// resultado siempre incluye el tiempo exacto calculado, nunca una frase
+// genérica repetida igual para todos los casos.
 var _multasReportadas = [];
+
+function mesesTranscurridos(fechaObj){
+  var ahora = new Date();
+  var meses = (ahora.getFullYear()-fechaObj.getFullYear())*12 + (ahora.getMonth()-fechaObj.getMonth());
+  if(ahora.getDate() < fechaObj.getDate()) meses--;
+  return Math.max(0, meses);
+}
+function formatoTiempo(meses){
+  var a = Math.floor(meses/12), m = meses%12;
+  if(a===0) return m + (m===1?' mes':' meses');
+  if(m===0) return a + (a===1?' año':' años');
+  return a + (a===1?' año':' años') + ' y ' + m + (m===1?' mes':' meses');
+}
+
 function calcularElegibilidad(){
   var rows = document.querySelectorAll('.multa-row');
   var lista = [];
@@ -1704,20 +1728,31 @@ function calcularElegibilidad(){
     var notif = row.querySelector('.mr-notif').value;
     var fotoEl = row.querySelector('.mr-foto');
     var foto = fotoEl ? fotoEl.value : 'nose';
+    var estadoSimit = row.dataset.estadoSimit || '';
     if(!fecha){ faltaFecha = true; return; }
     var fechaObj = new Date(fecha+'T00:00:00');
-    var edadAnios = (Date.now() - fechaObj.getTime()) / (1000*60*60*24*365.25);
+    var meses = mesesTranscurridos(fechaObj);
+    var tiempoTexto = formatoTiempo(meses);
+    var faltanTexto = formatoTiempo(Math.max(0, 36-meses));
     var anio = fechaObj.getFullYear();
     var estado, causal;
 
-    if(edadAnios >= 3){
-      estado='aplica'; causal='Prescripción: más de 3 años sin cobro efectivo (Art. 136, Ley 769 de 2002).';
+    if(meses >= 36){
+      estado='aplica'; causal='Prescripción: han pasado '+tiempoTexto+' sin cobro efectivo, más de los 3 años que exige el Art. 136 de la Ley 769 de 2002.';
     } else if(notif==='no'){
-      estado='aplica'; causal='Notificación defectuosa: no fuiste notificado formalmente (Ley 1843 de 2017).';
+      estado='aplica'; causal='Notificación defectuosa: no fuiste notificado formalmente dentro del plazo legal (Ley 1843 de 2017). Impuesta hace '+tiempoTexto+'.';
     } else if(notif==='nose'){
-      estado='revisar'; causal='Posible notificación defectuosa — un abogado debe confirmar cómo y cuándo te notificaron.';
+      estado='revisar'; causal='Notificación sin confirmar — faltan '+faltanTexto+' para que prescriba por tiempo. Un abogado debe revisar cómo y cuándo te notificaron.';
     } else {
-      estado='no_aplica'; causal='Por ahora no cumple causal de prescripción ni de notificación defectuosa, según lo reportado.';
+      estado='no_aplica'; causal='Aún no prescribe: faltan '+faltanTexto+' (fue impuesta hace '+tiempoTexto+') y reportaste que sí te notificaron correctamente.';
+    }
+
+    // El estado real que reporta el SIMIT (vía Verifik) se incorpora al
+    // análisis — no se descarta después de mostrarlo una vez.
+    if(/pagad/i.test(estadoSimit)){
+      causal += ' El SIMIT la marca como pagada: si aplica un causal, se evalúa devolución en vez de eliminación.';
+    } else if(/coactiv/i.test(estadoSimit)){
+      causal += ' Estado actual en el SIMIT: cobro coactivo — genera intereses mientras sigue activa.';
     }
 
     // Tercera causal: investigación Supertransporte 2026 por fotomultas 2018-2024
