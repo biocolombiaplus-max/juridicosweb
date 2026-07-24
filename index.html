@@ -436,6 +436,21 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .badge-no-aplica{background:rgba(100,116,139,0.1);color:var(--gray);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 .badge-revisar{background:rgba(217,119,6,0.12);color:#b45309;border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 
+/* ===== TARJETAS DE RESULTADO POR MULTA (veredicto + acción) ===== */
+.mres-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+.mres-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;transition:.2s;}
+.mres-card.mres-aplica{border-color:rgba(22,163,74,0.35);box-shadow:0 3px 14px rgba(22,163,74,0.08);}
+.mres-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.mres-fecha{font-size:0.76rem;color:var(--gray);font-weight:600;}
+.mres-valor{font-size:0.95rem;font-weight:800;color:var(--navy);}
+.mres-veredicto{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:0.7rem;font-weight:800;letter-spacing:.3px;margin-bottom:9px;}
+.mres-motivo{font-size:0.82rem;color:#334155;line-height:1.55;margin-bottom:4px;}
+.mres-nota{font-size:0.72rem;color:#b45309;line-height:1.5;display:flex;align-items:flex-start;gap:5px;margin-bottom:4px;}
+.mres-fuente{display:inline-block;margin-top:2px;font-size:0.72rem;color:var(--gold);text-decoration:underline;}
+.mres-btn-si{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:13px;border-radius:10px;cursor:pointer;font-size:0.87rem;font-weight:800;box-shadow:0 3px 12px rgba(22,163,74,0.3);transition:.2s;}
+.mres-btn-si:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(22,163,74,0.4);}
+.mres-btn-si.is-selected{background:var(--light);color:#16a34a;border:1.5px solid #16a34a;box-shadow:none;}
+
 /* ===== REPORTE REAL DE MULTAS (paso 3) ===== */
 .multa-row{border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;position:relative;}
 .multa-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -1750,11 +1765,14 @@ function calcularElegibilidad(){
     }
 
     // El estado real que reporta el SIMIT (vía Verifik) se incorpora al
-    // análisis — no se descarta después de mostrarlo una vez.
+    // análisis — no se descarta después de mostrarlo una vez. Se guarda
+    // aparte del motivo legal principal para que el resumen en pantalla
+    // siga siendo corto (una frase, no un párrafo).
+    var notaEstado = '';
     if(/pagad/i.test(estadoSimit)){
-      causal += ' El SIMIT la marca como pagada: si aplica un causal, se evalúa devolución en vez de eliminación.';
+      notaEstado = 'El SIMIT la marca como pagada — si aplica, se evalúa devolución en vez de eliminación.';
     } else if(/coactiv/i.test(estadoSimit)){
-      causal += ' Estado actual en el SIMIT: cobro coactivo — genera intereses mientras sigue activa.';
+      notaEstado = 'Estado en el SIMIT: cobro coactivo (genera intereses mientras sigue activa).';
     }
 
     // Tercera causal: investigación Supertransporte 2026 por fotomultas 2018-2024
@@ -1763,12 +1781,12 @@ function calcularElegibilidad(){
     // en la lista verificada — nunca de forma genérica.
     var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && ciudadEnListaINM(ciudad);
     if(posibleINM){
-      var notaINM = 'Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras de fotodetección sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022 — verifica la fecha exacta en el listado oficial de Mintransporte.';
+      var notaINM = 'Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022.';
       if(estado!=='aplica'){ estado='aplica'; causal=notaINM; }
-      else { causal += ' Además, ' + notaINM.charAt(0).toLowerCase() + notaINM.slice(1); }
+      else { causal += ' También aplica: cámara bajo investigación Supertransporte 2026 por falta de certificación INM.'; }
     }
 
-    lista.push({ fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, causal:causal, seleccionada: estado==='aplica' });
+    lista.push({ fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, causal:causal, notaEstado:notaEstado, seleccionada: estado==='aplica' });
   });
 
   if(lista.length===0){
@@ -1781,9 +1799,9 @@ function calcularElegibilidad(){
 }
 
 function badgeInfo(estado){
-  if(estado==='aplica') return {clase:'badge-aplica', texto:'Aplica para eliminar', icon:'fa-circle-check', border:'#16a34a'};
-  if(estado==='revisar') return {clase:'badge-revisar', texto:'Por revisar con un abogado', icon:'fa-magnifying-glass', border:'#d97706'};
-  return {clase:'badge-no-aplica', texto:'No aplica por ahora', icon:'fa-circle-minus', border:'#94a3b8'};
+  if(estado==='aplica') return {clase:'badge-aplica', texto:'SE PUEDE ELIMINAR', icon:'fa-circle-check', border:'#16a34a', bg:'#f0fdf4'};
+  if(estado==='revisar') return {clase:'badge-revisar', texto:'POR CONFIRMAR CON UN ABOGADO', icon:'fa-magnifying-glass', border:'#d97706', bg:'#fffbeb'};
+  return {clase:'badge-no-aplica', texto:'AÚN NO SE PUEDE ELIMINAR', icon:'fa-circle-minus', border:'#94a3b8', bg:'#f8fafc'};
 }
 
 function mostrarResultadoReal(){
@@ -1799,27 +1817,32 @@ function mostrarResultadoReal(){
     var b = badgeInfo(m.estado);
     var fechaFmt = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
     var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : 'Valor no indicado';
-    var checkbox = m.estado==='aplica'
-      ? '<label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:0.75rem;color:var(--navy);cursor:pointer;"><input type="checkbox" '+(m.seleccionada?'checked':'')+' onchange="toggleSeleccionMulta('+i+')"> Incluir en mi trámite</label>'
-      : '';
-    return '<div class="multa-row-r" style="border-left:3px solid '+b.border+';padding-left:12px;">'+
-      '<div class="mr-left"><strong><i class="fas '+b.icon+'" style="color:'+b.border+';margin-right:6px;"></i>Multa #'+(i+1)+' · '+fechaFmt+'</strong><span>'+(m.ciudad||'Ciudad no indicada')+'</span>'+
-      '<span style="display:block;margin-top:4px;color:var(--navy);font-size:0.75rem;">'+m.causal+'</span>'+
-      (m.posibleINM ? '<a href="'+FUENTE_OFICIAL_INM+'" target="_blank" style="display:inline-block;margin-top:3px;font-size:0.7rem;color:var(--gold);text-decoration:underline;">Ver listado oficial Mintransporte</a>' : '') +
-      '<span class="'+b.clase+'">'+b.texto+'</span>'+checkbox+
-      '</div><div class="mr-right"><div class="valor">'+valorFmt+'</div></div></div>';
+    var accion = '';
+    if(m.estado==='aplica'){
+      accion = '<button class="mres-btn-si '+(m.seleccionada?'is-selected':'')+'" onclick="toggleSeleccionMulta('+i+')">'+
+        '<i class="fas '+(m.seleccionada?'fa-circle-check':'fa-hand-pointer')+'"></i> '+(m.seleccionada?'Incluida en tu trámite':'Sí, quiero eliminar esta multa')+
+        '</button>';
+    }
+    return '<div class="mres-card mres-'+m.estado+'">'+
+      '<div class="mres-top"><span class="mres-fecha">Multa #'+(i+1)+' · '+fechaFmt+' · '+(m.ciudad||'Ciudad no indicada')+'</span><span class="mres-valor">'+valorFmt+'</span></div>'+
+      '<div class="mres-veredicto" style="color:'+b.border+';background:'+b.bg+';"><i class="fas '+b.icon+'"></i> '+b.texto+'</div>'+
+      '<p class="mres-motivo">'+m.causal+'</p>'+
+      (m.notaEstado ? '<p class="mres-nota"><i class="fas fa-circle-info"></i> '+m.notaEstado+'</p>' : '') +
+      (m.posibleINM ? '<a href="'+FUENTE_OFICIAL_INM+'" target="_blank" class="mres-fuente">Ver listado oficial Mintransporte</a>' : '') +
+      accion +
+      '</div>';
   }).join('');
 
   var html =
     '<div class="result-header"><h4><i class="fas fa-clipboard-check" style="margin-right:6px;color:var(--gold);"></i>Resultado de tu reporte</h4><span class="r-count">'+lista.length+' multa'+(lista.length>1?'s':'')+'</span></div>'+
-    '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-bottom:16px;">'+filasHtml+'</div>'+
+    '<div class="mres-list">'+filasHtml+'</div>'+
     '<div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:2px 0 16px;flex-wrap:wrap;">'+
     '<span style="font-size:0.68rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-external-link-alt" style="color:#16a34a;"></i>Verificado en el SIMIT oficial</span>'+
     '<span style="font-size:0.68rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-gavel" style="color:#16a34a;"></i>Calculado con Ley 769/2002, Ley 1843/2017 y Ley 2251/2022</span>'+
     '</div>';
 
   if(aplican.length > 0){
-    html += renderPlanes(aplican);
+    html += '<div id="mres-planes-wrap">'+renderPlanes(aplican)+'</div>';
   } else if(revisar.length > 0){
     html +=
       '<div class="result-cta-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid rgba(234,88,12,0.25);">'+
@@ -1838,8 +1861,16 @@ function mostrarResultadoReal(){
 }
 
 function toggleSeleccionMulta(idx){
-  _multasReportadas[idx].seleccionada = !_multasReportadas[idx].seleccionada;
+  var seleccionAhora = !_multasReportadas[idx].seleccionada;
+  _multasReportadas[idx].seleccionada = seleccionAhora;
   mostrarResultadoReal();
+  // Al marcar una multa para eliminar, el bloque de pago se activa justo
+  // debajo — llevamos la vista ahí para que el cliente vea de inmediato que
+  // su elección ya tiene un precio y un botón de pago esperando.
+  if(seleccionAhora){
+    var planes = document.getElementById('mres-planes-wrap');
+    if(planes) planes.scrollIntoView({behavior:'smooth', block:'start'});
+  }
 }
 
 function seleccionarTodasAplicables(){
