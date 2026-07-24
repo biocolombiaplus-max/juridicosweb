@@ -492,7 +492,8 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .doc-preview{position:relative;background:#fdfdfb;border:1px solid var(--border);border-radius:12px;padding:20px 18px;max-height:340px;overflow-y:auto;font-size:0.78rem;line-height:1.75;color:#2a2a3a;white-space:pre-wrap;box-shadow:inset 0 2px 10px rgba(0,0,0,0.04);}
 .doc-preview::before{content:'BORRADOR';position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:2.8rem;font-weight:900;color:rgba(230,57,70,0.1);letter-spacing:4px;pointer-events:none;white-space:nowrap;z-index:1;}
 .doc-preview-wrap{position:relative;}
-.doc-lock-badge{position:absolute;top:-10px;right:10px;background:var(--red);color:#fff;font-size:0.68rem;font-weight:800;padding:4px 12px;border-radius:20px;box-shadow:0 3px 10px rgba(230,57,70,0.4);z-index:2;}
+.doc-lock-badge{position:absolute;top:-10px;right:10px;background:var(--red);color:#fff;font-size:0.68rem;font-weight:800;padding:4px 12px;border-radius:20px;box-shadow:0 3px 10px rgba(230,57,70,0.4);z-index:2;transition:background .2s,box-shadow .2s;}
+.doc-lock-badge.is-firmado{background:#16a34a;box-shadow:0 3px 10px rgba(22,163,74,0.4);}
 .doc-final::before{content:'';display:none;}
 .doc-final{border-color:#bbf7d0;background:#fdfffe;}
 
@@ -1156,19 +1157,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <!-- STEP 5: BORRADOR (antes de pagar) -->
       <div class="step-panel" id="sp5">
         <div style="background:linear-gradient(135deg,#2e1065,#1e3a5f);border-radius:14px;padding:14px 16px;margin-bottom:14px;text-align:center;">
-          <p style="color:#2dd4bf;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-eye"></i> Así se ve tu Derecho de Petición</p>
-          <p style="color:#94a3b8;font-size:0.78rem;">Revísalo con calma. Solo se desbloquea la versión final y firmable al confirmar el pago.</p>
+          <p style="color:#2dd4bf;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-file-signature"></i> Tu Derecho de Petición ya está redactado</p>
+          <p style="color:#94a3b8;font-size:0.78rem;">Esto es exactamente lo que se radicará a tu nombre. Fírmalo ahora mismo, sin ningún pago de por medio, y compruébalo tú mismo.</p>
         </div>
         <div class="doc-preview-wrap">
-          <span class="doc-lock-badge"><i class="fas fa-lock"></i> Vista previa</span>
+          <span class="doc-lock-badge" id="doc-preview-badge"><i class="fas fa-pen-nib"></i> Borrador — listo para firmar</span>
           <div class="doc-preview" id="doc-preview-text"></div>
         </div>
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin:16px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+
+        <!-- FIRMA DIGITAL EN PANTALLA — antes de pagar, para generar confianza -->
+        <div id="firma-panel" style="border:2px solid #2dd4bf;border-radius:14px;padding:16px;margin:16px 0;background:linear-gradient(135deg,rgba(45,212,191,0.06),rgba(45,212,191,0.02));">
+          <p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:2px;"><i class="fas fa-signature" style="color:var(--gold);margin-right:5px;"></i>Firma aquí mismo — 10 segundos</p>
+          <p style="font-size:0.74rem;color:var(--gray);margin-bottom:10px;">Dibuja tu firma con el dedo o el mouse. Verás tu documento firmado al instante — así confirmas que el proceso es real antes de decidir nada más.</p>
+          <canvas id="firma-canvas" width="600" height="200" style="width:100%;height:130px;background:#fff;border:1.5px dashed var(--border);border-radius:10px;touch-action:none;cursor:crosshair;display:block;"></canvas>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button type="button" class="btn btn-outline" style="flex:1;color:var(--navy);border-color:var(--border);padding:11px;font-size:0.82rem;" onclick="limpiarFirma()"><i class="fas fa-eraser"></i> Borrar</button>
+            <button type="button" class="btn btn-shimmer" style="flex:2;padding:11px;font-size:0.85rem;" onclick="confirmarFirma()"><i class="fas fa-check"></i> Confirmar mi firma</button>
+          </div>
+        </div>
+
+        <div id="firma-confirmada" style="display:none;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:14px;margin-bottom:16px;">
+          <p style="color:#166534;font-weight:800;font-size:0.9rem;margin-bottom:4px;text-align:center;"><i class="fas fa-check-circle"></i> ¡Documento firmado! Así de real es el proceso</p>
+          <p style="color:#166534;font-size:0.78rem;line-height:1.6;margin-bottom:10px;text-align:center;">Tu caso ya fue analizado por nuestro sistema con <strong>Inteligencia Artificial</strong> y respaldado por un <strong>equipo jurídico experto en derecho de tránsito</strong>. El documento que acabas de firmar es el mismo que se radica — solo falta activarlo.</p>
+          <button type="button" class="btn btn-navy btn-full" style="font-size:0.82rem;padding:10px;" onclick="descargarPDFFirmado()"><i class="fas fa-download"></i> Descargar mi copia firmada</button>
+        </div>
+
+        <div style="text-align:center;margin-bottom:16px;">
+          <button type="button" onclick="mostrarFirmaManual()" id="btn-firma-manual-link" style="background:none;border:none;color:var(--gray);font-size:0.76rem;text-decoration:underline;cursor:pointer;">Prefiero descargar el PDF e imprimirlo para firmar a mano</button>
+        </div>
+
+        <div id="firma-manual-wrap" style="display:none;margin-bottom:16px;">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">1️⃣</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Activa tu caso y descarga el PDF</p></div>
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">✍️</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Imprímelo y fírmalo</p></div>
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">📤</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Escanéalo y súbelo</p></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+          <p style="font-size:0.79rem;color:var(--navy);line-height:1.65;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> Cada día que pasa, esa multa sigue activa: gana intereses y puede pasar a cobro coactivo. Tu caso ya tiene sustento legal real para eliminarse — actívalo hoy y nuestro equipo se encarga del resto.</p>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin:0 0 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
           <div><p style="font-size:0.78rem;color:var(--gray);margin:0 0 2px;" id="resumen-borrador-multas">Tu trámite</p><p style="font-size:0.7rem;color:#15803d;margin:0;">Pago verificado automáticamente</p></div>
           <p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;" id="resumen-borrador-total">$45.000</p>
         </div>
-        <button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-lock-open"></i> <span id="btn-ir-pago-txt">Confirmar y pagar $45.000</span></button>
-        <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i> Documento final al instante · Firma y radica cuando quieras</p>
+        <button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-bolt"></i> <span id="btn-ir-pago-txt">Activar mi caso — $45.000</span></button>
+        <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i> Tu documento firmado ya está listo · Solo falta activar tu caso para radicarlo</p>
       </div>
 
       <!-- STEP 6: PAGO -->
@@ -1206,13 +1240,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p style="color:rgba(255,255,255,0.85);font-size:0.8rem;">Redactado a la medida de tu caso — falta un último paso</p>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:16px;">
-          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">1️⃣</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Descarga el PDF</p></div>
-          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">✍️</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Fírmalo (a mano o digital)</p></div>
-          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">📤</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Súbelo o radícalo tú</p></div>
+        <div id="documentos-generados-wrap"><!-- una tarjeta por secretaría, generada por JS --></div>
+
+        <!-- Estado de la firma: ya se capturó en el paso del borrador (sp5). Aquí solo se confirma. -->
+        <div id="sp7-firma-ok" style="display:none;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:14px;margin-bottom:16px;text-align:center;">
+          <p style="color:#166534;font-weight:800;font-size:0.9rem;margin-bottom:2px;"><i class="fas fa-check-circle"></i> Documento firmado</p>
+          <p style="color:#166534;font-size:0.75rem;margin-bottom:10px;">Ya puedes radicarlo — o descarga tu copia firmada abajo.</p>
+          <button type="button" class="btn btn-navy btn-full" style="font-size:0.82rem;padding:10px;" onclick="descargarPDFFirmado()"><i class="fas fa-download"></i> Descargar mi copia firmada</button>
         </div>
 
-        <div id="documentos-generados-wrap"><!-- una tarjeta por secretaría, generada por JS --></div>
+        <div id="sp7-firma-manual" style="display:none;margin-bottom:16px;">
+          <p style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:10px;"><i class="fas fa-pen" style="color:var(--gold);margin-right:5px;"></i>Firma tu documento a mano</p>
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">1️⃣</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Descarga el PDF arriba</p></div>
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">✍️</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Imprímelo y fírmalo</p></div>
+            <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">📤</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Escanéalo y súbelo</p></div>
+          </div>
+        </div>
+
+        <div style="background:var(--light);border-radius:14px;padding:16px;margin-bottom:16px;">
+          <p style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:12px;"><i class="fas fa-route" style="color:var(--gold);margin-right:5px;"></i>Qué pasa después de radicar</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#2dd4bf;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">1</div>
+              <p style="font-size:0.78rem;color:#334155;line-height:1.55;margin:0;"><strong>Radicas el documento firmado</strong> ante la secretaría correspondiente (hoy).</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#2dd4bf;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">2</div>
+              <p style="font-size:0.78rem;color:#334155;line-height:1.55;margin:0;"><strong>La ley les da máximo 15 días hábiles</strong> para responder de fondo (Art. 14, CPACA).</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#16a34a;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">✓</div>
+              <p style="font-size:0.78rem;color:#166534;line-height:1.55;margin:0;"><strong>Si responden a favor:</strong> tu multa se elimina del SIMIT. Fin del proceso.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#d97706;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">!</div>
+              <p style="font-size:0.78rem;color:#7c2d12;line-height:1.55;margin:0;"><strong>Si no responden a tiempo, o responden en contra sin fundamento:</strong> procede una Acción de Tutela ($19.800 por multa) para exigir la respuesta y proteger tu derecho. Si tu caso llegó hasta aquí es porque el análisis legal indicó que sí aplica — una negativa sin sustento no cambia eso.</p>
+            </div>
+          </div>
+        </div>
 
         <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px;">¿Cómo quieres radicarlo?</p>
         <div style="border:2px solid #2dd4bf;border-radius:14px;padding:16px;margin-bottom:12px;">
@@ -2090,10 +2156,15 @@ function validarYVerBorrador(){
   guardarLead(datosLead);
   jwTrack('formulario_enviado', { ciudad: datosLead.ciudad });
 
-  // Los grupos (uno por secretaría) se calculan una sola vez aquí y se reutilizan
-  // en el paso 6 (pago) y 7 (documentos finales) sin volver a preguntar nada.
+  // Los grupos (uno por secretaría) y los documentos completos se calculan
+  // una sola vez aquí, en el borrador — antes del pago — para que el
+  // cliente pueda firmarlos de inmediato y generar confianza real.
   _gruposDocumento = agruparPorCiudad(_multasParaTramite);
-  document.getElementById('doc-preview-text').textContent = construirTextoPeticion(datosLead, _gruposDocumento[0] ? _gruposDocumento[0].multas : []);
+  _documentoDatos = datosLead;
+  _documentosGenerados = _gruposDocumento.map(function(grupo){
+    return { ciudad: grupo.ciudad, multas: grupo.multas, texto: construirTextoPeticion(datosLead, grupo.multas), firmaBase64: null, firmaNombre: null };
+  });
+  document.getElementById('doc-preview-text').textContent = _documentosGenerados[0] ? _documentosGenerados[0].texto : '';
 
   var montoTxt = '$'+_totalPago.toLocaleString('es-CO');
   var nMultas = _multasParaTramite.length;
@@ -2102,9 +2173,19 @@ function validarYVerBorrador(){
     nMultas+' multa'+(nMultas!==1?'s':'')+(nSecretarias>1?' en '+nSecretarias+' secretarías':'')+
     (pagoSel==='diferido' ? ' · Adelanto hoy' : '');
   document.getElementById('resumen-borrador-total').textContent = montoTxt;
-  document.getElementById('btn-ir-pago-txt').textContent = 'Confirmar y pagar '+montoTxt;
+  document.getElementById('btn-ir-pago-txt').textContent = 'Activar mi caso — '+montoTxt;
+
+  // Cada vez que se genera un borrador nuevo, la firma anterior (si la hubo)
+  // ya no corresponde al documento actual — se reinicia el panel de firma.
+  _archivoFirmadoBase64 = null; _archivoFirmadoNombre = null; _firmaPDFCache = null;
+  limpiarFirma();
+  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.remove('doc-final');
+  var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-pen-nib"></i> Borrador — listo para firmar'; docBadge.classList.remove('is-firmado'); }
+  var fp=document.getElementById('firma-panel'); if(fp) fp.style.display='block';
+  var fc=document.getElementById('firma-confirmada'); if(fc) fc.style.display='none';
 
   goToStep(5);
+  initFirmaPad();
 }
 
 var _gruposDocumento = [];
@@ -2205,11 +2286,8 @@ function construirTextoPeticion(p, multasGrupo){
     '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
 }
 
-function generarPDFDoc(p, texto, ciudad){
-  if(!window.jspdf){return;}
-  var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
+// Dibuja el encabezado de marca en la página actual del PDF
+function dibujarEncabezadoPDF(doc){
   doc.setFillColor(46,16,101);
   doc.rect(0,0,210,16,'F');
   doc.setTextColor(45,212,191);
@@ -2220,19 +2298,132 @@ function generarPDFDoc(p, texto, ciudad){
   doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
   doc.setTextColor(0,0,0);
   doc.setFontSize(9.5);
-  var lines=doc.splitTextToSize(texto,180);
-  var y=24;
-  lines.forEach(function(l){
-    if(y>280){doc.addPage();y=14;}
-    doc.text(l,14,y);y+=5.2;
-  });
+}
+function dibujarPiePDF(doc){
   doc.setFillColor(46,16,101);
   doc.rect(0,284,210,13,'F');
   doc.setTextColor(45,212,191);doc.setFontSize(8);
   doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
+}
+// Escribe un derecho de petición completo en la página actual de doc.
+// Si se pasa firmaDataUrl, la estampa justo encima de la línea de firma
+// (el texto "____________________________" que ya trae el documento).
+function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
+  dibujarEncabezadoPDF(doc);
+  var lines = doc.splitTextToSize(texto,180);
+  var y=24;
+  lines.forEach(function(l){
+    if(y>280){
+      dibujarPiePDF(doc);
+      doc.addPage();
+      dibujarEncabezadoPDF(doc);
+      y=24;
+    }
+    if(firmaDataUrl && l.indexOf('____')===0){
+      doc.addImage(firmaDataUrl,'PNG',14,y-15,55,17);
+    }
+    doc.text(l,14,y);y+=5.2;
+  });
+  dibujarPiePDF(doc);
+}
 
+function generarPDFDoc(p, texto, ciudad){
+  if(!window.jspdf){return;}
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  escribirDocumentoEnPDF(doc, texto, null);
   var sufijoCiudad = ciudad ? '_'+ciudad.replace(/[^a-zA-Z0-9]+/g,'') : '';
   doc.save('DerechoPeticion_'+(p.apellidos||'cliente')+'_'+(p.cedula||'')+sufijoCiudad+'.pdf');
+}
+
+// ===================== FIRMA DIGITAL EN PANTALLA =====================
+var _firmaVacia = true, _firmaDibujando = false, _firmaCtx = null, _firmaPDFCache = null;
+
+function initFirmaPad(){
+  var canvas = document.getElementById('firma-canvas');
+  if(!canvas || canvas.dataset.init) return;
+  canvas.dataset.init = '1';
+  var ctx = canvas.getContext('2d');
+  _firmaCtx = ctx;
+  ctx.strokeStyle = '#2e1065'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  function posicion(e){
+    var rect = canvas.getBoundingClientRect();
+    var t = e.touches && e.touches[0];
+    var clientX = t ? t.clientX : e.clientX;
+    var clientY = t ? t.clientY : e.clientY;
+    return { x: (clientX-rect.left) * (canvas.width/rect.width), y: (clientY-rect.top) * (canvas.height/rect.height) };
+  }
+  function iniciar(e){ e.preventDefault(); _firmaDibujando=true; _firmaVacia=false; var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y); }
+  function mover(e){ if(!_firmaDibujando) return; e.preventDefault(); var pt=posicion(e); ctx.lineTo(pt.x,pt.y); ctx.stroke(); }
+  function terminar(){ _firmaDibujando=false; }
+
+  canvas.addEventListener('mousedown', iniciar);
+  canvas.addEventListener('mousemove', mover);
+  window.addEventListener('mouseup', terminar);
+  canvas.addEventListener('touchstart', iniciar, {passive:false});
+  canvas.addEventListener('touchmove', mover, {passive:false});
+  canvas.addEventListener('touchend', terminar);
+}
+
+function limpiarFirma(){
+  var canvas = document.getElementById('firma-canvas');
+  if(!canvas || !_firmaCtx) return;
+  _firmaCtx.clearRect(0,0,canvas.width,canvas.height);
+  _firmaVacia = true;
+}
+
+function mostrarFirmaManual(){
+  var wrap = document.getElementById('firma-manual-wrap');
+  var link = document.getElementById('btn-firma-manual-link');
+  if(wrap) wrap.style.display = wrap.style.display==='block' ? 'none' : 'block';
+  if(link) link.textContent = (wrap && wrap.style.display==='block') ? 'Ocultar instrucciones para firmar a mano' : 'Prefiero descargar el PDF e imprimirlo para firmar a mano';
+}
+
+// Genera un único PDF con TODOS los documentos (uno por secretaría) y la
+// firma capturada estampada en cada uno, sin pasar por impresión ni escáner.
+function generarPDFConFirma(documentos, firmaDataUrl){
+  if(!window.jspdf || !documentos || !documentos.length) return null;
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  documentos.forEach(function(d, idx){
+    if(idx>0) doc.addPage();
+    escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl);
+  });
+  return doc;
+}
+
+function confirmarFirma(){
+  if(_firmaVacia){ alert('Dibuja tu firma en el recuadro antes de continuar.'); return; }
+  if(!_documentosGenerados || !_documentosGenerados.length){ alert('No hay documentos generados todavía.'); return; }
+  var canvas = document.getElementById('firma-canvas');
+  var firmaDataUrl = canvas.toDataURL('image/png');
+
+  var doc = generarPDFConFirma(_documentosGenerados, firmaDataUrl);
+  if(!doc){ alert('No se pudo generar el PDF. Intenta de nuevo o descarga y firma a mano.'); return; }
+  _firmaPDFCache = doc;
+
+  var datos = _documentoDatos || {};
+  _archivoFirmadoNombre = 'DerechoPeticion_Firmado_'+(datos.apellidos||'cliente')+'_'+(datos.cedula||'')+'.pdf';
+  _archivoFirmadoBase64 = doc.output('datauristring');
+
+  jwTrack('firma_digital_capturada', { documentos: _documentosGenerados.length });
+
+  document.getElementById('firma-panel').style.display='none';
+  document.getElementById('firma-confirmada').style.display='block';
+  var linkManual = document.getElementById('btn-firma-manual-link'); if(linkManual) linkManual.parentElement.style.display='none';
+  var manualWrap = document.getElementById('firma-manual-wrap'); if(manualWrap) manualWrap.style.display='none';
+
+  // El sello "BORRADOR" desaparece del preview: el cliente ve su documento
+  // ya firmado, tal como quedará radicado — refuerza que el proceso es real.
+  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.add('doc-final');
+  var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-check-circle"></i> Firmado'; docBadge.classList.add('is-firmado'); }
+}
+
+function descargarPDFFirmado(){
+  if(_firmaPDFCache){
+    _firmaPDFCache.save(_archivoFirmadoNombre || 'DerechoPeticion_Firmado.pdf');
+  }
 }
 
 function descargarPDFFinal(idx){
@@ -2319,22 +2510,23 @@ function iniciarPagoPrincipal(){
 function onPagoAprobado(txData){
   jwTrack('pago_aprobado', { plan: pagoSel, valor: _totalPago, wompi_id: txData && txData.id });
 
-  var datos = _leadGuardado || recogerDatosFormulario();
+  var datos = _documentoDatos || _leadGuardado || recogerDatosFormulario();
   datos.estadoPago = 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : '');
   guardarLead(datos);
   _documentoDatos = datos;
 
-  // Un documento por cada secretaría involucrada — nunca se mezclan multas de
-  // ciudades distintas en un mismo derecho de petición.
-  _documentosGenerados = _gruposDocumento.map(function(grupo){
-    return { ciudad: grupo.ciudad, multas: grupo.multas, texto: construirTextoPeticion(datos, grupo.multas), firmaBase64: null, firmaNombre: null };
-  });
-
+  // Los documentos (uno por secretaría) y la firma, si el cliente ya firmó,
+  // se generaron en el paso del borrador (sp5) — aquí solo se muestran.
   enviarCorreoCliente(datos, _documentosGenerados);
   renderDocumentosFinales();
   document.getElementById('sp7-titulo').textContent = _documentosGenerados.length>1
     ? '¡Pago confirmado! Tus '+_documentosGenerados.length+' documentos están listos'
     : '¡Pago confirmado! Tu documento está listo';
+
+  var yaFirmado = !!_archivoFirmadoBase64;
+  var okBox = document.getElementById('sp7-firma-ok'); if(okBox) okBox.style.display = yaFirmado ? 'block' : 'none';
+  var manualBox = document.getElementById('sp7-firma-manual'); if(manualBox) manualBox.style.display = yaFirmado ? 'none' : 'block';
+
   goToStep(7);
 }
 
@@ -2444,6 +2636,14 @@ function elegirRadicacion(conNosotros){
   document.getElementById('radicacion-manual-wrap').style.display = conNosotros ? 'none' : 'block';
   document.getElementById('btn-radicar-nosotros').style.display = 'none';
   if(!conNosotros) mostrarInstruccionesRadicacionManual();
+  // Si ya firmó en pantalla, el documento firmado ya está listo — no tiene
+  // sentido pedirle que lo suba otra vez.
+  if(conNosotros && _archivoFirmadoBase64){
+    var subir = document.getElementById('upload-box'); if(subir) subir.style.display='none';
+    var chip = document.getElementById('archivo-chip');
+    if(chip) chip.innerHTML = '<div class="upload-file-chip"><i class="fas fa-file-pdf"></i> '+escaparHtml(_archivoFirmadoNombre||'documento-firmado.pdf')+' <i class="fas fa-check-circle" style="margin-left:auto;color:#16a34a;"></i></div>';
+    var btn = document.getElementById('btn-radicar'); if(btn) btn.disabled = false;
+  }
 }
 
 function mostrarInstruccionesRadicacionManual(){
