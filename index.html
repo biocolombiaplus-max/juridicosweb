@@ -1116,16 +1116,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div id="multas-list"></div>
           <button type="button" onclick="agregarMultaRow()" style="background:none;border:2px dashed var(--border);border-radius:10px;padding:11px;width:100%;color:var(--navy);font-size:0.82rem;font-weight:700;cursor:pointer;margin-bottom:16px;"><i class="fas fa-plus"></i> Agregar otra multa</button>
 
-          <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Respaldo (opcional pero recomendado):</p>
-          <label class="upload-box" id="upload-box-simit" style="margin-bottom:16px;">
-            <input type="file" id="file-captura-simit" accept="image/*,application/pdf" onchange="onCapturaSimitSeleccionada(event)">
-            <i class="fas fa-camera" style="font-size:1.6rem;color:var(--gold);margin-bottom:6px;display:block;"></i>
-            <p style="font-size:0.83rem;color:var(--navy);font-weight:700;margin-bottom:2px;">Sube la captura de pantalla del SIMIT</p>
-            <p style="font-size:0.7rem;color:var(--gray);">Nos sirve para verificar tu caso</p>
-          </label>
-          <div id="captura-simit-chip"></div>
+          <div id="s3-respaldo-wrap">
+            <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Respaldo (opcional pero recomendado):</p>
+            <label class="upload-box" id="upload-box-simit" style="margin-bottom:16px;">
+              <input type="file" id="file-captura-simit" accept="image/*,application/pdf" onchange="onCapturaSimitSeleccionada(event)">
+              <i class="fas fa-camera" style="font-size:1.6rem;color:var(--gold);margin-bottom:6px;display:block;"></i>
+              <p style="font-size:0.83rem;color:var(--navy);font-weight:700;margin-bottom:2px;">Sube la captura de pantalla del SIMIT</p>
+              <p style="font-size:0.7rem;color:var(--gray);">Nos sirve para verificar tu caso</p>
+            </label>
+            <div id="captura-simit-chip"></div>
+          </div>
 
-          <button class="btn btn-red btn-full btn-xl" onclick="calcularElegibilidad()"><i class="fas fa-calculator"></i> Calcular cuáles aplican</button>
+          <button id="btn-calcular" class="btn btn-red btn-full btn-xl" onclick="calcularElegibilidad()"><i class="fas fa-calculator"></i> <span id="btn-calcular-texto">Ver si mis multas se pueden eliminar</span></button>
         </div>
 
         <div id="s3-resultado" style="display:none;">
@@ -1405,6 +1407,7 @@ function openSimitModal(e,tipo){
 
 function resetFlujoSimit(){
   // Limpia el estado de una consulta anterior para que el paso 3 siempre arranque desde cero
+  resetFormularioManual();
   var s2auto=document.getElementById('s2-auto-loader');
   var s2f1=document.getElementById('s2-fase1'), s2f2=document.getElementById('s2-fase2');
   if(s2auto) s2auto.style.display='none';
@@ -1535,6 +1538,8 @@ function intentarConsultaAutomatica(val, tipo){
 // Muestra en el paso 3 las multas reales que ya llegaron automáticamente —
 // solo falta que el cliente confirme la notificación de cada una (dato que
 // el proveedor de datos no entrega, porque es un hecho, no un registro).
+var _origenAutomatico = false;
+
 function mostrarMultasAutomaticas(multas){
   goToStep(3);
   document.getElementById('s3-inicio').style.display='none';
@@ -1544,10 +1549,16 @@ function mostrarMultasAutomaticas(multas){
     return;
   }
 
+  _origenAutomatico = true;
   document.getElementById('s3-form').style.display='block';
   var aviso=document.getElementById('s3-auto-aviso'), intro=document.getElementById('s3-form-intro');
   if(aviso) aviso.style.display='block';
   if(intro) intro.style.display='none';
+  // Ya son datos verificados directo del SIMIT — pedir además una captura de
+  // pantalla sería fricción sin sentido, así que ese paso solo se muestra en
+  // el reporte manual (cuando el cliente escribe lo que él mismo vio).
+  var respaldo = document.getElementById('s3-respaldo-wrap');
+  if(respaldo) respaldo.style.display='none';
 
   multas.forEach(function(m){
     agregarMultaRow();
@@ -1572,6 +1583,14 @@ function mostrarMultasAutomaticas(multas){
     if(m.placa) _placaAutoDetectada = m.placa;
     if(m.fecha) actualizarVistaPrevia(fEl);
   });
+
+  // El cliente no debería tener que tocar un botón para enterarse de su
+  // resultado — apenas terminó la consulta real, se calcula y se muestra
+  // de inmediato. El botón sigue disponible más abajo por si corrige alguna
+  // respuesta de notificación y quiere recalcular.
+  var textoBtn = document.getElementById('btn-calcular-texto');
+  if(textoBtn) textoBtn.textContent = 'Actualizar resultado con mis respuestas';
+  calcularElegibilidad();
 }
 
 var _placaAutoDetectada = '';
@@ -1642,6 +1661,17 @@ function s3ConMultas(){
   var auto=document.getElementById('s3-sinmultas-auto'); if(auto) auto.style.display='none';
   document.getElementById('s3-form').style.display='block';
   if(!document.querySelector('.multa-row')) agregarMultaRow();
+}
+
+// Restaura el paso 3 a su estado "reporte manual" (con la captura opcional y
+// el botón en su texto original) — se llama al abrir el modal de nuevo, para
+// que no queden rastros de una consulta automática anterior.
+function resetFormularioManual(){
+  _origenAutomatico = false;
+  var respaldo = document.getElementById('s3-respaldo-wrap');
+  if(respaldo) respaldo.style.display='block';
+  var textoBtn = document.getElementById('btn-calcular-texto');
+  if(textoBtn) textoBtn.textContent = 'Ver si mis multas se pueden eliminar';
 }
 
 var _multaRowSeq = 0;
