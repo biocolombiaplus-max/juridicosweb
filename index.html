@@ -1200,10 +1200,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- STEP 7: DOCUMENTOS FINALES -->
       <div class="step-panel" id="sp7">
-        <div style="background:linear-gradient(135deg,#16a34a,#15803d);border-radius:14px;padding:16px 18px;margin-bottom:16px;text-align:center;">
+        <div style="background:linear-gradient(135deg,#16a34a,#15803d);border-radius:14px;padding:16px 18px;margin-bottom:12px;text-align:center;">
           <div style="font-size:1.8rem;margin-bottom:6px;">✅</div>
           <p style="color:#fff;font-weight:800;font-size:1rem;margin-bottom:3px;" id="sp7-titulo">¡Pago confirmado! Tu documento está listo</p>
-          <p style="color:rgba(255,255,255,0.85);font-size:0.8rem;">Descárgalo, fírmalo y súbelo aquí</p>
+          <p style="color:rgba(255,255,255,0.85);font-size:0.8rem;">Redactado a la medida de tu caso — falta un último paso</p>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">1️⃣</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Descarga el PDF</p></div>
+          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">✍️</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Fírmalo (a mano o digital)</p></div>
+          <div style="flex:1;text-align:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 6px;"><div style="font-size:1.1rem;">📤</div><p style="font-size:0.68rem;font-weight:700;color:var(--navy);margin-top:3px;">Súbelo o radícalo tú</p></div>
         </div>
 
         <div id="documentos-generados-wrap"><!-- una tarjeta por secretaría, generada por JS --></div>
@@ -2133,52 +2139,69 @@ function construirTextoPeticion(p, multasGrupo){
   var hayPrescritas = aplican.some(function(m){ return m.causal.indexOf('Prescripción')===0; });
   var hayNotif = aplican.some(function(m){ return m.causal.indexOf('Notificación')===0; });
   var hayINM = aplican.some(function(m){ return m.posibleINM; });
+  var hayCoactivo = aplican.some(function(m){ return m.notaEstado && /coactiv/i.test(m.notaEstado); });
 
   var hechosMultas;
   if(aplican.length){
     hechosMultas = aplican.map(function(m,i){
       var f = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
       var valorTxt = m.valor ? ' por valor de $'+Number(m.valor).toLocaleString('es-CO') : '';
-      return (i+1)+'. Comparendo de fecha '+f+valorTxt+(m.ciudad?', registrado ante '+m.ciudad:'')+'. '+m.causal;
+      var estadoTxt = (m.notaEstado && /coactiv/i.test(m.notaEstado)) ? ' El comparendo se encuentra actualmente en proceso de cobro coactivo.' : '';
+      return (i+1)+'. Comparendo de fecha '+f+valorTxt+(m.ciudad?', registrado ante '+m.ciudad:'')+'. '+m.causal+estadoTxt;
     }).join('\n\n');
   } else {
     hechosMultas = '1. Tengo registrado(s) comparendo(s) en el Sistema Integrado de Información sobre Multas y Sanciones de Tránsito (SIMIT) a mi nombre y/o al de mi vehículo.';
   }
 
-  var fundamentoPrescripcion = hayPrescritas ?
-    '• Art. 136, Ley 769 de 2002 – Prescripción de las sanciones de tránsito a los tres (3) años.\n' : '';
-  var fundamentoNotif = hayNotif ?
-    '• Ley 1843 de 2017 y Decreto 431 de 2017 – Notificación de infracciones detectadas por medios técnicos dentro de los tres (3) días hábiles siguientes.\n' : '';
-  var fundamentoINM = hayINM ?
-    '• Ley 2251 de 2022 y Resolución 718 de 2023 del Ministerio de Transporte – Requisito del "concepto de desempeño" del Instituto Nacional de Metrología (INM) para operar equipos de fotodetección. La Superintendencia de Transporte adelanta investigación (2026) contra 37 organismos de tránsito por incumplir este requisito entre 2018 y 2024, afectando más de 5,8 millones de comparendos ('+FUENTE_OFICIAL_INM+').\n' : '';
+  // ── II. Fundamentos jurídicos y consideraciones de derecho ──
+  // No solo se citan las normas: se explica el razonamiento que conecta cada
+  // hecho con la consecuencia jurídica que se pide, como en un concepto
+  // jurídico real — no una plantilla de citas sueltas.
+  var considerandos = [];
+  considerandos.push('Que el artículo 29 de la Constitución Política consagra el derecho fundamental al debido proceso, aplicable también a las actuaciones administrativas sancionatorias, y que dicha garantía exige que toda sanción administrativa se imponga y se mantenga vigente únicamente mientras subsistan sus fundamentos fácticos y jurídicos.');
+
+  if(hayPrescritas){
+    considerandos.push('Que el artículo 136 de la Ley 769 de 2002 (Código Nacional de Tránsito) establece un término de prescripción de tres (3) años para el cobro de las sanciones de tránsito, contados desde la ocurrencia del hecho, término que en el(los) comparendo(s) relacionado(s) en los HECHOS ya se encuentra ampliamente superado sin que conste gestión de cobro efectiva. En concordancia, el artículo 52 de la Ley 1437 de 2011 (CPACA) reconoce el mismo límite temporal de tres (3) años para el ejercicio de la facultad sancionatoria de las autoridades administrativas, lo cual refuerza que, transcurrido dicho término, la administración pierde competencia para exigir el pago. Mantener vigente en el SIMIT un comparendo prescrito vulnera el principio de seguridad jurídica y constituye una actuación administrativa sin sustento legal vigente.');
+  }
+  if(hayNotif){
+    considerandos.push('Que los artículos 66 a 69 del CPACA (Ley 1437 de 2011), en concordancia con la Ley 1843 de 2017 y el Decreto 431 de 2017 para infracciones detectadas por medios técnicos, exigen que la notificación del comparendo se surta en debida forma y dentro de los tres (3) días hábiles siguientes a la infracción. Es doctrina reiterada en materia administrativa que un acto administrativo que no ha sido notificado válidamente al administrado no le es oponible ni produce efectos jurídicos en su contra, por no haberse garantizado su derecho de defensa y contradicción. En el caso relacionado, no se acredita notificación formal dentro del término legal, lo que impide que el comparendo surta efectos vinculantes.');
+  }
+  if(hayINM){
+    considerandos.push('Que la Ley 2251 de 2022 y la Resolución 718 de 2023 del Ministerio de Transporte exigen que los equipos de detección electrónica (fotodetección) cuenten con el "concepto de desempeño" vigente expedido por el Instituto Nacional de Metrología (INM) como condición de validez técnica y probatoria del registro fotográfico que sustenta el comparendo. La Superintendencia de Transporte adelanta desde 2026 una investigación oficial contra 37 organismos de tránsito —entre los cuales se encuentra el organismo destinatario de esta petición o uno de jurisdicción equivalente— por haber operado dichos equipos sin cumplir este requisito entre los años 2018 y 2024, afectando más de 5,8 millones de comparendos a nivel nacional ('+FUENTE_OFICIAL_INM+'). Sin el respaldo técnico exigido por la ley, el medio de prueba que sustenta el comparendo carece de validez, y por tanto el acto administrativo sancionatorio queda desprovisto de fundamento probatorio legal.');
+  }
+  if(hayCoactivo){
+    considerandos.push('Que, al encontrarse el comparendo en etapa de cobro coactivo, es procedente solicitar la suspensión inmediata de dicho proceso mientras se resuelve de fondo la presente petición, en tanto no puede adelantarse ni continuarse un cobro sobre una obligación cuya existencia y exigibilidad jurídica están siendo controvertidas por las razones aquí expuestas — proceder en sentido contrario expondría a la administración a adelantar cobros sobre créditos jurídicamente inexistentes.');
+  }
+  considerandos.push('Que el artículo 14 del CPACA obliga a la administración a resolver de fondo toda petición dentro de los quince (15) días hábiles siguientes a su radicación, y que el artículo 3 del mismo estatuto consagra los principios de eficacia, economía y celeridad que rigen toda actuación administrativa, los cuales imponen a esa Secretaría el deber de pronunciarse expresamente sobre cada una de las pretensiones aquí formuladas.');
+
+  var considerandosTxt = considerandos.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
 
   var pretensiones = [];
-  if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN de las sanciones relacionadas en el numeral correspondiente de los HECHOS, por haber transcurrido más de tres (3) años sin cobro efectivo.');
-  if(hayNotif) pretensiones.push('Que se declare la NULIDAD de los comparendos relacionados por notificación defectuosa o inexistente, conforme a la Ley 1843 de 2017.');
-  if(hayINM) pretensiones.push('Que se verifique si los equipos de fotodetección utilizados contaban con el concepto de desempeño del INM vigente al momento de la infracción, y de no ser así, se declare la NULIDAD del comparendo conforme a la investigación de la Superintendencia de Transporte.');
-  pretensiones.push('Que, en consecuencia, se ELIMINEN del sistema SIMIT los registros correspondientes a los comparendos aquí relacionados.');
+  if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN de las sanciones relacionadas en el numeral correspondiente de los HECHOS, por haber transcurrido más de tres (3) años sin cobro efectivo, conforme al Art. 136 de la Ley 769 de 2002.');
+  if(hayNotif) pretensiones.push('Que se declare la NULIDAD e inoponibilidad de los comparendos relacionados por notificación defectuosa o inexistente, conforme a la Ley 1843 de 2017 y los Arts. 66 a 69 del CPACA.');
+  if(hayINM) pretensiones.push('Que se verifique si los equipos de fotodetección utilizados contaban con el concepto de desempeño del INM vigente al momento de la infracción, y de no ser así, se declare la NULIDAD del comparendo por falta de validez del medio probatorio, conforme a la investigación de la Superintendencia de Transporte y la Ley 2251 de 2022.');
+  if(hayCoactivo) pretensiones.push('Que se ordene la SUSPENSIÓN INMEDIATA de cualquier proceso de cobro coactivo iniciado o en curso sobre los comparendos objeto de esta petición, mientras se resuelve de fondo la misma.');
+  pretensiones.push('Que, en consecuencia, se ELIMINEN del sistema SIMIT los registros correspondientes a los comparendos aquí relacionados, y se certifique dicha eliminación al peticionario.');
+  pretensiones.push('Que se resuelva de fondo la presente petición dentro del término legal de quince (15) días hábiles previsto en el Art. 14 del CPACA, notificando la decisión conforme a lo indicado en el numeral IV.');
   var pretensionesTxt = pretensiones.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
 
   return ciudadDoc+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
     'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE COMPARENDOS\n'+
     'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+(p.placa||'N/A')+'\n\n'+
     'Respetados señores:\n\n'+
-    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', en ejercicio del '+
+    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', mayor de edad y domiciliado/a en '+ciudadDoc+', en ejercicio del '+
     'derecho fundamental consagrado en el Art. 23 de la Constitución Política y en los términos de la '+
-    'Ley 1755 de 2015, me dirijo a ustedes para interponer el siguiente:\n\n'+
+    'Ley 1755 de 2015, me dirijo respetuosamente a ustedes para interponer el siguiente:\n\n'+
     'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
     'I. HECHOS\n\n'+
     hechosMultas + '\n\n'+
-    'II. FUNDAMENTOS JURÍDICOS\n\n'+
-    '• Art. 23 Constitución Política de Colombia – Derecho de petición.\n'+
-    '• Ley 1755 de 2015 – Procedimiento del derecho de petición.\n'+
-    '• Ley 769 de 2002 – Código Nacional de Tránsito.\n'+
-    fundamentoPrescripcion +
-    fundamentoNotif +
-    fundamentoINM +
-    '\nIII. PRETENSIONES\n\n'+
+    'II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO\n\n'+
+    considerandosTxt + '\n\n'+
+    'III. PRETENSIONES\n\n'+
     pretensionesTxt + '\n\n'+
-    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+'\n\n'+
+    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+' y/o WhatsApp '+p.whatsapp+', o en la dirección de notificación judicial registrada en el RUNT a mi nombre.\n\n'+
+    'De no obtener respuesta de fondo dentro del término legal, o de ser esta desfavorable sin fundamento jurídico válido, me reservo el derecho de acudir a los mecanismos judiciales y constitucionales pertinentes para la protección de mis derechos.\n\n'+
+    'Cordialmente,\n\n'+
     '____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
 }
 
