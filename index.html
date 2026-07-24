@@ -2136,6 +2136,23 @@ var _documentoDatos = null;
 var _documentosGenerados = [];
 var _radicarConNosotros = null; // true = pagamos radicación · false = el cliente radica solo
 
+// Pinta el texto del documento en la vista previa y, si ya se firmó, estampa
+// la firma justo sobre la línea "____" — igual que en el PDF — para que el
+// cliente vea su documento firmado ahí mismo, sin descargar ni salir de la página.
+function renderDocPreviewConFirma(texto, firmaDataUrl){
+  var el = document.getElementById('doc-preview-text');
+  if(!el) return;
+  if(!firmaDataUrl){ el.textContent = texto || ''; return; }
+  var marcador = '____________________________';
+  var idx = (texto||'').indexOf(marcador);
+  if(idx===-1){ el.textContent = texto || ''; return; }
+  var antes = texto.slice(0, idx);
+  var desdeLinea = texto.slice(idx);
+  el.innerHTML = escaparHtml(antes) +
+    '<img src="'+firmaDataUrl+'" alt="Firma" style="display:block;max-width:210px;height:auto;margin:6px 0 -10px;">' +
+    escaparHtml(desdeLinea);
+}
+
 function validarYVerBorrador(){
   var nombres=document.getElementById('frm-nombres').value.trim();
   var apellidos=document.getElementById('frm-apellidos').value.trim();
@@ -2168,7 +2185,7 @@ function validarYVerBorrador(){
   _documentosGenerados = _gruposDocumento.map(function(grupo){
     return { ciudad: grupo.ciudad, multas: grupo.multas, texto: construirTextoPeticion(datosLead, grupo.multas), firmaBase64: null, firmaNombre: null };
   });
-  document.getElementById('doc-preview-text').textContent = _documentosGenerados[0] ? _documentosGenerados[0].texto : '';
+  renderDocPreviewConFirma(_documentosGenerados[0] ? _documentosGenerados[0].texto : '', null);
   renderPagoOpcionesSp5();
 
   // Cada vez que se genera un borrador nuevo, la firma anterior (si la hubo)
@@ -2453,11 +2470,16 @@ function confirmarFirma(){
   var manualWrap = document.getElementById('firma-manual-wrap'); if(manualWrap) manualWrap.style.display='none';
 
   // El sello "BORRADOR" cambia a "PENDIENTE DE PAGO": el cliente ve su
-  // documento ya firmado, tal como quedará radicado, pero solo se puede
-  // descargar/copiar cuando active su caso — así el pago sigue siendo
-  // necesario aunque ya haya firmado.
+  // documento ya firmado (con la firma estampada ahí mismo, como en el PDF),
+  // tal como quedará radicado, pero solo se puede descargar/copiar cuando
+  // active su caso — así el pago sigue siendo necesario aunque ya haya firmado.
+  renderDocPreviewConFirma(_documentosGenerados[0].texto, firmaDataUrl);
   var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.add('doc-pendiente');
   var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-check-circle"></i> Firmado'; docBadge.classList.add('is-firmado'); }
+
+  // Sin salir de la página: llevamos la vista de vuelta arriba, al documento
+  // ya firmado, para que el cliente vea la prueba de inmediato y no se confunda.
+  if(docPrev) docPrev.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function descargarPDFFirmado(){
