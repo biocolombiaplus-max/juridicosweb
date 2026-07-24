@@ -496,6 +496,8 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .doc-lock-badge.is-firmado{background:#16a34a;box-shadow:0 3px 10px rgba(22,163,74,0.4);}
 .doc-final::before{content:'';display:none;}
 .doc-final{border-color:#bbf7d0;background:#fdfffe;}
+.doc-preview.doc-pendiente::before{content:'PENDIENTE DE PAGO';font-size:1.9rem;color:rgba(217,119,6,0.16);}
+.doc-preview.doc-pendiente{border-color:#fed7aa;user-select:none;-webkit-user-select:none;}
 
 /* ===== PAGO: verificación ===== */
 .pago-verify{text-align:center;padding:30px 10px;}
@@ -1176,10 +1178,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <div id="firma-confirmada" style="display:none;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:14px;margin-bottom:16px;">
-          <p style="color:#166534;font-weight:800;font-size:0.9rem;margin-bottom:4px;text-align:center;"><i class="fas fa-check-circle"></i> ¡Documento firmado! Así de real es el proceso</p>
-          <p style="color:#166534;font-size:0.78rem;line-height:1.6;margin-bottom:10px;text-align:center;">Tu caso ya fue analizado por nuestro sistema con <strong>Inteligencia Artificial</strong> y respaldado por un <strong>equipo jurídico experto en derecho de tránsito</strong>. El documento que acabas de firmar es el mismo que se radica — solo falta activarlo.</p>
-          <button type="button" class="btn btn-navy btn-full" style="font-size:0.82rem;padding:10px;" onclick="descargarPDFFirmado()"><i class="fas fa-download"></i> Descargar mi copia firmada</button>
+        <div id="firma-confirmada" style="display:none;background:rgba(22,163,74,0.08);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:14px;margin-bottom:16px;text-align:center;">
+          <p style="color:#166534;font-weight:800;font-size:0.9rem;margin-bottom:4px;"><i class="fas fa-check-circle"></i> ¡Documento firmado! Así de real es el proceso</p>
+          <p style="color:#166534;font-size:0.78rem;line-height:1.6;margin:0;">Tu caso ya fue analizado por nuestro sistema con <strong>Inteligencia Artificial</strong> y respaldado por un <strong>equipo jurídico experto en derecho de tránsito</strong>. Tu copia firmada queda lista para descargar en cuanto actives tu caso abajo.</p>
         </div>
 
         <div style="text-align:center;margin-bottom:16px;">
@@ -1197,11 +1198,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
           <p style="font-size:0.79rem;color:var(--navy);line-height:1.65;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> Cada día que pasa, esa multa sigue activa: gana intereses y puede pasar a cobro coactivo. Tu caso ya tiene sustento legal real para eliminarse — actívalo hoy y nuestro equipo se encarga del resto.</p>
         </div>
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin:0 0 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
-          <div><p style="font-size:0.78rem;color:var(--gray);margin:0 0 2px;" id="resumen-borrador-multas">Tu trámite</p><p style="font-size:0.7rem;color:#15803d;margin:0;">Pago verificado automáticamente</p></div>
-          <p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;" id="resumen-borrador-total">$45.000</p>
-        </div>
-        <button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-bolt"></i> <span id="btn-ir-pago-txt">Activar mi caso — $45.000</span></button>
+        <p style="font-size:0.8rem;font-weight:800;color:var(--navy);text-align:center;margin:0 0 10px;"><i class="fas fa-unlock-alt" style="color:var(--gold);"></i> Iniciar pago para radicar tu caso</p>
+        <div id="sp5-pago-wrap"><!-- opciones de pago, generadas por JS según el plan --></div>
         <p style="font-size:0.72rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i> Tu documento firmado ya está listo · Solo falta activar tu caso para radicarlo</p>
       </div>
 
@@ -1888,7 +1886,7 @@ function calcularElegibilidad(){
       else { causal += ' También aplica: cámara bajo investigación Supertransporte 2026 por falta de certificación INM.'; }
     }
 
-    lista.push({ fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, causal:causal, notaEstado:notaEstado, seleccionada: estado==='aplica' });
+    lista.push({ fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, causal:causal, notaEstado:notaEstado, seleccionada: false });
   });
 
   if(lista.length===0){
@@ -1902,7 +1900,7 @@ function calcularElegibilidad(){
 
 function badgeInfo(estado){
   if(estado==='aplica') return {clase:'badge-aplica', texto:'SE PUEDE ELIMINAR', icon:'fa-circle-check', border:'#16a34a', bg:'#f0fdf4'};
-  if(estado==='revisar') return {clase:'badge-revisar', texto:'POR CONFIRMAR CON UN ABOGADO', icon:'fa-magnifying-glass', border:'#d97706', bg:'#fffbeb'};
+  if(estado==='revisar') return {clase:'badge-revisar', texto:'AÚN NO SE PUEDE ELIMINAR', icon:'fa-circle-minus', border:'#d97706', bg:'#fffbeb'};
   return {clase:'badge-no-aplica', texto:'AÚN NO SE PUEDE ELIMINAR', icon:'fa-circle-minus', border:'#94a3b8', bg:'#f8fafc'};
 }
 
@@ -1920,10 +1918,15 @@ function mostrarResultadoReal(){
     var fechaFmt = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
     var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : 'Valor no indicado';
     var accion = '';
+    var hint = '';
     if(m.estado==='aplica'){
       accion = '<button class="mres-btn-si '+(m.seleccionada?'is-selected':'')+'" onclick="toggleSeleccionMulta('+i+')">'+
-        '<i class="fas '+(m.seleccionada?'fa-circle-check':'fa-hand-pointer')+'"></i> '+(m.seleccionada?'Incluida en tu trámite':'Sí, quiero eliminar esta multa')+
+        '<i class="fas '+(m.seleccionada?'fa-circle-check':'fa-hand-pointer')+'"></i> '+(m.seleccionada?'Incluida en tu trámite — toca para quitarla':'Toca para agregarla a tu trámite')+
         '</button>';
+      var hayMasAplicaDespues = lista.slice(i+1).some(function(x){ return x.estado==='aplica'; });
+      if(hayMasAplicaDespues){
+        hint = '<p style="text-align:center;font-size:0.72rem;color:var(--gray);margin:8px 0 0;">👇 Sigue revisando tu próxima multa abajo</p>';
+      }
     }
     return '<div class="mres-card mres-'+m.estado+'">'+
       '<div class="mres-top"><span class="mres-fecha">Multa #'+(i+1)+' · '+fechaFmt+' · '+(m.ciudad||'Ciudad no indicada')+'</span><span class="mres-valor">'+valorFmt+'</span></div>'+
@@ -1931,7 +1934,7 @@ function mostrarResultadoReal(){
       '<p class="mres-motivo">'+m.causal+'</p>'+
       (m.notaEstado ? '<p class="mres-nota"><i class="fas fa-circle-info"></i> '+m.notaEstado+'</p>' : '') +
       (m.posibleINM ? '<a href="'+FUENTE_OFICIAL_INM+'" target="_blank" class="mres-fuente">Ver listado oficial Mintransporte</a>' : '') +
-      accion +
+      accion + hint +
       '</div>';
   }).join('');
 
@@ -1965,11 +1968,12 @@ function mostrarResultadoReal(){
 function toggleSeleccionMulta(idx){
   var seleccionAhora = !_multasReportadas[idx].seleccionada;
   _multasReportadas[idx].seleccionada = seleccionAhora;
+  // Si todavía hay otra multa "se puede eliminar" más abajo sin revisar, no
+  // saltamos a los planes de pago: dejamos que el cliente siga bajando y
+  // toque el botón de cada una, una sola vez por multa.
+  var hayMasAplicaDespues = _multasReportadas.slice(idx+1).some(function(x){ return x.estado==='aplica'; });
   mostrarResultadoReal();
-  // Al marcar una multa para eliminar, el bloque de pago se activa justo
-  // debajo — llevamos la vista ahí para que el cliente vea de inmediato que
-  // su elección ya tiene un precio y un botón de pago esperando.
-  if(seleccionAhora){
+  if(seleccionAhora && !hayMasAplicaDespues){
     var planes = document.getElementById('mres-planes-wrap');
     if(planes) planes.scrollIntoView({behavior:'smooth', block:'start'});
   }
@@ -2010,7 +2014,7 @@ function renderPlanes(aplican){
     '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$'+totalIndividual.toLocaleString('es-CO')+'</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">'+numSel+' seleccionada'+(numSel!==1?'s':'')+'</p></div>'+
     '</div>'+
     '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#2e1065;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(45,212,191,0.45);opacity:'+(numSel===0?'0.5':'1')+';">'+
-    '<i class="fas fa-file-signature"></i>Continuar con '+(numSel||'')+' multa'+(numSel!==1?'s':'')+' — $'+totalIndividual.toLocaleString('es-CO')+'</button>'+
+    '<i class="fas fa-file-signature"></i>'+(numSel===0 ? 'Toca "agregar al trámite" arriba primero' : 'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' — $'+totalIndividual.toLocaleString('es-CO'))+'</button>'+
     '</div></div>';
 
   if(aplican.length >= 2){
@@ -2165,27 +2169,61 @@ function validarYVerBorrador(){
     return { ciudad: grupo.ciudad, multas: grupo.multas, texto: construirTextoPeticion(datosLead, grupo.multas), firmaBase64: null, firmaNombre: null };
   });
   document.getElementById('doc-preview-text').textContent = _documentosGenerados[0] ? _documentosGenerados[0].texto : '';
-
-  var montoTxt = '$'+_totalPago.toLocaleString('es-CO');
-  var nMultas = _multasParaTramite.length;
-  var nSecretarias = _gruposDocumento.length;
-  document.getElementById('resumen-borrador-multas').textContent =
-    nMultas+' multa'+(nMultas!==1?'s':'')+(nSecretarias>1?' en '+nSecretarias+' secretarías':'')+
-    (pagoSel==='diferido' ? ' · Adelanto hoy' : '');
-  document.getElementById('resumen-borrador-total').textContent = montoTxt;
-  document.getElementById('btn-ir-pago-txt').textContent = 'Activar mi caso — '+montoTxt;
+  renderPagoOpcionesSp5();
 
   // Cada vez que se genera un borrador nuevo, la firma anterior (si la hubo)
   // ya no corresponde al documento actual — se reinicia el panel de firma.
   _archivoFirmadoBase64 = null; _archivoFirmadoNombre = null; _firmaPDFCache = null;
   limpiarFirma();
-  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.remove('doc-final');
+  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.remove('doc-final','doc-pendiente');
   var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-pen-nib"></i> Borrador — listo para firmar'; docBadge.classList.remove('is-firmado'); }
   var fp=document.getElementById('firma-panel'); if(fp) fp.style.display='block';
   var fc=document.getElementById('firma-confirmada'); if(fc) fc.style.display='none';
 
   goToStep(5);
   initFirmaPad();
+}
+
+// Dos opciones de pago para las multas seleccionadas individualmente, o el
+// precio fijo del plan masivo si el cliente ya eligió "eliminar todas".
+function renderPagoOpcionesSp5(){
+  var wrap = document.getElementById('sp5-pago-wrap');
+  if(!wrap) return;
+  var n = _multasParaTramite.length;
+  if(pagoSel==='masivo'){
+    wrap.innerHTML =
+      '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">'+
+      '<div><p style="font-size:0.78rem;color:var(--gray);margin:0 0 2px;">'+n+' multas incluidas en tu trámite</p><p style="font-size:0.7rem;color:#15803d;margin:0;">Pago verificado automáticamente</p></div>'+
+      '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;">$69.000</p>'+
+      '</div>'+
+      '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-bolt"></i> Activar mi caso — $69.000</button>';
+    return;
+  }
+  var totalInmediato = n * 45000;
+  wrap.innerHTML =
+    '<div style="border:2px solid #2dd4bf;border-radius:14px;padding:14px 16px;margin-bottom:12px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">'+
+    '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar de inmediato</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$45.000 por '+(n>1?'cada una de tus '+n+' multas':'tu multa')+'</p></div>'+
+    '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+totalInmediato.toLocaleString('es-CO')+'</p>'+
+    '</div>'+
+    '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="elegirPagoFinal(\'individual\')"><i class="fas fa-bolt"></i> Pagar $'+totalInmediato.toLocaleString('es-CO')+' y activar</button>'+
+    '</div>'+
+    '<div style="border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 16px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">'+
+    '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar al Eliminar</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">Adelanto hoy, resto solo cuando se elimine</p></div>'+
+    '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$19.800</p>'+
+    '</div>'+
+    '<button class="btn btn-navy btn-full" style="padding:14px;font-size:0.9rem;" onclick="elegirPagoFinal(\'diferido\')"><i class="fas fa-file-invoice-dollar"></i> Pagar adelanto $19.800</button>'+
+    '<p style="font-size:0.68rem;color:var(--gray);margin:8px 0 0;text-align:center;">+ $95.900'+(n>1?' por multa':'')+' al finalizar el trámite</p>'+
+    '</div>';
+}
+
+function elegirPagoFinal(plan){
+  pagoSel = plan;
+  var calc = calcularTotalPago();
+  _totalPago = calc.total;
+  jwTrack('plan_pago_final', { plan: plan, total: _totalPago });
+  irAPago();
 }
 
 var _gruposDocumento = [];
@@ -2414,9 +2452,11 @@ function confirmarFirma(){
   var linkManual = document.getElementById('btn-firma-manual-link'); if(linkManual) linkManual.parentElement.style.display='none';
   var manualWrap = document.getElementById('firma-manual-wrap'); if(manualWrap) manualWrap.style.display='none';
 
-  // El sello "BORRADOR" desaparece del preview: el cliente ve su documento
-  // ya firmado, tal como quedará radicado — refuerza que el proceso es real.
-  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.add('doc-final');
+  // El sello "BORRADOR" cambia a "PENDIENTE DE PAGO": el cliente ve su
+  // documento ya firmado, tal como quedará radicado, pero solo se puede
+  // descargar/copiar cuando active su caso — así el pago sigue siendo
+  // necesario aunque ya haya firmado.
+  var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.add('doc-pendiente');
   var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-check-circle"></i> Firmado'; docBadge.classList.add('is-firmado'); }
 }
 
