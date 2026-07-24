@@ -28,6 +28,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray100);color
 .btn-login{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s}
 .btn-login:hover{background:#1a3a8f}
 .login-error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;display:none}
+.login-tabs{display:flex;gap:6px;background:var(--gray100);border-radius:9px;padding:4px;margin-bottom:20px}
+.login-tab{flex:1;padding:8px;border:none;background:none;border-radius:6px;font-size:12px;font-weight:700;color:var(--gray600);cursor:pointer;transition:all .15s}
+.login-tab.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
 /* ── LAYOUT ── */
 #app{display:none;height:100vh;overflow:hidden}
@@ -89,6 +92,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray100);color
 .filters-bar select:focus{outline:none;border-color:var(--navy)}
 .btn-refresh{padding:9px 14px;background:var(--gray100);color:var(--gray600);border:2px solid var(--gray200);border-radius:7px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s}
 .btn-refresh:hover{background:var(--gray200)}
+
+/* ── KANBAN ── */
+.kanban-wrap{display:flex;gap:12px;overflow-x:auto;padding:16px 20px;}
+.kanban-col{flex:0 0 240px;background:var(--gray50);border-radius:10px;padding:10px;display:flex;flex-direction:column;max-height:520px}
+.kanban-col-head{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px;font-size:12px;font-weight:800;color:var(--gray600);text-transform:uppercase;letter-spacing:.4px}
+.kanban-col-head .count{background:#fff;border-radius:20px;padding:1px 8px;font-size:11px;color:var(--gray800);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.kanban-cards{overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.kanban-card{background:#fff;border-radius:8px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;border-left:3px solid var(--gray400);transition:transform .1s}
+.kanban-card:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.kanban-card .k-name{font-size:12.5px;font-weight:700;color:var(--gray800)}
+.kanban-card .k-sub{font-size:11px;color:var(--gray400);margin-top:2px}
+.kanban-card .k-tag{display:inline-block;margin-top:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.kanban-empty{font-size:12px;color:var(--gray400);text-align:center;padding:16px 0}
 
 /* ── TABLE ── */
 .table-wrap{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
@@ -180,16 +196,29 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <p>Panel de Administración</p>
       <span class="login-badge">🔒 ACCESO RESTRINGIDO</span>
     </div>
-    <div class="form-group">
-      <label>Usuario</label>
-      <input type="text" id="login-user" placeholder="usuario" autocomplete="username">
+    <div class="login-tabs">
+      <button type="button" class="login-tab active" id="tab-cedula" onclick="cambiarTabLogin('cedula')">Mi cédula</button>
+      <button type="button" class="login-tab" id="tab-userpass" onclick="cambiarTabLogin('userpass')">Usuario y contraseña</button>
     </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    <div id="login-form-cedula">
+      <div class="form-group">
+        <label>Cédula</label>
+        <input type="text" inputmode="numeric" id="login-cedula" placeholder="Tu número de cédula" autocomplete="off">
+      </div>
+      <button class="btn-login" onclick="doLoginCedula()">Ingresar al Panel</button>
     </div>
-    <button class="btn-login" onclick="doLogin()">Ingresar al Panel</button>
-    <p class="login-error" id="login-error">❌ Usuario o contraseña incorrectos</p>
+    <div id="login-form-userpass" style="display:none">
+      <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" id="login-user" placeholder="usuario" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-login" onclick="doLogin()">Ingresar al Panel</button>
+    </div>
+    <p class="login-error" id="login-error">❌ Acceso incorrecto</p>
   </div>
 </div>
 
@@ -215,7 +244,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
   <div class="nav-section">
     <div class="nav-section-title">Principal</div>
     <div class="nav-item active" onclick="showSection('dashboard')">
-      <span class="icon">📊</span> Dashboard
+      <span class="icon">📊</span> Dashboard / Pipeline
     </div>
     <div class="nav-item" onclick="showSection('casos')">
       <span class="icon">📋</span> Todos los Casos
@@ -223,17 +252,25 @@ tr:hover td{background:#f8faff;cursor:pointer}
     </div>
   </div>
   <div class="nav-section">
-    <div class="nav-section-title">Seguimiento</div>
-    <div class="nav-item" onclick="showSection('pendientes')">
-      <span class="icon">⏳</span> Pendientes Pago
-      <span class="nav-badge" id="badge-pendientes" style="background:#f59e0b">0</span>
+    <div class="nav-section-title">Clientes</div>
+    <div class="nav-item" onclick="showSection('clientes')">
+      <span class="icon">💰</span> Clientes (Pagados)
+      <span class="nav-badge" id="badge-clientes" style="background:var(--green)">0</span>
     </div>
+    <div class="nav-item" onclick="showSection('remarketing')">
+      <span class="icon">🎯</span> Remarketing
+      <span class="nav-badge" id="badge-remarketing" style="background:#f59e0b">0</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Seguimiento legal</div>
     <div class="nav-item" onclick="showSection('autorizados')">
-      <span class="icon">✅</span> Autorizados
-      <span class="nav-badge" id="badge-autorizados" style="background:var(--green)">0</span>
+      <span class="icon">✅</span> Por Radicar
+      <span class="nav-badge" id="badge-autorizados" style="background:var(--blue)">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('enviados')">
-      <span class="icon">📧</span> Docs Enviados
+    <div class="nav-item" onclick="showSection('seguimiento')">
+      <span class="icon">⏰</span> Esperando Respuesta (15d)
+      <span class="nav-badge" id="badge-seguimiento" style="background:var(--gold)">0</span>
     </div>
     <div class="nav-item" onclick="showSection('tutelas')">
       <span class="icon">⚖️</span> Tutelas
@@ -279,14 +316,14 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <div class="stat-sub">Formularios recibidos</div>
         </div>
         <div class="stat-card gold">
-          <div class="stat-label">Pagos Confirmados</div>
+          <div class="stat-label">Clientes (Pagaron)</div>
           <div class="stat-value" id="stat-pagos">—</div>
-          <div class="stat-sub">Clientes que pagaron</div>
+          <div class="stat-sub">Casos con pago confirmado</div>
         </div>
         <div class="stat-card green">
-          <div class="stat-label">Docs Enviados</div>
+          <div class="stat-label">Radicados</div>
           <div class="stat-value" id="stat-enviados">—</div>
-          <div class="stat-sub">Derechos de Petición</div>
+          <div class="stat-sub">Derechos de Petición enviados</div>
         </div>
         <div class="stat-card red" style="border-color:#7c3aed">
           <div class="stat-label">Tutelas</div>
@@ -294,10 +331,16 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <div class="stat-sub">Casos segunda instancia</div>
         </div>
         <div class="stat-card blue">
-          <div class="stat-label">Pendientes</div>
+          <div class="stat-label">Remarketing</div>
           <div class="stat-value" id="stat-pendientes">—</div>
-          <div class="stat-sub">Sin confirmar pago</div>
+          <div class="stat-sub">Llenaron datos, no pagaron</div>
         </div>
+      </div>
+
+      <!-- Pipeline estilo kanban: una columna por etapa del caso -->
+      <div class="table-wrap" style="margin-bottom:16px;">
+        <div class="table-header"><h3>🧭 Pipeline de Casos</h3><span class="table-count">Toca una tarjeta para ver el detalle</span></div>
+        <div id="kanban-wrap" class="kanban-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando datos...</p></div></div>
       </div>
 
       <!-- Tabla recientes en dashboard -->
@@ -318,17 +361,19 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <input type="text" id="buscar-casos" placeholder="🔍 Buscar por nombre, cédula, placa, ciudad..." oninput="filtrarTabla()">
         <select id="filtro-estado" onchange="filtrarTabla()">
           <option value="">Todos los estados</option>
-          <option value="pendiente">⏳ Pendiente</option>
+          <option value="pendiente">🎯 Remarketing (no pagó)</option>
           <option value="pagado">💰 Pagado</option>
-          <option value="autorizado">✅ Autorizado</option>
-          <option value="enviado">📧 Enviado</option>
+          <option value="autorizado">✅ Por radicar</option>
+          <option value="esperando_respuesta">⏰ Esperando respuesta</option>
+          <option value="esperando_saldo">🧾 Esperando saldo</option>
           <option value="tutela">⚖️ Tutela</option>
           <option value="cerrado">🏁 Cerrado</option>
         </select>
         <select id="filtro-plan" onchange="filtrarTabla()">
           <option value="">Todos los planes</option>
-          <option value="45000">Plan $45.000</option>
-          <option value="19800">Plan $19.800</option>
+          <option value="45.000">Plan $45.000 (individual)</option>
+          <option value="19.800">Plan $19.800 (Pago al Eliminar)</option>
+          <option value="69.000">Plan $69.000 (todas)</option>
         </select>
         <button class="btn-refresh" onclick="loadData()">🔄 Actualizar</button>
       </div>
@@ -343,27 +388,35 @@ tr:hover td{background:#f8faff;cursor:pointer}
       </div>
     </div>
 
-    <!-- PENDIENTES -->
-    <div class="section" id="section-pendientes">
+    <!-- CLIENTES (PAGARON) -->
+    <div class="section" id="section-clientes">
       <div class="table-wrap">
-        <div class="table-header"><h3>⏳ Pendientes de Pago</h3><span class="table-count" id="pendientes-count"></span></div>
-        <div id="table-pendientes-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+        <div class="table-header"><h3>💰 Clientes — Pago Confirmado</h3><span class="table-count" id="clientes-count"></span></div>
+        <div id="table-clientes-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
     </div>
 
-    <!-- AUTORIZADOS -->
+    <!-- REMARKETING (NO PAGARON) -->
+    <div class="section" id="section-remarketing">
+      <div class="table-wrap">
+        <div class="table-header"><h3>🎯 Remarketing — Llenaron datos, no pagaron</h3><span class="table-count" id="remarketing-count"></span></div>
+        <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- AUTORIZADOS / POR RADICAR -->
     <div class="section" id="section-autorizados">
       <div class="table-wrap">
-        <div class="table-header"><h3>✅ Casos Autorizados</h3><span class="table-count" id="autorizados-count"></span></div>
+        <div class="table-header"><h3>✅ Pagados — Por Radicar</h3><span class="table-count" id="autorizados-count"></span></div>
         <div id="table-autorizados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
     </div>
 
-    <!-- ENVIADOS -->
-    <div class="section" id="section-enviados">
+    <!-- SEGUIMIENTO 15 DÍAS -->
+    <div class="section" id="section-seguimiento">
       <div class="table-wrap">
-        <div class="table-header"><h3>📧 Documentos Enviados</h3><span class="table-count" id="enviados-count"></span></div>
-        <div id="table-enviados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+        <div class="table-header"><h3>⏰ Radicados — Esperando Respuesta (15 días hábiles)</h3><span class="table-count" id="seguimiento-count"></span></div>
+        <div id="table-seguimiento-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
     </div>
 
@@ -485,6 +538,15 @@ var USUARIOS = {
   'secretaria2': { pass:'sec2026b',      nombre:'Secretaría 2',  rol:'Secretaria' },
 };
 
+// Acceso rápido por cédula — pensado para el dueño del despacho. OJO: una
+// cédula no es un secreto (puede aparecer en documentos, contratos, etc.),
+// así que esto es más una llave de acceso rápido que una contraseña fuerte.
+// Si quieres más seguridad, cámbiala por un PIN que solo tú conozcas, o usa
+// la pestaña de usuario y contraseña en su lugar.
+var ADMIN_CEDULAS = {
+  '88262856': { nombre:'Juan Carlos Cáceres', rol:'Administrador' },
+};
+
 // Estado global
 var allRows = [];
 var currentUser = null;
@@ -492,16 +554,38 @@ var currentUser = null;
 // ══════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════
+function cambiarTabLogin(tab){
+  document.getElementById('tab-cedula').classList.toggle('active', tab==='cedula');
+  document.getElementById('tab-userpass').classList.toggle('active', tab==='userpass');
+  document.getElementById('login-form-cedula').style.display = tab==='cedula' ? 'block' : 'none';
+  document.getElementById('login-form-userpass').style.display = tab==='userpass' ? 'block' : 'none';
+}
+
+function mostrarErrorLogin(){
+  document.getElementById('login-error').style.display='block';
+  setTimeout(function(){ document.getElementById('login-error').style.display='none'; }, 3000);
+}
+
+function doLoginCedula(){
+  var c = document.getElementById('login-cedula').value.trim();
+  if(ADMIN_CEDULAS[c]){
+    currentUser = Object.assign({ username:c }, ADMIN_CEDULAS[c]);
+    sessionStorage.setItem('jw_user', JSON.stringify(currentUser));
+    showApp();
+  } else {
+    mostrarErrorLogin();
+  }
+}
+
 function doLogin(){
   var u = document.getElementById('login-user').value.trim().toLowerCase();
   var p = document.getElementById('login-pass').value;
   if(USUARIOS[u] && USUARIOS[u].pass === p){
-    currentUser = { username:u, ...USUARIOS[u] };
+    currentUser = Object.assign({ username:u }, USUARIOS[u]);
     sessionStorage.setItem('jw_user', JSON.stringify(currentUser));
     showApp();
   } else {
-    document.getElementById('login-error').style.display='block';
-    setTimeout(function(){ document.getElementById('login-error').style.display='none'; }, 3000);
+    mostrarErrorLogin();
   }
 }
 
@@ -531,14 +615,18 @@ function doLogout(){
 document.getElementById('login-pass').addEventListener('keydown',function(e){
   if(e.key==='Enter') doLogin();
 });
+document.getElementById('login-cedula').addEventListener('keydown',function(e){
+  if(e.key==='Enter') doLoginCedula();
+});
 
 // ══════════════════════════════════════════════════
 // NAVEGACIÓN
 // ══════════════════════════════════════════════════
 var sectionTitles = {
-  dashboard:'Dashboard',casos:'Todos los Casos',pendientes:'Pendientes de Pago',
-  autorizados:'Casos Autorizados',enviados:'Documentos Enviados',
-  tutelas:'Casos con Tutela',cerrados:'Casos Cerrados'
+  dashboard:'Dashboard / Pipeline', casos:'Todos los Casos',
+  clientes:'Clientes (Pagados)', remarketing:'Remarketing (No pagaron)',
+  autorizados:'Pagados — Por Radicar', seguimiento:'Esperando Respuesta (15 días)',
+  tutelas:'Casos con Tutela', cerrados:'Casos Cerrados'
 };
 
 function showSection(sec){
@@ -587,9 +675,16 @@ function parseGViz(data){
 }
 
 function getDemoRows(){
+  var hoy = new Date();
+  var hace10 = new Date(hoy); hace10.setDate(hace10.getDate()-10);
+  var hace20 = new Date(hoy); hace20.setDate(hace20.getDate()-20);
+  var limiteProximo = new Date(hoy); limiteProximo.setDate(limiteProximo.getDate()+2);
+  var limiteVencido = new Date(hoy); limiteVencido.setDate(limiteVencido.getDate()-3);
+  var fmt = function(d){ return d.toISOString().slice(0,10); };
   return [
-    {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Plan Completo $45.000','Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE',Estado:'Enviado','Notas':'Demo'},
-    {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Plan Básico $19.800','Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Estado:'Pendiente','Notas':''},
+    {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace10),'Fecha Límite 15d':fmt(limiteProximo),'Respuesta Secretaría':'','Tutela Requerida':'FALSE',Cerrado:'FALSE',Notas:'Demo'},
+    {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Cerrado:'FALSE',Notas:'Demo — remarketing'},
+    {Fecha:'2025-06-03 09:00:00',Nombres:'Andrés',Apellidos:'Ruiz',Cédula:'5551234',Placa:'JKL456',WhatsApp:'3201234567',Email:'andres@demo.com',Ciudad:'Cali',Plan:'Pago al Eliminar — Adelanto $19.800 + $95.900 c/u','Multas Seleccionadas':1,'Monto Total':19800,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace20),'Fecha Límite 15d':fmt(limiteVencido),'Respuesta Secretaría':'Negativa','Tutela Requerida':'TRUE','Tutela Enviada':'FALSE',Cerrado:'FALSE',Notas:'Demo — tutela'},
   ];
 }
 
@@ -599,44 +694,67 @@ function getDemoRows(){
 function renderAll(){
   updateStats();
   renderDashboardTable();
+  renderKanban();
   renderSection('casos');
-  renderSection('pendientes');
+  renderSection('clientes');
+  renderSection('remarketing');
   renderSection('autorizados');
-  renderSection('enviados');
+  renderSection('seguimiento');
   renderSection('tutelas');
   renderSection('cerrados');
 }
 
+// Pipeline en orden: pendiente(remarketing) → pagado → autorizado(por radicar)
+// → esperando_respuesta (cuenta 15 días) → esperando_saldo (plan diferido) →
+// tutela → cerrado. Cada caso cae en UNA sola etapa, la más avanzada que le
+// aplique.
 function getEstado(row){
-  var tutela = row['Tutela Requerida']==='TRUE'||row['Tutela']===true;
-  var cerrado = row['Cerrado']==='TRUE'||row['Estado']==='Cerrado'||row['Estado']==='OK';
-  var enviado = row['Doc Enviado']==='TRUE';
-  var autorizado = row['Autorizar']==='TRUE';
-  var pagado = row['Pago OK']==='TRUE';
-  if(tutela) return 'tutela';
+  var cerrado = row['Cerrado']==='TRUE'||row['Cerrado']===true;
+  var tutela = row['Tutela Requerida']==='TRUE'||row['Tutela Requerida']===true;
+  var pagado = row['Pago OK']==='TRUE'||row['Pago OK']===true;
+  var autorizado = row['Autorizar']==='TRUE'||row['Autorizar']===true;
+  var enviado = row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true;
+  var respuesta = (row['Respuesta Secretaría']||'').toString();
+  var saldoPendiente = Number(row['Saldo Pendiente']||0) > 0;
+  var saldoPagado = row['Saldo Pagado']==='TRUE'||row['Saldo Pagado']===true;
+
   if(cerrado) return 'cerrado';
-  if(enviado) return 'enviado';
+  if(tutela) return 'tutela';
+  if(/positiva/i.test(respuesta) && saldoPendiente && !saldoPagado) return 'esperando_saldo';
+  if(enviado && !respuesta) return 'esperando_respuesta';
   if(autorizado) return 'autorizado';
   if(pagado) return 'pagado';
   return 'pendiente';
 }
 
+// Días que faltan (positivo) o que lleva vencido (negativo) para el límite
+// legal de 15 días hábiles. null si el caso todavía no tiene fecha límite.
+function diasHastaLimite(row){
+  var f = row['Fecha Límite 15d'];
+  if(!f) return null;
+  var limite = new Date(f.toString().substring(0,10)+'T00:00:00');
+  if(isNaN(limite.getTime())) return null;
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  return Math.round((limite - hoy) / 86400000);
+}
+
 function badgeForEstado(estado){
   var m = {
-    pendiente:'<span class="badge badge-pending">⏳ Pendiente</span>',
+    pendiente:'<span class="badge badge-pending">🎯 Remarketing</span>',
     pagado:   '<span class="badge badge-paid">💰 Pagado</span>',
-    autorizado:'<span class="badge badge-doc">✅ Autorizado</span>',
-    enviado:  '<span class="badge badge-done">📧 Enviado</span>',
+    autorizado:'<span class="badge badge-doc">✅ Por radicar</span>',
+    esperando_respuesta: '<span class="badge" style="background:#fef3c7;color:#92400e">⏰ Esperando respuesta</span>',
+    esperando_saldo: '<span class="badge" style="background:#dbeafe;color:#1e40af">🧾 Esperando saldo</span>',
     tutela:   '<span class="badge badge-tutela">⚖️ Tutela</span>',
     cerrado:  '<span class="badge" style="background:#f0fdf4;color:#166534">🏁 Cerrado</span>',
   };
   return m[estado]||'<span class="badge">—</span>';
 }
 
-function buildTable(rows, limit){
+function buildTable(rows, limit, mostrarDias){
   if(!rows||!rows.length) return '<div class="empty-state"><div class="icon">📭</div><p>No hay casos en esta categoría.</p></div>';
   var list = limit ? rows.slice(0,limit) : rows;
-  var html = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Cédula</th><th>Placa</th><th>Ciudad</th><th>Plan</th><th>Estado</th></tr></thead><tbody>';
+  var html = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Cédula</th><th>Placa</th><th>Ciudad</th><th>Plan</th>'+(mostrarDias?'<th>Plazo 15 días</th>':'')+'<th>Estado</th></tr></thead><tbody>';
   list.forEach(function(row, i){
     var estado = getEstado(row);
     var fecha = (row['Fecha']||'').toString().substring(0,10);
@@ -648,11 +766,20 @@ function buildTable(rows, limit){
     html += '<td><strong>'+escHtml(row['Placa']||'—')+'</strong></td>';
     html += '<td>'+escHtml(row['Ciudad']||'—')+'</td>';
     html += '<td style="font-size:12px">'+escHtml((row['Plan']||'').replace('Plan','').trim())+'</td>';
+    if(mostrarDias) html += '<td>'+badgeDias(diasHastaLimite(row))+'</td>';
     html += '<td>'+badgeForEstado(estado)+'</td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
   return html;
+}
+
+function badgeDias(dias){
+  if(dias===null) return '<span style="color:var(--gray400);font-size:12px">—</span>';
+  if(dias < 0) return '<span class="badge badge-red">🔴 Vencido hace '+Math.abs(dias)+' día'+(Math.abs(dias)!==1?'s':'')+'</span>';
+  if(dias === 0) return '<span class="badge" style="background:#fee2e2;color:#991b1b">🟠 Vence hoy</span>';
+  if(dias <= 3) return '<span class="badge" style="background:#fef3c7;color:#92400e">🟡 Faltan '+dias+' días</span>';
+  return '<span class="badge" style="background:#dcfce7;color:#166534">🟢 Faltan '+dias+' días</span>';
 }
 
 function renderDashboardTable(){
@@ -668,12 +795,68 @@ function renderSection(sec){
     document.getElementById('table-casos-wrap').innerHTML = buildTable(filtered);
     return;
   }
-  var estadoMap = {pendientes:'pendiente',autorizados:'autorizado',enviados:'enviado',tutelas:'tutela',cerrados:'cerrado'};
+  // Clientes = TODO el que ya pagó, sin importar en qué etapa vaya después
+  // (autorizado, esperando respuesta, tutela, cerrado...) — es el módulo de
+  // clientes reales. Remarketing = lo opuesto: llenó datos pero no pagó.
+  if(sec==='clientes'){
+    filtered = allRows.filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true; });
+    document.getElementById('clientes-count').textContent = filtered.length+' clientes';
+    document.getElementById('table-clientes-wrap').innerHTML = buildTable(filtered);
+    return;
+  }
+  if(sec==='remarketing'){
+    filtered = allRows.filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true); });
+    document.getElementById('remarketing-count').textContent = filtered.length+' leads sin pagar';
+    document.getElementById('table-remarketing-wrap').innerHTML = buildTable(filtered);
+    return;
+  }
+  if(sec==='seguimiento'){
+    filtered = allRows.filter(function(r){ return getEstado(r)==='esperando_respuesta'; })
+      .sort(function(a,b){ return (diasHastaLimite(a)||0) - (diasHastaLimite(b)||0); });
+    document.getElementById('seguimiento-count').textContent = filtered.length+' casos';
+    document.getElementById('table-seguimiento-wrap').innerHTML = buildTable(filtered, null, true);
+    return;
+  }
+  var estadoMap = {autorizados:'autorizado', tutelas:'tutela', cerrados:'cerrado'};
   var estado = estadoMap[sec];
   if(!estado) return;
   filtered = allRows.filter(function(r){ return getEstado(r)===estado; });
   document.getElementById(sec+'-count').textContent = filtered.length+' casos';
   document.getElementById('table-'+sec+'-wrap').innerHTML = buildTable(filtered);
+}
+
+// ── Pipeline visual estilo kanban (dashboard) ──
+var KANBAN_ETAPAS = [
+  { id:'pendiente', label:'🎯 Remarketing', color:'#f59e0b' },
+  { id:'pagado', label:'💰 Pagado', color:'var(--gold)' },
+  { id:'autorizado', label:'✅ Por Radicar', color:'var(--blue)' },
+  { id:'esperando_respuesta', label:'⏰ Esperando Respuesta', color:'#d97706' },
+  { id:'esperando_saldo', label:'🧾 Esperando Saldo', color:'#2563eb' },
+  { id:'tutela', label:'⚖️ Tutela', color:'#7c3aed' },
+  { id:'cerrado', label:'🏁 Cerrado', color:'var(--green)' },
+];
+
+function renderKanban(){
+  var wrap = document.getElementById('kanban-wrap');
+  if(!wrap) return;
+  var porEtapa = {};
+  KANBAN_ETAPAS.forEach(function(e){ porEtapa[e.id] = []; });
+  allRows.forEach(function(r){ var e = getEstado(r); if(porEtapa[e]) porEtapa[e].push(r); });
+
+  wrap.innerHTML = KANBAN_ETAPAS.map(function(etapa){
+    var casos = porEtapa[etapa.id];
+    var tarjetas = casos.length ? casos.slice().reverse().slice(0,25).map(function(r){
+      var nombre = ((r['Nombres']||'')+' '+(r['Apellidos']||'')).trim()||'(sin nombre)';
+      var sub = r['Plan'] ? escHtml(r['Plan'].replace(/—.*/,'').trim()) : '';
+      var dias = etapa.id==='esperando_respuesta' ? diasHastaLimite(r) : null;
+      return '<div class="kanban-card" style="border-left-color:'+etapa.color+'" onclick="abrirCaso('+JSON.stringify(JSON.stringify(r)).replace(/"/g,'&quot;')+')">'+
+        '<div class="k-name">'+escHtml(nombre)+'</div>'+
+        '<div class="k-sub">'+sub+'</div>'+
+        (dias!==null ? '<span class="k-tag" style="background:'+(dias<0?'#fee2e2':dias<=3?'#fef3c7':'#dcfce7')+';color:'+(dias<0?'#991b1b':dias<=3?'#92400e':'#166534')+'">'+(dias<0?'Vencido '+Math.abs(dias)+'d':'Faltan '+dias+'d')+'</span>' : '')+
+        '</div>';
+    }).join('') : '<div class="kanban-empty">Sin casos</div>';
+    return '<div class="kanban-col"><div class="kanban-col-head"><span>'+etapa.label+'</span><span class="count">'+casos.length+'</span></div><div class="kanban-cards">'+tarjetas+'</div></div>';
+  }).join('');
 }
 
 function getFilteredRows(){
@@ -704,6 +887,8 @@ function updateStats(){
   var enviados = allRows.filter(function(r){ return r['Doc Enviado']==='TRUE'; }).length;
   var tutelas = allRows.filter(function(r){ return getEstado(r)==='tutela'; }).length;
   var pendientes = allRows.filter(function(r){ return getEstado(r)==='pendiente'; }).length;
+  var seguimiento = allRows.filter(function(r){ return getEstado(r)==='esperando_respuesta'; }).length;
+  var autorizados = allRows.filter(function(r){ return getEstado(r)==='autorizado'; }).length;
 
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-pagos').textContent = pagos;
@@ -712,8 +897,10 @@ function updateStats(){
   document.getElementById('stat-pendientes').textContent = pendientes;
 
   document.getElementById('badge-total').textContent = total;
-  document.getElementById('badge-pendientes').textContent = pendientes;
-  document.getElementById('badge-autorizados').textContent = allRows.filter(function(r){ return getEstado(r)==='autorizado'; }).length;
+  document.getElementById('badge-clientes').textContent = pagos;
+  document.getElementById('badge-remarketing').textContent = pendientes;
+  document.getElementById('badge-autorizados').textContent = autorizados;
+  document.getElementById('badge-seguimiento').textContent = seguimiento;
   document.getElementById('badge-tutelas').textContent = tutelas;
 }
 
@@ -729,6 +916,7 @@ function abrirCaso(rowJson){
 
   var timeline = buildTimeline(row, estado);
   var acciones = buildAcciones(row, estado);
+  var dias = diasHastaLimite(row);
 
   var html = '<div class="detail-grid">';
   html += detailItem('Nombres completos', nombre.trim());
@@ -738,19 +926,24 @@ function abrirCaso(rowJson){
   html += detailItem('Email', '<a href="mailto:'+escHtml(row['Email']||'')+'" style="color:var(--blue)">'+escHtml(row['Email']||'—')+'</a>');
   html += detailItem('Ciudad / Dpto', (row['Ciudad']||'')+(row['Departamento'] ? ', '+row['Departamento'] : ''));
   html += detailItem('Plan contratado', row['Plan']||'—');
+  html += detailItem('Monto', row['Monto Total'] ? '$'+Number(row['Monto Total']).toLocaleString('es-CO') : '—');
   html += detailItem('Estado actual', badgeForEstado(estado));
   html += detailItem('Fecha registro', row['Fecha']||'—');
-  html += detailItem('Tipo documento', row['Tipo Doc']||'Pendiente selección');
-  html += detailItem('Fecha límite 15d', row['Fecha Límite 15d']||'—');
+  html += detailItem('Fecha radicación', row['Fecha Radicación']||'—');
+  html += detailItem('Fecha límite 15d', row['Fecha Límite 15d'] ? row['Fecha Límite 15d']+' — '+(dias===null?'':badgeDias(dias)) : '—');
+  html += detailItem('Respuesta secretaría', row['Respuesta Secretaría']||'Sin respuesta todavía');
+  if(Number(row['Saldo Pendiente']||0) > 0){
+    html += detailItem('Saldo pendiente (Pago al Eliminar)', '$'+Number(row['Saldo Pendiente']).toLocaleString('es-CO')+(row['Saldo Pagado']==='TRUE'?' — ✅ Pagado':' — ⏳ Por cobrar'));
+  }
   html += detailItem('Notas', row['Notas']||'Sin notas');
   html += '</div>';
 
   html += '<div class="section-title">🕐 Línea de Tiempo del Caso</div>';
   html += '<ul class="timeline">'+timeline+'</ul>';
 
-  if(row['Multas']){
+  if(row['Multas Reportadas']){
     html += '<div class="section-title" style="margin-top:20px">📝 Detalle Multas</div>';
-    html += '<div style="background:var(--gray50);border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;margin-bottom:16px">'+escHtml(row['Multas'])+'</div>';
+    html += '<div style="background:var(--gray50);border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;margin-bottom:16px">'+escHtml(row['Multas Reportadas'])+'</div>';
   }
 
   html += '<div class="modal-actions">'+acciones+'</div>';
@@ -766,12 +959,15 @@ function detailItem(label, val){
 function buildTimeline(row, estado){
   var items = '';
   items += tItem('navy', row['Fecha']||'—', '📋 Lead registrado en el sistema');
-  if(row['Pago OK']==='TRUE') items += tItem('gold','—','💰 Pago confirmado por el administrador');
-  if(row['Autorizar']==='TRUE') items += tItem('green','—','✅ Caso autorizado — documento en cola');
-  if(row['Doc Enviado']==='TRUE') items += tItem('green','—','📧 Derecho de Petición enviado al cliente');
-  if(row['Fecha Límite 15d']) items += tItem('gray',row['Fecha Límite 15d'],'⏰ Fecha límite respuesta secretaría (15 días hábiles)');
-  if(row['Respuesta Secretaría']) items += tItem('green','—','📬 Respuesta recibida: '+escHtml(row['Respuesta Secretaría']));
-  if(getEstado(row)==='tutela') items += tItem('green','—','⚖️ Tutela requerida — siguiente acción legal');
+  if(row['Pago OK']==='TRUE') items += tItem('gold','—','💰 Pago confirmado');
+  if(row['Autorizar']==='TRUE') items += tItem('green','—','✅ Documento autorizado');
+  if(row['Doc Enviado']==='TRUE') items += tItem('green', row['Fecha Radicación']||'—', '📨 Derecho de Petición radicado — arrancó el plazo de 15 días hábiles');
+  if(row['Fecha Límite 15d']) items += tItem('gray',row['Fecha Límite 15d'],'⏰ Fecha límite respuesta secretaría (Art. 14 CPACA)');
+  if(row['Respuesta Secretaría']) items += tItem(/positiva/i.test(row['Respuesta Secretaría'])?'green':'gold', row['Fecha Respuesta']||'—', '📬 Respuesta: '+escHtml(row['Respuesta Secretaría']));
+  if(row['Tutela Requerida']==='TRUE') items += tItem('gold','—','⚖️ Tutela requerida');
+  if(row['Tutela Enviada']==='TRUE') items += tItem('green','—','⚖️ Tutela radicada ante el juzgado');
+  if(row['Saldo Pagado']==='TRUE') items += tItem('green','—','🧾 Saldo del Plan Pago al Eliminar cobrado');
+  if(row['Cerrado']==='TRUE') items += tItem('green','—','🏁 Caso cerrado');
   return items;
 }
 
@@ -780,26 +976,85 @@ function tItem(color, time, text){
 }
 
 function buildAcciones(row, estado){
+  var rowAttr = escHtml(JSON.stringify(row));
   var wa = row['WhatsApp'] ? 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent('Hola '+row['Nombres']+', somos JurídicosWeb. Te contactamos sobre tu trámite.') : '#';
   var html = '';
   if(row['WhatsApp']) html += '<a href="'+wa+'" target="_blank" class="btn btn-success btn-sm">💬 WhatsApp</a>';
   if(row['Email']) html += '<a href="mailto:'+escHtml(row['Email'])+'" class="btn btn-outline btn-sm">📧 Correo</a>';
-  if(estado==='pendiente') html += '<button class="btn btn-primary btn-sm" onclick="confirmarAccion(\'pago\',this)" data-row="'+escHtml(JSON.stringify(row))+'">💰 Confirmar Pago</button>';
-  if(estado==='pagado') html += '<button class="btn btn-primary btn-sm" onclick="confirmarAccion(\'autorizar\',this)" data-row="'+escHtml(JSON.stringify(row))+'">✅ Autorizar Doc</button>';
+
+  if(estado==='pendiente'){
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'confirmar_pago\',this,null,\'confirmar_pago\')">💰 Confirmar Pago</button>';
+  }
+  if(estado==='pagado'){
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'autorizar_documento\',this,null,\'autorizar_documento\')">✅ Autorizar Documento</button>';
+  }
+  if(estado==='autorizado'){
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_enviado\',this,null,\'marcar_enviado\')">📨 Marcar como Radicado</button>';
+  }
+  if(estado==='esperando_respuesta'){
+    html += '<button class="btn btn-success btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'positiva\'},\'respuesta_positiva\')">✅ Respuesta Positiva</button>';
+    html += '<button class="btn btn-danger btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'negativa\'},\'respuesta_negativa\')">❌ Respuesta Negativa</button>';
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'sin_respuesta\'},\'sin_respuesta\')">⏱️ Sin Respuesta</button>';
+  }
+  if(estado==='esperando_saldo'){
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_saldo_pagado\',this,null,\'marcar_saldo_pagado\')">🧾 Confirmar Pago de Saldo</button>';
+    if(row['WhatsApp']) html += '<a href="'+waTemplate(row,'saldo')+'" target="_blank" class="btn btn-outline btn-sm">💬 Recordar saldo pendiente</a>';
+  }
+  if(estado==='tutela'){
+    if(row['WhatsApp']) html += '<a href="'+waTemplate(row,'tutela')+'" target="_blank" class="btn btn-success btn-sm">💬 Enviar mensaje de Tutela</a>';
+    if(row['Tutela Enviada']!=='TRUE'){
+      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_enviada\',this,null,\'marcar_tutela_enviada\')">⚖️ Marcar Tutela Radicada</button>';
+    }
+  }
+  if(estado!=='pendiente' && estado!=='cerrado'){
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'cerrar_caso\',this,null,\'cerrar_caso\')">🏁 Cerrar Caso</button>';
+  }
   return html || '<span style="color:var(--gray400);font-size:13px">Sin acciones disponibles</span>';
 }
 
-function confirmarAccion(tipo, btn){
+// Textos de confirm() por tipo de acción — se arman aquí (no en el HTML) para
+// poder usar el nombre real del cliente sin pelear con comillas anidadas.
+var MENSAJES_CONFIRM = {
+  confirmar_pago:        function(row){ return '¿Confirmar que '+row['Nombres']+' realizó el pago?'; },
+  autorizar_documento:   function(row){ return '¿Autorizar el documento de '+row['Nombres']+'?'; },
+  marcar_enviado:        function(row){ return '¿Marcar como radicado? Esto arranca el plazo de 15 días hábiles.'; },
+  respuesta_positiva:    function(row){ return '¿La secretaría respondió A FAVOR de '+row['Nombres']+'?'; },
+  respuesta_negativa:    function(row){ return '¿La secretaría respondió EN CONTRA? Esto marca tutela automáticamente.'; },
+  sin_respuesta:         function(row){ return '¿Confirmar que no respondieron dentro del plazo? Esto marca tutela automáticamente.'; },
+  marcar_saldo_pagado:   function(row){ return '¿Confirmar que ya pagó el saldo de $95.900 por multa? Esto cierra el caso.'; },
+  marcar_tutela_enviada: function(row){ return '¿Marcar la tutela como radicada ante el juzgado?'; },
+  cerrar_caso:           function(row){ return '¿Cerrar este caso manualmente?'; },
+};
+
+// Mensajes de WhatsApp pre-armados para los momentos más delicados del
+// seguimiento — el admin solo revisa y envía.
+function waTemplate(row, tipo){
+  var nombre = row['Nombres']||'';
+  var msg = '';
+  if(tipo==='tutela'){
+    msg = 'Hola '+nombre+', te escribimos de JurídicosWeb sobre tu Derecho de Petición. '+
+      'Ya se cumplió el plazo legal y, según lo que sabemos, procede una Acción de Tutela para exigir la respuesta y proteger tu derecho ($19.800 por multa). '+
+      '¿Quieres que la iniciemos ya mismo?';
+  } else if(tipo==='saldo'){
+    msg = 'Hola '+nombre+', ¡buenas noticias! La secretaría respondió a favor y tu multa quedó eliminada. '+
+      'Para el Plan Pago al Eliminar, el último paso es pagar el saldo de $95.900 por multa. ¿Te compartimos el link de pago?';
+  }
+  return 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent(msg);
+}
+
+// accion: nombre de la acción del backend · extra: campos adicionales a
+// enviar (ej. {respuesta:'positiva'}) · tipoMsg: clave en MENSAJES_CONFIRM
+function confirmarAccion(accion, btn, extra, tipoMsg){
   var row;
   try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
-  var msg = tipo==='pago' ? '¿Confirmar que '+row['Nombres']+' realizó el pago?' : '¿Autorizar generación del documento para '+row['Nombres']+'?';
-  if(!confirm(msg)) return;
-  btn.disabled=true; btn.textContent='Procesando...';
-  var accion = tipo==='pago' ? 'confirmar_pago' : 'autorizar_documento';
+  var generarMsg = MENSAJES_CONFIRM[tipoMsg];
+  if(generarMsg && !confirm(generarMsg(row))) return;
+  btn.disabled=true; var textoOriginal = btn.textContent; btn.textContent='Procesando...';
+  var payload = Object.assign({_accion:accion, email:row['Email'], cedula:row['Cédula'], nombres:row['Nombres']}, extra||{});
   fetch(SCRIPT_URL, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({_accion:accion, email:row['Email'], cedula:row['Cédula'], nombres:row['Nombres']})
+    body: JSON.stringify(payload)
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
@@ -809,12 +1064,12 @@ function confirmarAccion(tipo, btn){
       setTimeout(loadData, 1500);
     } else {
       showToast('Error: '+(data.error||'desconocido'),'error');
-      btn.disabled=false; btn.textContent='Reintentar';
+      btn.disabled=false; btn.textContent=textoOriginal;
     }
   })
   .catch(function(e){
     showToast('Error de conexión: '+e.message,'error');
-    btn.disabled=false; btn.textContent='Reintentar';
+    btn.disabled=false; btn.textContent=textoOriginal;
   });
 }
 

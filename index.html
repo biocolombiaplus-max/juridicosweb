@@ -2580,6 +2580,9 @@ function onPagoAprobado(txData){
 
   var datos = _documentoDatos || _leadGuardado || recogerDatosFormulario();
   datos.estadoPago = 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : '');
+  // _accion:'confirmar_pago' actualiza la fila que ya existe desde el
+  // formulario (PENDIENTE) en vez de crear una fila nueva y duplicada.
+  datos._accion = 'confirmar_pago';
   guardarLead(datos);
   _documentoDatos = datos;
 
