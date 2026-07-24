@@ -1148,7 +1148,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="fg"><label>Placa (si aplica)</label><input id="frm-placa" type="text" placeholder="ABC123"></div>
           <div class="fg"><label>WhatsApp</label><input id="frm-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567"><div class="field-error" id="err-wa">Ingresa un WhatsApp válido</div></div>
           <div class="fg"><label>Correo electrónico</label><input id="frm-email" type="email" placeholder="tucorreo@ejemplo.com" onkeyup="validarEmail()"><div class="field-error" id="err-email">Correo inválido</div><div class="field-ok" id="ok-email">✓ Correo válido</div></div>
-          <div class="fg fg-full"><label>Dirección de notificación (RUNT)</label><input id="frm-dir" type="text" placeholder="Calle 00 # 00-00"></div>
+          <div class="fg fg-full"><label>Dirección de vivienda actual</label><input id="frm-dir" type="text" placeholder="Calle 00 # 00-00"></div>
           <div class="fg"><label>Departamento</label><select id="frm-dpto" onchange="cargarMunicipios()"><option value="">Selecciona</option></select></div>
           <div class="fg"><label>Ciudad</label><select id="frm-ciudad"><option value="">Selecciona municipio</option></select></div>
         </div>
@@ -2149,7 +2149,7 @@ function renderDocPreviewConFirma(texto, firmaDataUrl){
   var antes = texto.slice(0, idx);
   var desdeLinea = texto.slice(idx);
   el.innerHTML = escaparHtml(antes) +
-    '<img src="'+firmaDataUrl+'" alt="Firma" style="display:block;max-width:210px;height:auto;margin:6px 0 -10px;">' +
+    '<img id="doc-firma-img" src="'+firmaDataUrl+'" alt="Firma" style="display:block;max-width:210px;height:auto;margin:6px 0 -10px;">' +
     escaparHtml(desdeLinea);
 }
 
@@ -2477,9 +2477,15 @@ function confirmarFirma(){
   var docPrev = document.getElementById('doc-preview-text'); if(docPrev) docPrev.parentElement.classList.add('doc-pendiente');
   var docBadge = document.getElementById('doc-preview-badge'); if(docBadge){ docBadge.innerHTML = '<i class="fas fa-check-circle"></i> Firmado'; docBadge.classList.add('is-firmado'); }
 
-  // Sin salir de la página: llevamos la vista de vuelta arriba, al documento
-  // ya firmado, para que el cliente vea la prueba de inmediato y no se confunda.
-  if(docPrev) docPrev.scrollIntoView({behavior:'smooth', block:'start'});
+  // Sin salir de la página y sin que el cliente tenga que hacer scroll él
+  // mismo: el documento tiene su propio scroll interno (es una caja con
+  // altura fija), así que además de bajar la página hay que bajar el
+  // contenido del documento hasta la firma. scrollIntoView() en la imagen
+  // misma resuelve ambos scrolls (el de la página y el interno) de una vez.
+  requestAnimationFrame(function(){
+    var imgFirma = document.getElementById('doc-firma-img');
+    if(imgFirma) imgFirma.scrollIntoView({behavior:'smooth', block:'center'});
+  });
 }
 
 function descargarPDFFirmado(){
