@@ -21,32 +21,20 @@
  *   Params:  documentType (CC|CE|PA|RC|TI), documentNumber, includeCosts (true)
  *   Costo:   0.4 créditos por consulta
  *
- *   Nota: el 401 inicial en este endpoint era un problema puntual de
- *   cuenta en Verifik, ya confirmado y resuelto por su soporte.
- *
- *   Respuesta esperada:
+ * RESPUESTA REAL CONFIRMADA (cédula de prueba con 2 multas reales en cobro
+ * coactivo, verificada contra el SIMIT oficial el 24/07/2026):
+ *   data.comparendos SIEMPRE viene como [] en este endpoint — los datos
+ *   reales están en data.multas, con este esquema por elemento:
  *     {
- *       "data": {
- *         "comparendos": [
- *           {
- *             "tipovehiculo": "AUTOMOVIL",
- *             "estadoComparendo": "Pendiente",
- *             "fechaComparendo": "2016/02/23",
- *             "fotodeteccion": false,
- *             "NúmeroComparendo": "25612001000152646662173",
- *             "placavehiculo": "AAA123",
- *             "secretariaComparendo": "Ricaurte",
- *             "total": 344730,
- *             "idOrganismoTransito": "25612123",
- *             "codigoInfraccion": "C35",
- *             "descripcionInfraccion": "No realizar la revisión técnico-mecánica...",
- *             "direccionComparendo": "CARRERA 9 CON CALLE 10 AGUA DE DIOS",
- *             "infractorComparendo": "CAR BER",
- *             "serviciovehiculo": "Particular"
- *           }
- *         ]
- *       },
- *       "signature": { "message": "Certified by Verifik.co", "dateTime": "..." }
+ *       "estadoCartera": "Cobro coactivo",
+ *       "fechaComparendo": "06/12/2021 00:00:00",   // DD/MM/YYYY, con hora
+ *       "organismoTransito": "Cucuta",
+ *       "placa": "CCM141",
+ *       "comparendoElectronico": false,               // true = fotomulta
+ *       "numeroComparendo": "54001000000032092975",
+ *       "valor": "447555",                             // multa base
+ *       "valorPagar": "841539",                         // con intereses/gestión
+ *       "infracciones": [{ "descripcionInfraccion": "..." }]
  *     }
  *
  * IMPORTANTE: este endpoint solo acepta DOCUMENTO (cédula, CE, pasaporte,
@@ -152,36 +140,44 @@ async function consultarVerifik(cedula, token) {
  * Convierte la respuesta real de Verifik al formato que espera index.html:
  *   { success: true, multas: [ { comparendo, fecha:'YYYY-MM-DD', valor:number,
  *     ciudad, estado }, ... ] }
- * Se busca la lista de comparendos en las rutas donde Verifik suele anidarla
- * (puede variar entre endpoints/versiones), para no romper si el nombre exacto
- * del campo cambia.
+ *
+ * data.comparendos viene SIEMPRE como [] en este endpoint aunque sí existan
+ * multas reales — los datos reales están en data.multas. Por eso NO se puede
+ * usar un simple "||" entre ambos (un array vacío es "truthy" en JS y ganaría
+ * siempre); se elige explícitamente el primer campo que tenga elementos.
  */
 function adaptarRespuestaVerifik(raw) {
-  const lista = raw?.data?.comparendos || raw?.comparendos || raw?.data?.multas || raw?.multas || [];
-  if (!Array.isArray(lista)) {
-    return { success: false, error: 'Formato de respuesta inesperado de Verifik', raw };
-  }
-  const multas = lista.map((m) => ({
-    comparendo: m['NúmeroComparendo'] || m.NumeroComparendo || '',
-    fecha: normalizarFecha(m.fechaComparendo),
-    valor: Number(m.total || 0),
-    ciudad: m.secretariaComparendo || '',
-    estado: m.estadoComparendo || '',
-    causalSugerida: m.descripcionInfraccion || '',
-    placa: m.placavehiculo || '',
-    fotodeteccion: m.fotodeteccion === true,
-  }));
+  const candidatos = [raw?.data?.multas, raw?.multas, raw?.data?.comparendos, raw?.comparendos];
+  let lista = candidatos.find((arr) => Array.isArray(arr) && arr.length > 0);
+  if (!lista) lista = candidatos.find((arr) => Array.isArray(arr)) || [];
+
+  const multas = lista.map((m) => {
+    const infraccion = Array.isArray(m.infracciones) && m.infracciones[0] ? m.infracciones[0] : null;
+    return {
+      comparendo: m.numeroComparendo || m['NúmeroComparendo'] || m.NumeroComparendo || m.nroCoactivo || '',
+      fecha: normalizarFecha(m.fechaComparendo || m.fechaResolucion),
+      valor: Number(m.valor || m.valorPagar || m.total || 0),
+      ciudad: m.organismoTransito || m.secretariaComparendo || m.departamento || '',
+      estado: m.estadoCartera || m.estadoComparendo || '',
+      causalSugerida: (infraccion && infraccion.descripcionInfraccion) || m.descripcionInfraccion || '',
+      placa: m.placa || m.placavehiculo || '',
+      fotodeteccion: m.comparendoElectronico === true || m.fotodeteccion === true,
+    };
+  });
   return { success: true, multas };
 }
 
-// Verifik entrega la fecha como "YYYY/MM/DD" (con barras) — la normalizamos a
-// "YYYY-MM-DD" para que coincida con lo que espera el resto de la app.
+// La fecha real llega como "DD/MM/YYYY HH:mm:ss" (con hora incluida). Algunos
+// endpoints de Verifik la entregan como "YYYY/MM/DD" — se detecta por la
+// longitud del primer segmento para soportar ambos formatos sin romper.
 function normalizarFecha(valor) {
   if (!valor) return '';
-  const partes = String(valor).split('/');
+  const soloFecha = String(valor).split(' ')[0];
+  const partes = soloFecha.split('/');
   if (partes.length === 3) {
-    const [y, m, d] = partes;
-    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    const [a, b, c] = partes;
+    if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`;
+    return `${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
   }
   const d = new Date(valor);
   if (isNaN(d.getTime())) return '';
