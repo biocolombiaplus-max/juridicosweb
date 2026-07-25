@@ -48,7 +48,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://checkout.wompi.co/widget.js"></script>
 <style>
@@ -626,8 +625,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <!-- Botón principal -->
         <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)" style="width:100%;font-size:1.25rem;padding:26px 24px;border-radius:16px;letter-spacing:.4px;box-shadow:0 10px 40px rgba(45,212,191,0.5);">
-          <i class="fas fa-fire"></i> CONSULTAR Y ELIMINAR MIS MULTAS
+          <i class="fas fa-fire"></i> CONSULTAR MULTAS Y FOTOMULTAS
         </button>
+
+        <!-- Cómo funciona: rápido, fácil, real, inmediato -->
+        <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:12px;">
+          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-bolt" style="color:#2dd4bf;"></i> Rápido</span>
+          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-hand-pointer" style="color:#2dd4bf;"></i> Fácil</span>
+          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-database" style="color:#2dd4bf;"></i> Datos reales del SIMIT</span>
+          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-file-signature" style="color:#2dd4bf;"></i> Derecho de Petición al instante</span>
+        </div>
+        <p style="color:rgba(255,255,255,0.6);font-size:0.76rem;text-align:center;margin:8px 0 0;">Consultas con tu cédula, ves de inmediato si tu multa o fotomulta se puede eliminar, y si aplica, tu Derecho de Petición queda listo para firmar en el momento — sin filas ni papeleo.</p>
 
         <!-- Subtítulo separador -->
         <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
@@ -1236,6 +1244,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div style="font-size:1.8rem;margin-bottom:6px;">✅</div>
           <p style="color:#fff;font-weight:800;font-size:1rem;margin-bottom:3px;" id="sp7-titulo">¡Pago confirmado! Tu documento está listo</p>
           <p style="color:rgba(255,255,255,0.85);font-size:0.8rem;">Redactado a la medida de tu caso — falta un último paso</p>
+          <p style="color:rgba(255,255,255,0.75);font-size:0.72rem;margin-top:6px;"><i class="fas fa-envelope-circle-check"></i> También te lo enviamos a tu correo — y lo puedes descargar aquí abajo cuando quieras</p>
         </div>
 
         <div id="documentos-generados-wrap"><!-- una tarjeta por secretaría, generada por JS --></div>
@@ -1342,9 +1351,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
 var SIMIT_PROXY_URL    = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';
 var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
-var EMAILJS_SERVICE_ID  = '';
-var EMAILJS_TEMPLATE_ID = '';
-var EMAILJS_PUBLIC_KEY  = '';
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
 // La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
 var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
@@ -1385,8 +1391,6 @@ function ciudadEnListaINM(ciudad){
   if(!norm) return false;
   return CIUDADES_INVESTIGACION_INM.some(function(c){ return norm.indexOf(c)!==-1; });
 }
-
-if (EMAILJS_PUBLIC_KEY) { emailjs.init(EMAILJS_PUBLIC_KEY); }
 
 // ===================== COLOMBIA DATA =====================
 var dptoMpio={
@@ -2588,7 +2592,7 @@ function onPagoAprobado(txData){
 
   // Los documentos (uno por secretaría) y la firma, si el cliente ya firmó,
   // se generaron en el paso del borrador (sp5) — aquí solo se muestran.
-  enviarCorreoCliente(datos, _documentosGenerados);
+  enviarDocumentoPorCorreoAutomatico(datos);
   renderDocumentosFinales();
   document.getElementById('sp7-titulo').textContent = _documentosGenerados.length>1
     ? '¡Pago confirmado! Tus '+_documentosGenerados.length+' documentos están listos'
@@ -2601,31 +2605,39 @@ function onPagoAprobado(txData){
   goToStep(7);
 }
 
-function enviarCorreoCliente(datos, documentos){
-  if(!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY){
-    console.warn('EmailJS no configurado. Sigue las instrucciones en INSTRUCCIONES_CONFIGURACION.md');
+// Envía el PDF real (firmado si ya se firmó en el borrador, o el documento
+// generado si no) como archivo adjunto al correo del cliente, apenas se
+// aprueba el pago — vía el mismo backend de Apps Script que ya usamos para
+// el CRM, sin depender de un servicio externo aparte que haya que configurar.
+function enviarDocumentoPorCorreoAutomatico(datos){
+  if(!GUARDAR_LEAD_URL || !datos.email) return;
+
+  var base64, nombreArchivo, firmado;
+  if(_archivoFirmadoBase64){
+    base64 = _archivoFirmadoBase64;
+    nombreArchivo = _archivoFirmadoNombre || 'DerechoPeticion_Firmado.pdf';
+    firmado = true;
+  } else if(window.jspdf && _documentosGenerados && _documentosGenerados.length){
+    var doc = generarPDFConFirma(_documentosGenerados, null);
+    if(!doc) return;
+    base64 = doc.output('datauristring');
+    nombreArchivo = 'DerechoPeticion_'+(datos.apellidos||'cliente')+'_'+(datos.cedula||'')+'.pdf';
+    firmado = false;
+  } else {
     return;
   }
-  var textoCombinado = documentos.map(function(d){ return '— '+d.ciudad+' —\n'+d.texto; }).join('\n\n');
-  var params = {
-    nombres          : datos.nombres,
-    apellidos        : datos.apellidos,
-    cedula           : datos.cedula,
-    placa            : datos.placa||'N/A',
-    whatsapp         : datos.whatsapp,
-    email_cliente    : datos.email,
-    direccion        : datos.direccion,
-    ciudad           : datos.ciudad+', '+datos.dpto,
-    plan_pago        : nombrePlan(pagoSel),
-    secretarias      : documentos.map(function(d){return d.ciudad;}).join(', '),
-    documento_texto  : textoCombinado.substring(0,1400),
-    fecha_solicitud  : new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
-    reply_to         : datos.email,
-    to_email         : datos.email,
-  };
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-    .then(function(){console.log('Email enviado al cliente');})
-    .catch(function(err){console.error('Error EmailJS:',err);});
+
+  fetch(GUARDAR_LEAD_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      _accion: 'enviar_documento_correo',
+      email: datos.email, nombres: datos.nombres, apellidos: datos.apellidos, cedula: datos.cedula,
+      archivoBase64: base64, archivoNombre: nombreArchivo, firmado: firmado,
+    }),
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(){ console.log('✅ PDF enviado por correo al cliente'); })
+  .catch(function(err){ console.warn('No se pudo enviar el PDF por correo:', err); });
 }
 
 // ===================== ÉXITO MODAL (dos variantes) =====================

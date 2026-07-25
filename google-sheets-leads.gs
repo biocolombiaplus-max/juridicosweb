@@ -62,6 +62,7 @@ function doPost(e) {
       case 'marcar_tutela_enviada': return marcarTutelaEnviada(datos);
       case 'cerrar_caso':         return cerrarCaso(datos);
       case 'radicar_documento':   return manejarRadicacion(datos);
+      case 'enviar_documento_correo': return enviarDocumentoCorreo(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -227,6 +228,37 @@ function manejarRadicacion(datos) {
 
   marcarEnviado(datos); // arranca el plazo de 15 días en el caso principal
   return respuestaJson({ ok: true, enlaceArchivo: enlace });
+}
+
+// Envía el PDF del Derecho de Petición como archivo adjunto real al correo
+// del cliente, apenas se confirma el pago — no depende de ningún servicio
+// externo de terceros, usa el correo de Google directamente.
+function enviarDocumentoCorreo(datos) {
+  if (!datos.email || !datos.archivoBase64) {
+    return respuestaJson({ ok: false, error: 'Falta email o archivo del documento' });
+  }
+  try {
+    var partes = datos.archivoBase64.split(',');
+    var mime = (partes[0].match(/data:(.*);base64/) || [])[1] || 'application/pdf';
+    var bytes = Utilities.base64Decode(partes[1] || partes[0]);
+    var nombreArchivo = datos.archivoNombre || 'DerechoPeticion.pdf';
+    var blob = Utilities.newBlob(bytes, mime, nombreArchivo);
+
+    var asunto = '📄 Tu Derecho de Petición está listo — JurídicosWeb';
+    var cuerpo =
+      'Hola ' + (datos.nombres || '') + ',\n\n' +
+      '¡Gracias por confiar en JurídicosWeb! Adjunto a este correo encontrarás tu Derecho de Petición, listo para radicar.\n\n' +
+      (datos.firmado
+        ? 'Ya quedó firmado digitalmente — puedes radicarlo directamente.\n\n'
+        : 'Fírmalo (a mano o desde la página) antes de radicarlo.\n\n') +
+      'Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.\n\n' +
+      'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito';
+
+    MailApp.sendEmail({ to: datos.email, subject: asunto, body: cuerpo, attachments: [blob] });
+    return respuestaJson({ ok: true });
+  } catch (err) {
+    return respuestaJson({ ok: false, error: String(err) });
+  }
 }
 
 // ───────────────────────── recordatorio automático (Activador diario) ─────
