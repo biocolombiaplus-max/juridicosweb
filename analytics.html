@@ -96,20 +96,28 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <div class="main">
 
-  <!-- ── Config GA4 ── -->
-  <div class="config-box" id="config-box">
-    <h3>⚙️ Configurar Google Analytics 4 (una sola vez)</h3>
-    <p>Para datos reales necesita conectar GA4:<br>
-    1. Cree una cuenta en <strong>analytics.google.com</strong> → Nuevo sitio web → <code>juridicosweb.com</code><br>
-    2. Copie el <strong>Measurement ID</strong> (formato <code>G-XXXXXXXXXX</code>)<br>
-    3. En el <code>index.html</code> reemplace <code>G-XXXXXXXXXX</code> por su ID real<br>
-    4. En GA4 → Eventos: verá <code>consulta_iniciada</code>, <code>formulario_enviado</code>, <code>pago_iniciado</code>, <code>pago_confirmado</code><br><br>
-    Mientras tanto este dashboard muestra los datos de <strong>este navegador</strong> (localStorage).</p>
+  <!-- ── Tráfico REAL: Google Analytics 4 ya está conectado ── -->
+  <div class="config-box" id="config-box" style="border-color:#22c55e;">
+    <h3 style="color:#22c55e;">✅ Google Analytics ya está midiendo tu tráfico real</h3>
+    <p>Tu página ya envía cada visita y cada clic a Google Analytics (ID <code>G-CBKTML924W</code>) — esto lleva funcionando en segundo plano, solo falta que entres a verlo:<br><br>
+    1. Entra a <strong><a href="https://analytics.google.com" target="_blank" style="color:#60a5fa;">analytics.google.com</a></strong> con la cuenta de Google del sitio<br>
+    2. Busca la propiedad con ID <code>G-CBKTML924W</code> (si no la ves, puede estar en otra cuenta de Google — dime y creamos una nueva)<br>
+    3. <strong>Informes → Tiempo real</strong>: cuántas personas están en la página ahora mismo<br>
+    4. <strong>Informes → Interacción → Eventos</strong>: verás <code>consulta_iniciada</code>, <code>formulario_enviado</code>, <code>pago_iniciado</code>, <code>pago_aprobado</code> — cada uno es un clic real de un visitante real<br>
+    5. <strong>Explorar → Embudo</strong>: arma un embudo con esos mismos eventos para ver en qué paso se te va la gente, con datos de TODOS los visitantes (no solo los tuyos)<br><br>
+    El panel de abajo ("Actividad de prueba") solo muestra lo que pasa en <strong>este navegador tuyo</strong> — útil para probar que todo funciona, no para medir visitas reales.</p>
     <button onclick="document.getElementById('config-box').style.display='none'" style="background:#1e2d4a;border:none;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.75rem;margin-top:8px;">Entendido, ocultar</button>
   </div>
 
+  <!-- ── Seguimiento y decisiones: tu CRM ── -->
+  <a class="sheet-link" href="admin.html" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);margin-bottom:20px;">
+    <i class="fas fa-users" style="color:#fff;font-size:1.2rem;"></i>
+    <span>Para hacer seguimiento y decidir a quién contactar: abre tu Panel CRM →</span>
+    <i class="fas fa-external-link-alt" style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-left:auto;"></i>
+  </a>
+
   <!-- ── KPIs ── -->
-  <p class="section-title">Resumen de hoy</p>
+  <p class="section-title">Actividad de prueba (solo este navegador — no son visitas reales)</p>
   <div class="kpi-grid">
     <div class="kpi-card blue">
       <div class="icon"><i class="fas fa-eye" style="color:#60a5fa;"></i></div>
@@ -150,7 +158,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   </div>
 
   <!-- ── Funnel ── -->
-  <p class="section-title">Funnel de conversión</p>
+  <p class="section-title">Embudo de prueba (este navegador — para el embudo real, usa GA4 arriba)</p>
   <div class="funnel-wrap">
     <div class="funnel-step">
       <div class="funnel-label">1. Visitan la página</div>
@@ -231,7 +239,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   <!-- ── Tabla leads del Sheet ── -->
   <p class="section-title">Leads recientes (Google Sheet)</p>
 
-  <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1KVXRarjnV2z01pLBm_FjZJC3rowLxiF1RWV23lh4F34/edit#gid=0" target="_blank">
+  <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl/edit" target="_blank">
     <i class="fas fa-table-cells" style="color:#fff;font-size:1.2rem;"></i>
     <span>Abrir Google Sheet completo →</span>
     <i class="fas fa-external-link-alt" style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-left:auto;"></i>
@@ -263,13 +271,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   </div>
 
   <p style="font-size:0.72rem;color:#334155;text-align:center;padding-bottom:20px;">
-    JurídicosWeb Analytics · Datos en tiempo real · Google Analytics 4 + Google Sheets
+    JurídicosWeb Analytics · Tráfico real en Google Analytics · Leads y seguimiento en el Panel CRM
   </p>
 </div>
 
 <script>
-var SHEET_ID = '1KVXRarjnV2z01pLBm_FjZJC3rowLxiF1RWV23lh4F34';
-var SHEET_NAME = encodeURIComponent('📥 Leads');
+var SHEET_ID = '1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl';
+var SHEET_NAME = encodeURIComponent('📊 Control de Casos');
 
 // ── Leer eventos desde localStorage (este navegador) ────────────────────────
 function leerEventos(){
@@ -333,12 +341,22 @@ function actualizarKPIs(){
 }
 
 // ── Leer leads del Google Sheet via GViz ────────────────────────────────────
+// Busca columnas por NOMBRE (no por posición) para no romperse si el CRM
+// agrega o reordena columnas — mismo criterio que usa admin.html.
+function indiceColumnaGViz(cols, nombreBuscado){
+  var normalizar = function(s){ return String(s||'').trim().toLowerCase(); };
+  var buscado = normalizar(nombreBuscado);
+  for(var i=0;i<cols.length;i++){ if(normalizar(cols[i].label)===buscado) return i; }
+  return -1;
+}
+
 function cargarLeads(){
   var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+SHEET_NAME;
   fetch(url)
     .then(function(r){ return r.text(); })
     .then(function(txt){
       var json = JSON.parse(txt.replace(/^[^\{]+/, '').replace(/\);?\s*$/, ''));
+      var cols = (json.table && json.table.cols) ? json.table.cols : [];
       var rows = (json.table && json.table.rows) ? json.table.rows : [];
       var tbody = document.getElementById('leads-table-body');
 
@@ -348,28 +366,43 @@ function cargarLeads(){
         return;
       }
 
+      var idx = {
+        fecha: indiceColumnaGViz(cols,'Fecha'), nombres: indiceColumnaGViz(cols,'Nombres'),
+        cedula: indiceColumnaGViz(cols,'Cédula'), whatsapp: indiceColumnaGViz(cols,'WhatsApp'),
+        ciudad: indiceColumnaGViz(cols,'Ciudad'), multas: indiceColumnaGViz(cols,'Multas Seleccionadas'),
+        pagoOk: indiceColumnaGViz(cols,'Pago OK'), autorizar: indiceColumnaGViz(cols,'Autorizar'),
+        docEnviado: indiceColumnaGViz(cols,'Doc Enviado'), tutela: indiceColumnaGViz(cols,'Tutela Requerida'),
+        cerrado: indiceColumnaGViz(cols,'Cerrado'),
+      };
+
       var html = '';
-      rows.slice(1).reverse().slice(0, 20).forEach(function(r){
+      rows.slice().reverse().slice(0, 20).forEach(function(r){
         var c = r.c || [];
-        var get = function(i){ return c[i] && c[i].v ? String(c[i].v) : '—'; };
-        var estado = get(8);
-        var badgeClass = estado.includes('CONFIRMADO') ? 'badge-paid'
-          : estado.includes('Pendiente') || estado.includes('PENDIENTE') ? 'badge-pending'
-          : 'badge-form';
-        var estadoCorto = estado.replace('PENDIENTE PAGO – Remarketing','⏳ Sin pago').replace('PAGO CONFIRMADO','✅ Pagado');
+        var get = function(i){ return (i!==-1 && c[i] && c[i].v!=null) ? String(c[i].v) : '—'; };
+        var esVerdadero = function(i){ return i!==-1 && c[i] && (c[i].v===true || c[i].v==='TRUE'); };
+
+        var estadoCorto, badgeClass;
+        if(esVerdadero(idx.cerrado)){ estadoCorto='🏁 Cerrado'; badgeClass='badge-form'; }
+        else if(esVerdadero(idx.tutela)){ estadoCorto='⚖️ Tutela'; badgeClass='badge-pending'; }
+        else if(esVerdadero(idx.docEnviado)){ estadoCorto='⏰ Esperando respuesta'; badgeClass='badge-pending'; }
+        else if(esVerdadero(idx.autorizar)){ estadoCorto='✅ Por radicar'; badgeClass='badge-paid'; }
+        else if(esVerdadero(idx.pagoOk)){ estadoCorto='💰 Pagado'; badgeClass='badge-paid'; }
+        else { estadoCorto='🎯 Remarketing'; badgeClass='badge-pending'; }
+
+        var wa = get(idx.whatsapp).replace(/\D/g,'');
         html +=
           '<tr>' +
-          '<td style="color:#64748b;font-size:0.72rem;">'+get(0).substring(0,16)+'</td>' +
-          '<td style="font-weight:600;">'+get(1)+'</td>' +
-          '<td style="color:#94a3b8;">'+get(2)+'</td>' +
-          '<td><a href="https://wa.me/57'+get(4).replace(/\D/g,'')+'" target="_blank" style="color:#22c55e;">'+get(4)+'</a></td>' +
-          '<td>'+get(6)+'</td>' +
-          '<td style="text-align:center;font-weight:700;color:#d4a017;">'+get(7)+'</td>' +
+          '<td style="color:#64748b;font-size:0.72rem;">'+get(idx.fecha).substring(0,16)+'</td>' +
+          '<td style="font-weight:600;">'+get(idx.nombres)+'</td>' +
+          '<td style="color:#94a3b8;">'+get(idx.cedula)+'</td>' +
+          '<td>'+(wa?'<a href="https://wa.me/57'+wa+'" target="_blank" style="color:#22c55e;">'+get(idx.whatsapp)+'</a>':'—')+'</td>' +
+          '<td>'+get(idx.ciudad)+'</td>' +
+          '<td style="text-align:center;font-weight:700;color:#d4a017;">'+get(idx.multas)+'</td>' +
           '<td><span class="badge '+badgeClass+'">'+estadoCorto+'</span></td>' +
           '</tr>';
       });
       tbody.innerHTML = html;
-      document.getElementById('sheet-status').textContent = (rows.length-1) + ' leads totales';
+      document.getElementById('sheet-status').textContent = rows.length + ' leads totales';
     })
     .catch(function(){
       document.getElementById('sheet-status').textContent = 'Sheet privado o sin datos';
