@@ -38,12 +38,80 @@
  *      retoma al día siguiente.
  */
 
+// ═══════════════════════════ MENÚ Y PANEL EN LA HOJA ═══════════════════════════
+// Se ejecuta solo al abrir la hoja de cálculo — crea el menú de arriba.
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('📣 Envíos JurídicosWeb')
+    .addItem('Abrir panel de control', 'abrirPanelMarketing')
+    .addSeparator()
+    .addItem('Limpiar y validar base', 'limpiarBaseDeCorreos')
+    .addItem('Enviar correos ahora', 'enviarCorreosDiarios')
+    .addSeparator()
+    .addItem('Activar envío automático (cada hora)', 'crearActivadorAutomatico')
+    .addItem('Desactivar envío automático', 'eliminarActivadorAutomatico')
+    .addToUi();
+}
+
+function abrirPanelMarketing() {
+  var panel = HtmlService.createHtmlOutputFromFile('Sidebar').setTitle('Envíos JurídicosWeb');
+  SpreadsheetApp.getUi().showSidebar(panel);
+}
+
+// Envía UN solo correo de prueba, marcado como prueba en el asunto. No toca
+// la hoja de Control Envíos ni el contador diario — puedes probar cuantas
+// veces quieras sin afectar la campaña real.
+function enviarCorreoPrueba(destinatario) {
+  if (!esEmailValido(destinatario)) {
+    return { ok: false, error: 'Ese correo no tiene un formato válido.' };
+  }
+  try {
+    MailApp.sendEmail({
+      to: destinatario,
+      subject: '[PRUEBA] ' + ASUNTOS_RONDA1[0],
+      htmlBody: cuerpoCorreo('Prueba', 1),
+      name: REMITENTE_NOMBRE,
+    });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+}
+
+// Estadísticas para el panel — se llama desde Sidebar.html vía google.script.run.
+function obtenerEstadoParaSidebar() {
+  var hojaControl = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(HOJA_CONTROL);
+  var activo = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'enviarCorreosDiarios'; });
+  if (!hojaControl) {
+    return { existeControl: false, activo: activo, enviadosHoy: obtenerContadorHoy(), limiteDiario: LIMITE_DIARIO };
+  }
+  var datos = hojaControl.getDataRange().getValues();
+  var idx = {};
+  COLUMNAS_CONTROL.forEach(function (c, i) { idx[c] = i; });
+  var total = 0, validos = 0, r1 = 0, r2 = 0;
+  for (var i = FILA_ENCABEZADOS_CONTROL; i < datos.length; i++) {
+    var fila = datos[i];
+    if (!fila[idx['Correo']]) continue;
+    total++;
+    if (fila[idx['Válido']] === 'Sí') validos++;
+    if (fila[idx['Ronda 1 Enviada']] === 'TRUE' || fila[idx['Ronda 1 Enviada']] === true) r1++;
+    if (fila[idx['Ronda 2 Enviada']] === 'TRUE' || fila[idx['Ronda 2 Enviada']] === true) r2++;
+  }
+  return {
+    existeControl: true, activo: activo,
+    total: total, validos: validos, invalidos: total - validos,
+    ronda1: r1, ronda2: r2,
+    enviadosHoy: obtenerContadorHoy(), limiteDiario: LIMITE_DIARIO,
+  };
+}
+
 // ═══════════════════════════ CONFIGURACIÓN ═══════════════════════════
 var HOJA_LEADS = 'Sheet1';                    // nombre de la hoja con los leads (ajusta si es distinto)
 var COL_NOMBRE = 'Nombre completo';
 var COL_EMAIL = 'Correo electronico';         // el script también intenta "Correo electrónico" con tilde
 
 var HOJA_CONTROL = 'Control Envíos';          // se crea sola — no toca tu hoja "EnviosEmail" existente
+var FILA_ENCABEZADOS_CONTROL = 3;             // fila 1 = título, fila 2 = resumen, fila 3 = encabezados, fila 4 en adelante = datos
 var COLUMNAS_CONTROL = [
   'Correo', 'Nombre', 'Válido',
   'Ronda 1 Enviada', 'Fecha Ronda 1', 'Plantilla Ronda 1',
@@ -145,7 +213,7 @@ function limpiarBaseDeCorreos() {
 
   var hojaControl = crearOLimpiarHojaControl();
   if (filasControl.length) {
-    hojaControl.getRange(2, 1, filasControl.length, COLUMNAS_CONTROL.length).setValues(filasControl);
+    hojaControl.getRange(FILA_ENCABEZADOS_CONTROL + 1, 1, filasControl.length, COLUMNAS_CONTROL.length).setValues(filasControl);
   }
 
   var validos = filasControl.filter(function (f) { return f[2] === 'Sí'; }).length;
@@ -162,9 +230,9 @@ function crearOLimpiarHojaControl() {
     hoja.clear();
   }
   // deja 2 filas libres arriba para el resumen (actualizarResumenControl las usa)
-  hoja.getRange(3, 1, 1, COLUMNAS_CONTROL.length).setValues([COLUMNAS_CONTROL]);
-  hoja.getRange(3, 1, 1, COLUMNAS_CONTROL.length).setFontWeight('bold').setBackground('#2e1065').setFontColor('#ffffff');
-  hoja.setFrozenRows(3);
+  hoja.getRange(FILA_ENCABEZADOS_CONTROL, 1, 1, COLUMNAS_CONTROL.length).setValues([COLUMNAS_CONTROL]);
+  hoja.getRange(FILA_ENCABEZADOS_CONTROL, 1, 1, COLUMNAS_CONTROL.length).setFontWeight('bold').setBackground('#2e1065').setFontColor('#ffffff');
+  hoja.setFrozenRows(FILA_ENCABEZADOS_CONTROL);
   hoja.autoResizeColumns(1, COLUMNAS_CONTROL.length);
   return hoja;
 }
@@ -181,9 +249,22 @@ function enviarCorreosDiarios() {
   var cupoEsteRun = Math.min(LOTE_POR_EJECUCION, cupoRestanteHoy);
 
   var datos = hojaControl.getDataRange().getValues();
-  var filaEncabezado = 3; // 1-based; los datos empiezan en la fila 4
+  var filaEncabezado = FILA_ENCABEZADOS_CONTROL; // índice 0-based del array == primera fila de datos
   var idx = {};
   COLUMNAS_CONTROL.forEach(function (c, i) { idx[c] = i; });
+
+  // Diagnóstico: si algún día vuelve a dar 0 envíos, este log dice exactamente por qué.
+  var totalFilas = 0, validas = 0, r1Pendientes = 0, r2Pendientes = 0;
+  for (var d = filaEncabezado; d < datos.length; d++) {
+    if (!datos[d][idx['Correo']]) continue;
+    totalFilas++;
+    if (datos[d][idx['Válido']] === 'Sí') validas++;
+    var r1 = datos[d][idx['Ronda 1 Enviada']] === 'TRUE' || datos[d][idx['Ronda 1 Enviada']] === true;
+    var r2 = datos[d][idx['Ronda 2 Enviada']] === 'TRUE' || datos[d][idx['Ronda 2 Enviada']] === true;
+    if (datos[d][idx['Válido']] === 'Sí' && !r1) r1Pendientes++;
+    if (datos[d][idx['Válido']] === 'Sí' && r1 && !r2) r2Pendientes++;
+  }
+  Logger.log('Diagnóstico: ' + totalFilas + ' filas con correo, ' + validas + ' válidas, ' + r1Pendientes + ' pendientes de Ronda 1, ' + r2Pendientes + ' pendientes de Ronda 2. Cupo esta corrida: ' + cupoEsteRun + '.');
 
   var enviados = 0;
 
@@ -249,7 +330,7 @@ function actualizarResumenControl() {
   COLUMNAS_CONTROL.forEach(function (c, i) { idx[c] = i; });
 
   var total = 0, validos = 0, r1 = 0, r2 = 0;
-  for (var i = 3; i < datos.length; i++) {
+  for (var i = FILA_ENCABEZADOS_CONTROL; i < datos.length; i++) {
     var fila = datos[i];
     if (!fila[idx['Correo']]) continue;
     total++;

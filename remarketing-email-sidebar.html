@@ -1,0 +1,223 @@
+<!--
+  Sidebar.html — panel de control de envíos para juridicosweb.com
+
+  CÓMO AGREGAR ESTE ARCHIVO:
+    En el editor de Apps Script (junto al Código.gs de remarketing-email-leads.gs):
+    Archivos (ícono +) → HTML → nómbralo exactamente "Sidebar" (sin .html,
+    Apps Script se lo pone solo) → pega todo este contenido → Guardar.
+
+  Luego, en tu Google Sheet, recarga la página (F5). Va a aparecer un menú
+  nuevo arriba: "📣 Envíos JurídicosWeb" → "Abrir panel de control".
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 16px;
+      color: #1f1533;
+      background: #f6f4fb;
+      font-size: 13px;
+    }
+    h2 {
+      font-size: 15px;
+      color: #2e1065;
+      margin: 0 0 4px;
+    }
+    p.sub { color: #6b6489; margin: 0 0 18px; font-size: 12px; }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2dcf3;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .card h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b6489;
+      margin: 0 0 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0edf8;
+      font-size: 12.5px;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .val { font-weight: bold; color: #2e1065; }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .badge.on { background: #d9f6f1; color: #0f6d61; }
+    .badge.off { background: #f3e6e6; color: #a12424; }
+
+    button {
+      width: 100%;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: opacity .15s;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    button:hover:not(:disabled) { opacity: 0.9; }
+
+    .btn-primary { background: #2dd4bf; color: #0a1f1c; }
+    .btn-dark { background: #2e1065; color: #ffffff; }
+    .btn-outline { background: #ffffff; color: #2e1065; border: 1.5px solid #d8cff0; }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1.5px solid #d8cff0;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-family: inherit;
+    }
+
+    .msg {
+      font-size: 12px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-top: 8px;
+      display: none;
+    }
+    .msg.show { display: block; }
+    .msg.ok { background: #d9f6f1; color: #0f6d61; }
+    .msg.error { background: #f3e6e6; color: #a12424; }
+
+    .spinner {
+      display: none;
+      text-align: center;
+      font-size: 12px;
+      color: #6b6489;
+      margin-top: 6px;
+    }
+    .spinner.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <h2>Envíos JurídicosWeb</h2>
+  <p class="sub">Panel de control de la campaña de remarketing</p>
+
+  <div class="card">
+    <h3>Estado actual</h3>
+    <div id="stats">
+      <div class="stat-row"><span>Cargando…</span></div>
+    </div>
+    <button class="btn-outline" onclick="cargarEstado()" style="margin-top:8px;">Actualizar</button>
+  </div>
+
+  <div class="card">
+    <h3>Enviar correo de prueba</h3>
+    <input type="email" id="correo-prueba" placeholder="tu-correo@ejemplo.com">
+    <button class="btn-primary" onclick="enviarPrueba()">Enviar prueba ahora</button>
+    <div class="spinner" id="spinner-prueba">Enviando…</div>
+    <div class="msg" id="msg-prueba"></div>
+  </div>
+
+  <div class="card">
+    <h3>Acciones</h3>
+    <button class="btn-dark" onclick="ejecutar('limpiarBaseDeCorreos', 'msg-acciones', 'Base limpiada y validada.')">Limpiar y validar base</button>
+    <button class="btn-dark" onclick="ejecutar('enviarCorreosDiarios', 'msg-acciones', 'Tanda de correos enviada.')">Enviar correos ahora</button>
+    <button class="btn-outline" onclick="ejecutar('crearActivadorAutomatico', 'msg-acciones', 'Envío automático activado.')">Activar envío automático</button>
+    <button class="btn-outline" onclick="ejecutar('eliminarActivadorAutomatico', 'msg-acciones', 'Envío automático desactivado.')">Desactivar envío automático</button>
+    <div class="spinner" id="spinner-acciones">Procesando…</div>
+    <div class="msg" id="msg-acciones"></div>
+  </div>
+
+  <script>
+    function cargarEstado() {
+      document.getElementById('stats').innerHTML = '<div class="stat-row"><span>Cargando…</span></div>';
+      google.script.run.withSuccessHandler(pintarEstado).obtenerEstadoParaSidebar();
+    }
+
+    function pintarEstado(e) {
+      var html = '';
+      html += fila('Envío automático', '<span class="badge ' + (e.activo ? 'on">Activo' : 'off">Inactivo') + '</span>', true);
+      html += fila('Enviados hoy', e.enviadosHoy + ' / ' + e.limiteDiario);
+      if (e.existeControl) {
+        html += fila('Total en base', e.total);
+        html += fila('Válidos', e.validos);
+        html += fila('Inválidos / baja', e.invalidos);
+        html += fila('Ronda 1 enviada', e.ronda1);
+        html += fila('Ronda 2 enviada', e.ronda2);
+      } else {
+        html += fila('Base', 'Todavía no se ha limpiado');
+      }
+      document.getElementById('stats').innerHTML = html;
+    }
+
+    function fila(label, val, esHtml) {
+      return '<div class="stat-row"><span>' + label + '</span><span class="val">' + val + '</span></div>';
+    }
+
+    function enviarPrueba() {
+      var correo = document.getElementById('correo-prueba').value.trim();
+      var msg = document.getElementById('msg-prueba');
+      msg.className = 'msg';
+      if (!correo) { msg.textContent = 'Escribe un correo primero.'; msg.className = 'msg error show'; return; }
+      document.getElementById('spinner-prueba').className = 'spinner show';
+      google.script.run
+        .withSuccessHandler(function (res) {
+          document.getElementById('spinner-prueba').className = 'spinner';
+          if (res.ok) {
+            msg.textContent = 'Prueba enviada a ' + correo + '. Revisa la bandeja (y spam).';
+            msg.className = 'msg ok show';
+          } else {
+            msg.textContent = 'Error: ' + res.error;
+            msg.className = 'msg error show';
+          }
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('spinner-prueba').className = 'spinner';
+          msg.textContent = 'Error: ' + err.message;
+          msg.className = 'msg error show';
+        })
+        .enviarCorreoPrueba(correo);
+    }
+
+    function ejecutar(nombreFuncion, idMsg, textoOk) {
+      var msg = document.getElementById(idMsg);
+      msg.className = 'msg';
+      document.getElementById('spinner-acciones').className = 'spinner show';
+      google.script.run
+        .withSuccessHandler(function () {
+          document.getElementById('spinner-acciones').className = 'spinner';
+          msg.textContent = textoOk;
+          msg.className = 'msg ok show';
+          cargarEstado();
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('spinner-acciones').className = 'spinner';
+          msg.textContent = 'Error: ' + err.message;
+          msg.className = 'msg error show';
+        })
+        [nombreFuncion]();
+    }
+
+    cargarEstado();
+  </script>
+</body>
+</html>
