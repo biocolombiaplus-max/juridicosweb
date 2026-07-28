@@ -38,6 +38,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     try{
       gtag('event', evento, Object.assign({ event_category:'juridicosweb' }, params||{}));
       dataLayer.push(Object.assign({ event: evento }, params||{}));
+      if(typeof fbq === 'function'){
+        if(evento === 'formulario_enviado') fbq('track', 'Lead');
+        else if(evento === 'pago_iniciado') fbq('track', 'InitiateCheckout', { value: (params&&params.valor)||0, currency: 'COP' });
+        else if(evento === 'pago_aprobado') fbq('track', 'Purchase', { value: (params&&params.valor)||0, currency: 'COP' });
+      }
       var hist = JSON.parse(localStorage.getItem('jw_eventos')||'[]');
       hist.push({ e: evento, p: params, t: Date.now() });
       if(hist.length > 200) hist = hist.slice(-200);
@@ -45,6 +50,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     } catch(err){}
   }
 </script>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1756287258733232');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1756287258733232&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
