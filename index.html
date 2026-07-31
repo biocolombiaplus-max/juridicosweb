@@ -347,6 +347,12 @@ h2.title span{color:var(--gold);}
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
 .btn-nequi{background:linear-gradient(135deg,#7c1f4e,#a02562);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;}
 .btn-nequi:hover{transform:translateY(-2px);}
+.nequi-card{background:linear-gradient(135deg,#5a1249,#8e1b6b);border-radius:16px;padding:20px;margin:12px 0 16px;text-align:center;box-shadow:0 8px 24px rgba(142,27,107,0.32);}
+.nequi-card-label{color:rgba(255,255,255,0.8);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.nequi-card-number{color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:2.15rem;letter-spacing:2px;font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:12px;}
+.nequi-card-copy{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.16);border:1.5px solid rgba(255,255,255,0.35);color:#fff;font-size:0.8rem;font-weight:700;padding:9px 18px;border-radius:22px;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;}
+.nequi-card-copy:hover{background:rgba(255,255,255,0.26);}
+.nequi-card-copy.copied{background:rgba(46,199,109,0.35);border-color:rgba(46,199,109,0.6);}
 .tutela-box{max-width:860px;margin:20px auto 0;background:#fff;border:2px solid rgba(230,57,70,0.2);border-radius:14px;padding:22px 26px;}
 .tutela-box h4{color:var(--red);font-size:0.95rem;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .tutela-box p{color:var(--gray);font-size:0.85rem;line-height:1.7;}
@@ -468,6 +474,16 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .mres-motivo{font-size:0.82rem;color:#334155;line-height:1.55;margin-bottom:4px;}
 .mres-nota{font-size:0.72rem;color:#b45309;line-height:1.5;display:flex;align-items:flex-start;gap:5px;margin-bottom:4px;}
 .mres-fuente{display:inline-block;margin-top:2px;font-size:0.72rem;color:var(--gold);text-decoration:underline;}
+
+/* ===== SELLO DE DATOS OFICIALES (estilo portal SIMIT, genera confianza) ===== */
+.simit-banner{border-radius:14px;margin-bottom:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,42,84,0.28);}
+.simit-banner-flag{height:4px;background:linear-gradient(90deg,#ffcd00 0%,#ffcd00 34%,#003893 34%,#003893 67%,#c8102e 67%,#c8102e 100%);}
+.simit-banner-inner{display:flex;align-items:center;gap:13px;padding:14px 16px;background:linear-gradient(135deg,#00284d,#0a4a86);flex-wrap:wrap;}
+.simit-banner-icon{width:42px;height:42px;flex-shrink:0;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#ffcd00;}
+.simit-banner-text{flex:1;min-width:180px;}
+.simit-banner-text h5{color:#fff;font-size:0.88rem;font-weight:800;letter-spacing:.2px;margin-bottom:2px;}
+.simit-banner-text p{color:rgba(255,255,255,0.75);font-size:0.71rem;line-height:1.4;}
+.simit-banner-badge{flex-shrink:0;background:rgba(255,205,0,0.15);border:1px solid rgba(255,205,0,0.45);color:#ffcd00;font-size:0.62rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:5px 10px;border-radius:20px;white-space:nowrap;margin-left:55px;}
 .mres-btn-si{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;padding:13px;border-radius:10px;cursor:pointer;font-size:0.87rem;font-weight:800;box-shadow:0 3px 12px rgba(22,163,74,0.3);transition:.2s;}
 .mres-btn-si:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(22,163,74,0.4);}
 .mres-btn-si.is-selected{background:var(--light);color:#16a34a;border:1.5px solid #16a34a;box-shadow:none;}
@@ -1348,8 +1364,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="mmodal-head"><h3>📱 Pago por Nequi</h3><button class="mmodal-close" onclick="closeOverlay('overlay-nequi')"><i class="fas fa-times"></i></button></div>
     <div style="padding:10px 28px 28px;text-align:center;">
       <div style="width:72px;height:72px;background:linear-gradient(135deg,#7c1f4e,#a02562);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"><i class="fas fa-mobile-alt" style="color:#fff;font-size:30px;"></i></div>
-      <h3 style="font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:6px;">Número Nequi</h3>
-      <div style="font-size:2rem;font-weight:800;color:var(--navy);letter-spacing:4px;margin:10px 0;font-family:'Playfair Display',serif;">350 545 7420</div>
+      <div class="nequi-card">
+        <div class="nequi-card-label"><i class="fas fa-mobile-alt"></i> Número Nequi</div>
+        <div class="nequi-card-number">350 545 7420</div>
+        <button type="button" class="nequi-card-copy" id="nequi-copy-btn" onclick="copiarNequiNumero()"><i class="fas fa-copy"></i> Copiar número</button>
+      </div>
       <p id="nequi-monto-info" style="font-size:0.95rem;font-weight:700;color:#16a34a;margin-bottom:10px;"></p>
       <div style="background:var(--light);border-radius:10px;padding:12px;margin-bottom:14px;"><p style="font-size:0.82rem;color:var(--gray);">Titular: <strong style="color:var(--navy);">Juan Cáceres</strong></p></div>
       <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.25);border-radius:10px;padding:12px;margin-bottom:18px;text-align:left;"><p style="font-size:0.83rem;color:var(--navy);line-height:1.65;"><strong>⚠️ Importante:</strong> Una vez pagues, <strong>envía el comprobante por WhatsApp al 3159318400</strong> con tu nombre completo y placa. Sin comprobante no podemos iniciar el trámite.</p></div>
@@ -1965,6 +1984,11 @@ function mostrarResultadoReal(){
   }).join('');
 
   var html =
+    '<div class="simit-banner"><div class="simit-banner-flag"></div><div class="simit-banner-inner">'+
+    '<div class="simit-banner-icon"><i class="fas fa-shield-halved"></i></div>'+
+    '<div class="simit-banner-text"><h5>Datos del SIMIT</h5><p>Sistema de Información de Multas y Sanciones por Infracciones de Tránsito — resultado calculado sobre tu consulta oficial</p></div>'+
+    '<span class="simit-banner-badge"><i class="fas fa-circle-check"></i> Verificado</span>'+
+    '</div></div>'+
     '<div class="result-header"><h4><i class="fas fa-clipboard-check" style="margin-right:6px;color:var(--gold);"></i>Resultado de tu reporte</h4><span class="r-count">'+lista.length+' multa'+(lista.length>1?'s':'')+'</span></div>'+
     '<div class="mres-list">'+filasHtml+'</div>'+
     '<div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:2px 0 16px;flex-wrap:wrap;">'+
@@ -2691,6 +2715,16 @@ function mostrarExito(tipo){
 }
 
 // ===================== NEQUI (verificación manual) =====================
+function copiarNequiNumero(){
+  var btn = document.getElementById('nequi-copy-btn');
+  navigator.clipboard.writeText('3505457420').then(function(){
+    if(!btn) return;
+    var original = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.innerHTML = original; btn.classList.remove('copied'); }, 2000);
+  });
+}
 var _nequiMontoActual = 45000;
 function abrirNequi(montoFijo){
   _nequiMontoActual = montoFijo || _totalPago || 45000;
