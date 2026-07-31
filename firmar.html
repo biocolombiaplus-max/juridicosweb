@@ -135,7 +135,7 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
     </div>
     <h2 style="font-size:1.15rem;margin-bottom:6px;">Hola, <span id="saludo-nombre">—</span> 👋</h2>
     <p class="lead" style="margin-bottom:16px;">En menos de 2 minutos vas a ver tu documento y firmarlo con el dedo, directo desde el teléfono.</p>
-    <button class="btn btn-primary" onclick="irAMultas()"><i class="fas fa-arrow-right"></i> Empezar</button>
+    <button class="btn btn-primary" onclick="irEmpezar()"><i class="fas fa-arrow-right"></i> Empezar</button>
   </div>
 
   <!-- PASO 1: MULTAS -->
@@ -195,6 +195,7 @@ var CIUDADES_INVESTIGACION_INM = [
 ];
 
 var _caso = null; // fila del cliente tal como viene del Sheet
+var _tipo = 'peticion'; // 'peticion' | 'tutela'
 var _multasReportadas = [];
 var _documentosGenerados = [];
 var _firmaVacia = true, _firmaDibujando = false, _firmaCtx = null;
@@ -219,7 +220,13 @@ function normalizarTexto(s){
 function init(){
   var params = new URLSearchParams(window.location.search);
   var cedula = (params.get('cedula')||'').trim();
+  _tipo = params.get('tipo')==='tutela' ? 'tutela' : 'peticion';
   if(!cedula){ mostrar('v-error'); return; }
+
+  if(_tipo==='tutela'){
+    document.title = 'Firma tu Acción de Tutela — JurídicosWeb';
+    document.querySelector('.topbar p').textContent = 'Firma de tu Acción de Tutela — desde tu teléfono';
+  }
 
   var sheetName = encodeURIComponent('📊 Control de Casos');
   var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName;
@@ -234,6 +241,28 @@ function init(){
     if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos un caso con esa cédula. Pídele a tu asesor que revise el enlace.'; mostrar('v-error'); return; }
     _caso = match;
 
+    if(_tipo==='tutela'){
+      var tutelaFirmada = match['Tutela Firmada']==='TRUE' || match['Tutela Firmada']===true;
+      if(tutelaFirmada){
+        document.querySelector('#v-yafirmado h2').textContent = 'Ya firmaste tu Tutela';
+        document.querySelector('#v-yafirmado p.lead').textContent = 'Tu Acción de Tutela firmada ya fue enviada a tu correo y a nuestro equipo para radicarla ante el juzgado.';
+        mostrar('v-yafirmado'); return;
+      }
+      var tutelaRequerida = match['Tutela Requerida']==='TRUE' || match['Tutela Requerida']===true;
+      if(!tutelaRequerida){
+        document.querySelector('#v-bloqueado h2').textContent = 'Tu Tutela aún no está activada';
+        document.querySelector('#v-bloqueado p.lead').textContent = 'Este enlace se activa cuando confirmamos contigo que quieres iniciar la Acción de Tutela. Escríbenos y la activamos al momento.';
+        mostrar('v-bloqueado'); return;
+      }
+      document.getElementById('saludo-nombre').textContent = match['Nombres']||'';
+      document.querySelector('#v-saludo h2').innerHTML = 'Hola, <span id="saludo-nombre">'+(match['Nombres']||'')+'</span> 👋';
+      document.querySelector('#v-saludo p.lead').textContent = 'Tu Acción de Tutela ya está redactada. Revísala y fírmala con el dedo — no tienes que escribir nada más.';
+      document.querySelector('#v-saludo .simit-inner h5').textContent = 'Tutela activada';
+      document.querySelector('#v-saludo .simit-inner p').textContent = 'Tu Derecho de Petición no fue respondido a tiempo — vamos a exigir la respuesta con una Acción de Tutela';
+      mostrar('v-saludo');
+      return;
+    }
+
     var pagoOk = match['Pago OK']==='TRUE' || match['Pago OK']===true;
     if(!pagoOk){ mostrar('v-bloqueado'); return; }
 
@@ -246,6 +275,11 @@ function init(){
     document.getElementById('v-error-texto').textContent = 'No pudimos cargar tu caso — revisa tu conexión e intenta de nuevo.';
     mostrar('v-error');
   });
+}
+
+function irEmpezar(){
+  if(_tipo==='tutela') irADocumentoTutela();
+  else irAMultas();
 }
 
 // ══════════════════════════════════════════════════
@@ -450,6 +484,61 @@ function construirTextoPeticion(p, multasGrupo){
     'Cordialmente,\n\n____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
 }
 
+// Acción de tutela por vulneración al derecho de petición: no depende de
+// datos de multas, sino de que ya pasó el plazo legal sin respuesta —
+// por eso el flujo de tutela salta directo aquí, sin pasar por "Multas".
+function construirTextoTutela(p){
+  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var fechaRad = p.fechaRadicacion ? new Date(p.fechaRadicacion+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha registrada en el radicado';
+  var fechaLim = p.fechaLimite ? new Date(p.fechaLimite+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha límite legal';
+  var huboRespuesta = p.respuestaSecretaria && !/sin respuesta/i.test(p.respuestaSecretaria);
+
+  return p.ciudad+', '+hoy+'\n\nSeñor(a)\nJUEZ DE TUTELA (REPARTO)\n'+p.ciudad+'\nE.S.D.\n\n'+
+    'REFERENCIA: ACCIÓN DE TUTELA POR VULNERACIÓN AL DERECHO FUNDAMENTAL DE PETICIÓN\n'+
+    'ACCIONANTE: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nACCIONADO: Secretaría de Tránsito y Movilidad de '+p.ciudad+'\n\n'+
+    'Respetado(a) señor(a) Juez:\n\n'+
+    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', mayor de edad y domiciliado/a en '+p.ciudad+', en ejercicio de la acción '+
+    'consagrada en el artículo 86 de la Constitución Política y reglamentada por el Decreto 2591 de 1991, acudo respetuosamente ante su despacho para '+
+    'interponer ACCIÓN DE TUTELA en contra de la Secretaría de Tránsito y Movilidad de '+p.ciudad+', por la vulneración de mi derecho fundamental de petición, '+
+    'con fundamento en los siguientes:\n\n'+
+    'I. HECHOS\n\n'+
+    '1. El día '+fechaRad+', radiqué ante la Secretaría de Tránsito y Movilidad de '+p.ciudad+' un Derecho de Petición solicitando la revisión, prescripción y/o eliminación de comparendo(s) de tránsito registrados a mi nombre.\n\n'+
+    '2. De conformidad con el artículo 14 de la Ley 1437 de 2011 (CPACA), la entidad contaba con un término de quince (15) días hábiles para resolver de fondo mi petición, plazo que venció el '+fechaLim+' '+
+    (huboRespuesta ? 'sin que la respuesta recibida resolviera de fondo, de manera clara, precisa y congruente, lo solicitado.' : 'sin que a la fecha se haya producido respuesta alguna.')+'\n\n'+
+    '3. A la fecha de presentación de esta acción, la entidad accionada mantiene una situación de indefinición jurídica sobre mi solicitud, que me causa un perjuicio actual al no poder ejercer con certeza mis derechos frente a los comparendos objeto de la petición.\n\n'+
+    'II. FUNDAMENTOS DE DERECHO\n\n'+
+    '1. El artículo 23 de la Constitución Política consagra el derecho fundamental de petición, e impone a toda autoridad el deber de resolver de fondo, de manera oportuna, las solicitudes que se le presenten.\n\n'+
+    '2. El artículo 86 de la Constitución Política y el Decreto 2591 de 1991 establecen la acción de tutela como mecanismo preferente y sumario para la protección inmediata de los derechos fundamentales, procedente cuando el afectado no disponga de otro medio de defensa judicial eficaz para la protección inmediata del derecho.\n\n'+
+    '3. La falta de respuesta de fondo dentro del término legal de quince (15) días hábiles previsto en el artículo 14 del CPACA configura, por sí sola, una vulneración del derecho fundamental de petición, con independencia del sentido en que la administración decida resolver una vez responda.\n\n'+
+    'III. PRETENSIONES\n\n'+
+    'PRIMERO: Que se TUTELE mi derecho fundamental de petición.\n\n'+
+    'SEGUNDO: Que se ORDENE a la Secretaría de Tránsito y Movilidad de '+p.ciudad+' dar respuesta de fondo, clara, precisa y congruente a mi Derecho de Petición radicado el '+fechaRad+', dentro de las cuarenta y ocho (48) horas siguientes a la notificación del fallo.\n\n'+
+    'TERCERO: Que se ordene notificar la decisión conforme al artículo 30 del Decreto 2591 de 1991.\n\n'+
+    'IV. JURAMENTO\n\nBajo la gravedad de juramento, manifiesto que no he presentado otra acción de tutela por los mismos hechos y derechos ante ninguna otra autoridad judicial.\n\n'+
+    'V. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+' y/o WhatsApp '+p.whatsapp+'.\n\n'+
+    'Cordialmente,\n\n____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
+}
+
+function irADocumentoTutela(){
+  setStepBar(3);
+  document.getElementById('stepbar-1').classList.add('done');
+  document.getElementById('stepbar-2').classList.add('done');
+  var p = {
+    nombres:_caso['Nombres']||'', apellidos:_caso['Apellidos']||'', cedula:_caso['Cédula']||'',
+    whatsapp:_caso['WhatsApp']||'', email:_caso['Email']||'', ciudad:_caso['Ciudad']||'',
+    fechaRadicacion:_caso['Fecha Radicación']||'', fechaLimite:_caso['Fecha Límite 15d']||'',
+    respuestaSecretaria:_caso['Respuesta Secretaría']||'',
+  };
+  _documentosGenerados = [{ ciudad:p.ciudad, texto: construirTextoTutela(p) }];
+  document.getElementById('doc-tabs').style.display='none';
+  document.querySelector('#v-documento h2').innerHTML = '<i class="fas fa-gavel" style="color:var(--teal);"></i> Tu Acción de Tutela';
+  document.querySelector('#v-documento p.lead').textContent = 'Este es exactamente el texto que se radicará ante el juzgado.';
+  document.getElementById('btn-firmar').innerHTML = '<i class="fas fa-check-circle"></i> Firmar mi Tutela';
+  mostrarDoc(0);
+  mostrar('v-documento');
+  initFirmaPad();
+}
+
 function irADocumento(){
   setStepBar(3);
   var p = {
@@ -550,7 +639,8 @@ function firmarYEnviar(){
   var btn = document.getElementById('btn-firmar');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-  var nombreArchivo = 'DerechoPeticion_Firmado_'+(_caso['Apellidos']||'cliente')+'_'+(_caso['Cédula']||'')+'.pdf';
+  var esTutela = _tipo==='tutela';
+  var nombreArchivo = (esTutela?'Tutela_Firmada_':'DerechoPeticion_Firmado_')+(_caso['Apellidos']||'cliente')+'_'+(_caso['Cédula']||'')+'.pdf';
   doc.save(nombreArchivo); // descarga inmediata al teléfono
 
   var base64 = doc.output('datauristring');
@@ -558,10 +648,17 @@ function firmarYEnviar(){
   fetch(SCRIPT_URL, {
     method:'POST',
     body: JSON.stringify({
-      _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+      _accion: esTutela ? 'marcar_tutela_firmada' : 'marcar_firmado',
+      cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
       archivoBase64: base64, archivoNombre: nombreArchivo, secretarias: secretarias,
     })
-  }).then(function(){ mostrar('v-exito'); }).catch(function(){ mostrar('v-exito'); });
+  }).then(function(){
+    if(esTutela){
+      document.querySelector('#v-exito h2').textContent = '¡Tu Tutela quedó firmada! ⚖️';
+      document.querySelector('#v-exito p.lead').textContent = 'Ya se descargó a tu teléfono y también la enviamos a tu correo. Nuestro equipo la radicará ante el juzgado — te avisamos apenas tengamos noticias.';
+    }
+    mostrar('v-exito');
+  }).catch(function(){ mostrar('v-exito'); });
 }
 
 init();

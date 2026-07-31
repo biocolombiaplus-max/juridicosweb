@@ -276,6 +276,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <span class="icon">⚖️</span> Tutelas
       <span class="nav-badge" id="badge-tutelas" style="background:#7c3aed">0</span>
     </div>
+    <div class="nav-item" onclick="showSection('tutelasporradicar')">
+      <span class="icon">📌</span> Tutelas por Radicar
+      <span class="nav-badge" id="badge-tutelasporradicar" style="background:#dc2626">0</span>
+    </div>
     <div class="nav-item" onclick="showSection('cerrados')">
       <span class="icon">🏁</span> Cerrados / OK
     </div>
@@ -425,6 +429,17 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <div class="table-wrap">
         <div class="table-header"><h3>⚖️ Casos con Tutela</h3><span class="table-count" id="tutelas-count"></span></div>
         <div id="table-tutelas-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- TUTELAS POR RADICAR (control manual) -->
+    <div class="section" id="section-tutelasporradicar">
+      <div class="table-wrap" style="margin-bottom:16px;background:#fff7ed;border:1px solid rgba(220,38,38,.2);">
+        <div style="padding:14px 20px;font-size:13px;color:#7c2d12;">📌 Estas tutelas ya están <strong>firmadas por el cliente</strong> y listas — la radicación ante el juzgado se hace de forma manual, así que esta lista es tu punto de control para no dejar ninguna pendiente.</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><h3>📌 Firmadas — Pendientes de Radicar</h3><span class="table-count" id="tutelasporradicar-count"></span></div>
+        <div id="table-tutelasporradicar-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
     </div>
 
@@ -637,7 +652,7 @@ var sectionTitles = {
   dashboard:'Dashboard / Pipeline', casos:'Todos los Casos',
   clientes:'Clientes (Pagados)', remarketing:'Remarketing (No pagaron)',
   autorizados:'Pagados — Por Radicar', seguimiento:'Esperando Respuesta (15 días)',
-  tutelas:'Casos con Tutela', cerrados:'Casos Cerrados'
+  tutelas:'Casos con Tutela', tutelasporradicar:'Tutelas Firmadas — Por Radicar', cerrados:'Casos Cerrados'
 };
 
 function showSection(sec){
@@ -712,6 +727,7 @@ function renderAll(){
   renderSection('autorizados');
   renderSection('seguimiento');
   renderSection('tutelas');
+  renderSection('tutelasporradicar');
   renderSection('cerrados');
 }
 
@@ -828,6 +844,16 @@ function renderSection(sec){
     document.getElementById('table-seguimiento-wrap').innerHTML = buildTable(filtered, null, true);
     return;
   }
+  if(sec==='tutelasporradicar'){
+    filtered = allRows.filter(function(r){
+      var firmada = r['Tutela Firmada']==='TRUE'||r['Tutela Firmada']===true;
+      var radicada = r['Tutela Enviada']==='TRUE'||r['Tutela Enviada']===true;
+      return firmada && !radicada;
+    });
+    document.getElementById('tutelasporradicar-count').textContent = filtered.length+' por radicar';
+    document.getElementById('table-tutelasporradicar-wrap').innerHTML = buildTable(filtered);
+    return;
+  }
   var estadoMap = {autorizados:'autorizado', tutelas:'tutela', cerrados:'cerrado'};
   var estado = estadoMap[sec];
   if(!estado) return;
@@ -900,6 +926,11 @@ function updateStats(){
   var pendientes = allRows.filter(function(r){ return getEstado(r)==='pendiente'; }).length;
   var seguimiento = allRows.filter(function(r){ return getEstado(r)==='esperando_respuesta'; }).length;
   var autorizados = allRows.filter(function(r){ return getEstado(r)==='autorizado'; }).length;
+  var tutelasPorRadicar = allRows.filter(function(r){
+    var firmada = r['Tutela Firmada']==='TRUE'||r['Tutela Firmada']===true;
+    var radicada = r['Tutela Enviada']==='TRUE'||r['Tutela Enviada']===true;
+    return firmada && !radicada;
+  }).length;
 
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-pagos').textContent = pagos;
@@ -913,6 +944,7 @@ function updateStats(){
   document.getElementById('badge-autorizados').textContent = autorizados;
   document.getElementById('badge-seguimiento').textContent = seguimiento;
   document.getElementById('badge-tutelas').textContent = tutelas;
+  document.getElementById('badge-tutelasporradicar').textContent = tutelasPorRadicar;
 }
 
 // ══════════════════════════════════════════════════
@@ -977,7 +1009,10 @@ function buildTimeline(row, estado){
   if(row['Fecha Límite 15d']) items += tItem('gray',row['Fecha Límite 15d'],'⏰ Fecha límite respuesta secretaría (Art. 14 CPACA)');
   if(row['Respuesta Secretaría']) items += tItem(/positiva/i.test(row['Respuesta Secretaría'])?'green':'gold', row['Fecha Respuesta']||'—', '📬 Respuesta: '+escHtml(row['Respuesta Secretaría']));
   if(row['Tutela Requerida']==='TRUE') items += tItem('gold','—','⚖️ Tutela requerida');
+  if(row['Tutela Firmada']==='TRUE') items += tItem('gold','—','🖊️ Tutela firmada digitalmente');
   if(row['Tutela Enviada']==='TRUE') items += tItem('green','—','⚖️ Tutela radicada ante el juzgado');
+  if(row['Resultado Tutela']) items += tItem(/positiva/i.test(row['Resultado Tutela'])?'green':'gold','—','📬 Resultado Tutela: '+escHtml(row['Resultado Tutela']));
+  if(row['Tutela Pagada']==='TRUE') items += tItem('green','—','💰 Tutela pagada ($45.000)');
   if(row['Saldo Pagado']==='TRUE') items += tItem('green','—','🧾 Saldo del Plan Pago al Eliminar cobrado');
   if(row['Cerrado']==='TRUE') items += tItem('green','—','🏁 Caso cerrado');
   return items;
@@ -1028,6 +1063,14 @@ function buildAcciones(row, estado){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_enviado\',this,null,\'marcar_enviado\')">📨 Marcar como Radicado (manual)</button>';
   }
   if(estado==='esperando_respuesta'){
+    // Los 15 días hábiles se cuentan con el calendario colombiano real (sin
+    // festivos) en el backend — este botón se activa apenas se cumple el
+    // plazo (diasHastaLimite<=0), en vez de esperar solo al envío automático.
+    var dias = diasHastaLimite(row);
+    if(dias!==null && dias<=0){
+      var yaEnviado = row['Recordatorio Enviado']==='TRUE'||row['Recordatorio Enviado']===true;
+      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'enviar_recordatorio_manual\',this,null,\'enviar_recordatorio_manual\')">📧 '+(yaEnviado?'Reenviar':'Enviar')+' recordatorio (15 días cumplidos)</button>';
+    }
     html += '<button class="btn btn-success btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'positiva\'},\'respuesta_positiva\')">✅ Respuesta Positiva</button>';
     html += '<button class="btn btn-danger btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'negativa\'},\'respuesta_negativa\')">❌ Respuesta Negativa</button>';
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'sin_respuesta\'},\'sin_respuesta\')">⏱️ Sin Respuesta</button>';
@@ -1037,15 +1080,57 @@ function buildAcciones(row, estado){
     if(row['WhatsApp']) html += '<a href="'+waTemplate(row,'saldo')+'" target="_blank" class="btn btn-outline btn-sm">💬 Recordar saldo pendiente</a>';
   }
   if(estado==='tutela'){
-    if(row['WhatsApp']) html += '<a href="'+waTemplate(row,'tutela')+'" target="_blank" class="btn btn-success btn-sm">💬 Enviar mensaje de Tutela</a>';
-    if(row['Tutela Enviada']!=='TRUE'){
-      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_enviada\',this,null,\'marcar_tutela_enviada\')">⚖️ Marcar Tutela Radicada</button>';
-    }
+    html += buildAccionesTutela(row, rowAttr);
   }
   if(estado!=='pendiente' && estado!=='cerrado'){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'cerrar_caso\',this,null,\'cerrar_caso\')">🏁 Cerrar Caso</button>';
   }
   return html || '<span style="color:var(--gray400);font-size:13px">Sin acciones disponibles</span>';
+}
+
+// Flujo completo de la tutela, paso a paso: activar y enviar enlace de firma
+// → firmada → radicar (manual, ante el juzgado) → resultado → cobrar SOLO si
+// resultó positiva (esa es la garantía que se le ofrece al cliente).
+function buildAccionesTutela(row, rowAttr){
+  var html = '';
+  var tutelaFirmada = row['Tutela Firmada']==='TRUE'||row['Tutela Firmada']===true;
+  var tutelaRadicada = row['Tutela Enviada']==='TRUE'||row['Tutela Enviada']===true;
+  var resultado = (row['Resultado Tutela']||'').toString();
+  var tutelaPagada = row['Tutela Pagada']==='TRUE'||row['Tutela Pagada']===true;
+
+  if(!tutelaFirmada){
+    var linkTutela = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula'])+'&tipo=tutela';
+    var msgWa = encodeURIComponent('Hola '+row['Nombres']+', activamos tu Acción de Tutela ✅. Entra a este enlace desde tu celular para revisarla y firmarla — toma 2 minutos. Recuerda: solo pagas los $45.000 si el resultado es positivo: '+linkTutela);
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'activar_tutela\',this,null,\'activar_tutela\')">⚖️ Activar Tutela y enviar enlace</button>';
+    if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgWa+'" target="_blank" class="btn btn-success btn-sm">💬 Enviar enlace por WhatsApp</a>';
+    html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkTutela+'\',this)">📋 Copiar enlace de firma</button>';
+    return html;
+  }
+
+  html += '<span class="badge" style="background:#ede9fe;color:#5b21b6">🖊️ Tutela firmada</span>';
+  if(row['Enlace PDF Tutela']) html += '<a href="'+escHtml(row['Enlace PDF Tutela'])+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF Tutela</a>';
+
+  if(!tutelaRadicada){
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_enviada\',this,null,\'marcar_tutela_enviada\')">⚖️ Marcar Tutela Radicada (manual)</button>';
+    return html;
+  }
+
+  if(!resultado){
+    html += '<button class="btn btn-success btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_resultado\',this,{resultado:\'positiva\'},\'tutela_positiva\')">✅ Tutela Ganada</button>';
+    html += '<button class="btn btn-danger btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_resultado\',this,{resultado:\'negativa\'},\'tutela_negativa\')">❌ Tutela Negada</button>';
+    return html;
+  }
+
+  if(/positiva/i.test(resultado) && !tutelaPagada){
+    html += '<span class="badge badge-paid">✅ Tutela ganada</span>';
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_tutela_pagada\',this,null,\'marcar_tutela_pagada\')">💰 Confirmar Pago Tutela $45.000</button>';
+    if(row['WhatsApp']) html += '<a href="'+waTemplate(row,'tutela_ganada')+'" target="_blank" class="btn btn-outline btn-sm">💬 Avisar y cobrar</a>';
+  } else if(/positiva/i.test(resultado)){
+    html += '<span class="badge" style="background:#f0fdf4;color:#166534">💰 Tutela ganada y pagada</span>';
+  } else {
+    html += '<span class="badge badge-red">❌ Tutela negada</span>';
+  }
+  return html;
 }
 
 // Textos de confirm() por tipo de acción — se arman aquí (no en el HTML) para
@@ -1062,6 +1147,11 @@ var MENSAJES_CONFIRM = {
   cerrar_caso:           function(row){ return '¿Cerrar este caso manualmente?'; },
   reenviar_firmado:      function(row){ return '¿Reenviar el documento ya firmado al correo de '+row['Nombres']+'?'; },
   radicar_por_correo:    function(row){ return '¿Radicar YA el Derecho de Petición de '+row['Nombres']+' por correo ante la secretaría de '+(row['Ciudad']||'su ciudad')+'?\n\nEsto envía el documento firmado, arranca el plazo legal de 15 días hábiles, y no se puede deshacer.'; },
+  enviar_recordatorio_manual: function(row){ return '¿Enviar a '+row['Nombres']+' el correo de los 15 días (con el botón para iniciar la Tutela)?'; },
+  activar_tutela:        function(row){ return '¿Activar la Tutela de '+row['Nombres']+' y enviarle el enlace de firma? Confirma primero que el cliente ya aceptó por WhatsApp.'; },
+  tutela_positiva:       function(row){ return '¿El juzgado falló A FAVOR en la Tutela de '+row['Nombres']+'? Esto habilita cobrar los $45.000.'; },
+  tutela_negativa:       function(row){ return '¿El juzgado falló EN CONTRA en la Tutela de '+row['Nombres']+'? No se cobra nada en este caso.'; },
+  marcar_tutela_pagada:  function(row){ return '¿Confirmar que '+row['Nombres']+' ya pagó los $45.000 de la Tutela ganada? Esto cierra el caso.'; },
 };
 
 // Copia el enlace de firma al portapapeles — respaldo por si el admin
@@ -1086,6 +1176,9 @@ function waTemplate(row, tipo){
   } else if(tipo==='saldo'){
     msg = 'Hola '+nombre+', ¡buenas noticias! La secretaría respondió a favor y tu multa quedó eliminada. '+
       'Para el Plan Pago al Eliminar, el último paso es pagar el saldo de $95.900 por multa. ¿Te compartimos el link de pago?';
+  } else if(tipo==='tutela_ganada'){
+    msg = 'Hola '+nombre+', ¡ganamos la Tutela! 🎉 El juzgado ordenó a la Secretaría responder tu Derecho de Petición. '+
+      'Como acordamos, el costo de la Tutela ($45.000) se cobra ahora que ya tuvimos un resultado positivo. ¿Te compartimos el link de pago?';
   }
   return 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent(msg);
 }

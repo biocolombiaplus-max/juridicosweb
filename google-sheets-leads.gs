@@ -37,8 +37,10 @@ var CORREOS_RADICACION_SHEET_ID = '1RB8EfYBtsn3zZ2BayYxJjD8p7w3M7ElGGqFazcnhObU'
 
 var VALOR_SALDO_DIFERIDO = 95900; // lo que falta pagar por multa en el Plan Pago al Eliminar
 var DIAS_HABILES_RESPUESTA = 15;  // Art. 14 CPACA
+var VALOR_TUTELA = 45000; // se cobra SOLO si la tutela resulta positiva — es la garantía
 var WHATSAPP_DESPACHO = '573159318400';
 var EMAIL_DESPACHO = 'juridicoswebcasos@gmail.com';
+var FIRMAR_BASE_URL = 'https://juridicosweb.com/firmar.html';
 
 // Encabezados de la hoja principal, en el orden en que se ven — un solo
 // caso (cliente) por fila, se actualiza en el sitio (nunca se duplica).
@@ -55,6 +57,7 @@ var COLUMNAS_CASOS = [
   'Respuesta Secretaría', 'Fecha Respuesta', 'Tutela Requerida',
   'Tutela Enviada', 'Recordatorio Enviado', 'Cerrado', 'Notas',
   'Firmado', 'Enlace PDF Firmado',
+  'Tutela Firmada', 'Enlace PDF Tutela', 'Tutela Valor', 'Resultado Tutela', 'Tutela Pagada',
 ];
 
 var COLUMNAS_FIRMADOS = [
@@ -78,6 +81,11 @@ function doPost(e) {
       case 'marcar_firmado':      return marcarFirmado(datos);
       case 'reenviar_firmado':    return reenviarFirmado(datos);
       case 'radicar_por_correo':  return radicarPorCorreo(datos);
+      case 'enviar_recordatorio_manual': return enviarRecordatorioManual(datos);
+      case 'activar_tutela':      return activarTutela(datos);
+      case 'marcar_tutela_firmada': return marcarTutelaFirmada(datos);
+      case 'marcar_tutela_resultado': return marcarTutelaResultado(datos);
+      case 'marcar_tutela_pagada': return marcarTutelaPagada(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -527,7 +535,7 @@ function revisarRecordatorios15Dias() {
     var nombres = fila[idx['Nombres']];
 
     if (!recordatorioEnviado && hoy.getTime() >= limite.getTime() && email) {
-      enviarRecordatorioCliente(email, nombres);
+      enviarRecordatorioCliente(email, nombres, fila[idx['Cédula']]);
       hoja.getRange(i + 1, idx['Recordatorio Enviado'] + 1).setValue('TRUE');
     }
 
@@ -541,31 +549,216 @@ function revisarRecordatorios15Dias() {
   aplicarFormatoCondicional(hoja);
 }
 
-function enviarRecordatorioCliente(email, nombres) {
-  var asunto = 'Ya se cumplieron los 15 días hábiles — revisa tu respuesta';
-  var cuerpo =
-    'Hola ' + (nombres || '') + ',\n\n' +
-    'Ya se cumplió el plazo legal de 15 días hábiles (Art. 14 CPACA) desde que radicamos tu Derecho de Petición.\n\n' +
-    'Por favor revisa tu correo (incluida la carpeta de spam) y el SIMIT para ver si la secretaría ya respondió.\n\n' +
-    'Escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + ' contándonos qué pasó:\n' +
-    '• Si respondieron a FAVOR: perfecto, seguimos con la eliminación.\n' +
-    '• Si respondieron en CONTRA o no respondieron: procede una Acción de Tutela y ya podemos iniciarla.\n\n' +
-    'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito';
-  try { MailApp.sendEmail(email, asunto, cuerpo); } catch (e) { /* cuota de correo agotada u otro error — no rompe el resto del chequeo */ }
+// Botón "Enviar recordatorio" en el panel — mismo correo que el envío
+// automático, pero disparado a mano por el admin (ej. para reenviarlo).
+function enviarRecordatorioManual(datos) {
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
+  var email = obtenerValorFila(hoja, fila, 'Email');
+  var nombres = obtenerValorFila(hoja, fila, 'Nombres');
+  var cedula = obtenerValorFila(hoja, fila, 'Cédula');
+  if (!email) return respuestaJson({ ok: false, error: 'El caso no tiene correo registrado' });
+  enviarRecordatorioCliente(email, nombres, cedula);
+  escribirFila(hoja, fila, { 'Recordatorio Enviado': 'TRUE' });
+  return respuestaJson({ ok: true });
 }
 
-// Suma N días HÁBILES (lunes a viernes) a una fecha. No descuenta festivos
-// colombianos — si un festivo cae en el rango, ajusta la fecha límite a mano
-// en la hoja si hace falta.
+// Correo de los 15 días — explica la tutela (garantía: solo se paga si
+// resulta positiva) y trae un botón directo a WhatsApp para que el cliente
+// confirme que quiere iniciarla, sin tener que escribir nada él mismo.
+function enviarRecordatorioCliente(email, nombres, cedula) {
+  var asunto = '⏰ Ya se cumplieron los 15 días hábiles — revisa tu respuesta';
+  var msgWa = encodeURIComponent('Hola, soy ' + (nombres || '') + ' (C.C. ' + (cedula || '') + '). Ya pasaron los 15 días hábiles y no he recibido respuesta de la Secretaría de Tránsito. Quiero iniciar la Tutela (pago los $45.000 solo si resulta positiva).');
+  var linkWa = 'https://wa.me/' + WHATSAPP_DESPACHO + '?text=' + msgWa;
+  var cuerpoHtml = '' +
+    '<div style="font-family:Arial,sans-serif;color:#1e293b;max-width:560px;">' +
+    '<div style="background:#2e1065;padding:16px 20px;border-radius:10px 10px 0 0;"><p style="color:#2dd4bf;font-weight:800;font-size:15px;margin:0;">JurídicosWeb.com</p></div>' +
+    '<div style="border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:20px;">' +
+    '<p>Hola ' + (nombres || '') + ',</p>' +
+    '<p>Ya se cumplió el plazo legal de <strong>15 días hábiles</strong> (Art. 14 de la Ley 1437 de 2011 — CPACA) desde que radicamos tu Derecho de Petición.</p>' +
+    '<p>Por favor revisa tu correo (incluida la carpeta de spam) y el SIMIT para confirmar si la secretaría ya respondió.</p>' +
+    '<div style="background:#f8fafc;border-radius:10px;padding:16px;margin:18px 0;">' +
+    '<p style="margin:0 0 8px;font-weight:700;color:#2e1065;">¿No te han respondido, o la respuesta fue negativa?</p>' +
+    '<p style="margin:0 0 14px;font-size:14px;">Podemos iniciar de inmediato una <strong>Acción de Tutela</strong> para exigir la respuesta y proteger tu derecho. Tiene un costo de <strong>$45.000</strong> — y solo lo pagas <strong>si el resultado es positivo</strong>. Esa es nuestra garantía.</p>' +
+    '<a href="' + linkWa + '" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;font-size:14px;">💬 Quiero iniciar mi Tutela</a>' +
+    '</div>' +
+    '<p style="font-size:13px;color:#64748b;">Si ya te respondieron a favor, ignora este mensaje — nuestro equipo ya está al tanto y seguirá con el proceso de eliminación.</p>' +
+    '<p>JurídicosWeb.com — Bufete Experto en Derecho de Tránsito</p>' +
+    '</div></div>';
+  try { MailApp.sendEmail({ to: email, subject: asunto, htmlBody: cuerpoHtml }); } catch (e) { /* cuota de correo agotada u otro error — no rompe el resto del chequeo */ }
+}
+
+// ───────────────────────── flujo de tutela ─────────────────────────
+//
+// El cliente confirma por WhatsApp (desde el botón del correo de arriba)
+// que quiere iniciar la tutela. El admin, al ver ese mensaje, activa la
+// tutela desde el panel: esto le envía al cliente el enlace para firmarla
+// digitalmente desde el teléfono (mismo módulo firmar.html, en modo tutela).
+function activarTutela(datos) {
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
+
+  var nombres = obtenerValorFila(hoja, fila, 'Nombres');
+  var email = obtenerValorFila(hoja, fila, 'Email');
+  var cedula = obtenerValorFila(hoja, fila, 'Cédula');
+
+  escribirFila(hoja, fila, { 'Tutela Requerida': 'TRUE', 'Tutela Valor': VALOR_TUTELA });
+
+  if (email) {
+    var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(cedula) + '&tipo=tutela';
+    var cuerpoHtml = '' +
+      '<div style="font-family:Arial,sans-serif;color:#1e293b;max-width:560px;">' +
+      '<div style="background:#2e1065;padding:16px 20px;border-radius:10px 10px 0 0;"><p style="color:#2dd4bf;font-weight:800;font-size:15px;margin:0;">JurídicosWeb.com</p></div>' +
+      '<div style="border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:20px;">' +
+      '<p>Hola ' + nombres + ',</p>' +
+      '<p>Ya preparamos tu <strong>Acción de Tutela</strong> para exigir la respuesta a tu Derecho de Petición. Recuerda: el costo de $45.000 <strong>solo se cobra si el resultado es positivo</strong> — no arriesgas nada.</p>' +
+      '<p>Fírmala ahora mismo desde tu celular, toma 2 minutos:</p>' +
+      '<a href="' + linkFirma + '" style="display:inline-block;background:#2dd4bf;color:#2e1065;text-decoration:none;padding:13px 24px;border-radius:8px;font-weight:800;font-size:14px;">🖊️ Firmar mi Tutela</a>' +
+      '<p style="font-size:13px;color:#64748b;margin-top:16px;">Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.</p>' +
+      '<p>JurídicosWeb.com — Bufete Experto en Derecho de Tránsito</p>' +
+      '</div></div>';
+    try {
+      MailApp.sendEmail({ to: email, subject: '⚖️ Tu Acción de Tutela está lista para firmar', htmlBody: cuerpoHtml });
+    } catch (e) { /* no rompe la activación si falla el envío */ }
+  }
+  return respuestaJson({ ok: true });
+}
+
+// Igual que marcarFirmado() pero para la tutela — guarda el PDF firmado en
+// Drive, marca el caso, y le reenvía el documento firmado al cliente.
+function marcarTutelaFirmada(datos) {
+  if (!datos.archivoBase64 || !datos.cedula) {
+    return respuestaJson({ ok: false, error: 'Falta el archivo firmado o la cédula del caso' });
+  }
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
+
+  var carpeta = obtenerOCrearCarpeta(CARPETA_DRIVE_FIRMAS);
+  var partes = datos.archivoBase64.split(',');
+  var mime = (partes[0].match(/data:(.*);base64/) || [])[1] || 'application/pdf';
+  var bytes = Utilities.base64Decode(partes[1] || partes[0]);
+  var nombreArchivo = datos.archivoNombre || ('Tutela_Firmada_' + datos.cedula + '.pdf');
+  var archivo = carpeta.createFile(Utilities.newBlob(bytes, mime, nombreArchivo));
+  archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  escribirFila(hoja, fila, { 'Tutela Firmada': 'TRUE', 'Enlace PDF Tutela': archivo.getUrl() });
+
+  var emailDestino = datos.email || obtenerValorFila(hoja, fila, 'Email');
+  if (emailDestino) {
+    try {
+      MailApp.sendEmail({
+        to: emailDestino,
+        subject: '⚖️ Tu Acción de Tutela firmada — JurídicosWeb',
+        body: 'Hola ' + (datos.nombres || obtenerValorFila(hoja, fila, 'Nombres')) + ',\n\n' +
+          'Adjunto tu Acción de Tutela ya firmada. Nuestro equipo la radicará ante el juzgado competente.\n\n' +
+          'Recuerda: el costo de $45.000 solo se cobra si el resultado es positivo.\n\n' +
+          'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito',
+        attachments: [archivo.getBlob()],
+      });
+    } catch (e) { /* no rompe el guardado si falla el envío */ }
+  }
+  return respuestaJson({ ok: true, enlaceArchivo: archivo.getUrl() });
+}
+
+// resultado: 'positiva' | 'negativa' — si es positiva, deja el cobro de los
+// $45.000 pendiente (esa es la garantía: se cobra solo cuando ya ganó).
+function marcarTutelaResultado(datos) {
+  var valores = { 'Resultado Tutela': datos.resultado === 'positiva' ? 'Positiva' : 'Negativa' };
+  if (datos.resultado === 'positiva') valores['Tutela Pagada'] = 'FALSE';
+  return actualizarPorCedula(datos, valores);
+}
+
+function marcarTutelaPagada(datos) {
+  return actualizarPorCedula(datos, { 'Tutela Pagada': 'TRUE', 'Cerrado': 'TRUE' });
+}
+
+// Suma N días HÁBILES (lunes a viernes, sin festivos colombianos) a una
+// fecha — usa el calendario oficial de Colombia (ver festivosColombia()).
 function sumarDiasHabiles(fechaInicio, dias) {
   var fecha = new Date(fechaInicio);
   var contados = 0;
   while (contados < dias) {
     fecha.setDate(fecha.getDate() + 1);
     var dow = fecha.getDay();
-    if (dow !== 0 && dow !== 6) contados++;
+    if (dow !== 0 && dow !== 6 && !esFestivoColombia(fecha)) contados++;
   }
   return fecha;
+}
+
+// ───────────────────────── festivos de Colombia (Ley 51 de 1983 / Ley Emiliani) ─
+//
+// Calcula los 18 festivos oficiales de un año: 6 de fecha fija, 7 de fecha
+// fija pero trasladables al lunes siguiente si no caen en lunes (Ley
+// Emiliani), y 5 que dependen del Domingo de Pascua (2 fijos: Jueves y
+// Viernes Santo; 3 trasladables a lunes: Ascensión, Corpus Christi y Sagrado
+// Corazón de Jesús).
+function domingoPascua(anio) {
+  var a = anio % 19;
+  var b = Math.floor(anio / 100);
+  var c = anio % 100;
+  var d = Math.floor(b / 4);
+  var e = b % 4;
+  var f = Math.floor((b + 8) / 25);
+  var g = Math.floor((b - f + 1) / 3);
+  var h = (19 * a + b - d - g + 15) % 30;
+  var i = Math.floor(c / 4);
+  var k = c % 4;
+  var l = (32 + 2 * e + 2 * i - h - k) % 7;
+  var m = Math.floor((a + 11 * h + 22 * l) / 451);
+  var mes = Math.floor((h + l - 7 * m + 114) / 31); // 3 = marzo, 4 = abril
+  var dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(anio, mes - 1, dia);
+}
+
+function sumarDiasFecha(fecha, dias) {
+  var f = new Date(fecha);
+  f.setDate(f.getDate() + dias);
+  return f;
+}
+
+// Traslada al lunes siguiente si la fecha no cae en lunes (Ley Emiliani).
+function trasladarALunes(fecha) {
+  var f = new Date(fecha);
+  var dow = f.getDay();
+  if (dow !== 1) f.setDate(f.getDate() + ((8 - dow) % 7));
+  return f;
+}
+
+var _cacheFestivos = {};
+function festivosColombia(anio) {
+  if (_cacheFestivos[anio]) return _cacheFestivos[anio];
+  var pascua = domingoPascua(anio);
+  var festivos = [
+    new Date(anio, 0, 1),   // Año Nuevo
+    new Date(anio, 4, 1),   // Día del Trabajo
+    new Date(anio, 6, 20),  // Independencia
+    new Date(anio, 7, 7),   // Batalla de Boyacá
+    new Date(anio, 11, 8),  // Inmaculada Concepción
+    new Date(anio, 11, 25), // Navidad
+    trasladarALunes(new Date(anio, 0, 6)),   // Reyes Magos
+    trasladarALunes(new Date(anio, 2, 19)),  // San José
+    trasladarALunes(new Date(anio, 5, 29)),  // San Pedro y San Pablo
+    trasladarALunes(new Date(anio, 7, 15)),  // Asunción de la Virgen
+    trasladarALunes(new Date(anio, 9, 12)),  // Día de la Raza
+    trasladarALunes(new Date(anio, 10, 1)),  // Todos los Santos
+    trasladarALunes(new Date(anio, 10, 11)), // Independencia de Cartagena
+    sumarDiasFecha(pascua, -3), // Jueves Santo
+    sumarDiasFecha(pascua, -2), // Viernes Santo
+    trasladarALunes(sumarDiasFecha(pascua, 39)), // Ascensión del Señor
+    trasladarALunes(sumarDiasFecha(pascua, 60)), // Corpus Christi
+    trasladarALunes(sumarDiasFecha(pascua, 68)), // Sagrado Corazón de Jesús
+  ];
+  var claves = festivos.map(function (f) { return Utilities.formatDate(f, 'GMT-5', 'yyyy-MM-dd'); });
+  _cacheFestivos[anio] = claves;
+  return claves;
+}
+
+function esFestivoColombia(fecha) {
+  var claves = festivosColombia(fecha.getFullYear());
+  return claves.indexOf(Utilities.formatDate(fecha, 'GMT-5', 'yyyy-MM-dd')) !== -1;
 }
 
 // ───────────────────────── utilidades de hoja ─────────────────────────
