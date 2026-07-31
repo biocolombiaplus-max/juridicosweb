@@ -1425,7 +1425,7 @@ var CIUDADES_INVESTIGACION_INM = [
 var FUENTE_OFICIAL_INM = 'https://mintransporte.gov.co/publicaciones/12348/gobierno-nacional-investiga-a-37-organismos-de-transito-mas-de-75-millones-de-fotomultas-estan-bajo-la-lupa-y-58-millones-quedaran-sin-validez/';
 
 function normalizarTexto(s){
-  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 function ciudadEnListaINM(ciudad){
   var norm = normalizarTexto(ciudad);

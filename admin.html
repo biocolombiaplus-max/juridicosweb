@@ -501,20 +501,31 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div class="form-group-m">
           <label>Plan</label>
           <select id="nc-plan">
-            <option value="Plan Básico $19.800">Plan Básico $19.800</option>
-            <option value="Plan Completo $45.000">Plan Completo $45.000</option>
+            <option value="Pago al Eliminar — Adelanto $19.800 + $95.900 c/u">Plan Pago al Eliminar $19.800</option>
+            <option value="Pago individual — $45.000 c/u">Plan Completo $45.000</option>
           </select>
         </div>
         <div class="form-group-m">
-          <label>Tipo Servicio</label>
-          <select id="nc-servicio">
-            <option value="2018-2024">Fotomultas 2018-2024</option>
-            <option value="multa-reciente">Multa Reciente</option>
+          <label>¿Cómo llegó este caso? *</label>
+          <select id="nc-fuente">
+            <option value="WhatsApp (contacto directo)">💬 WhatsApp</option>
+            <option value="Llamada telefónica">📞 Llamada</option>
+            <option value="Landing juridicosweb.com">🌐 Página web</option>
+            <option value="Referido">🤝 Referido</option>
+            <option value="Otro">✏️ Otro</option>
           </select>
+        </div>
+        <div class="form-group-m full-col" style="background:var(--gray50);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+          <input type="checkbox" id="nc-ya-pago" style="width:auto;" onchange="document.getElementById('nc-monto-wrap').style.display=this.checked?'block':'none'">
+          <label for="nc-ya-pago" style="margin:0;text-transform:none;font-size:13px;color:var(--gray800);cursor:pointer;">💰 El cliente ya pagó (confirmado por fuera de la página)</label>
+        </div>
+        <div class="form-group-m" id="nc-monto-wrap" style="display:none;">
+          <label>Monto pagado</label>
+          <input type="number" id="nc-monto" placeholder="Ej: 45000">
         </div>
         <div class="form-group-m full-col">
           <label>Multas / Detalles</label>
-          <textarea id="nc-multas" rows="3" placeholder="Descripción de las multas o detalles relevantes"></textarea>
+          <textarea id="nc-multas" rows="3" placeholder="Descripción de las multas o detalles relevantes — luego se completan los datos exactos al enviar el enlace de firma"></textarea>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:20px">
@@ -961,6 +972,7 @@ function buildTimeline(row, estado){
   items += tItem('navy', row['Fecha']||'—', '📋 Lead registrado en el sistema');
   if(row['Pago OK']==='TRUE') items += tItem('gold','—','💰 Pago confirmado');
   if(row['Autorizar']==='TRUE') items += tItem('green','—','✅ Documento autorizado');
+  if(row['Firmado']==='TRUE') items += tItem('gold','—','🖊️ Documento firmado digitalmente');
   if(row['Doc Enviado']==='TRUE') items += tItem('green', row['Fecha Radicación']||'—', '📨 Derecho de Petición radicado — arrancó el plazo de 15 días hábiles');
   if(row['Fecha Límite 15d']) items += tItem('gray',row['Fecha Límite 15d'],'⏰ Fecha límite respuesta secretaría (Art. 14 CPACA)');
   if(row['Respuesta Secretaría']) items += tItem(/positiva/i.test(row['Respuesta Secretaría'])?'green':'gold', row['Fecha Respuesta']||'—', '📬 Respuesta: '+escHtml(row['Respuesta Secretaría']));
@@ -975,6 +987,10 @@ function tItem(color, time, text){
   return '<li><div class="timeline-dot '+color+'"></div><div class="timeline-content"><div class="time">'+escHtml(time.toString())+'</div><p>'+escHtml(text)+'</p></div></li>';
 }
 
+// URL pública de firmar.html — mismo dominio del sitio. Si tu sitio no vive
+// en la raíz del dominio, ajusta esta ruta.
+var FIRMAR_BASE_URL = 'https://juridicosweb.com/firmar.html';
+
 function buildAcciones(row, estado){
   var rowAttr = escHtml(JSON.stringify(row));
   var wa = row['WhatsApp'] ? 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent('Hola '+row['Nombres']+', somos JurídicosWeb. Te contactamos sobre tu trámite.') : '#';
@@ -985,11 +1001,31 @@ function buildAcciones(row, estado){
   if(estado==='pendiente'){
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'confirmar_pago\',this,null,\'confirmar_pago\')">💰 Confirmar Pago</button>';
   }
+
+  // A partir de que el pago está confirmado, sin importar la etapa exacta,
+  // el admin puede mandar el enlace de firma remota (para casos por
+  // WhatsApp que nunca pasaron por el sitio) y, una vez firmado, radicarlo.
+  var pagoOk = row['Pago OK']==='TRUE'||row['Pago OK']===true;
+  var firmado = row['Firmado']==='TRUE'||row['Firmado']===true;
+  if(pagoOk && !firmado && row['Cédula']){
+    var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']);
+    var msgFirma = encodeURIComponent('Hola '+row['Nombres']+', tu pago quedó confirmado ✅. Para preparar tu Derecho de Petición, entra a este enlace desde tu celular, revisa tu documento y fírmalo con el dedo — toma 2 minutos: '+linkFirma);
+    if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ Enviar enlace de firma</a>';
+    html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
+  }
+  if(firmado){
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'reenviar_firmado\',this,null,\'reenviar_firmado\')">📧 Reenviar documento firmado</button>';
+    if(row['Enlace PDF Firmado']) html += '<a href="'+escHtml(row['Enlace PDF Firmado'])+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF firmado</a>';
+    if(!(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true)){
+      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'radicar_por_correo\',this,null,\'radicar_por_correo\')">📨 Radicar ante la secretaría</button>';
+    }
+  }
+
   if(estado==='pagado'){
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'autorizar_documento\',this,null,\'autorizar_documento\')">✅ Autorizar Documento</button>';
   }
   if(estado==='autorizado'){
-    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_enviado\',this,null,\'marcar_enviado\')">📨 Marcar como Radicado</button>';
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_enviado\',this,null,\'marcar_enviado\')">📨 Marcar como Radicado (manual)</button>';
   }
   if(estado==='esperando_respuesta'){
     html += '<button class="btn btn-success btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'positiva\'},\'respuesta_positiva\')">✅ Respuesta Positiva</button>';
@@ -1024,7 +1060,19 @@ var MENSAJES_CONFIRM = {
   marcar_saldo_pagado:   function(row){ return '¿Confirmar que ya pagó el saldo de $95.900 por multa? Esto cierra el caso.'; },
   marcar_tutela_enviada: function(row){ return '¿Marcar la tutela como radicada ante el juzgado?'; },
   cerrar_caso:           function(row){ return '¿Cerrar este caso manualmente?'; },
+  reenviar_firmado:      function(row){ return '¿Reenviar el documento ya firmado al correo de '+row['Nombres']+'?'; },
+  radicar_por_correo:    function(row){ return '¿Radicar YA el Derecho de Petición de '+row['Nombres']+' por correo ante la secretaría de '+(row['Ciudad']||'su ciudad')+'?\n\nEsto envía el documento firmado, arranca el plazo legal de 15 días hábiles, y no se puede deshacer.'; },
 };
+
+// Copia el enlace de firma al portapapeles — respaldo por si el admin
+// prefiere pegarlo en otro chat en vez de abrir WhatsApp directamente.
+function copiarEnlace(url, btn){
+  navigator.clipboard.writeText(url).then(function(){
+    var original = btn.textContent;
+    btn.textContent = '✅ Copiado';
+    setTimeout(function(){ btn.textContent = original; }, 2000);
+  });
+}
 
 // Mensajes de WhatsApp pre-armados para los momentos más delicados del
 // seguimiento — el admin solo revisa y envía.
@@ -1082,8 +1130,10 @@ function openNuevoCaso(){
 
 function guardarNuevoCaso(){
   var btn = document.getElementById('btn-guardar-nc');
+  var yaPago = document.getElementById('nc-ya-pago').checked;
+  var monto = document.getElementById('nc-monto').value.trim();
+  var plan = document.getElementById('nc-plan').value;
   var datos = {
-    _accion:    'nuevo_lead',
     nombres:    document.getElementById('nc-nombres').value.trim(),
     apellidos:  document.getElementById('nc-apellidos').value.trim(),
     cedula:     document.getElementById('nc-cedula').value.trim(),
@@ -1092,10 +1142,12 @@ function guardarNuevoCaso(){
     email:      document.getElementById('nc-email').value.trim(),
     ciudad:     document.getElementById('nc-ciudad').value.trim(),
     dpto:       document.getElementById('nc-dpto').value.trim(),
-    plan:       document.getElementById('nc-plan').value,
-    tipoServicio: document.getElementById('nc-servicio').value,
-    multasResumen: document.getElementById('nc-multas').value.trim(),
-    origen:     'admin-manual',
+    plan:       plan,
+    multasSeleccionadas: 1,
+    montoTotal: monto || '',
+    estadoPago: yaPago ? 'PAGADO — Confirmado manualmente' : 'PENDIENTE',
+    fuente:     document.getElementById('nc-fuente').value,
+    multasReportadas: document.getElementById('nc-multas').value.trim(),
   };
   if(!datos.nombres || !datos.email){
     showToast('⚠️ Nombres y Email son obligatorios','error');
@@ -1111,13 +1163,15 @@ function guardarNuevoCaso(){
   .then(function(r){ return r.json(); })
   .then(function(data){
     btn.disabled=false; btn.textContent='💾 Registrar Caso';
-    if(data.ok||data.resultado){
-      showToast('✅ Caso registrado exitosamente','success');
+    if(data.ok){
+      showToast(yaPago ? '✅ Caso registrado como PAGADO' : '✅ Caso registrado exitosamente','success');
       closeModal('modal-nuevo');
       // Limpiar campos
-      ['nc-nombres','nc-apellidos','nc-cedula','nc-placa','nc-whatsapp','nc-email','nc-ciudad','nc-dpto','nc-multas'].forEach(function(id){
+      ['nc-nombres','nc-apellidos','nc-cedula','nc-placa','nc-whatsapp','nc-email','nc-ciudad','nc-dpto','nc-multas','nc-monto'].forEach(function(id){
         document.getElementById(id).value='';
       });
+      document.getElementById('nc-ya-pago').checked=false;
+      document.getElementById('nc-monto-wrap').style.display='none';
       setTimeout(loadData, 1500);
     } else {
       showToast('Error: '+(data.error||'respuesta inesperada'),'error');
