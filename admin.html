@@ -713,7 +713,14 @@ function loadData(){
   fetch(url)
     .then(function(r){ return r.text(); })
     .then(function(text){
-      // GViz devuelve google.visualization.Query.setResponse(...)
+      // GViz siempre devuelve google.visualization.Query.setResponse(...).
+      // Si no viene eso, casi seguro Google respondió con una página de
+      // inicio de sesión/permisos en vez de los datos — es decir, el Sheet
+      // dejó de estar compartido como público. Lo detectamos aquí en vez
+      // de dejar que falle el JSON.parse con un error críptico.
+      if(text.indexOf('google.visualization.Query.setResponse') === -1){
+        throw new Error('Tu Google Sheet no está compartido públicamente (o cambió de ID/nombre de pestaña). Ve a tu hoja → botón "Compartir" → cambia a "Cualquier persona con el enlace" → rol "Lector" → Listo, y vuelve a intentar.');
+      }
       var json = text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '');
       var data = JSON.parse(json);
       allRows = parseGViz(data);
@@ -721,9 +728,10 @@ function loadData(){
       document.getElementById('last-sync').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CO');
     })
     .catch(function(err){
-      showToast('Error cargando datos: '+err.message,'error');
-      document.getElementById('last-sync').textContent='Error de carga';
-      // Datos demo si sheet no está public
+      showToast('⚠️ '+err.message,'error');
+      document.getElementById('last-sync').textContent='Error de carga — mostrando datos de ejemplo';
+      // Datos demo si el sheet no está accesible, para que el panel nunca
+      // se quede vacío mientras se soluciona el acceso.
       allRows = getDemoRows();
       renderAll();
     });

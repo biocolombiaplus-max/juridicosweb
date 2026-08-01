@@ -231,6 +231,9 @@ function init(){
   var sheetName = encodeURIComponent('📊 Control de Casos');
   var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName;
   fetch(url).then(function(r){ return r.text(); }).then(function(text){
+    if(text.indexOf('google.visualization.Query.setResponse') === -1){
+      throw new Error('sheet_no_publico');
+    }
     var json = text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '');
     var data = JSON.parse(json);
     var cols = data.table.cols.map(function(c){ return c.label; });
@@ -271,8 +274,10 @@ function init(){
 
     document.getElementById('saludo-nombre').textContent = match['Nombres']||'';
     mostrar('v-saludo');
-  }).catch(function(){
-    document.getElementById('v-error-texto').textContent = 'No pudimos cargar tu caso — revisa tu conexión e intenta de nuevo.';
+  }).catch(function(err){
+    document.getElementById('v-error-texto').textContent = (err && err.message==='sheet_no_publico')
+      ? 'No pudimos verificar tu caso ahora mismo. Escríbenos por WhatsApp y lo revisamos al momento.'
+      : 'No pudimos cargar tu caso — revisa tu conexión e intenta de nuevo.';
     mostrar('v-error');
   });
 }
