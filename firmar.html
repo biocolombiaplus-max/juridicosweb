@@ -187,6 +187,8 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
 // ══════════════════════════════════════════════════
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
 var SHEET_ID   = '1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl';
+// gid de la pestaña "Control de Casos" — ver nota en admin.html
+var SHEET_GID_CASOS = '1990875083';
 var FUENTE_OFICIAL_INM = 'https://mintransporte.gov.co/publicaciones/12348/gobierno-nacional-investiga-a-37-organismos-de-transito-mas-de-75-millones-de-fotomultas-estan-bajo-la-lupa-y-58-millones-quedaran-sin-validez/';
 var CIUDADES_INVESTIGACION_INM = [
   'bogota','medellin','cali','barranquilla','cartagena','bucaramanga','villavicencio',
@@ -217,6 +219,39 @@ function normalizarTexto(s){
   return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
+// Parser CSV RFC 4180 (comillas, comas y saltos de l\u00ednea dentro de un
+// campo) \u2014 ver misma funci\u00f3n en admin.html.
+function parseCSV(texto){
+  var filas = []; var fila = []; var campo = ''; var entreComillas = false;
+  for(var i=0; i<texto.length; i++){
+    var c = texto[i];
+    if(entreComillas){
+      if(c === '"'){
+        if(texto[i+1] === '"'){ campo += '"'; i++; }
+        else { entreComillas = false; }
+      } else { campo += c; }
+    } else if(c === '"'){ entreComillas = true; }
+    else if(c === ','){ fila.push(campo); campo = ''; }
+    else if(c === '\r'){ /* se ignora */ }
+    else if(c === '\n'){ fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+    else { campo += c; }
+  }
+  if(campo.length || fila.length){ fila.push(campo); filas.push(fila); }
+  return filas;
+}
+function csvAObjetos(texto){
+  var matriz = parseCSV(texto);
+  if(!matriz.length) return [];
+  var encabezados = matriz[0];
+  return matriz.slice(1)
+    .filter(function(fila){ return fila.some(function(v){ return v!==''; }); })
+    .map(function(fila){
+      var obj = {};
+      encabezados.forEach(function(h,i){ obj[h] = fila[i]!==undefined ? fila[i] : ''; });
+      return obj;
+    });
+}
+
 function init(){
   var params = new URLSearchParams(window.location.search);
   var cedula = (params.get('cedula')||'').trim();
@@ -228,18 +263,16 @@ function init(){
     document.querySelector('.topbar p').textContent = 'Firma de tu Acción de Tutela — desde tu teléfono';
   }
 
-  var sheetName = encodeURIComponent('📊 Control de Casos');
-  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName+'&_t='+Date.now();
-  fetch(url, { cache: 'no-store' }).then(function(r){ return r.text(); }).then(function(text){
-    if(text.indexOf('google.visualization.Query.setResponse') === -1){
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+SHEET_GID_CASOS+'&_t='+Date.now();
+  fetch(url, { cache: 'no-store' }).then(function(r){
+    if(!r.ok) throw new Error('sheet_no_publico');
+    return r.text();
+  }).then(function(text){
+    var inicio = text.trim().slice(0,15).toLowerCase();
+    if(inicio.indexOf('<!doctype') === 0 || inicio.indexOf('<html') === 0){
       throw new Error('sheet_no_publico');
     }
-    var json = text.replace(/^[^(]*\(/, '').replace(/\);?\s*$/, '');
-    var data = JSON.parse(json);
-    var cols = data.table.cols.map(function(c){ return c.label; });
-    var filas = data.table.rows.map(function(row){
-      var obj={}; row.c.forEach(function(cell,i){ obj[cols[i]] = cell ? (cell.f || cell.v || '') : ''; }); return obj;
-    });
+    var filas = csvAObjetos(text);
     var match = filas.filter(function(r){ return String(r['Cédula']||'').trim()===cedula; }).pop();
     if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos un caso con esa cédula. Pídele a tu asesor que revise el enlace.'; mostrar('v-error'); return; }
     _caso = match;
