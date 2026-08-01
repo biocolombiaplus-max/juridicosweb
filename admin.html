@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>JurídicosWeb — Panel de Administración</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -174,13 +174,59 @@ tr:hover td{background:#f8faff;cursor:pointer}
 .section{display:none}
 .section.active{display:block}
 
+/* ── MENÚ HAMBURGUESA + BACKDROP (solo móvil) ── */
+.btn-hamburger{display:none;background:none;border:none;width:38px;height:38px;border-radius:9px;align-items:center;justify-content:center;font-size:18px;color:var(--navy);cursor:pointer;flex-shrink:0}
+.btn-hamburger:active{background:var(--gray100)}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(13,27,75,.5);z-index:99;opacity:0;transition:opacity .25s}
+.sidebar-backdrop.show{display:block;opacity:1}
+
+/* ── BARRA INFERIOR ESTILO APP (solo móvil) ── */
+.bottom-nav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:1px solid var(--gray200);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06);}
+.bottom-nav-items{display:flex;justify-content:space-around;align-items:center}
+.bn-item{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;color:var(--gray400);font-size:9.5px;font-weight:700;cursor:pointer;flex:1;min-width:0}
+.bn-item .bn-icon{font-size:18px;line-height:1}
+.bn-item.active{color:var(--navy)}
+.bn-item.active .bn-icon{color:var(--gold)}
+.fab-nuevo{display:none;position:fixed;right:18px;z-index:65;bottom:calc(76px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;border:none;font-size:22px;box-shadow:0 6px 18px rgba(13,27,75,.4);align-items:center;justify-content:center;cursor:pointer}
+.fab-nuevo:active{transform:scale(.94)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
-  .sidebar{width:0;position:fixed;z-index:100;height:100vh;transition:width .3s}
-  .sidebar.open{width:var(--sidebar)}
-  .stats-grid{grid-template-columns:1fr 1fr}
+  body{-webkit-tap-highlight-color:transparent}
+  .btn-hamburger{display:flex}
+  .topbar{padding:0 14px;height:56px}
+  .topbar-actions .btn-primary{display:none} /* "Nuevo Caso" ya lo cubre el botón flotante (+) */
+  .topbar-actions .btn-outline{padding:8px 10px}
+  .topbar-actions .btn-outline span{display:none} /* deja solo el ícono 🔄 para ahorrar espacio */
+  .content{padding:14px 12px 90px} /* deja espacio para la bottom-nav */
+  .sidebar{width:var(--sidebar);max-width:82vw;position:fixed;z-index:100;height:100vh;top:0;left:0;transform:translateX(-100%);transition:transform .28s ease;box-shadow:6px 0 24px rgba(0,0,0,.25)}
+  .sidebar.open{transform:translateX(0)}
+  .bottom-nav{display:block}
+  .fab-nuevo{display:flex}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-card{padding:14px}
+  .stat-value{font-size:26px}
   .detail-grid{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
+  .filters-bar{padding:12px}
+
+  /* Tablas → tarjetas apiladas: mucho más "app" que scroll horizontal */
+  .table-wrap table, .table-wrap thead, .table-wrap tbody, .table-wrap th, .table-wrap td, .table-wrap tr{display:block}
+  .table-wrap thead{display:none}
+  .table-wrap tr{background:#fff;border-radius:12px;padding:12px 14px;margin:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-bottom:none !important}
+  .table-wrap td{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gray100) !important;font-size:13px;text-align:right}
+  .table-wrap td:last-child{border-bottom:none !important}
+  .table-wrap td::before{content:attr(data-label);font-size:10.5px;font-weight:700;color:var(--gray400);text-transform:uppercase;letter-spacing:.4px;text-align:left;flex-shrink:0}
+  .table-wrap td[data-label="Cliente"]{text-align:right}
+
+  /* Modal a pantalla completa, como un detalle nativo de app */
+  .modal-overlay.show{align-items:stretch}
+  .modal{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0}
+  .modal-header{padding:16px}
+  .modal-body{padding:16px 16px calc(90px + env(safe-area-inset-bottom))}
+
+  .kanban-wrap{padding:12px 12px}
+  .modal-actions .btn{flex:1;min-width:calc(50% - 5px)}
 }
 </style>
 </head>
@@ -217,6 +263,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
 <div id="app">
 <div class="layout">
 
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
@@ -232,44 +280,44 @@ tr:hover td{background:#f8faff;cursor:pointer}
   </div>
   <div class="nav-section">
     <div class="nav-section-title">Principal</div>
-    <div class="nav-item active" onclick="showSection('dashboard')">
+    <div class="nav-item active" data-sec="dashboard" onclick="showSection('dashboard')">
       <span class="icon">📊</span> Dashboard / Pipeline
     </div>
-    <div class="nav-item" onclick="showSection('casos')">
+    <div class="nav-item" data-sec="casos" onclick="showSection('casos')">
       <span class="icon">📋</span> Todos los Casos
       <span class="nav-badge" id="badge-total">0</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-section-title">Clientes</div>
-    <div class="nav-item" onclick="showSection('clientes')">
+    <div class="nav-item" data-sec="clientes" onclick="showSection('clientes')">
       <span class="icon">💰</span> Clientes (Pagados)
       <span class="nav-badge" id="badge-clientes" style="background:var(--green)">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('remarketing')">
+    <div class="nav-item" data-sec="remarketing" onclick="showSection('remarketing')">
       <span class="icon">🎯</span> Remarketing
       <span class="nav-badge" id="badge-remarketing" style="background:#f59e0b">0</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-section-title">Seguimiento legal</div>
-    <div class="nav-item" onclick="showSection('autorizados')">
+    <div class="nav-item" data-sec="autorizados" onclick="showSection('autorizados')">
       <span class="icon">✅</span> Por Radicar
       <span class="nav-badge" id="badge-autorizados" style="background:var(--blue)">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('seguimiento')">
+    <div class="nav-item" data-sec="seguimiento" onclick="showSection('seguimiento')">
       <span class="icon">⏰</span> Esperando Respuesta (15d)
       <span class="nav-badge" id="badge-seguimiento" style="background:var(--gold)">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('tutelas')">
+    <div class="nav-item" data-sec="tutelas" onclick="showSection('tutelas')">
       <span class="icon">⚖️</span> Tutelas
       <span class="nav-badge" id="badge-tutelas" style="background:#7c3aed">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('tutelasporradicar')">
+    <div class="nav-item" data-sec="tutelasporradicar" onclick="showSection('tutelasporradicar')">
       <span class="icon">📌</span> Tutelas por Radicar
       <span class="nav-badge" id="badge-tutelasporradicar" style="background:#dc2626">0</span>
     </div>
-    <div class="nav-item" onclick="showSection('cerrados')">
+    <div class="nav-item" data-sec="cerrados" onclick="showSection('cerrados')">
       <span class="icon">🏁</span> Cerrados / OK
     </div>
   </div>
@@ -291,9 +339,12 @@ tr:hover td{background:#f8faff;cursor:pointer}
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h1 id="topbar-title">Dashboard</h1>
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <button class="btn-hamburger" onclick="toggleSidebar(true)" aria-label="Abrir menú">☰</button>
+      <h1 id="topbar-title">Dashboard</h1>
+    </div>
     <div class="topbar-actions">
-      <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualizar</button>
+      <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 <span>Actualizar</span></button>
       <button class="btn btn-primary btn-sm" onclick="openNuevoCaso()">➕ Nuevo Caso</button>
     </div>
   </div>
@@ -444,6 +495,19 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div><!-- /main -->
 
 </div><!-- /layout -->
+
+<!-- BARRA INFERIOR ESTILO APP (solo móvil) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-items">
+    <button class="bn-item active" data-sec="dashboard" onclick="irSeccionMovil('dashboard')"><span class="bn-icon">📊</span>Inicio</button>
+    <button class="bn-item" data-sec="casos" onclick="irSeccionMovil('casos')"><span class="bn-icon">📋</span>Casos</button>
+    <button class="bn-item" data-sec="clientes" onclick="irSeccionMovil('clientes')"><span class="bn-icon">💰</span>Clientes</button>
+    <button class="bn-item" data-sec="tutelas" onclick="irSeccionMovil('tutelas')"><span class="bn-icon">⚖️</span>Tutelas</button>
+    <button class="bn-item" onclick="toggleSidebar(true)"><span class="bn-icon">☰</span>Menú</button>
+  </div>
+</nav>
+<button class="fab-nuevo" onclick="openNuevoCaso()" aria-label="Nuevo caso">➕</button>
+
 </div><!-- /app -->
 
 <!-- ══════════════════════════════════════════════ -->
@@ -617,10 +681,25 @@ var sectionTitles = {
 function showSection(sec){
   document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('section-'+sec).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.toggle('active', n.dataset.sec===sec); });
+  document.querySelectorAll('.bn-item').forEach(function(n){ n.classList.toggle('active', n.dataset.sec===sec); });
   document.getElementById('topbar-title').textContent = sectionTitles[sec] || sec;
   if(sec !== 'dashboard') renderSection(sec);
+  toggleSidebar(false);
+  document.querySelector('.content').scrollTop = 0;
+}
+
+// Atajo de la barra inferior (móvil) — misma lógica que el menú lateral.
+function irSeccionMovil(sec){ showSection(sec); }
+
+// Abre/cierra el menú deslizable en móvil. Sin argumento, lo alterna.
+function toggleSidebar(forzar){
+  var sidebar = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebar-backdrop');
+  var abrir = forzar!==undefined ? forzar : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', abrir);
+  backdrop.classList.toggle('show', abrir);
+  document.body.style.overflow = abrir ? 'hidden' : '';
 }
 
 // ══════════════════════════════════════════════════
@@ -746,14 +825,14 @@ function buildTable(rows, limit, mostrarDias){
     var fecha = (row['Fecha']||'').toString().substring(0,10);
     var nombre = (row['Nombres']||'')+' '+(row['Apellidos']||'');
     html += '<tr onclick="abrirCaso('+JSON.stringify(JSON.stringify(row)).replace(/"/g,'&quot;')+')">';
-    html += '<td style="color:var(--gray400);font-size:12px">'+fecha+'</td>';
-    html += '<td><strong>'+escHtml(nombre.trim())+'</strong><br><span style="font-size:11px;color:var(--gray400)">'+escHtml(row['Email']||'')+'</span></td>';
-    html += '<td>'+escHtml(row['Cédula']||'—')+'</td>';
-    html += '<td><strong>'+escHtml(row['Placa']||'—')+'</strong></td>';
-    html += '<td>'+escHtml(row['Ciudad']||'—')+'</td>';
-    html += '<td style="font-size:12px">'+escHtml((row['Plan']||'').replace('Plan','').trim())+'</td>';
-    if(mostrarDias) html += '<td>'+badgeDias(diasHastaLimite(row))+'</td>';
-    html += '<td>'+badgeForEstado(estado)+'</td>';
+    html += '<td data-label="Fecha" style="color:var(--gray400);font-size:12px">'+fecha+'</td>';
+    html += '<td data-label="Cliente"><strong>'+escHtml(nombre.trim())+'</strong><br><span style="font-size:11px;color:var(--gray400)">'+escHtml(row['Email']||'')+'</span></td>';
+    html += '<td data-label="Cédula">'+escHtml(row['Cédula']||'—')+'</td>';
+    html += '<td data-label="Placa"><strong>'+escHtml(row['Placa']||'—')+'</strong></td>';
+    html += '<td data-label="Ciudad">'+escHtml(row['Ciudad']||'—')+'</td>';
+    html += '<td data-label="Plan" style="font-size:12px">'+escHtml((row['Plan']||'').replace('Plan','').trim())+'</td>';
+    if(mostrarDias) html += '<td data-label="Plazo 15 días">'+badgeDias(diasHastaLimite(row))+'</td>';
+    html += '<td data-label="Estado">'+badgeForEstado(estado)+'</td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
@@ -1177,6 +1256,7 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
 // NUEVO CASO MANUAL
 // ══════════════════════════════════════════════════
 function openNuevoCaso(){
+  toggleSidebar(false);
   document.getElementById('modal-nuevo').classList.add('show');
 }
 
