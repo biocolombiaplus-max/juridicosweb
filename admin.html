@@ -708,9 +708,11 @@ function toggleSidebar(forzar){
 // ══════════════════════════════════════════════════
 function loadData(){
   var sheetName = encodeURIComponent('📊 Control de Casos');
-  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName;
+  // El parámetro _t evita que Google (o el navegador) sirvan en caché una
+  // respuesta vieja de "sin permiso" de cuando el Sheet todavía era privado.
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName+'&_t='+Date.now();
   document.getElementById('last-sync').textContent='Actualizando...';
-  fetch(url)
+  fetch(url, { cache: 'no-store' })
     .then(function(r){ return r.text(); })
     .then(function(text){
       // GViz siempre devuelve google.visualization.Query.setResponse(...).

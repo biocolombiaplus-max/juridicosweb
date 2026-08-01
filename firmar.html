@@ -229,8 +229,8 @@ function init(){
   }
 
   var sheetName = encodeURIComponent('📊 Control de Casos');
-  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName;
-  fetch(url).then(function(r){ return r.text(); }).then(function(text){
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+sheetName+'&_t='+Date.now();
+  fetch(url, { cache: 'no-store' }).then(function(r){ return r.text(); }).then(function(text){
     if(text.indexOf('google.visualization.Query.setResponse') === -1){
       throw new Error('sheet_no_publico');
     }

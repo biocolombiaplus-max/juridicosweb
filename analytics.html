@@ -351,8 +351,8 @@ function indiceColumnaGViz(cols, nombreBuscado){
 }
 
 function cargarLeads(){
-  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+SHEET_NAME;
-  fetch(url)
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+SHEET_NAME+'&_t='+Date.now();
+  fetch(url, { cache: 'no-store' })
     .then(function(r){ return r.text(); })
     .then(function(txt){
       var json = JSON.parse(txt.replace(/^[^\{]+/, '').replace(/\);?\s*$/, ''));
