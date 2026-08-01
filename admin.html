@@ -196,18 +196,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <p>Panel de Administración</p>
       <span class="login-badge">🔒 ACCESO RESTRINGIDO</span>
     </div>
-    <div class="login-tabs">
-      <button type="button" class="login-tab active" id="tab-cedula" onclick="cambiarTabLogin('cedula')">Mi cédula</button>
-      <button type="button" class="login-tab" id="tab-userpass" onclick="cambiarTabLogin('userpass')">Usuario y contraseña</button>
-    </div>
-    <div id="login-form-cedula">
-      <div class="form-group">
-        <label>Cédula</label>
-        <input type="text" inputmode="numeric" id="login-cedula" placeholder="Tu número de cédula" autocomplete="off">
-      </div>
-      <button class="btn-login" onclick="doLoginCedula()">Ingresar al Panel</button>
-    </div>
-    <div id="login-form-userpass" style="display:none">
+    <div id="login-form-userpass">
       <div class="form-group">
         <label>Usuario</label>
         <input type="text" id="login-user" placeholder="usuario" autocomplete="username">
@@ -559,18 +548,9 @@ var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqn
 var SHEET_ID   = '1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl';
 
 var USUARIOS = {
-  'admin':       { pass:'juridicos2026', nombre:'Administrador', rol:'Administrador' },
+  '88262856':    { pass:'juancarlos8302', nombre:'Juan Carlos Cáceres', rol:'Administrador' },
   'secretaria1': { pass:'sec2026',       nombre:'Secretaría 1',  rol:'Secretaria' },
   'secretaria2': { pass:'sec2026b',      nombre:'Secretaría 2',  rol:'Secretaria' },
-};
-
-// Acceso rápido por cédula — pensado para el dueño del despacho. OJO: una
-// cédula no es un secreto (puede aparecer en documentos, contratos, etc.),
-// así que esto es más una llave de acceso rápido que una contraseña fuerte.
-// Si quieres más seguridad, cámbiala por un PIN que solo tú conozcas, o usa
-// la pestaña de usuario y contraseña en su lugar.
-var ADMIN_CEDULAS = {
-  '88262856': { nombre:'Juan Carlos Cáceres', rol:'Administrador' },
 };
 
 // Estado global
@@ -580,27 +560,9 @@ var currentUser = null;
 // ══════════════════════════════════════════════════
 // AUTH
 // ══════════════════════════════════════════════════
-function cambiarTabLogin(tab){
-  document.getElementById('tab-cedula').classList.toggle('active', tab==='cedula');
-  document.getElementById('tab-userpass').classList.toggle('active', tab==='userpass');
-  document.getElementById('login-form-cedula').style.display = tab==='cedula' ? 'block' : 'none';
-  document.getElementById('login-form-userpass').style.display = tab==='userpass' ? 'block' : 'none';
-}
-
 function mostrarErrorLogin(){
   document.getElementById('login-error').style.display='block';
   setTimeout(function(){ document.getElementById('login-error').style.display='none'; }, 3000);
-}
-
-function doLoginCedula(){
-  var c = document.getElementById('login-cedula').value.trim();
-  if(ADMIN_CEDULAS[c]){
-    currentUser = Object.assign({ username:c }, ADMIN_CEDULAS[c]);
-    sessionStorage.setItem('jw_user', JSON.stringify(currentUser));
-    showApp();
-  } else {
-    mostrarErrorLogin();
-  }
 }
 
 function doLogin(){
@@ -640,9 +602,6 @@ function doLogout(){
 // Enter key en login
 document.getElementById('login-pass').addEventListener('keydown',function(e){
   if(e.key==='Enter') doLogin();
-});
-document.getElementById('login-cedula').addEventListener('keydown',function(e){
-  if(e.key==='Enter') doLoginCedula();
 });
 
 // ══════════════════════════════════════════════════
