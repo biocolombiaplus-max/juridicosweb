@@ -559,12 +559,13 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <input type="email" id="nc-email" placeholder="correo@ejemplo.com">
         </div>
         <div class="form-group-m">
-          <label>Ciudad</label>
-          <input type="text" id="nc-ciudad" placeholder="Ciudad">
+          <label>Departamento</label>
+          <select id="nc-dpto" onchange="cargarMunicipiosAdmin()"><option value="">Selecciona</option></select>
         </div>
         <div class="form-group-m">
-          <label>Departamento</label>
-          <input type="text" id="nc-dpto" placeholder="Departamento">
+          <label>Ciudad / Municipio</label>
+          <select id="nc-ciudad" onchange="toggleCiudadOtra()"><option value="">Selecciona primero el departamento</option></select>
+          <input type="text" id="nc-ciudad-otra" placeholder="Escribe el nombre del municipio" style="display:none;margin-top:8px;">
         </div>
         <div class="form-group-m">
           <label>Plan</label>
@@ -1230,9 +1231,12 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
   if(generarMsg && !confirm(generarMsg(row))) return;
   btn.disabled=true; var textoOriginal = btn.textContent; btn.textContent='Procesando...';
   var payload = Object.assign({_accion:accion, email:row['Email'], cedula:row['Cédula'], nombres:row['Nombres']}, extra||{});
+  // SIN Content-Type: application/json — Apps Script no responde al preflight
+  // CORS que exige ese header y el fetch falla con "Failed to fetch" antes
+  // de siquiera llegar al servidor. Apps Script igual lee el body como JSON
+  // vía e.postData.contents sin importar el Content-Type declarado.
   fetch(SCRIPT_URL, {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   })
   .then(function(r){ return r.json(); })
@@ -1255,6 +1259,75 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
 // ══════════════════════════════════════════════════
 // NUEVO CASO MANUAL
 // ══════════════════════════════════════════════════
+// Lista de municipios más comunes por departamento — no es exhaustiva (hay
+// más de 1.100 municipios en Colombia), por eso el select siempre trae al
+// final la opción "Otro municipio" con un campo de texto libre, para que
+// nunca bloquee registrar un caso por no aparecer en la lista.
+var dptoMpioAdmin={
+  "Amazonas":["Leticia","Puerto Nariño"],
+  "Antioquia":["Medellín","Bello","Envigado","Itagüí","Rionegro","Apartadó","Turbo","Caucasia","Marinilla","La Ceja","El Carmen de Viboral","Barbosa","Sabaneta","Copacabana","Girardota","Caldas","La Estrella","Andes","Jericó","Santa Fe de Antioquia"],
+  "Arauca":["Arauca","Arauquita","Saravena","Tame","Fortul"],
+  "Atlántico":["Barranquilla","Soledad","Malambo","Sabanagrande","Baranoa","Galapa","Puerto Colombia","Sabanalarga"],
+  "Bolívar":["Cartagena","Magangué","Mompox","El Carmen de Bolívar","Turbaco","Arjona","San Jacinto"],
+  "Boyacá":["Tunja","Duitama","Sogamoso","Chiquinquirá","Paipa","Villa de Leyva","Garagoa","Puerto Boyacá"],
+  "Caldas":["Manizales","Chinchiná","Riosucio","La Dorada","Salamina","Anserma","Villamaría","Palestina"],
+  "Caquetá":["Florencia","San Vicente del Caguán","Puerto Rico","El Doncello","La Montañita"],
+  "Casanare":["Yopal","Aguazul","Tauramena","Villanueva","Orocué","Trinidad","Paz de Ariporo"],
+  "Cauca":["Popayán","Santander de Quilichao","Puerto Tejada","Patía","Miranda","El Tambo","Piendamó","Corinto","Caloto"],
+  "Cesar":["Valledupar","Aguachica","Codazzi","La Jagua de Ibirico","Bosconia","San Alberto"],
+  "Chocó":["Quibdó","Istmina","Tadó","Riosucio","Acandí"],
+  "Córdoba":["Montería","Montelíbano","Lorica","Sahagún","Cereté","Tierralta"],
+  "Cundinamarca":["Bogotá","Soacha","Chía","Zipaquirá","Fusagasugá","Facatativá","Cajicá","Madrid","Mosquera","Funza","La Calera","Girardot","Silvania","Villeta","Ubaté","Pacho"],
+  "Guainía":["Inírida"],
+  "Guaviare":["San José del Guaviare","El Retorno","Calamar"],
+  "Huila":["Neiva","Pitalito","Garzón","La Plata","Campoalegre","Rivera"],
+  "La Guajira":["Riohacha","Maicao","Uribia","Manaure","San Juan del Cesar"],
+  "Magdalena":["Santa Marta","Ciénaga","Fundación","El Banco","Plato"],
+  "Meta":["Villavicencio","Acacías","Granada","San Martín","Restrepo","Puerto Gaitán","Cumaral"],
+  "Nariño":["Pasto","Ipiales","Tumaco","Túquerres","La Unión","Samaniego"],
+  "Norte de Santander":["Cúcuta","Villa del Rosario","Los Patios","Ocaña","Pamplona","Tibú","Sardinata"],
+  "Putumayo":["Mocoa","Puerto Asís","Orito","La Hormiga","Sibundoy","Puerto Caicedo"],
+  "Quindío":["Armenia","Calarcá","Montenegro","La Tebaida","Quimbaya","Circasia"],
+  "Risaralda":["Pereira","Dosquebradas","Santa Rosa de Cabal","La Virginia","Belén de Umbría"],
+  "San Andrés":["San Andrés","Providencia"],
+  "Santander":["Bucaramanga","Floridablanca","Girón","Piedecuesta","Barrancabermeja","San Gil","Socorro","Vélez"],
+  "Sucre":["Sincelejo","Corozal","Sampués","Morroa","San Onofre","Tolú"],
+  "Tolima":["Ibagué","Espinal","Honda","Líbano","Melgar","Mariquita","Chaparral","Armero"],
+  "Valle del Cauca":["Cali","Buenaventura","Palmira","Tuluá","Buga","Cartago","Yumbo","Jamundí","Candelaria","Florida","Guacarí","Roldanillo","Zarzal","El Cerrito","La Victoria","Riofrío"],
+  "Vaupés":["Mitú"],
+  "Vichada":["Puerto Carreño"],
+};
+
+(function poblarDeptosAdmin(){
+  var sel = document.getElementById('nc-dpto');
+  Object.keys(dptoMpioAdmin).sort().forEach(function(d){
+    var o=document.createElement('option'); o.value=d; o.textContent=d; sel.appendChild(o);
+  });
+})();
+
+function cargarMunicipiosAdmin(){
+  var d = document.getElementById('nc-dpto').value;
+  var sel = document.getElementById('nc-ciudad');
+  sel.innerHTML = '<option value="">Selecciona municipio</option>';
+  (dptoMpioAdmin[d]||[]).forEach(function(m){
+    var o=document.createElement('option'); o.value=m; o.textContent=m; sel.appendChild(o);
+  });
+  var o2=document.createElement('option'); o2.value='__otra__'; o2.textContent='Otro municipio (escribir)'; sel.appendChild(o2);
+  document.getElementById('nc-ciudad-otra').style.display='none';
+  document.getElementById('nc-ciudad-otra').value='';
+}
+
+function toggleCiudadOtra(){
+  var esOtra = document.getElementById('nc-ciudad').value === '__otra__';
+  document.getElementById('nc-ciudad-otra').style.display = esOtra ? 'block' : 'none';
+}
+
+function valorCiudadNuevoCaso(){
+  var sel = document.getElementById('nc-ciudad').value;
+  if(sel === '__otra__') return document.getElementById('nc-ciudad-otra').value.trim();
+  return sel;
+}
+
 function openNuevoCaso(){
   toggleSidebar(false);
   document.getElementById('modal-nuevo').classList.add('show');
@@ -1272,8 +1345,8 @@ function guardarNuevoCaso(){
     placa:      document.getElementById('nc-placa').value.trim().toUpperCase(),
     whatsapp:   document.getElementById('nc-whatsapp').value.trim(),
     email:      document.getElementById('nc-email').value.trim(),
-    ciudad:     document.getElementById('nc-ciudad').value.trim(),
-    dpto:       document.getElementById('nc-dpto').value.trim(),
+    ciudad:     valorCiudadNuevoCaso(),
+    dpto:       document.getElementById('nc-dpto').value,
     plan:       plan,
     multasSeleccionadas: 1,
     montoTotal: monto || '',
@@ -1287,9 +1360,8 @@ function guardarNuevoCaso(){
   }
   btn.disabled=true;
   btn.innerHTML='<span class="loading-spinner"></span>Guardando...';
-  fetch(SCRIPT_URL, {
+  fetch(SCRIPT_URL, { // sin Content-Type: application/json — ver nota en confirmarAccion()
     method:'POST',
-    headers:{'Content-Type':'application/json'},
     body: JSON.stringify(datos)
   })
   .then(function(r){ return r.json(); })
@@ -1299,9 +1371,11 @@ function guardarNuevoCaso(){
       showToast(yaPago ? '✅ Caso registrado como PAGADO' : '✅ Caso registrado exitosamente','success');
       closeModal('modal-nuevo');
       // Limpiar campos
-      ['nc-nombres','nc-apellidos','nc-cedula','nc-placa','nc-whatsapp','nc-email','nc-ciudad','nc-dpto','nc-multas','nc-monto'].forEach(function(id){
+      ['nc-nombres','nc-apellidos','nc-cedula','nc-placa','nc-whatsapp','nc-email','nc-dpto','nc-multas','nc-monto','nc-ciudad-otra'].forEach(function(id){
         document.getElementById(id).value='';
       });
+      document.getElementById('nc-ciudad').innerHTML = '<option value="">Selecciona primero el departamento</option>';
+      document.getElementById('nc-ciudad-otra').style.display='none';
       document.getElementById('nc-ya-pago').checked=false;
       document.getElementById('nc-monto-wrap').style.display='none';
       setTimeout(loadData, 1500);
