@@ -1544,7 +1544,11 @@ function consultarVerifikAdmin(){
 
   try{
     if(!_mmCaso) throw new Error('Abre primero el caso del cliente');
-    var cedula = (_mmCaso['Cédula']||'').trim();
+    // String(...) es necesario: si en la hoja de Google Sheets la cédula
+    // quedó guardada como número (celda numérica, no texto), el JSON que
+    // llega aquí trae un number en vez de un string, y .trim() no existe en
+    // números — eso es justo lo que rompía el botón en silencio.
+    var cedula = String(_mmCaso['Cédula']||'').trim();
     if(!cedula) throw new Error('Este caso no tiene cédula registrada — agrégala primero con "✏️ Editar datos del caso"');
 
     var yaHayDatos = Array.prototype.some.call(document.querySelectorAll('#mm-lista .mm-fecha'), function(el){ return el.value; });
