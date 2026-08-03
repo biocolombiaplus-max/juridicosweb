@@ -1032,7 +1032,7 @@ function abrirCaso(rowJson){
   html += detailItem('Cédula', row['Cédula']||'—');
   html += detailItem('Placa', row['Placa']||'—');
   html += detailItem('WhatsApp', row['WhatsApp'] ? '<a href="https://wa.me/57'+row['WhatsApp']+'" target="_blank" style="color:var(--green);font-weight:700">📱 '+row['WhatsApp']+'</a>' : '—');
-  html += detailItem('Email', '<a href="mailto:'+escHtml(row['Email']||'')+'" style="color:var(--blue)">'+escHtml(row['Email']||'—')+'</a>');
+  html += detailItem('Email', '<a href="'+gmailComponerUrl(row['Email'])+'" target="_blank" style="color:var(--blue)">'+escHtml(row['Email']||'—')+'</a>');
   html += detailItem('Ciudad / Dpto', (row['Ciudad']||'')+(row['Departamento'] ? ', '+row['Departamento'] : ''));
   html += detailItem('Plan contratado', row['Plan']||'—');
   html += detailItem('Monto', row['Monto Total'] ? '$'+Number(row['Monto Total']).toLocaleString('es-CO') : '—');
@@ -1097,7 +1097,7 @@ function buildAcciones(row, estado){
   var wa = row['WhatsApp'] ? 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent('Hola '+row['Nombres']+', somos JurídicosWeb. Te contactamos sobre tu trámite.') : '#';
   var html = '';
   if(row['WhatsApp']) html += '<a href="'+wa+'" target="_blank" class="btn btn-success btn-sm">💬 WhatsApp</a>';
-  if(row['Email']) html += '<a href="mailto:'+escHtml(row['Email'])+'" class="btn btn-outline btn-sm">📧 Correo</a>';
+  if(row['Email']) html += '<a href="'+gmailComponerUrl(row['Email'])+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo</a>';
 
   if(estado==='pendiente'){
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'confirmar_pago\',this,null,\'confirmar_pago\')">💰 Confirmar Pago</button>';
@@ -1226,6 +1226,13 @@ var MENSAJES_CONFIRM = {
 
 // Copia el enlace de firma al portapapeles — respaldo por si el admin
 // prefiere pegarlo en otro chat en vez de abrir WhatsApp directamente.
+// Abre directamente el compositor de Gmail en una pestaña nueva, en vez de
+// "mailto:" (que abre el cliente de correo predeterminado del sistema —
+// en este caso Hotmail/Outlook, no la cuenta de Gmail del despacho).
+function gmailComponerUrl(email){
+  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(email||'');
+}
+
 function copiarEnlace(url, btn){
   navigator.clipboard.writeText(url).then(function(){
     var original = btn.textContent;
