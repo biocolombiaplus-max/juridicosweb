@@ -651,12 +651,28 @@ function firmarYEnviar(){
       cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
       archivoBase64: base64, archivoNombre: nombreArchivo, secretarias: secretarias,
     })
-  }).then(function(){
+  }).then(function(r){ return r.json(); }).then(function(data){
     if(esTutela){
       document.querySelector('#v-exito h2').textContent = '¡Tu Tutela quedó firmada! ⚖️';
       document.querySelector('#v-exito p.lead').textContent = 'Ya se descargó a tu teléfono y también la enviamos a tu correo. Nuestro equipo la radicará ante el juzgado — te avisamos apenas tengamos noticias.';
+      mostrar('v-exito');
+      return;
     }
-    mostrar('v-exito');
+    if(!data.ok){ mostrar('v-exito'); return; }
+    // Derecho de Petición firmado con éxito — se radica de inmediato por
+    // correo, sin esperar a que el admin lo haga a mano. Si por algo falla
+    // (ej. todavía no hay correo cargado para esa ciudad), el cliente ve el
+    // mensaje normal y el admin lo radica después desde el panel.
+    return fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
+    }).then(function(r){ return r.json(); }).then(function(radicado){
+      if(radicado.ok){
+        document.querySelector('#v-exito h2').textContent = '¡Firmado y radicado! 🎉';
+        document.querySelector('#v-exito p.lead').textContent = 'Tu Derecho de Petición ya quedó firmado y radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.';
+      }
+      mostrar('v-exito');
+    });
   }).catch(function(){ mostrar('v-exito'); });
 }
 

@@ -124,6 +124,7 @@ function doPost(e) {
       case 'marcar_tutela_firmada': return marcarTutelaFirmada(datos);
       case 'marcar_tutela_resultado': return marcarTutelaResultado(datos);
       case 'marcar_tutela_pagada': return marcarTutelaPagada(datos);
+      case 'guardar_multas':      return guardarMultasEstructuradas(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -711,6 +712,15 @@ function marcarTutelaResultado(datos) {
 
 function marcarTutelaPagada(datos) {
   return actualizarPorCedula(datos, { 'Tutela Pagada': 'TRUE', 'Cerrado': 'TRUE' });
+}
+
+// Guarda los datos de las multas (fecha, ciudad, notificación, etc.) que el
+// admin carga a mano para un caso que llegó por WhatsApp — con esto ya
+// guardado, el enlace de firma (firmar.html) salta directo al documento sin
+// pedirle nada al cliente, porque encuentra "Multas Reportadas" con datos.
+function guardarMultasEstructuradas(datos) {
+  if (!datos.multasReportadas) return respuestaJson({ ok: false, error: 'Falta la lista de multas' });
+  return actualizarPorCedula(datos, { 'Multas Reportadas': datos.multasReportadas });
 }
 
 // Suma N días HÁBILES (lunes a viernes, sin festivos colombianos) a una

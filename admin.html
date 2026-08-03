@@ -157,6 +157,16 @@ tr:hover td{background:#f8faff;cursor:pointer}
 .form-group-m input:focus,.form-group-m select:focus,.form-group-m textarea:focus{outline:none;border-color:var(--navy)}
 .full-col{grid-column:1/-1}
 
+/* ── COMPLETAR MULTAS (modal-multas) ── */
+.mm-row{border:1.5px solid var(--gray200);border-radius:10px;padding:14px;margin-bottom:12px;position:relative}
+.mm-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.mm-row-head strong{font-size:13px;color:var(--navy)}
+.mm-row .btn-quitar-mm{background:none;border:none;color:var(--red);font-size:12px;font-weight:700;cursor:pointer}
+.mm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mm-fg label{display:block;font-size:11px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.mm-fg input,.mm-fg select{width:100%;padding:9px 12px;border:2px solid var(--gray200);border-radius:7px;font-size:13px;font-family:inherit}
+.mm-fg input:focus,.mm-fg select:focus{outline:none;border-color:var(--navy)}
+
 /* ── EMPTY / LOADING ── */
 .empty-state{text-align:center;padding:60px 20px;color:var(--gray400)}
 .empty-state .icon{font-size:48px;margin-bottom:12px}
@@ -520,6 +530,30 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <button class="modal-close" onclick="closeModal('modal-caso')">✕</button>
     </div>
     <div class="modal-body" id="modal-caso-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL COMPLETAR MULTAS (para firma sin llenar nada) -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-multas">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📝 Completar datos de la multa</h2>
+      <button class="modal-close" onclick="closeModal('modal-multas')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
+        Copia lo que dice el SIMIT para cada multa de <strong id="mm-cliente-nombre">—</strong>. Con esto guardado,
+        cuando le envíes el enlace de firma, va a ver el documento directo — no tiene que llenar nada.
+      </p>
+      <div id="mm-lista"></div>
+      <button type="button" onclick="agregarFilaMultaAdmin()" style="background:none;border:2px dashed var(--gray200);border-radius:8px;padding:10px;width:100%;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px;">+ Agregar otra multa</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" id="btn-guardar-mm" onclick="guardarMultasAdmin()">💾 Guardar y activar enlace de firma</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-multas')">Cancelar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1075,10 +1109,14 @@ function buildAcciones(row, estado){
   var pagoOk = row['Pago OK']==='TRUE'||row['Pago OK']===true;
   var firmado = row['Firmado']==='TRUE'||row['Firmado']===true;
   if(pagoOk && !firmado && row['Cédula']){
+    var tieneMultas = false;
+    try{ tieneMultas = Array.isArray(JSON.parse(row['Multas Reportadas'])) && JSON.parse(row['Multas Reportadas']).length>0; }catch(e){}
+    html += '<button class="btn '+(tieneMultas?'btn-outline':'btn-primary')+' btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultas?'Editar':'Completar')+' datos de multas</button>';
     var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']);
     var msgFirma = encodeURIComponent('Hola '+row['Nombres']+', tu pago quedó confirmado ✅. Para preparar tu Derecho de Petición, entra a este enlace desde tu celular, revisa tu documento y fírmalo con el dedo — toma 2 minutos: '+linkFirma);
-    if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ Enviar enlace de firma</a>';
+    if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ '+(tieneMultas?'Enviar enlace de firma':'Enviar enlace (sin multas cargadas)')+'</a>';
     html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
+    if(!tieneMultas) html += '<p style="width:100%;font-size:11px;color:#92400e;margin:2px 0 0;">⚠️ Sin datos de multas, el cliente tendrá que llenarlos él mismo al abrir el enlace.</p>';
   }
   if(firmado){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'reenviar_firmado\',this,null,\'reenviar_firmado\')">📧 Reenviar documento firmado</button>';
@@ -1193,6 +1231,93 @@ function copiarEnlace(url, btn){
     var original = btn.textContent;
     btn.textContent = '✅ Copiado';
     setTimeout(function(){ btn.textContent = original; }, 2000);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// COMPLETAR MULTAS (para que el cliente solo firme, sin llenar nada)
+// ══════════════════════════════════════════════════
+var _mmCaso = null;
+
+function openModalMultas(btn){
+  var row;
+  try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
+  _mmCaso = row;
+  document.getElementById('mm-cliente-nombre').textContent = ((row['Nombres']||'')+' '+(row['Apellidos']||'')).trim();
+  document.getElementById('mm-lista').innerHTML = '';
+
+  var previas = [];
+  try{ var p = JSON.parse(row['Multas Reportadas']); if(Array.isArray(p)) previas = p; }catch(e){}
+
+  if(previas.length){
+    previas.forEach(function(m){ agregarFilaMultaAdmin(m); });
+  } else {
+    agregarFilaMultaAdmin({ ciudad: row['Ciudad']||'' });
+  }
+  document.getElementById('modal-multas').classList.add('show');
+}
+
+var _mmSeq = 0;
+function agregarFilaMultaAdmin(datos){
+  datos = datos || {};
+  _mmSeq++;
+  var id = _mmSeq;
+  var n = document.querySelectorAll('#mm-lista .mm-row').length + 1;
+  var div = document.createElement('div');
+  div.className = 'mm-row';
+  div.dataset.id = id;
+  div.innerHTML =
+    '<div class="mm-row-head"><strong>Multa #'+n+'</strong>'+(n>1?'<button type="button" class="btn-quitar-mm" onclick="this.closest(\'.mm-row\').remove()">Quitar</button>':'')+'</div>'+
+    '<div class="mm-grid">'+
+    '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+new Date().toISOString().slice(0,10)+'" value="'+(datos.fecha||'')+'"></div>'+
+    '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" value="'+(datos.valor||'')+'"></div>'+
+    '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" value="'+escHtml(datos.ciudad||'')+'"></div>'+
+    '<div class="mm-fg"><label>¿Notificado formalmente?</label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="mm-fg full-col"><label>¿Detectada por cámara?</label><select class="mm-foto"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '</div>';
+  document.getElementById('mm-lista').appendChild(div);
+  if(datos.notif) div.querySelector('.mm-notif').value = datos.notif;
+  if(datos.foto) div.querySelector('.mm-foto').value = datos.foto;
+}
+
+function guardarMultasAdmin(){
+  if(!_mmCaso) return;
+  var filas = document.querySelectorAll('#mm-lista .mm-row');
+  var lista = [];
+  var faltaFecha = false;
+  filas.forEach(function(f){
+    var fecha = f.querySelector('.mm-fecha').value;
+    if(!fecha){ faltaFecha = true; return; }
+    lista.push({
+      fecha: fecha,
+      valor: f.querySelector('.mm-valor').value,
+      ciudad: f.querySelector('.mm-ciudad').value.trim(),
+      notif: f.querySelector('.mm-notif').value,
+      foto: f.querySelector('.mm-foto').value,
+    });
+  });
+  if(!lista.length){ showToast(faltaFecha?'⚠️ Ingresa al menos la fecha de cada multa':'⚠️ Agrega al menos una multa','error'); return; }
+
+  var btn = document.getElementById('btn-guardar-mm');
+  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify({ _accion:'guardar_multas', cedula:_mmCaso['Cédula'], email:_mmCaso['Email'], multasReportadas: JSON.stringify(lista) })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
+    if(data.ok){
+      showToast('✅ Multas guardadas — el enlace de firma ya va directo al documento','success');
+      closeModal('modal-multas');
+      setTimeout(loadData, 1200);
+    } else {
+      showToast('Error: '+(data.error||'desconocido'),'error');
+    }
+  })
+  .catch(function(e){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
+    showToast('Error de conexión: '+e.message,'error');
   });
 }
 
