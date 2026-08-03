@@ -1638,8 +1638,15 @@ function guardarDatosCliente(){
   .then(function(data){
     btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
     if(data.ok){
-      showToast('✅ Datos guardados','success');
+      showToast(data.reactivado
+        ? '✅ Datos corregidos — como el caso ya estaba firmado, se reinició el estado: envía de nuevo el enlace de firma para el documento corregido'
+        : '✅ Datos guardados','success');
       closeModal('modal-datos-cliente');
+      // También se cierra el detalle del caso: quedaba con los datos
+      // viejos en pantalla (el modal no se refresca solo), y reabrirlo
+      // después de que loadData() recargue ya muestra el estado real —
+      // con el botón de firma reactivado si aplicó.
+      closeModal('modal-caso');
       setTimeout(loadData, 1200);
     } else {
       showToast('Error: '+(data.error||'desconocido'),'error');

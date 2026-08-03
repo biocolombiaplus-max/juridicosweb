@@ -898,6 +898,21 @@ function completarDatosCliente(datos) {
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email);
   if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
 
+  // Estos campos quedan impresos dentro del propio Derecho de Petición
+  // (encabezado, hechos, notificaciones) — si alguno cambia DESPUÉS de que
+  // el cliente ya firmó, el PDF que ya existe quedó con el dato viejo o
+  // erróneo (ej. una cédula mal digitada) y no sirve para radicar.
+  var camposDocumento = { nombres: 'Nombres', apellidos: 'Apellidos', cedula: 'Cédula', placa: 'Placa', whatsapp: 'WhatsApp', ciudad: 'Ciudad' };
+  var huboCambioRelevante = false;
+  Object.keys(camposDocumento).forEach(function (campo) {
+    if (datos[campo] && String(datos[campo]) !== String(obtenerValorFila(hoja, fila, camposDocumento[campo]) || '')) {
+      huboCambioRelevante = true;
+    }
+  });
+  if (datos.emailNuevo && String(datos.emailNuevo) !== String(obtenerValorFila(hoja, fila, 'Email') || '')) {
+    huboCambioRelevante = true;
+  }
+
   var valores = {};
   if (datos.nombres) valores['Nombres'] = datos.nombres;
   if (datos.apellidos) valores['Apellidos'] = datos.apellidos;
@@ -912,9 +927,28 @@ function completarDatosCliente(datos) {
   if (datos.ciudad) valores['Ciudad'] = datos.ciudad;
   if (datos.dpto) valores['Departamento'] = datos.dpto;
 
+  var yaFirmado = obtenerValorFila(hoja, fila, 'Firmado') === 'TRUE' || obtenerValorFila(hoja, fila, 'Firmado') === true;
+  var yaRadicado = obtenerValorFila(hoja, fila, 'Doc Enviado') === 'TRUE' || obtenerValorFila(hoja, fila, 'Doc Enviado') === true;
+  var reactivado = false;
+  if (huboCambioRelevante && yaFirmado) {
+    // Reinicia el estado de firma: esto hace que el botón "Enviar enlace de
+    // firma" vuelva a aparecer en el panel (en vez de "Reenviar documento
+    // firmado"), listo para generar y firmar un documento NUEVO con los
+    // datos ya corregidos — no reenvía el PDF viejo, que sigue siendo el
+    // que tenía el error.
+    valores['Firmado'] = 'FALSE';
+    valores['Enlace PDF Firmado'] = '';
+    if (yaRadicado) valores['Doc Enviado'] = 'FALSE';
+    var notaActual = obtenerValorFila(hoja, fila, 'Notas') || '';
+    var notaNueva = '⚠️ Se corrigieron datos después de firmar' + (yaRadicado ? ' y radicar' : '') +
+      ' — se reinició el estado para generar y firmar un documento nuevo con los datos correctos (' + new Date().toLocaleString('es-CO') + ').';
+    valores['Notas'] = notaActual + (notaActual ? ' | ' : '') + notaNueva;
+    reactivado = true;
+  }
+
   escribirFila(hoja, fila, valores);
   aplicarFormatoCondicional(hoja);
-  return respuestaJson({ ok: true });
+  return respuestaJson({ ok: true, reactivado: reactivado });
 }
 
 // Suma N días HÁBILES (lunes a viernes, sin festivos colombianos) a una
