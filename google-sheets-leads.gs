@@ -125,6 +125,7 @@ function doPost(e) {
       case 'marcar_tutela_resultado': return marcarTutelaResultado(datos);
       case 'marcar_tutela_pagada': return marcarTutelaPagada(datos);
       case 'guardar_multas':      return guardarMultasEstructuradas(datos);
+      case 'completar_datos_cliente': return completarDatosCliente(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -515,6 +516,10 @@ function radicarPorCorreo(datos) {
   });
 
   if (!radicados.length) {
+    var notaFalloTotal = obtenerValorFila(hoja, fila, 'Notas') || '';
+    escribirFila(hoja, fila, {
+      'Notas': notaFalloTotal + (notaFalloTotal ? ' | ' : '') + '⚠️ Radicación automática falló — sin correo cargado para: ' + sinCorreo.join(', ') + ' (' + new Date().toLocaleString('es-CO') + ')',
+    });
     return respuestaJson({ ok: false, error: 'No encontramos el correo oficial de radicación para: ' + sinCorreo.join(', ') + '. Agrégalo en tu hoja de correos y vuelve a intentar.' });
   }
 
@@ -537,10 +542,11 @@ function radicarPorCorreo(datos) {
 
   marcarEnviado({ cedula: cedula, email: emailCliente }); // arranca el plazo de 15 días hábiles
   var notaActual = obtenerValorFila(hoja, fila, 'Notas') || '';
-  var notaNueva = radicados.map(function (r) { return r.ciudad + ' → ' + r.correo; }).join('; ');
-  escribirFila(hoja, fila, {
-    'Notas': notaActual + (notaActual ? ' | ' : '') + 'Radicado por correo (' + notaNueva + ') el ' + new Date().toLocaleString('es-CO'),
-  });
+  var notaNueva = 'Radicado por correo (' + radicados.map(function (r) { return r.ciudad + ' → ' + r.correo; }).join('; ') + ') el ' + new Date().toLocaleString('es-CO');
+  if (sinCorreo.length) {
+    notaNueva += ' | ⚠️ Pendiente por radicar (sin correo cargado): ' + sinCorreo.join(', ');
+  }
+  escribirFila(hoja, fila, { 'Notas': notaActual + (notaActual ? ' | ' : '') + notaNueva });
 
   return respuestaJson({ ok: true, radicados: radicados, sinCorreo: sinCorreo });
 }
@@ -549,6 +555,20 @@ function radicarPorCorreo(datos) {
 // correo oficial de radicación para una ciudad — por nombre de columna, así
 // que no importa el orden ni el nombre exacto de tus columnas, siempre que
 // una contenga "ciudad"/"municipio"/"organismo" y otra "correo"/"email".
+// Quita acentos/mayúsculas (normalizarTexto) y además sufijos y símbolos que
+// suelen variar entre cómo se escribe una ciudad en el reporte de la multa y
+// cómo quedó escrita en tu hoja de correos ("Bogotá" vs "Bogotá D.C." vs
+// "BOGOTA D.C. (CUNDINAMARCA)") — así una diferencia de redacción no hace
+// que la radicación automática falle silenciosamente.
+function normalizarCiudadRadicacion(s) {
+  var t = normalizarTexto(s);
+  t = t.replace(/\(.*?\)/g, ' ');
+  t = t.replace(/\bd\.?\s*c\.?\b/g, ' ');
+  t = t.replace(/[^a-z0-9\s]/g, ' ');
+  t = t.replace(/\s+/g, ' ').trim();
+  return t;
+}
+
 function buscarCorreoRadicacion(ciudad) {
   if (!ciudad) return null;
   try {
@@ -563,17 +583,24 @@ function buscarCorreoRadicacion(ciudad) {
       if (colCorreo === -1 && /correo|email|mail/.test(h)) colCorreo = i;
     });
     if (colCiudad === -1 || colCorreo === -1) return null;
-    var ciudadNorm = normalizarTexto(ciudad);
+
+    var buscado = normalizarCiudadRadicacion(ciudad);
+    if (!buscado) return null;
+    var mejorParcial = null;
     for (var i = 1; i < valores.length; i++) {
-      if (normalizarTexto(String(valores[i][colCiudad])) === ciudadNorm) {
-        var correo = String(valores[i][colCorreo] || '').trim();
-        return correo || null;
+      var actual = normalizarCiudadRadicacion(String(valores[i][colCiudad]));
+      if (!actual) continue;
+      var correoFila = String(valores[i][colCorreo] || '').trim();
+      if (!correoFila) continue;
+      if (actual === buscado) return correoFila; // coincidencia exacta: se usa de una vez
+      if (!mejorParcial && (actual.indexOf(buscado) !== -1 || buscado.indexOf(actual) !== -1)) {
+        mejorParcial = correoFila; // coincidencia parcial: se guarda por si no aparece una exacta
       }
     }
+    return mejorParcial;
   } catch (err) {
     return null;
   }
-  return null;
 }
 
 function normalizarTexto(s) {
@@ -802,6 +829,30 @@ function guardarMultasEstructuradas(datos) {
   // se marca "Autorizar" de una vez para no obligar a un clic aparte que ya
   // no aporta nada en este flujo.
   return actualizarPorCedula(datos, { 'Multas Reportadas': datos.multasReportadas, 'Autorizar': 'TRUE' });
+}
+
+// Completa nombres/cédula/placa/whatsapp/ciudad de un caso que llegó
+// incompleto (típicamente un lead de WhatsApp que solo dio la placa, sin
+// cédula) — busca por cédula si ya la tiene, o por correo si todavía no.
+// Se usa desde el panel justo antes de confirmar un pago, para que el
+// Derecho de Petición nunca salga con datos vacíos o a medias.
+function completarDatosCliente(datos) {
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
+
+  var valores = {};
+  if (datos.nombres) valores['Nombres'] = datos.nombres;
+  if (datos.apellidos) valores['Apellidos'] = datos.apellidos;
+  if (datos.cedula) valores['Cédula'] = datos.cedula;
+  if (datos.placa) valores['Placa'] = datos.placa;
+  if (datos.whatsapp) valores['WhatsApp'] = datos.whatsapp;
+  if (datos.ciudad) valores['Ciudad'] = datos.ciudad;
+  if (datos.dpto) valores['Departamento'] = datos.dpto;
+
+  escribirFila(hoja, fila, valores);
+  aplicarFormatoCondicional(hoja);
+  return respuestaJson({ ok: true });
 }
 
 // Suma N días HÁBILES (lunes a viernes, sin festivos colombianos) a una

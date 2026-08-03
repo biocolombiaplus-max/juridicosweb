@@ -534,6 +534,36 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
+<!-- MODAL COMPLETAR DATOS DEL CLIENTE (antes de confirmar pago) -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-datos-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>👤 Completar datos del cliente</h2>
+      <button class="modal-close" onclick="closeModal('modal-datos-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
+        Antes de confirmar el pago, el caso necesita nombre y cédula completos — sin esto, el Derecho de Petición
+        saldría con datos vacíos o a medias. Esto pasa sobre todo con casos de WhatsApp donde solo dieron la placa.
+      </p>
+      <div class="form-grid">
+        <div class="form-group-m"><label>Nombres *</label><input type="text" id="dc-nombres"></div>
+        <div class="form-group-m"><label>Apellidos</label><input type="text" id="dc-apellidos"></div>
+        <div class="form-group-m"><label>Cédula *</label><input type="text" inputmode="numeric" id="dc-cedula"></div>
+        <div class="form-group-m"><label>Placa</label><input type="text" id="dc-placa"></div>
+        <div class="form-group-m"><label>WhatsApp</label><input type="text" id="dc-whatsapp"></div>
+        <div class="form-group-m"><label>Ciudad</label><input type="text" id="dc-ciudad"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-primary" id="btn-guardar-dc" onclick="guardarDatosCliente()">💾 Guardar datos</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-datos-cliente')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
 <!-- MODAL COMPLETAR MULTAS (para firma sin llenar nada) -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-multas">
@@ -1140,7 +1170,12 @@ function buildAcciones(row, estado){
         html += '<a href="'+escHtml(u)+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF firmado'+(enlacesPdf.length>1?' #'+(i+1):'')+'</a>';
       });
     }
-    if(!(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true)){
+    // Sigue mostrando el botón aunque "Doc Enviado" ya esté en TRUE si quedó
+    // alguna secretaría pendiente (caso con multas en varias ciudades donde
+    // solo alguna se radicó automáticamente) — reintentar es seguro, solo
+    // procesa las que sigan pendientes.
+    var faltaAlgunaPorRadicar = !(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true) || /Pendiente por radicar/.test(row['Notas']||'');
+    if(faltaAlgunaPorRadicar){
       html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'radicar_por_correo\',this,null,\'radicar_por_correo\')">📨 Radicar ante la secretaría</button>';
     }
   }
@@ -1377,6 +1412,57 @@ function guardarMultasAdmin(){
   });
 }
 
+var _dcCasoOriginal = null;
+function openModalDatosCliente(row){
+  _dcCasoOriginal = row;
+  document.getElementById('dc-nombres').value = row['Nombres']||'';
+  document.getElementById('dc-apellidos').value = row['Apellidos']||'';
+  document.getElementById('dc-cedula').value = row['Cédula']||'';
+  document.getElementById('dc-placa').value = row['Placa']||'';
+  document.getElementById('dc-whatsapp').value = row['WhatsApp']||'';
+  document.getElementById('dc-ciudad').value = row['Ciudad']||'';
+  document.getElementById('modal-datos-cliente').classList.add('show');
+}
+
+function guardarDatosCliente(){
+  if(!_dcCasoOriginal) return;
+  var nombres = document.getElementById('dc-nombres').value.trim();
+  var cedula = document.getElementById('dc-cedula').value.trim();
+  if(!nombres || !cedula){ showToast('⚠️ Nombres y cédula son obligatorios','error'); return; }
+
+  var btn = document.getElementById('btn-guardar-dc');
+  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify({
+      _accion:'completar_datos_cliente',
+      cedulaActual: _dcCasoOriginal['Cédula']||'',
+      email: _dcCasoOriginal['Email']||'',
+      nombres: nombres,
+      apellidos: document.getElementById('dc-apellidos').value.trim(),
+      cedula: cedula,
+      placa: document.getElementById('dc-placa').value.trim(),
+      whatsapp: document.getElementById('dc-whatsapp').value.trim(),
+      ciudad: document.getElementById('dc-ciudad').value.trim(),
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+    if(data.ok){
+      showToast('✅ Datos completados — ya puedes confirmar el pago','success');
+      closeModal('modal-datos-cliente');
+      setTimeout(loadData, 1200);
+    } else {
+      showToast('Error: '+(data.error||'desconocido'),'error');
+    }
+  })
+  .catch(function(e){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+    showToast('Error de conexión: '+e.message,'error');
+  });
+}
+
 // Mensajes de WhatsApp pre-armados para los momentos más delicados del
 // seguimiento — el admin solo revisa y envía.
 function waTemplate(row, tipo){
@@ -1401,6 +1487,14 @@ function waTemplate(row, tipo){
 function confirmarAccion(accion, btn, extra, tipoMsg){
   var row;
   try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
+  // No dejar confirmar un pago con datos a medias — pasa sobre todo con
+  // casos de WhatsApp donde solo dieron la placa, sin cédula. Sin esto, el
+  // Derecho de Petición saldría con nombre o cédula vacíos.
+  if(accion==='confirmar_pago' && (!row['Nombres'] || !row['Cédula'])){
+    showToast('⚠️ Falta nombre o cédula — complétalos antes de confirmar el pago','error');
+    openModalDatosCliente(row);
+    return;
+  }
   var generarMsg = MENSAJES_CONFIRM[tipoMsg];
   if(generarMsg && !confirm(generarMsg(row))) return;
   btn.disabled=true; var textoOriginal = btn.textContent; btn.textContent='Procesando...';
