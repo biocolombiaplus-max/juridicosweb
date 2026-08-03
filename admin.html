@@ -587,6 +587,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div class="form-group-m"><label>Correo</label><input type="email" id="dc-email"></div>
         <div class="form-group-m"><label>Ciudad</label><input type="text" id="dc-ciudad"></div>
       </div>
+      <label id="dc-forzar-wrap" style="display:none;align-items:flex-start;gap:8px;font-size:13px;color:var(--gray700,#334155);background:#fffbeb;border:1px solid rgba(217,119,6,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
+        <input type="checkbox" id="dc-forzar-reinicio" checked style="margin-top:2px;">
+        <span>🔄 Generar un documento nuevo y pedir que firme otra vez (recomendado — el documento firmado actualmente no se corrige solo, sigue teniendo el dato de antes hasta que el cliente firme uno nuevo).</span>
+      </label>
       <div style="display:flex;gap:10px;margin-top:6px;">
         <button class="btn btn-primary" id="btn-guardar-dc" onclick="guardarDatosCliente()">💾 Guardar datos</button>
         <button class="btn btn-outline" onclick="closeModal('modal-datos-cliente')">Cancelar</button>
@@ -1608,6 +1612,14 @@ function openModalDatosCliente(row, modo){
     document.getElementById('dc-titulo').textContent = '✏️ Editar datos del cliente';
     document.getElementById('dc-explicacion').textContent = 'Corrige aquí cualquier dato mal digitado (cédula, WhatsApp, correo, etc.) antes de reenviar el enlace de firma o el documento — evita tener que pedirle al cliente que vuelva a empezar.';
   }
+  // El checkbox de "generar documento nuevo" solo tiene sentido si YA hay
+  // un documento firmado en circulación — si el caso todavía no ha
+  // firmado, cualquier corrección ya queda incluida en la primera firma,
+  // sin nada que reiniciar.
+  var yaFirmado = row['Firmado']==='TRUE' || row['Firmado']===true;
+  var wrapForzar = document.getElementById('dc-forzar-wrap');
+  wrapForzar.style.display = yaFirmado ? 'flex' : 'none';
+  document.getElementById('dc-forzar-reinicio').checked = true;
   document.getElementById('modal-datos-cliente').classList.add('show');
 }
 
@@ -1632,6 +1644,12 @@ function guardarDatosCliente(){
       whatsapp: document.getElementById('dc-whatsapp').value.trim(),
       emailNuevo: document.getElementById('dc-email').value.trim(),
       ciudad: document.getElementById('dc-ciudad').value.trim(),
+      // Control directo del admin: si el checkbox está visible y marcado,
+      // fuerza el reinicio de la firma aunque el backend no detecte ningún
+      // cambio en los campos (ej. la cédula ya se había corregido antes,
+      // pero el documento firmado sigue siendo el viejo y hay que
+      // regenerarlo de todas formas).
+      forzarReinicio: document.getElementById('dc-forzar-wrap').style.display!=='none' && document.getElementById('dc-forzar-reinicio').checked,
     })
   })
   .then(function(r){ return r.json(); })

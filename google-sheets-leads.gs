@@ -912,6 +912,11 @@ function completarDatosCliente(datos) {
   if (datos.emailNuevo && String(datos.emailNuevo) !== String(obtenerValorFila(hoja, fila, 'Email') || '')) {
     huboCambioRelevante = true;
   }
+  // Override manual del admin: el checkbox del panel para forzar la
+  // regeneración aunque el dato ya se hubiera corregido en un guardado
+  // anterior (antes de que existiera este reinicio automático) y por eso
+  // ya no se detecte como "cambio" en esta pasada.
+  if (datos.forzarReinicio) huboCambioRelevante = true;
 
   var valores = {};
   if (datos.nombres) valores['Nombres'] = datos.nombres;
