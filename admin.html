@@ -1097,7 +1097,17 @@ function buildAcciones(row, estado){
   var wa = row['WhatsApp'] ? 'https://wa.me/57'+row['WhatsApp']+'?text='+encodeURIComponent('Hola '+row['Nombres']+', somos JurídicosWeb. Te contactamos sobre tu trámite.') : '#';
   var html = '';
   if(row['WhatsApp']) html += '<a href="'+wa+'" target="_blank" class="btn btn-success btn-sm">💬 WhatsApp</a>';
-  if(row['Email']) html += '<a href="'+gmailComponerUrl(row['Email'])+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo</a>';
+  if(row['Email']){
+    // A los que llenaron datos pero no pagaron, el correo sale ya redactado
+    // con la plantilla de remarketing (gatillos de venta + link a WhatsApp).
+    // A los demás (ya pagaron, en trámite, etc.) el correo abre en blanco.
+    if(estado==='pendiente'){
+      var correoRmk = construirCorreoRemarketing(row);
+      html += '<a href="'+gmailComponerUrl(row['Email'], correoRmk.asunto, correoRmk.cuerpo)+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo de reenganche</a>';
+    } else {
+      html += '<a href="'+gmailComponerUrl(row['Email'])+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo</a>';
+    }
+  }
 
   if(estado==='pendiente'){
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'confirmar_pago\',this,null,\'confirmar_pago\')">💰 Confirmar Pago</button>';
@@ -1229,8 +1239,41 @@ var MENSAJES_CONFIRM = {
 // Abre directamente el compositor de Gmail en una pestaña nueva, en vez de
 // "mailto:" (que abre el cliente de correo predeterminado del sistema —
 // en este caso Hotmail/Outlook, no la cuenta de Gmail del despacho).
-function gmailComponerUrl(email){
-  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(email||'');
+// asunto/cuerpo son opcionales — si se pasan, Gmail abre el mensaje ya
+// redactado, listo para revisar y enviar con un clic.
+function gmailComponerUrl(email, asunto, cuerpo){
+  var url = 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(email||'');
+  if(asunto) url += '&su='+encodeURIComponent(asunto);
+  if(cuerpo) url += '&body='+encodeURIComponent(cuerpo);
+  return url;
+}
+
+var WHATSAPP_DESPACHO = '573159318400';
+
+// Correo de remarketing para leads que llenaron el formulario pero no
+// pagaron — usa gatillos de psicología de ventas (pérdida, ancla de precio,
+// urgencia, prueba social, honestidad) y termina en un enlace directo a
+// WhatsApp para reenganchar la conversación de inmediato.
+function construirCorreoRemarketing(row){
+  var nombre = row['Nombres'] || 'Hola';
+  var placaTxt = row['Placa'] ? ' de tu vehículo placa '+row['Placa'] : '';
+  var msgWa = encodeURIComponent('Hola, soy '+(row['Nombres']||'')+'. Quiero activar mi trámite para eliminar mi multa — vi el correo de JurídicosWeb.');
+  var linkWa = 'https://wa.me/'+WHATSAPP_DESPACHO+'?text='+msgWa;
+
+  var asunto = '🚨 '+nombre+', tu multa sigue activa — actívala hoy por $45.000';
+  var cuerpo =
+    'Hola '+nombre+',\n\n'+
+    'Vimos que empezaste tu trámite para eliminar tu multa'+placaTxt+' en JurídicosWeb, pero no alcanzaste a completarlo.\n\n'+
+    'Mientras tanto, tu multa sigue activa en el SIMIT — y si ya está en cobro coactivo, sigue generando intereses cada día que pasa.\n\n'+
+    'La buena noticia: según lo que ya revisamos, tu caso SÍ aplica para eliminación. Hoy la puedes activar por solo $45.000, pago único, sin letra pequeña ni sorpresas después.\n\n'+
+    'Ya son cientos los conductores en Colombia que eliminaron sus multas con este mismo proceso — 100% verificado en el SIMIT oficial, con resultado real, no una promesa.\n\n'+
+    'Entre más esperes, más riesgo de que cambien las condiciones de tu caso. Escríbenos ahora mismo y en minutos activamos tu trámite:\n\n'+
+    linkWa+'\n\n'+
+    'Cualquier duda, respóndenos este correo.\n\n'+
+    'JurídicosWeb.com\n'+
+    'Bufete Experto en Derecho de Tránsito';
+
+  return { asunto: asunto, cuerpo: cuerpo };
 }
 
 function copiarEnlace(url, btn){
