@@ -97,6 +97,29 @@ function doGet(e) {
         });
       return respuestaJson({ ok: true, casos: casos });
     }
+    // Un solo lugar para ver TODOS los PDF firmados y dónde quedaron
+    // guardados (carpeta de Drive), sin tener que abrir caso por caso.
+    if (accion === 'listar_firmados') {
+      var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
+      var valoresF = hojaFirmados.getDataRange().getValues();
+      if (valoresF.length < 2) return respuestaJson({ ok: true, documentos: [] });
+      var encabezadosF = valoresF[0];
+      var documentos = valoresF.slice(1)
+        .filter(function (fila) { return fila.some(function (v) { return v !== ''; }); })
+        .map(function (fila) {
+          var obj = {};
+          encabezadosF.forEach(function (h, i) {
+            var v = fila[i];
+            if (v instanceof Date) obj[h] = Utilities.formatDate(v, 'GMT-5', 'yyyy-MM-dd HH:mm:ss');
+            else if (v === true) obj[h] = 'TRUE';
+            else if (v === false) obj[h] = 'FALSE';
+            else obj[h] = v;
+          });
+          return obj;
+        })
+        .reverse(); // los más recientes primero
+      return respuestaJson({ ok: true, documentos: documentos, carpeta: CARPETA_DRIVE_FIRMAS });
+    }
     return respuestaJson({ ok: false, error: 'Acción GET no reconocida: ' + accion });
   } catch (err) {
     return respuestaJson({ ok: false, error: String(err) });

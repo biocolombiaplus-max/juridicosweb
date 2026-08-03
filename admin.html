@@ -332,6 +332,13 @@ tr:hover td{background:#f8faff;cursor:pointer}
     </div>
   </div>
   <div class="nav-section">
+    <div class="nav-section-title">Documentos</div>
+    <div class="nav-item" data-sec="documentos" onclick="showSection('documentos')">
+      <span class="icon">📁</span> PDF Firmados
+      <span class="nav-badge" id="badge-documentos" style="background:#0891b2">0</span>
+    </div>
+  </div>
+  <div class="nav-section">
     <div class="nav-section-title">Acciones</div>
     <div class="nav-item" onclick="openNuevoCaso()">
       <span class="icon">➕</span> Nuevo Caso Manual
@@ -498,6 +505,28 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <div class="table-wrap">
         <div class="table-header"><h3>🏁 Casos Cerrados / Resueltos</h3><span class="table-count" id="cerrados-count"></span></div>
         <div id="table-cerrados-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS FIRMADOS: dónde queda cada PDF que firma un cliente -->
+    <div class="section" id="section-documentos">
+      <div class="table-wrap" style="margin-bottom:16px;background:#f0f9ff;border:1px solid rgba(8,145,178,.25);">
+        <div style="padding:14px 20px;font-size:13px;color:#0c4a6e;">
+          📁 Cada PDF firmado queda guardado automáticamente en tu Google Drive, en la carpeta <strong id="carpeta-drive-nombre">JuridicosWeb - Documentos Firmados</strong> (se crea sola ahí la primera vez que alguien firma). Esta lista es el registro de soporte: un enlace directo por cada documento, para no tener que buscarlo caso por caso.
+        </div>
+      </div>
+      <div class="filters-bar">
+        <input type="text" id="buscar-documentos" placeholder="🔍 Buscar por nombre, cédula o ciudad..." oninput="filtrarDocumentos()">
+        <button class="btn-refresh" onclick="loadDocumentosFirmados()">🔄 Actualizar</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>📄 PDF Firmados</h3>
+          <span class="table-count" id="documentos-count">Cargando...</span>
+        </div>
+        <div id="table-documentos-wrap">
+          <div class="empty-state"><div class="icon">⏳</div><p>Cargando datos...</p></div>
+        </div>
       </div>
     </div>
 
@@ -766,7 +795,8 @@ var sectionTitles = {
   dashboard:'Dashboard / Pipeline', casos:'Todos los Casos',
   clientes:'Clientes (Pagados)', remarketing:'Remarketing (No pagaron)',
   autorizados:'Pagados — Por Radicar', seguimiento:'Esperando Respuesta (15 días)',
-  tutelas:'Casos con Tutela', tutelasporradicar:'Tutelas Firmadas — Por Radicar', cerrados:'Casos Cerrados'
+  tutelas:'Casos con Tutela', tutelasporradicar:'Tutelas Firmadas — Por Radicar', cerrados:'Casos Cerrados',
+  documentos:'PDF Firmados',
 };
 
 function showSection(sec){
@@ -834,6 +864,63 @@ function getDemoRows(){
     {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Cerrado:'FALSE',Notas:'Demo — remarketing'},
     {Fecha:'2025-06-03 09:00:00',Nombres:'Andrés',Apellidos:'Ruiz',Cédula:'5551234',Placa:'JKL456',WhatsApp:'3201234567',Email:'andres@demo.com',Ciudad:'Cali',Plan:'Pago al Eliminar — Adelanto $19.800 + $95.900 c/u','Multas Seleccionadas':1,'Monto Total':19800,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace20),'Fecha Límite 15d':fmt(limiteVencido),'Respuesta Secretaría':'Negativa','Tutela Requerida':'TRUE','Tutela Enviada':'FALSE',Cerrado:'FALSE',Notas:'Demo — tutela'},
   ];
+}
+
+// ══════════════════════════════════════════════════
+// DOCUMENTOS FIRMADOS — dónde queda cada PDF, para soporte
+// ══════════════════════════════════════════════════
+var _documentosFirmados = null;
+function loadDocumentosFirmados(){
+  var url = SCRIPT_URL + '?accion=listar_firmados&_t=' + Date.now();
+  document.getElementById('table-documentos-wrap').innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div>';
+  fetch(url, { cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(!data.ok) throw new Error(data.error || 'Respuesta inesperada del servidor');
+      _documentosFirmados = data.documentos || [];
+      if(data.carpeta) document.getElementById('carpeta-drive-nombre').textContent = data.carpeta;
+      document.getElementById('badge-documentos').textContent = _documentosFirmados.length;
+      renderTablaDocumentos(_documentosFirmados);
+    })
+    .catch(function(err){
+      showToast('⚠️ Error cargando documentos firmados: '+err.message,'error');
+      document.getElementById('table-documentos-wrap').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>No se pudo cargar la lista. Intenta actualizar.</p></div>';
+    });
+}
+
+function filtrarDocumentos(){
+  if(!_documentosFirmados) return;
+  var q = document.getElementById('buscar-documentos').value.trim().toLowerCase();
+  var filtered = !q ? _documentosFirmados : _documentosFirmados.filter(function(d){
+    var texto = [d['Nombres'],d['Apellidos'],d['Cédula'],d['Secretarías']].join(' ').toLowerCase();
+    return texto.indexOf(q) !== -1;
+  });
+  renderTablaDocumentos(filtered);
+}
+
+function renderTablaDocumentos(lista){
+  document.getElementById('documentos-count').textContent = lista.length+' documento'+(lista.length===1?'':'s');
+  if(!lista.length){
+    document.getElementById('table-documentos-wrap').innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Todavía no hay ningún PDF firmado.</p></div>';
+    return;
+  }
+  var html = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Cédula</th><th>Secretaría</th><th>Radicación</th><th>PDF</th></tr></thead><tbody>';
+  lista.forEach(function(d){
+    var radicado = /radicado/i.test(d['Canal de radicación']||'');
+    var badgeRad = radicado
+      ? '<span class="badge badge-paid">✅ '+escHtml(d['Canal de radicación'])+'</span>'
+      : '<span class="badge" style="background:#fef3c7;color:#92400e">⏳ '+escHtml(d['Canal de radicación']||'Por radicar')+'</span>';
+    html += '<tr>'+
+      '<td>'+escHtml((d['Fecha']||'').toString())+'</td>'+
+      '<td>'+escHtml((d['Nombres']||'')+' '+(d['Apellidos']||''))+'</td>'+
+      '<td>'+escHtml(d['Cédula']||'')+'</td>'+
+      '<td>'+escHtml(d['Secretarías']||'—')+'</td>'+
+      '<td>'+badgeRad+'</td>'+
+      '<td>'+(d['Enlace del archivo en Drive'] ? '<a href="'+escHtml(d['Enlace del archivo en Drive'])+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF</a>' : '—')+'</td>'+
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('table-documentos-wrap').innerHTML = html;
 }
 
 // ══════════════════════════════════════════════════
@@ -938,6 +1025,13 @@ function renderDashboardTable(){
 
 function renderSection(sec){
   var filtered;
+  // Los documentos firmados viven en otra hoja ("Documentos Firmados"), no
+  // en allRows — se cargan aparte, la primera vez que se abre la sección.
+  if(sec==='documentos'){
+    if(_documentosFirmados) renderTablaDocumentos(_documentosFirmados);
+    else loadDocumentosFirmados();
+    return;
+  }
   if(sec==='casos'){
     filtered = getFilteredRows();
     document.getElementById('casos-count').textContent = filtered.length+' casos';
@@ -1108,7 +1202,8 @@ function abrirCaso(rowJson){
 
   if(row['Multas Reportadas']){
     html += '<div class="section-title" style="margin-top:20px">📝 Detalle Multas</div>';
-    html += '<div style="background:var(--gray50);border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;margin-bottom:16px">'+escHtml(row['Multas Reportadas'])+'</div>';
+    var detalleHtml = renderDetalleMultas(row['Multas Reportadas']);
+    html += detalleHtml || '<div style="background:var(--gray50);border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;margin-bottom:16px">'+escHtml(row['Multas Reportadas'])+'</div>';
   }
 
   html += '<div class="modal-actions">'+acciones+'</div>';
@@ -1119,6 +1214,43 @@ function abrirCaso(rowJson){
 
 function detailItem(label, val){
   return '<div class="detail-item"><label>'+escHtml(label)+'</label><p>'+val+'</p></div>';
+}
+
+// Identifica de un vistazo cuál causal legal aplica a cada multa —
+// prescripción, notificación tardía (caducidad) o error de fotomultas INM —
+// en vez de tener que leer el JSON crudo para saberlo.
+var TIPO_CAUSAL_INFO = {
+  prescripcion:          {texto:'⏳ Prescripción (3 años)', bg:'#f0fdf4', color:'#166534'},
+  notificacion_tardia:   {texto:'✉️ Notificación tardía (caducidad)', bg:'#eff6ff', color:'#1d4ed8'},
+  error_fotomulta_inm:   {texto:'📷 Fotomulta sin certificación INM', bg:'#fdf4ff', color:'#86198f'},
+  revisar_notificacion:  {texto:'🔍 Por confirmar notificación RUNT', bg:'#fffbeb', color:'#92400e'},
+  no_aplica:             {texto:'⏱️ Aún no aplica', bg:'#f8fafc', color:'#64748b'},
+};
+function tipoCausalBadge(m){
+  var info = TIPO_CAUSAL_INFO[m.tipoCausal];
+  if(!info){
+    // Multas guardadas antes de que existiera "tipoCausal" — se usa el
+    // estado general como respaldo para no dejar la insignia en blanco.
+    info = m.estado==='aplica' ? {texto:'✅ Aplica (causal sin clasificar)', bg:'#f0fdf4', color:'#166534'}
+      : m.estado==='revisar' ? {texto:'🔍 Por revisar', bg:'#fffbeb', color:'#92400e'}
+      : {texto:'⏱️ Aún no aplica', bg:'#f8fafc', color:'#64748b'};
+  }
+  return '<span class="badge" style="background:'+info.bg+';color:'+info.color+'">'+info.texto+'</span>';
+}
+function renderDetalleMultas(jsonStr){
+  var lista;
+  try{ lista = JSON.parse(jsonStr); }catch(e){ return null; }
+  if(!Array.isArray(lista) || !lista.length) return null;
+  return lista.map(function(m,i){
+    var fechaFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
+    return '<div style="background:var(--gray50);border-radius:8px;padding:12px 14px;margin-bottom:8px;font-size:13px;">'+
+      '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;"><strong>Multa #'+(i+1)+' · '+fechaFmt+(m.ciudad?' · '+escHtml(m.ciudad):'')+'</strong>'+(valorFmt?'<span>'+valorFmt+'</span>':'')+'</div>'+
+      tipoCausalBadge(m)+
+      (m.seleccionada!==undefined ? ' <span class="badge" style="background:#f1f5f9;color:#475569">'+(m.seleccionada?'Incluida en el documento':'No incluida')+'</span>' : '')+
+      (m.causal ? '<p style="margin:8px 0 0;color:var(--gray600);">'+escHtml(m.causal)+'</p>' : '')+
+    '</div>';
+  }).join('');
 }
 
 function buildTimeline(row, estado){
@@ -1394,7 +1526,7 @@ function agregarFilaMultaAdmin(datos){
     '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+new Date().toISOString().slice(0,10)+'" value="'+(datos.fecha||'')+'"></div>'+
     '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" value="'+(datos.valor||'')+'"></div>'+
     '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" value="'+escHtml(datos.ciudad||'')+'"></div>'+
-    '<div class="mm-fg"><label>¿Notificado formalmente?</label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="mm-fg"><label>¿Le llegó la notificación a su dirección del RUNT en los 13 días hábiles siguientes?</label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
     '<div class="mm-fg full-col"><label>¿Detectada por cámara?</label><select class="mm-foto"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
     '</div>';
   document.getElementById('mm-lista').appendChild(div);

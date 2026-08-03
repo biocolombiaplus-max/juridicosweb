@@ -341,7 +341,7 @@ function agregarMultaRow(){
     '<div class="fg"><label>Fecha de la infracción</label><input type="date" class="mf-fecha" max="'+new Date().toISOString().slice(0,10)+'"></div>'+
     '<div class="fg"><label>Valor (opcional)</label><input type="number" class="mf-valor" placeholder="Ej: 450000"></div>'+
     '<div class="fg"><label>Ciudad / organismo de tránsito</label><input type="text" class="mf-ciudad" placeholder="Ej: Bogotá" value="'+(_caso&&_caso['Ciudad']?_caso['Ciudad']:'')+'"></div>'+
-    '<div class="fg"><label>¿Te notificaron formalmente?</label><select class="mf-notif"><option value="nose">No estoy seguro</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="fg"><label>¿Te llegó la notificación a tu dirección del RUNT, dentro de los 13 días hábiles siguientes a la infracción?</label><select class="mf-notif"><option value="nose">No recuerdo / no estoy seguro</option><option value="si">Sí, me llegó a tiempo</option><option value="no">No, no me llegó o llegó tarde</option></select></div>'+
     '<div class="fg"><label>¿Fue detectada por cámara (fotomulta)?</label><select class="mf-foto"><option value="nose">No estoy seguro</option><option value="si">Sí</option><option value="no">No</option></select></div>';
   document.getElementById('multas-list').appendChild(div);
 }
@@ -396,25 +396,40 @@ function calcularCausal(fecha, valor, ciudad, notif, foto){
   var tiempoTexto = formatoTiempo(meses);
   var faltanTexto = formatoTiempo(Math.max(0,36-meses));
   var anio = fechaObj.getFullYear();
-  var estado, causal;
-
-  if(meses>=36){
-    estado='aplica'; causal='Prescripción: han pasado '+tiempoTexto+' sin cobro efectivo, más de los 3 años que exige el Art. 136 de la Ley 769 de 2002.';
-  } else if(notif==='no'){
-    estado='aplica'; causal='Notificación defectuosa: no fuiste notificado formalmente dentro del plazo legal (Ley 1843 de 2017). Impuesta hace '+tiempoTexto+'.';
-  } else if(notif==='nose'){
-    estado='revisar'; causal='Notificación sin confirmar — faltan '+faltanTexto+' para que prescriba por tiempo. Un abogado debe revisar cómo y cuándo te notificaron.';
-  } else {
-    estado='no_aplica'; causal='Aún no prescribe: faltan '+faltanTexto+' (fue impuesta hace '+tiempoTexto+') y reportaste que sí te notificaron correctamente.';
-  }
+  var estado, causal, tipoCausal;
 
   var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && ciudadEnListaINM(ciudad);
-  if(posibleINM){
-    var notaINM='Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022.';
-    if(estado!=='aplica'){ estado='aplica'; causal=notaINM; }
-    else { causal += ' También aplica: cámara bajo investigación Supertransporte 2026 por falta de certificación INM.'; }
+  // La pregunta de notificación al RUNT solo decide algo cuando NINGUNA otra
+  // causal ya aplica (prescripción o INM) — es la última carta, no la
+  // primera, y solo tiene sustento legal (Ley 1843/2017) para infracciones
+  // de 2018 en adelante, hasta 2024 (mismo rango que investiga Supertransporte).
+  var enRangoNotifRunt = anio>=2018 && anio<=2024;
+
+  if(meses>=36){
+    estado='aplica'; tipoCausal='prescripcion';
+    causal='Prescripción: han pasado '+tiempoTexto+' sin cobro efectivo, más de los 3 años que exige el Art. 136 de la Ley 769 de 2002.';
+  } else if(posibleINM){
+    estado='aplica'; tipoCausal='error_fotomulta_inm';
+    causal='Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022.';
+  } else if(enRangoNotifRunt && notif==='no'){
+    estado='aplica'; tipoCausal='notificacion_tardia';
+    causal='Notificación extemporánea: la Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificarte (10 para validar el comparendo y 3 más para enviarte la notificación a tu dirección del RUNT). Reportaste que no te llegó dentro de ese plazo — impuesta hace '+tiempoTexto+' — lo que da lugar a pedir la caducidad de la facultad sancionatoria y la nulidad del comparendo.';
+  } else if(enRangoNotifRunt && notif==='nose'){
+    estado='revisar'; tipoCausal='revisar_notificacion';
+    causal='Por confirmar: si no te llegó la notificación dentro de los 13 días hábiles siguientes a la infracción (Ley 1843 de 2017) a tu dirección del RUNT, también sería causal para pedir que la eliminen. Revisa en el SIMIT o en tu correo/carta la fecha exacta en que te notificaron.';
+  } else {
+    estado='no_aplica'; tipoCausal='no_aplica';
+    causal='Aún no prescribe: faltan '+faltanTexto+' (fue impuesta hace '+tiempoTexto+')'+(notif==='si'?' y reportaste que sí te notificaron a tiempo.':'.');
   }
-  return { fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, causal:causal, seleccionada:(estado==='aplica') };
+
+  // Si ya aplica por prescripción o por el INM, pero ADEMÁS reportaste
+  // notificación tardía dentro del rango vigente, se suma como refuerzo —
+  // nunca resta, solo hace el documento más sólido.
+  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && enRangoNotifRunt && notif==='no'){
+    causal += ' Adicionalmente, tampoco te notificaron dentro de los 13 días hábiles que exige la Ley 1843 de 2017 a tu dirección del RUNT — otro motivo más para pedir la eliminación.';
+  }
+
+  return { fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal, seleccionada:(estado==='aplica') };
 }
 
 function badgeInfo(estado){
@@ -468,8 +483,15 @@ function construirTextoPeticion(p, multasGrupo){
   var ciudadDoc = (multasGrupo && multasGrupo.length) ? multasGrupo[0].ciudad : p.ciudad;
   var secretaria = 'Secretaría de Tránsito y Movilidad – '+ciudadDoc;
   var aplican = multasGrupo || [];
-  var hayPrescritas = aplican.some(function(m){ return m.causal.indexOf('Prescripción')===0; });
-  var hayNotif = aplican.some(function(m){ return m.causal.indexOf('Notificación')===0; });
+  var hayPrescritas = aplican.some(function(m){ return m.tipoCausal==='prescripcion'; });
+  // Se detecta por el dato crudo (notif + rango de años), no por el texto del
+  // causal — así se cita esta base legal tanto cuando la notificación tardía
+  // fue el motivo principal como cuando solo refuerza una prescripción o un
+  // caso INM ya aplicable.
+  var hayNotif = aplican.some(function(m){
+    var anio = new Date(m.fecha+'T00:00:00').getFullYear();
+    return m.notif==='no' && anio>=2018 && anio<=2024;
+  });
   var hayINM = aplican.some(function(m){ return m.posibleINM; });
 
   var hechosMultas = aplican.map(function(m,i){
@@ -481,21 +503,21 @@ function construirTextoPeticion(p, multasGrupo){
   var considerandos = [];
   considerandos.push('Que el artículo 29 de la Constitución Política consagra el derecho fundamental al debido proceso, aplicable también a las actuaciones administrativas sancionatorias, y que dicha garantía exige que toda sanción administrativa se imponga y se mantenga vigente únicamente mientras subsistan sus fundamentos fácticos y jurídicos.');
   if(hayPrescritas) considerandos.push('Que el artículo 136 de la Ley 769 de 2002 (Código Nacional de Tránsito) establece un término de prescripción de tres (3) años para el cobro de las sanciones de tránsito, término que en el(los) comparendo(s) relacionado(s) ya se encuentra ampliamente superado. En concordancia, el artículo 52 de la Ley 1437 de 2011 (CPACA) reconoce el mismo límite temporal para el ejercicio de la facultad sancionatoria de las autoridades administrativas.');
-  if(hayNotif) considerandos.push('Que los artículos 66 a 69 del CPACA (Ley 1437 de 2011), en concordancia con la Ley 1843 de 2017, exigen que la notificación del comparendo se surta en debida forma. Un acto administrativo que no ha sido notificado válidamente al administrado no le es oponible ni produce efectos jurídicos en su contra.');
+  if(hayNotif) considerandos.push('Que la Ley 1843 de 2017 le da a la autoridad de tránsito un término máximo de diez (10) días hábiles siguientes a la infracción para validar el comparendo, y tres (3) días hábiles adicionales para notificarlo — trece (13) días hábiles en total desde la infracción —, notificación que debe surtirse a la dirección registrada en el RUNT. Un acto administrativo no notificado dentro de ese término no es oponible al administrado, no produce efectos jurídicos en su contra y da lugar a la caducidad de la facultad sancionatoria, conforme a los artículos 66 a 69 del CPACA (Ley 1437 de 2011).');
   if(hayINM) considerandos.push('Que la Ley 2251 de 2022 y la Resolución 718 de 2023 del Ministerio de Transporte exigen que los equipos de fotodetección cuenten con el "concepto de desempeño" del Instituto Nacional de Metrología (INM). La Superintendencia de Transporte investiga desde 2026 a organismos de tránsito que operaron dichos equipos sin cumplir este requisito entre 2018 y 2024 ('+FUENTE_OFICIAL_INM+').');
   considerandos.push('Que el artículo 14 del CPACA obliga a la administración a resolver de fondo toda petición dentro de los quince (15) días hábiles siguientes a su radicación.');
   var considerandosTxt = considerandos.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
 
   var pretensiones=[];
   if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN de las sanciones relacionadas, conforme al Art. 136 de la Ley 769 de 2002.');
-  if(hayNotif) pretensiones.push('Que se declare la NULIDAD e inoponibilidad de los comparendos por notificación defectuosa, conforme a la Ley 1843 de 2017.');
+  if(hayNotif) pretensiones.push('Que se declare la CADUCIDAD de la facultad sancionatoria y la NULIDAD de los comparendos por notificación extemporánea, al no haberse surtido dentro de los trece (13) días hábiles que exige la Ley 1843 de 2017, contados desde la infracción, a la dirección registrada en el RUNT.');
   if(hayINM) pretensiones.push('Que se verifique el concepto de desempeño del INM del equipo de fotodetección y, de no existir, se declare la NULIDAD del comparendo.');
   pretensiones.push('Que, en consecuencia, se ELIMINEN del sistema SIMIT los registros correspondientes, y se certifique dicha eliminación al peticionario.');
   pretensiones.push('Que se resuelva de fondo la presente petición dentro del término legal de quince (15) días hábiles previsto en el Art. 14 del CPACA.');
   var pretensionesTxt = pretensiones.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
 
   return ciudadDoc+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
-    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, NULIDAD Y ELIMINACIÓN DE COMPARENDOS\n'+
+    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, CADUCIDAD, NULIDAD Y ELIMINACIÓN DE COMPARENDOS\n'+
     'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+(p.placa||'N/A')+'\n\n'+
     'Respetados señores:\n\n'+
     'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', mayor de edad y domiciliado/a en '+ciudadDoc+', en ejercicio del '+
