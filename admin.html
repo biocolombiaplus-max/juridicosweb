@@ -1535,59 +1535,77 @@ function openModalMultas(btn){
 // de que el cliente pase por la página. Nunca inventa nada: si no encuentra
 // nada, se lo dice claro y deja seguir con la carga manual de siempre.
 function consultarVerifikAdmin(){
-  if(!_mmCaso){ showToast('⚠️ Abre primero el caso del cliente','error'); return; }
-  var cedula = (_mmCaso['Cédula']||'').trim();
-  if(!cedula){ showToast('⚠️ Este caso no tiene cédula registrada — agrégala primero con "✏️ Editar datos del caso"','error'); return; }
-
-  var yaHayDatos = Array.prototype.some.call(document.querySelectorAll('#mm-lista .mm-fecha'), function(el){ return el.value; });
-  if(yaHayDatos && !confirm('Ya hay multas cargadas en este formulario. ¿Reemplazarlas con lo que encuentre Verifik?')) return;
-
   var btn = document.getElementById('btn-consultar-verifik');
-  var textoOriginal = btn.textContent;
-  btn.disabled = true; btn.textContent = '🔍 Consultando SIMIT...';
+  var textoOriginal = btn ? btn.textContent : '';
+  // El cambio de estado del botón va PRIMERO, antes de cualquier validación
+  // — así, si algo revienta más adelante, al menos queda visible que el
+  // clic sí se registró (en vez de no pasar absolutamente nada en pantalla).
+  if(btn){ btn.disabled = true; btn.textContent = '🔍 Consultando SIMIT...'; }
 
-  // fetch() no tiene límite de tiempo por defecto — si el Worker de
-  // Cloudflare o la API de Verifik se quedan pegados, el botón se quedaría
-  // deshabilitado para siempre ("no deja dar clic"). Este tope de 12s
-  // garantiza que el botón siempre se vuelva a habilitar, pase lo que pase.
-  var controller = new AbortController();
-  var timeoutId = setTimeout(function(){ controller.abort(); }, 12000);
+  try{
+    if(!_mmCaso) throw new Error('Abre primero el caso del cliente');
+    var cedula = (_mmCaso['Cédula']||'').trim();
+    if(!cedula) throw new Error('Este caso no tiene cédula registrada — agrégala primero con "✏️ Editar datos del caso"');
 
-  fetch(SIMIT_PROXY_URL + '?cedula=' + encodeURIComponent(cedula), { signal: controller.signal })
-    .then(function(r){ clearTimeout(timeoutId); return r.json(); })
-    .then(function(data){
-      btn.disabled = false; btn.textContent = textoOriginal;
-      if(!data || !data.success || !(data.multas||[]).length){
-        // Muestra el motivo real que devuelve el Worker (ej. "Verifik está en
-        // modo sandbox", "VERIFIK_TOKEN no configurado") en vez de un genérico
-        // "no encontramos nada" — así se sabe si es un caso sin multas o si
-        // hay algo que arreglar en la configuración del Worker.
-        var motivo = (data && data.error) ? ' — '+data.error : '';
-        showToast('⚠️ No se encontraron multas automáticamente'+motivo,'error');
-        return;
-      }
-      document.getElementById('mm-lista').innerHTML = '';
-      data.multas.forEach(function(m){
-        agregarFilaMultaAdmin({
-          fecha: m.fecha||'',
-          valor: m.valor||'',
-          ciudad: m.ciudad||'',
-          // "notif" (¿le llegó la notificación a tiempo?) es un hecho que solo
-          // el cliente sabe, no un dato del SIMIT — nunca se inventa, queda
-          // en "No sé" hasta que él mismo lo confirme.
-          foto: typeof m.fotodeteccion==='boolean' ? (m.fotodeteccion?'si':'no') : 'nose',
+    var yaHayDatos = Array.prototype.some.call(document.querySelectorAll('#mm-lista .mm-fecha'), function(el){ return el.value; });
+    if(yaHayDatos && !confirm('Ya hay multas cargadas en este formulario. ¿Reemplazarlas con lo que encuentre Verifik?')){
+      if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+      return;
+    }
+
+    // fetch() no tiene límite de tiempo por defecto — si el Worker de
+    // Cloudflare o la API de Verifik se quedan pegados, el botón se quedaría
+    // deshabilitado para siempre ("no deja dar clic"). Este tope de 12s
+    // garantiza que el botón siempre se vuelva a habilitar, pase lo que pase.
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function(){ controller.abort(); }, 12000);
+
+    fetch(SIMIT_PROXY_URL + '?cedula=' + encodeURIComponent(cedula), { signal: controller.signal })
+      .then(function(r){ clearTimeout(timeoutId); return r.json(); })
+      .then(function(data){
+        if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+        if(!data || !data.success || !(data.multas||[]).length){
+          // Muestra el motivo real que devuelve el Worker (ej. "Verifik está en
+          // modo sandbox", "VERIFIK_TOKEN no configurado") en vez de un genérico
+          // "no encontramos nada" — así se sabe si es un caso sin multas o si
+          // hay algo que arreglar en la configuración del Worker.
+          var motivo = (data && data.error) ? ' — '+data.error : '';
+          showToast('⚠️ No se encontraron multas automáticamente'+motivo,'error');
+          return;
+        }
+        document.getElementById('mm-lista').innerHTML = '';
+        data.multas.forEach(function(m){
+          agregarFilaMultaAdmin({
+            fecha: m.fecha||'',
+            valor: m.valor||'',
+            ciudad: m.ciudad||'',
+            // "notif" (¿le llegó la notificación a tiempo?) es un hecho que solo
+            // el cliente sabe, no un dato del SIMIT — nunca se inventa, queda
+            // en "No sé" hasta que él mismo lo confirme.
+            foto: typeof m.fotodeteccion==='boolean' ? (m.fotodeteccion?'si':'no') : 'nose',
+          });
         });
+        showToast('✅ Se encontraron '+data.multas.length+' multa'+(data.multas.length===1?'':'s')+' reales en el SIMIT','success');
+      })
+      .catch(function(err){
+        clearTimeout(timeoutId);
+        if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+        var seAgoto = err && err.name==='AbortError';
+        var detalle = err && err.message ? ' ('+err.message+')' : '';
+        showToast(seAgoto
+          ? '⚠️ La consulta tardó demasiado y se canceló — intenta de nuevo o carga las multas manualmente'
+          : '⚠️ No se pudo conectar con la consulta automática'+detalle+' — carga las multas manualmente abajo','error');
+        console.error('consultarVerifikAdmin:', err);
       });
-      showToast('✅ Se encontraron '+data.multas.length+' multa'+(data.multas.length===1?'':'s')+' reales en el SIMIT','success');
-    })
-    .catch(function(err){
-      clearTimeout(timeoutId);
-      btn.disabled = false; btn.textContent = textoOriginal;
-      var seAgoto = err && err.name==='AbortError';
-      showToast(seAgoto
-        ? '⚠️ La consulta tardó demasiado y se canceló — intenta de nuevo o carga las multas manualmente'
-        : '⚠️ No se pudo conectar con la consulta automática — carga las multas manualmente abajo','error');
-    });
+  } catch(errSync){
+    // Cualquier error inesperado ANTES de llegar al fetch (ej. algo cambió
+    // de nombre, un elemento no existe) queda visible en vez de morir en
+    // silencio — sin esto, un fallo aquí se ve exactamente como "no pasa
+    // nada al hacer clic".
+    if(btn){ btn.disabled = false; btn.textContent = textoOriginal; }
+    showToast('⚠️ '+errSync.message,'error');
+    console.error('consultarVerifikAdmin:', errSync);
+  }
 }
 
 var _mmSeq = 0;
