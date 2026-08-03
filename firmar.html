@@ -595,18 +595,15 @@ function limpiarFirma(){
   _firmaVacia=true;
 }
 
+// Sin membrete ni logo: el documento debe verse como lo redactó y radicó
+// la propia persona, no como un producto de un bufete de abogados.
 function dibujarEncabezadoPDF(doc){
-  doc.setFillColor(46,16,101); doc.rect(0,0,210,16,'F');
-  doc.setTextColor(45,212,191); doc.setFontSize(10); doc.setFont('helvetica','bold');
-  doc.text('JURÍDICOSWEB.COM',14,11);
-  doc.setTextColor(148,163,184); doc.setFont('helvetica','normal');
-  doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
-  doc.setTextColor(0,0,0); doc.setFontSize(9.5);
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(9.5);
+  doc.setFont('helvetica','normal');
 }
 function dibujarPiePDF(doc){
-  doc.setFillColor(46,16,101); doc.rect(0,284,210,13,'F');
-  doc.setTextColor(45,212,191); doc.setFontSize(8);
-  doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
+  // intencionalmente vacío
 }
 function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
   dibujarEncabezadoPDF(doc);
@@ -627,49 +624,83 @@ function generarPDFConFirma(documentos, firmaDataUrl){
   return doc;
 }
 
+// Genera UN PDF independiente por cada secretaría (no un solo archivo con
+// varias páginas) — cada una debe recibir únicamente SU petición, nunca
+// las de las otras ciudades mezcladas en un mismo documento.
+function generarPDFsPorSecretaria(documentos, firmaDataUrl){
+  if(!window.jspdf || !documentos || !documentos.length) return null;
+  var jsPDF = window.jspdf.jsPDF;
+  return documentos.map(function(d){
+    var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl);
+    return { ciudad: d.ciudad, doc: doc };
+  });
+}
+
 function firmarYEnviar(){
   if(_firmaVacia){ alert('Dibuja tu firma en el recuadro antes de continuar.'); return; }
   if(!_documentosGenerados.length){ alert('No hay documento generado.'); return; }
   var canvas = document.getElementById('firma-canvas');
   var firmaDataUrl = canvas.toDataURL('image/png');
-  var doc = generarPDFConFirma(_documentosGenerados, firmaDataUrl);
-  if(!doc){ alert('No se pudo generar el PDF. Intenta de nuevo.'); return; }
+  var esTutela = _tipo==='tutela';
 
   var btn = document.getElementById('btn-firmar');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-  var esTutela = _tipo==='tutela';
-  var nombreArchivo = (esTutela?'Tutela_Firmada_':'DerechoPeticion_Firmado_')+(_caso['Apellidos']||'cliente')+'_'+(_caso['Cédula']||'')+'.pdf';
-  doc.save(nombreArchivo); // descarga inmediata al teléfono
-
-  var base64 = doc.output('datauristring');
-  var secretarias = _documentosGenerados.map(function(d){ return d.ciudad; });
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    body: JSON.stringify({
-      _accion: esTutela ? 'marcar_tutela_firmada' : 'marcar_firmado',
-      cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
-      archivoBase64: base64, archivoNombre: nombreArchivo, secretarias: secretarias,
-    })
-  }).then(function(r){ return r.json(); }).then(function(data){
-    if(esTutela){
+  if(esTutela){
+    // La tutela es un solo documento, siempre — no depende de cuántas
+    // secretarías tenga el Derecho de Petición original.
+    var docTutela = generarPDFConFirma(_documentosGenerados, firmaDataUrl);
+    if(!docTutela){ alert('No se pudo generar el PDF. Intenta de nuevo.'); btn.disabled=false; return; }
+    var nombreTutela = 'Tutela_Firmada_'+(_caso['Apellidos']||'cliente')+'_'+(_caso['Cédula']||'')+'.pdf';
+    docTutela.save(nombreTutela);
+    fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({
+        _accion:'marcar_tutela_firmada', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+        archivoBase64: docTutela.output('datauristring'), archivoNombre: nombreTutela,
+      })
+    }).then(function(){
       document.querySelector('#v-exito h2').textContent = '¡Tu Tutela quedó firmada! ⚖️';
       document.querySelector('#v-exito p.lead').textContent = 'Ya se descargó a tu teléfono y también la enviamos a tu correo. Nuestro equipo la radicará ante el juzgado — te avisamos apenas tengamos noticias.';
       mostrar('v-exito');
-      return;
-    }
+    }).catch(function(){ mostrar('v-exito'); });
+    return;
+  }
+
+  var pdfs = generarPDFsPorSecretaria(_documentosGenerados, firmaDataUrl);
+  if(!pdfs){ alert('No se pudo generar el PDF. Intenta de nuevo.'); btn.disabled=false; return; }
+
+  var apellido = _caso['Apellidos']||'cliente', cedulaTxt = _caso['Cédula']||'';
+  var documentosParaEnviar = pdfs.map(function(p, i){
+    var sufijo = pdfs.length>1 ? '_'+p.ciudad.replace(/[^a-zA-Z0-9]+/g,'') : '';
+    var nombreArchivo = 'DerechoPeticion_Firmado_'+apellido+'_'+cedulaTxt+sufijo+'.pdf';
+    p.doc.save(nombreArchivo); // descarga cada uno por separado al teléfono
+    return { ciudad: p.ciudad, archivoBase64: p.doc.output('datauristring'), archivoNombre: nombreArchivo };
+  });
+
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify({
+      _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+      documentos: documentosParaEnviar,
+    })
+  }).then(function(r){ return r.json(); }).then(function(data){
     if(!data.ok){ mostrar('v-exito'); return; }
-    // Derecho de Petición firmado con éxito — se radica de inmediato por
-    // correo, sin esperar a que el admin lo haga a mano. Si por algo falla
-    // (ej. todavía no hay correo cargado para esa ciudad), el cliente ve el
-    // mensaje normal y el admin lo radica después desde el panel.
+    // Cada Derecho de Petición se radica ante SU secretaría correspondiente
+    // — si hay varias ciudades, el backend le manda a cada una solo la
+    // suya. Si por algo falla (ej. alguna ciudad sin correo cargado
+    // todavía), el cliente ve el mensaje normal y el admin la radica
+    // después desde el panel.
     return fetch(SCRIPT_URL, {
       method:'POST',
       body: JSON.stringify({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
     }).then(function(r){ return r.json(); }).then(function(radicado){
       if(radicado.ok){
         document.querySelector('#v-exito h2').textContent = '¡Firmado y radicado! 🎉';
-        document.querySelector('#v-exito p.lead').textContent = 'Tu Derecho de Petición ya quedó firmado y radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.';
+        document.querySelector('#v-exito p.lead').textContent = documentosParaEnviar.length>1
+          ? 'Tus '+documentosParaEnviar.length+' Derechos de Petición ya quedaron firmados y radicados ante cada secretaría correspondiente. Desde hoy corre el plazo legal de 15 días hábiles para que respondan — te avisaremos apenas se cumpla.'
+          : 'Tu Derecho de Petición ya quedó firmado y radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.';
       }
       mostrar('v-exito');
     });

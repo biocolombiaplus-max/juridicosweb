@@ -2392,23 +2392,16 @@ function construirTextoPeticion(p, multasGrupo){
 }
 
 // Dibuja el encabezado de marca en la página actual del PDF
+// Sin membrete ni logo: el documento debe verse como lo redactó y radicó
+// la propia persona, no como un producto de un bufete de abogados — eso
+// ha funcionado mejor para que las secretarías lo tramiten sin fricción.
 function dibujarEncabezadoPDF(doc){
-  doc.setFillColor(46,16,101);
-  doc.rect(0,0,210,16,'F');
-  doc.setTextColor(45,212,191);
-  doc.setFontSize(10);doc.setFont('helvetica','bold');
-  doc.text('JURÍDICOSWEB.COM',14,11);
-  doc.setTextColor(148,163,184);
-  doc.setFont('helvetica','normal');
-  doc.text('Bufete Experto en Derecho de Tránsito · Colombia',100,11);
   doc.setTextColor(0,0,0);
   doc.setFontSize(9.5);
+  doc.setFont('helvetica','normal');
 }
 function dibujarPiePDF(doc){
-  doc.setFillColor(46,16,101);
-  doc.rect(0,284,210,13,'F');
-  doc.setTextColor(45,212,191);doc.setFontSize(8);
-  doc.text('JurídicosWeb.com · +57 315 931 8400 · juridicoswebcasos@gmail.com · juridicosweb.com',14,292);
+  // intencionalmente vacío
 }
 // Escribe un derecho de petición completo en la página actual de doc.
 // Si se pasa firmaDataUrl, la estampa justo encima de la línea de firma

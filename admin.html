@@ -1132,7 +1132,14 @@ function buildAcciones(row, estado){
   }
   if(firmado){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'reenviar_firmado\',this,null,\'reenviar_firmado\')">📧 Reenviar documento firmado</button>';
-    if(row['Enlace PDF Firmado']) html += '<a href="'+escHtml(row['Enlace PDF Firmado'])+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF firmado</a>';
+    // Si hubo multas en varias secretarías, aquí quedan varios enlaces
+    // separados por " | " — uno por cada Derecho de Petición firmado.
+    if(row['Enlace PDF Firmado']){
+      var enlacesPdf = row['Enlace PDF Firmado'].split('|').map(function(u){return u.trim();}).filter(Boolean);
+      enlacesPdf.forEach(function(u, i){
+        html += '<a href="'+escHtml(u)+'" target="_blank" class="btn btn-outline btn-sm">📄 Ver PDF firmado'+(enlacesPdf.length>1?' #'+(i+1):'')+'</a>';
+      });
+    }
     if(!(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true)){
       html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'radicar_por_correo\',this,null,\'radicar_por_correo\')">📨 Radicar ante la secretaría</button>';
     }

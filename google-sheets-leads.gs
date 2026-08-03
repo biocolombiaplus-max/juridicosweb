@@ -337,60 +337,107 @@ function enviarDocumentoCorreo(datos) {
 // PDF firmado a Drive, guarda el enlace en el caso, y le manda el documento
 // firmado por correo de una vez — el mismo camino tanto si firmó desde la
 // página principal como si firmó desde este enlace remoto.
+// Acepta datos.documentos = [{ciudad, archivoBase64, archivoNombre}, ...] —
+// un cliente con multas en varias secretarías firma un Derecho de Petición
+// independiente por cada una (misma firma, un PDF distinto por ciudad), y
+// aquí se guarda cada uno por separado: una fila propia en "Documentos
+// Firmados" por secretaría, para que radicarPorCorreo() le mande a cada
+// una SOLO el suyo. Mantiene compatibilidad con el formato antiguo de un
+// solo archivo (datos.archivoBase64) por si algo más viejo todavía lo usa.
 function marcarFirmado(datos) {
-  if (!datos.archivoBase64 || !datos.cedula) {
-    return respuestaJson({ ok: false, error: 'Falta el archivo firmado o la cédula del caso' });
-  }
+  if (!datos.cedula) return respuestaJson({ ok: false, error: 'Falta la cédula del caso' });
+  var documentos = Array.isArray(datos.documentos) && datos.documentos.length
+    ? datos.documentos
+    : (datos.archivoBase64 ? [{ ciudad: '', archivoBase64: datos.archivoBase64, archivoNombre: datos.archivoNombre }] : []);
+  if (!documentos.length) return respuestaJson({ ok: false, error: 'Falta el archivo firmado' });
+
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
   if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
 
-  var carpeta = obtenerOCrearCarpeta(CARPETA_DRIVE_FIRMAS);
-  var partes = datos.archivoBase64.split(',');
-  var mime = (partes[0].match(/data:(.*);base64/) || [])[1] || 'application/pdf';
-  var bytes = Utilities.base64Decode(partes[1] || partes[0]);
-  var nombreArchivo = datos.archivoNombre || ('DerechoPeticion_Firmado_' + datos.cedula + '.pdf');
-  var archivo = carpeta.createFile(Utilities.newBlob(bytes, mime, nombreArchivo));
-  archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  escribirFila(hoja, fila, { 'Firmado': 'TRUE', 'Enlace PDF Firmado': archivo.getUrl() });
-
+  var nombres = datos.nombres || obtenerValorFila(hoja, fila, 'Nombres');
+  var apellidos = obtenerValorFila(hoja, fila, 'Apellidos');
   var emailDestino = datos.email || obtenerValorFila(hoja, fila, 'Email');
+  var whatsapp = obtenerValorFila(hoja, fila, 'WhatsApp');
+
+  var carpeta = obtenerOCrearCarpeta(CARPETA_DRIVE_FIRMAS);
+  var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
+  var enlaces = [];
+  var blobsParaCorreo = [];
+
+  documentos.forEach(function (d) {
+    var partes = d.archivoBase64.split(',');
+    var mime = (partes[0].match(/data:(.*);base64/) || [])[1] || 'application/pdf';
+    var bytes = Utilities.base64Decode(partes[1] || partes[0]);
+    var nombreArchivo = d.archivoNombre || ('DerechoPeticion_Firmado_' + datos.cedula + '.pdf');
+    var archivo = carpeta.createFile(Utilities.newBlob(bytes, mime, nombreArchivo));
+    archivo.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    enlaces.push(archivo.getUrl());
+    blobsParaCorreo.push(archivo.getBlob());
+
+    hojaFirmados.appendRow([
+      new Date().toLocaleString('es-CO'), nombres || '', apellidos || '',
+      datos.cedula || '', emailDestino || '', whatsapp || '',
+      d.ciudad || '', archivo.getUrl(), 'Por radicar',
+    ]);
+  });
+
+  escribirFila(hoja, fila, { 'Firmado': 'TRUE', 'Enlace PDF Firmado': enlaces.join(' | ') });
+
   if (emailDestino) {
-    enviarDocumentoCorreo({
-      email: emailDestino,
-      nombres: datos.nombres || obtenerValorFila(hoja, fila, 'Nombres'),
-      archivoBase64: datos.archivoBase64,
-      archivoNombre: nombreArchivo,
-      firmado: true,
-    });
+    try {
+      var varios = documentos.length > 1;
+      var asunto = varios
+        ? '📄 Tus ' + documentos.length + ' Derechos de Petición están listos — JurídicosWeb'
+        : '📄 Tu Derecho de Petición está listo — JurídicosWeb';
+      var cuerpo = 'Hola ' + (nombres || '') + ',\n\n¡Gracias por confiar en JurídicosWeb! Adjunto' + (varios ? 's' : '') +
+        ' encontrarás tu' + (varios ? 's' : '') + ' Derecho' + (varios ? 's' : '') + ' de Petición ya firmado' + (varios ? 's' : '') +
+        (varios ? ', uno por cada secretaría de tránsito donde tienes multas' : '') + ', listo' + (varios ? 's' : '') + ' para radicar.\n\n' +
+        'Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.\n\n' +
+        'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito';
+      MailApp.sendEmail({ to: emailDestino, subject: asunto, body: cuerpo, attachments: blobsParaCorreo });
+    } catch (e) { /* no rompe el guardado si falla el envío */ }
   }
-  return respuestaJson({ ok: true, enlaceArchivo: archivo.getUrl() });
+
+  return respuestaJson({ ok: true, enlaces: enlaces });
 }
 
-// Botón "Reenviar documento firmado" en el panel — usa el PDF que ya está
-// guardado en Drive, no pide que el cliente vuelva a firmar.
+// Botón "Reenviar documento firmado" en el panel — usa los PDF que ya están
+// guardados en Drive, no pide que el cliente vuelva a firmar. Reenvía TODOS
+// los que tenga (uno por secretaría si el caso tuvo multas en varias
+// ciudades), no solo el primero.
 function reenviarFirmado(datos) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
   if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
 
-  var enlace = obtenerValorFila(hoja, fila, 'Enlace PDF Firmado');
-  var idArchivo = extraerIdDrive(enlace);
-  if (!idArchivo) return respuestaJson({ ok: false, error: 'Este caso todavía no tiene un documento firmado guardado' });
+  var cedula = obtenerValorFila(hoja, fila, 'Cédula');
+  var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
+  var valores = hojaFirmados.getDataRange().getValues();
+  var idx = {};
+  COLUMNAS_FIRMADOS.forEach(function (c, i) { idx[c] = i; });
+
+  var blobs = [];
+  for (var i = 1; i < valores.length; i++) {
+    if (String(valores[i][idx['Cédula']]) === String(cedula)) {
+      var idArchivo = extraerIdDrive(valores[i][idx['Enlace del archivo en Drive']]);
+      if (idArchivo) { try { blobs.push(DriveApp.getFileById(idArchivo).getBlob()); } catch (e) {} }
+    }
+  }
+  if (!blobs.length) return respuestaJson({ ok: false, error: 'Este caso todavía no tiene un documento firmado guardado' });
 
   var emailDestino = datos.email || obtenerValorFila(hoja, fila, 'Email');
   if (!emailDestino) return respuestaJson({ ok: false, error: 'El caso no tiene correo registrado' });
 
   try {
-    var blob = DriveApp.getFileById(idArchivo).getBlob();
     var nombres = obtenerValorFila(hoja, fila, 'Nombres');
+    var varios = blobs.length > 1;
     MailApp.sendEmail({
       to: emailDestino,
-      subject: '📄 Tu Derecho de Petición firmado — JurídicosWeb',
-      body: 'Hola ' + nombres + ',\n\nTe reenviamos tu Derecho de Petición ya firmado, listo para radicar.\n\n' +
+      subject: varios ? '📄 Tus Derechos de Petición firmados — JurídicosWeb' : '📄 Tu Derecho de Petición firmado — JurídicosWeb',
+      body: 'Hola ' + nombres + ',\n\nTe reenviamos tu' + (varios ? 's' : '') + ' Derecho' + (varios ? 's' : '') + ' de Petición ya firmado' + (varios ? 's' : '') + ', listo' + (varios ? 's' : '') + ' para radicar.\n\n' +
         'Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.\n\nJurídicosWeb.com',
-      attachments: [blob],
+      attachments: blobs,
     });
     return respuestaJson({ ok: true });
   } catch (err) {
@@ -410,48 +457,77 @@ function reenviarFirmado(datos) {
 // antes de usarlo a gran escala — cita normas vigentes y de uso común en este
 // tipo de trámite, pero como cualquier plantilla legal conviene que la
 // valide tu equipo jurídico antes de radicar casos reales con ella.
+// Radica CADA Derecho de Petición firmado ante SU secretaría correspondiente
+// — si el cliente tiene multas en varias ciudades, cada una recibe
+// únicamente su propio documento, nunca el de las otras mezclado. Busca en
+// "Documentos Firmados" todas las filas de este cliente que sigan "Por
+// radicar" (una por secretaría, ver marcarFirmado) y las procesa una a una.
 function radicarPorCorreo(datos) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
   if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
 
-  var ciudad = obtenerValorFila(hoja, fila, 'Ciudad');
-  var enlacePdf = obtenerValorFila(hoja, fila, 'Enlace PDF Firmado');
   var nombres = obtenerValorFila(hoja, fila, 'Nombres');
   var apellidos = obtenerValorFila(hoja, fila, 'Apellidos');
   var cedula = obtenerValorFila(hoja, fila, 'Cédula');
   var placa = obtenerValorFila(hoja, fila, 'Placa');
   var emailCliente = obtenerValorFila(hoja, fila, 'Email');
+  var ciudadCaso = obtenerValorFila(hoja, fila, 'Ciudad');
 
-  if (!enlacePdf) {
-    return respuestaJson({ ok: false, error: 'Este caso todavía no tiene un documento firmado. Envía primero el enlace de firma.' });
+  var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
+  var valores = hojaFirmados.getDataRange().getValues();
+  var idx = {};
+  COLUMNAS_FIRMADOS.forEach(function (c, i) { idx[c] = i; });
+
+  var pendientes = [];
+  for (var i = 1; i < valores.length; i++) {
+    if (String(valores[i][idx['Cédula']]) === String(cedula) && valores[i][idx['Canal de radicación']] === 'Por radicar') {
+      pendientes.push({
+        filaNum: i + 1,
+        ciudad: valores[i][idx['Secretarías']] || ciudadCaso,
+        enlace: valores[i][idx['Enlace del archivo en Drive']],
+      });
+    }
   }
-  var idArchivo = extraerIdDrive(enlacePdf);
-  var blob = idArchivo ? DriveApp.getFileById(idArchivo).getBlob() : null;
-
-  var correoSecretaria = buscarCorreoRadicacion(ciudad);
-  if (!correoSecretaria) {
-    return respuestaJson({ ok: false, error: 'No encontramos el correo oficial de radicación para "' + ciudad + '" en tu hoja de correos. Agrégalo ahí y vuelve a intentar.' });
+  if (!pendientes.length) {
+    return respuestaJson({ ok: false, error: 'Este caso no tiene documentos firmados pendientes de radicar. Envía primero el enlace de firma.' });
   }
 
-  var asunto = 'DERECHO DE PETICIÓN — Radicación electrónica — ' + nombres + ' ' + apellidos + ' — C.C. ' + cedula;
-  var cuerpoHtml = construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente);
+  var radicados = [];
+  var sinCorreo = [];
+  pendientes.forEach(function (p) {
+    var correoSecretaria = buscarCorreoRadicacion(p.ciudad);
+    if (!correoSecretaria) { sinCorreo.push(p.ciudad); return; }
 
-  MailApp.sendEmail({
-    to: correoSecretaria,
-    cc: EMAIL_DESPACHO,
-    subject: asunto,
-    htmlBody: cuerpoHtml,
-    attachments: blob ? [blob] : [],
+    var idArchivo = extraerIdDrive(p.enlace);
+    var blob = idArchivo ? DriveApp.getFileById(idArchivo).getBlob() : null;
+    var asunto = 'DERECHO DE PETICIÓN — Radicación electrónica — ' + nombres + ' ' + apellidos + ' — C.C. ' + cedula;
+    var cuerpoHtml = construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente, p.ciudad);
+
+    MailApp.sendEmail({
+      to: correoSecretaria, cc: EMAIL_DESPACHO, subject: asunto,
+      htmlBody: cuerpoHtml, attachments: blob ? [blob] : [],
+    });
+
+    hojaFirmados.getRange(p.filaNum, idx['Canal de radicación'] + 1)
+      .setValue('Radicado por correo a ' + correoSecretaria + ' el ' + new Date().toLocaleString('es-CO'));
+    radicados.push({ ciudad: p.ciudad, correo: correoSecretaria });
   });
+
+  if (!radicados.length) {
+    return respuestaJson({ ok: false, error: 'No encontramos el correo oficial de radicación para: ' + sinCorreo.join(', ') + '. Agrégalo en tu hoja de correos y vuelve a intentar.' });
+  }
 
   if (emailCliente) {
     try {
+      var listaTxt = radicados.map(function (r) { return r.ciudad + ' (' + r.correo + ')'; }).join(', ');
       MailApp.sendEmail({
         to: emailCliente,
         subject: '📨 Tu Derecho de Petición ya fue radicado',
         body: 'Hola ' + nombres + ',\n\n' +
-          'Tu Derecho de Petición quedó radicado hoy, por correo electrónico, ante: ' + correoSecretaria + '.\n\n' +
+          (radicados.length > 1
+            ? 'Tus Derechos de Petición quedaron radicados hoy, por correo electrónico, ante: ' + listaTxt + '.\n\n'
+            : 'Tu Derecho de Petición quedó radicado hoy, por correo electrónico, ante: ' + radicados[0].correo + '.\n\n') +
           'Desde hoy corre el plazo legal de 15 días hábiles (Art. 14 de la Ley 1437 de 2011 — CPACA) para que te respondan. ' +
           'Apenas se cumpla ese plazo te avisamos automáticamente para revisar juntos la respuesta.\n\n' +
           'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito',
@@ -461,11 +537,12 @@ function radicarPorCorreo(datos) {
 
   marcarEnviado({ cedula: cedula, email: emailCliente }); // arranca el plazo de 15 días hábiles
   var notaActual = obtenerValorFila(hoja, fila, 'Notas') || '';
+  var notaNueva = radicados.map(function (r) { return r.ciudad + ' → ' + r.correo; }).join('; ');
   escribirFila(hoja, fila, {
-    'Notas': notaActual + (notaActual ? ' | ' : '') + 'Radicado por correo a ' + correoSecretaria + ' el ' + new Date().toLocaleString('es-CO'),
+    'Notas': notaActual + (notaActual ? ' | ' : '') + 'Radicado por correo (' + notaNueva + ') el ' + new Date().toLocaleString('es-CO'),
   });
 
-  return respuestaJson({ ok: true, correo: correoSecretaria });
+  return respuestaJson({ ok: true, radicados: radicados, sinCorreo: sinCorreo });
 }
 
 // Busca en TU hoja externa de correos (CORREOS_RADICACION_SHEET_ID) el
@@ -514,12 +591,13 @@ function extraerIdDrive(url) {
 // el trámite). Cita normas generales y de uso reconocido en Colombia sobre
 // derecho de petición y validez de mensajes de datos — no inventa
 // jurisprudencia puntual, precisamente para que el texto sea defendible.
-function construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente) {
+function construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente, ciudad) {
   var hoy = Utilities.formatDate(new Date(), 'GMT-5', "d 'de' MMMM 'de' yyyy");
+  var ciudadTxt = ciudad || '';
   return '' +
     '<div style="font-family:Georgia,serif;color:#1a1a1a;line-height:1.6;max-width:700px;">' +
-    '<p>Bogotá D.C., ' + hoy + '</p>' +
-    '<p><strong>Señores<br>SECRETARÍA DE TRÁNSITO Y MOVILIDAD</strong><br>E. S. D.</p>' +
+    '<p>' + (ciudadTxt || 'Colombia') + ', ' + hoy + '</p>' +
+    '<p><strong>Señores<br>SECRETARÍA DE TRÁNSITO Y MOVILIDAD' + (ciudadTxt ? ' DE ' + ciudadTxt.toUpperCase() : '') + '</strong><br>E. S. D.</p>' +
     '<p><strong>REFERENCIA:</strong> Radicación de Derecho de Petición por correo electrónico — ' +
     'Peticionario: ' + nombres + ' ' + apellidos + ', C.C. No. ' + cedula + (placa ? ', placa ' + placa : '') + '</p>' +
     '<p>Respetados señores:</p>' +
