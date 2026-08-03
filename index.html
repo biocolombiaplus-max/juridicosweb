@@ -1807,30 +1807,43 @@ function agregarMultaRow(){
       '<div class="fg"><label><i class="fas fa-calendar-day" style="color:var(--gold);margin-right:4px;"></i>Fecha de la infracción</label><input type="date" class="mr-fecha" max="'+new Date().toISOString().slice(0,10)+'" oninput="actualizarVistaPrevia(this)"></div>'+
       '<div class="fg"><label><i class="fas fa-tag" style="color:var(--gold);margin-right:4px;"></i>Valor de la multa</label><input type="number" class="mr-valor" placeholder="435000" inputmode="numeric"></div>'+
       '<div class="fg fg-full"><label><i class="fas fa-city" style="color:var(--gold);margin-right:4px;"></i>Ciudad / organismo de tránsito</label><input type="text" class="mr-ciudad" placeholder="Ej: Secretaría de Movilidad de Bogotá"></div>'+
-      '<div class="fg fg-full"><label><i class="fas fa-envelope-open-text" style="color:var(--gold);margin-right:4px;"></i>¿Te llegó la notificación a la dirección que tienes registrada en el RUNT, dentro de los 13 días hábiles siguientes a la infracción?</label>'+
-        '<select class="mr-notif" oninput="actualizarVistaPrevia(this)"><option value="si">Sí, me llegó a tiempo</option><option value="no">No, no me llegó o llegó tarde</option><option value="nose" selected>No recuerdo / no estoy seguro/a</option></select>'+
-        '<span style="display:block;font-size:11px;color:#64748b;margin-top:4px;">La Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificarte: 10 para validar la multa y 3 más para enviártela a tu dirección del RUNT. Si no llegó a tiempo, es otra causal para pedir que la eliminen.</span>'+
-      '</div>'+
       '<div class="fg fg-full"><label><i class="fas fa-camera" style="color:var(--gold);margin-right:4px;"></i>¿Fue detectada por una cámara (fotomulta)?</label>'+
-        '<select class="mr-foto" oninput="actualizarVistaPrevia(this)"><option value="nose" selected>No estoy seguro/a</option><option value="si">Sí, fue una cámara</option><option value="no">No, fue un agente de tránsito</option></select>'+
+        '<select class="mr-foto" oninput="actualizarVistaPrevia(this)" onchange="toggleNotifRow(this)"><option value="nose" selected>No estoy seguro/a</option><option value="si">Sí, fue una cámara</option><option value="no">No, fue un agente de tránsito</option></select>'+
+      '</div>'+
+      '<div class="fg fg-full mr-notif-wrap" style="display:none;"><label><i class="fas fa-envelope-open-text" style="color:var(--gold);margin-right:4px;"></i>¿Te llegó la notificación a la dirección que tienes registrada en el RUNT, dentro de los 13 días hábiles siguientes a la infracción?</label>'+
+        '<select class="mr-notif" oninput="actualizarVistaPrevia(this)"><option value="nose" selected>No recuerdo / no estoy seguro/a</option><option value="si">Sí, me llegó a tiempo</option><option value="no">No, no me llegó o llegó tarde</option></select>'+
+        '<span style="display:block;font-size:11px;color:#64748b;margin-top:4px;">La Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificar una fotomulta: 10 para validarla y 3 más para enviártela a tu dirección del RUNT. Si no llegó a tiempo, es otra causal para pedir que la eliminen. (Los comparendos de un agente de tránsito se notifican de inmediato, en el momento — por eso esta pregunta solo aplica a fotomultas.)</span>'+
       '</div>'+
     '</div>'+
     '<p class="mr-preview" style="font-size:0.74rem;margin:8px 0 0;display:none;"></p>';
   wrap.appendChild(div);
 }
 
+// Solo las fotomultas pasan por notificación postal a la dirección del
+// RUNT — un comparendo de un agente de tránsito se notifica de inmediato,
+// en el momento, así que la pregunta de notificación solo tiene sentido
+// (y solo se muestra) cuando el cliente confirma que fue una cámara.
+function toggleNotifRow(select){
+  var row = select.closest('.multa-row');
+  var wrap = row.querySelector('.mr-notif-wrap');
+  if(!wrap) return;
+  wrap.style.display = select.value==='si' ? '' : 'none';
+  actualizarVistaPrevia(select);
+}
+
 // Vista previa en vivo (no es el resultado final, solo orienta mientras completa el formulario)
 function actualizarVistaPrevia(el){
   var row = el.closest('.multa-row');
   var fecha = row.querySelector('.mr-fecha').value;
+  var foto = row.querySelector('.mr-foto').value;
   var notif = row.querySelector('.mr-notif').value;
   var preview = row.querySelector('.mr-preview');
   if(!fecha){ preview.style.display='none'; return; }
   var edadAnios = (Date.now() - new Date(fecha+'T00:00:00').getTime()) / (1000*60*60*24*365.25);
   var msg, color;
   if(edadAnios >= 3){ msg='<i class="fas fa-circle-check"></i> A primera vista: ya cumpliría 3 años (posible prescripción)'; color='#16a34a'; }
-  else if(notif==='no'){ msg='<i class="fas fa-circle-check"></i> A primera vista: la notificación tardía podría ser causal de caducidad y nulidad'; color='#16a34a'; }
-  else if(notif==='nose'){ msg='<i class="fas fa-magnifying-glass"></i> Aún no cumple 3 años — revisamos la notificación al RUNT al calcular'; color='#b45309'; }
+  else if(foto==='si' && notif==='no'){ msg='<i class="fas fa-circle-check"></i> A primera vista: la notificación tardía podría ser causal de caducidad y nulidad'; color='#16a34a'; }
+  else if(foto==='si' && notif==='nose'){ msg='<i class="fas fa-magnifying-glass"></i> Aún no cumple 3 años — revisamos la notificación al RUNT al calcular'; color='#b45309'; }
   else { msg='<i class="fas fa-circle-info"></i> Por ahora no se ve causal clara, pero calculamos con todos los datos al final'; color='#64748b'; }
   preview.style.display='block';
   preview.style.color=color;
@@ -1911,9 +1924,13 @@ function calcularElegibilidad(){
 
     // La pregunta de notificación al RUNT solo decide algo cuando NINGUNA
     // otra causal ya aplica (prescripción o INM) — es la última carta, no la
-    // primera, y solo tiene sustento legal (Ley 1843/2017) para infracciones
-    // de 2018 en adelante, hasta 2024 (mismo rango que investiga Supertransporte).
-    var enRangoNotifRunt = anio>=2018 && anio<=2024;
+    // primera — y SOLO tiene sustento legal para fotomultas (Ley 1843/2017,
+    // procedimiento de infracciones detectadas por medios técnicos entre
+    // 2018 y 2024). Un comparendo impuesto por un agente de tránsito se
+    // notifica de inmediato, en el momento y en persona — no pasa por el
+    // trámite de notificación postal/RUNT, así que este causal nunca aplica
+    // si el cliente indicó que no fue una cámara.
+    var enRangoNotifRunt = foto==='si' && anio>=2018 && anio<=2024;
 
     if(meses >= 36){
       estado='aplica'; tipoCausal='prescripcion';

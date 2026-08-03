@@ -1526,12 +1526,18 @@ function agregarFilaMultaAdmin(datos){
     '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+new Date().toISOString().slice(0,10)+'" value="'+(datos.fecha||'')+'"></div>'+
     '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" value="'+(datos.valor||'')+'"></div>'+
     '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" value="'+escHtml(datos.ciudad||'')+'"></div>'+
-    '<div class="mm-fg"><label>¿Le llegó la notificación a su dirección del RUNT en los 13 días hábiles siguientes?</label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
-    '<div class="mm-fg full-col"><label>¿Detectada por cámara?</label><select class="mm-foto"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="mm-fg"><label>¿Detectada por cámara?</label><select class="mm-foto" onchange="toggleNotifMm(this)"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="mm-fg full-col mm-notif-wrap" style="display:none;"><label>¿Le llegó la notificación a su dirección del RUNT en los 13 días hábiles siguientes? <span style="font-weight:400;color:var(--gray500,#64748b);">(solo aplica a fotomultas; un agente notifica de inmediato)</span></label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
     '</div>';
   document.getElementById('mm-lista').appendChild(div);
   if(datos.notif) div.querySelector('.mm-notif').value = datos.notif;
   if(datos.foto) div.querySelector('.mm-foto').value = datos.foto;
+  if(datos.foto==='si') div.querySelector('.mm-notif-wrap').style.display = '';
+}
+
+function toggleNotifMm(select){
+  var wrap = select.closest('.mm-row').querySelector('.mm-notif-wrap');
+  if(wrap) wrap.style.display = select.value==='si' ? '' : 'none';
 }
 
 function guardarMultasAdmin(){

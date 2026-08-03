@@ -341,9 +341,15 @@ function agregarMultaRow(){
     '<div class="fg"><label>Fecha de la infracción</label><input type="date" class="mf-fecha" max="'+new Date().toISOString().slice(0,10)+'"></div>'+
     '<div class="fg"><label>Valor (opcional)</label><input type="number" class="mf-valor" placeholder="Ej: 450000"></div>'+
     '<div class="fg"><label>Ciudad / organismo de tránsito</label><input type="text" class="mf-ciudad" placeholder="Ej: Bogotá" value="'+(_caso&&_caso['Ciudad']?_caso['Ciudad']:'')+'"></div>'+
-    '<div class="fg"><label>¿Te llegó la notificación a tu dirección del RUNT, dentro de los 13 días hábiles siguientes a la infracción?</label><select class="mf-notif"><option value="nose">No recuerdo / no estoy seguro</option><option value="si">Sí, me llegó a tiempo</option><option value="no">No, no me llegó o llegó tarde</option></select></div>'+
-    '<div class="fg"><label>¿Fue detectada por cámara (fotomulta)?</label><select class="mf-foto"><option value="nose">No estoy seguro</option><option value="si">Sí</option><option value="no">No</option></select></div>';
+    '<div class="fg"><label>¿Fue detectada por cámara (fotomulta)?</label><select class="mf-foto" onchange="toggleNotifBlock(this)"><option value="nose">No estoy seguro</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
+    '<div class="fg mf-notif-wrap" style="display:none;"><label>¿Te llegó la notificación a tu dirección del RUNT, dentro de los 13 días hábiles siguientes a la infracción?</label><select class="mf-notif"><option value="nose">No recuerdo / no estoy seguro</option><option value="si">Sí, me llegó a tiempo</option><option value="no">No, no me llegó o llegó tarde</option></select>'+
+    '<span style="display:block;font-size:11px;color:var(--gray500,#64748b);margin-top:4px;">Solo aplica a fotomultas: un comparendo de un agente de tránsito se notifica de inmediato, en el momento.</span></div>';
   document.getElementById('multas-list').appendChild(div);
+}
+
+function toggleNotifBlock(select){
+  var wrap = select.closest('.multa-block').querySelector('.mf-notif-wrap');
+  if(wrap) wrap.style.display = select.value==='si' ? '' : 'none';
 }
 
 function mesesTranscurridos(fechaObj){
@@ -401,9 +407,13 @@ function calcularCausal(fecha, valor, ciudad, notif, foto){
   var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && ciudadEnListaINM(ciudad);
   // La pregunta de notificación al RUNT solo decide algo cuando NINGUNA otra
   // causal ya aplica (prescripción o INM) — es la última carta, no la
-  // primera, y solo tiene sustento legal (Ley 1843/2017) para infracciones
-  // de 2018 en adelante, hasta 2024 (mismo rango que investiga Supertransporte).
-  var enRangoNotifRunt = anio>=2018 && anio<=2024;
+  // primera — y SOLO tiene sustento legal para fotomultas (Ley 1843/2017,
+  // procedimiento de infracciones detectadas por medios técnicos entre
+  // 2018 y 2024). Un comparendo impuesto por un agente de tránsito se
+  // notifica de inmediato, en el momento y en persona — no pasa por el
+  // trámite de notificación postal/RUNT, así que este causal nunca aplica
+  // si el cliente indicó que no fue una cámara.
+  var enRangoNotifRunt = foto==='si' && anio>=2018 && anio<=2024;
 
   if(meses>=36){
     estado='aplica'; tipoCausal='prescripcion';
