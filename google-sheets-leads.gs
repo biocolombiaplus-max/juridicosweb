@@ -720,7 +720,10 @@ function marcarTutelaPagada(datos) {
 // pedirle nada al cliente, porque encuentra "Multas Reportadas" con datos.
 function guardarMultasEstructuradas(datos) {
   if (!datos.multasReportadas) return respuestaJson({ ok: false, error: 'Falta la lista de multas' });
-  return actualizarPorCedula(datos, { 'Multas Reportadas': datos.multasReportadas });
+  // Con la multa ya cargada el documento queda listo para enviar a firmar —
+  // se marca "Autorizar" de una vez para no obligar a un clic aparte que ya
+  // no aporta nada en este flujo.
+  return actualizarPorCedula(datos, { 'Multas Reportadas': datos.multasReportadas, 'Autorizar': 'TRUE' });
 }
 
 // Suma N días HÁBILES (lunes a viernes, sin festivos colombianos) a una

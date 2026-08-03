@@ -1121,12 +1121,14 @@ function buildAcciones(row, estado){
   if(pagoOk && !firmado && row['Cédula']){
     var tieneMultas = false;
     try{ tieneMultas = Array.isArray(JSON.parse(row['Multas Reportadas'])) && JSON.parse(row['Multas Reportadas']).length>0; }catch(e){}
-    html += '<button class="btn '+(tieneMultas?'btn-outline':'btn-primary')+' btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultas?'Editar':'Completar')+' datos de multas</button>';
+    // El botón principal (enviar el enlace) va primero — es lo único que
+    // normalmente hace falta tocar en este punto del caso.
     var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']);
     var msgFirma = encodeURIComponent('Hola '+row['Nombres']+', tu pago quedó confirmado ✅. Para preparar tu Derecho de Petición, entra a este enlace desde tu celular, revisa tu documento y fírmalo con el dedo — toma 2 minutos: '+linkFirma);
     if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ '+(tieneMultas?'Enviar enlace de firma':'Enviar enlace (sin multas cargadas)')+'</a>';
     html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
-    if(!tieneMultas) html += '<p style="width:100%;font-size:11px;color:#92400e;margin:2px 0 0;">⚠️ Sin datos de multas, el cliente tendrá que llenarlos él mismo al abrir el enlace.</p>';
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultas?'Editar':'Completar')+' datos de multas</button>';
+    if(!tieneMultas) html += '<p style="width:100%;font-size:11px;color:#92400e;margin:2px 0 0;">⚠️ Sin datos de multas, el cliente tendrá que llenarlos él mismo al abrir el enlace. Si prefieres que no le toque llenar nada, usa primero "Completar datos de multas".</p>';
   }
   if(firmado){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'reenviar_firmado\',this,null,\'reenviar_firmado\')">📧 Reenviar documento firmado</button>';
@@ -1136,9 +1138,6 @@ function buildAcciones(row, estado){
     }
   }
 
-  if(estado==='pagado'){
-    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'autorizar_documento\',this,null,\'autorizar_documento\')">✅ Autorizar Documento</button>';
-  }
   if(estado==='autorizado'){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_enviado\',this,null,\'marcar_enviado\')">📨 Marcar como Radicado (manual)</button>';
   }
