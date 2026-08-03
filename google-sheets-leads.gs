@@ -904,6 +904,11 @@ function completarDatosCliente(datos) {
   if (datos.cedula) valores['Cédula'] = datos.cedula;
   if (datos.placa) valores['Placa'] = datos.placa;
   if (datos.whatsapp) valores['WhatsApp'] = datos.whatsapp;
+  // "emailNuevo" (no "email") a propósito: "email" ya se usa para ubicar la
+  // fila del cliente por su correo ORIGINAL — si se reutilizara ese mismo
+  // campo para el valor corregido, la búsqueda fallaría en el mismo
+  // request que intenta arreglar un correo mal digitado.
+  if (datos.emailNuevo) valores['Email'] = datos.emailNuevo;
   if (datos.ciudad) valores['Ciudad'] = datos.ciudad;
   if (datos.dpto) valores['Departamento'] = datos.dpto;
 

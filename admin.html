@@ -563,18 +563,20 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
-<!-- MODAL COMPLETAR DATOS DEL CLIENTE (antes de confirmar pago) -->
+<!-- MODAL EDITAR / COMPLETAR DATOS DEL CLIENTE -->
+<!-- (se abre sola antes de confirmar un pago con datos a medias, y también -->
+<!-- disponible siempre vía el botón "✏️ Editar datos del caso") -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-datos-cliente">
   <div class="modal">
     <div class="modal-header">
-      <h2>👤 Completar datos del cliente</h2>
+      <h2 id="dc-titulo">👤 Editar datos del cliente</h2>
       <button class="modal-close" onclick="closeModal('modal-datos-cliente')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
-        Antes de confirmar el pago, el caso necesita nombre y cédula completos — sin esto, el Derecho de Petición
-        saldría con datos vacíos o a medias. Esto pasa sobre todo con casos de WhatsApp donde solo dieron la placa.
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;" id="dc-explicacion">
+        Corrige aquí cualquier dato mal digitado (cédula, WhatsApp, correo, etc.) antes de reenviar el enlace de
+        firma o el documento — evita tener que pedirle al cliente que vuelva a empezar.
       </p>
       <div class="form-grid">
         <div class="form-group-m"><label>Nombres *</label><input type="text" id="dc-nombres"></div>
@@ -582,6 +584,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div class="form-group-m"><label>Cédula *</label><input type="text" inputmode="numeric" id="dc-cedula"></div>
         <div class="form-group-m"><label>Placa</label><input type="text" id="dc-placa"></div>
         <div class="form-group-m"><label>WhatsApp</label><input type="text" id="dc-whatsapp"></div>
+        <div class="form-group-m"><label>Correo</label><input type="email" id="dc-email"></div>
         <div class="form-group-m"><label>Ciudad</label><input type="text" id="dc-ciudad"></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:6px;">
@@ -1369,6 +1372,10 @@ function buildAcciones(row, estado){
   if(estado!=='pendiente' && estado!=='cerrado'){
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'cerrar_caso\',this,null,\'cerrar_caso\')">🏁 Cerrar Caso</button>';
   }
+  // Siempre disponible, en cualquier etapa — para corregir un dato mal
+  // digitado (ej. la cédula quedó con un correo, un WhatsApp mal escrito)
+  // antes de reenviar el enlace de firma o el documento.
+  html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalDatosCliente(JSON.parse(this.getAttribute(\'data-row\')),\'editar\')">✏️ Editar datos del caso</button>';
   return html || '<span style="color:var(--gray400);font-size:13px">Sin acciones disponibles</span>';
 }
 
@@ -1582,14 +1589,25 @@ function guardarMultasAdmin(){
 }
 
 var _dcCasoOriginal = null;
-function openModalDatosCliente(row){
+// modo: 'completar' (se abrió sola porque faltaba nombre/cédula antes de
+// pagar) o 'editar' (el admin la abrió a mano para corregir algo) — solo
+// cambia el texto de encabezado, el guardado es el mismo en ambos casos.
+function openModalDatosCliente(row, modo){
   _dcCasoOriginal = row;
   document.getElementById('dc-nombres').value = row['Nombres']||'';
   document.getElementById('dc-apellidos').value = row['Apellidos']||'';
   document.getElementById('dc-cedula').value = row['Cédula']||'';
   document.getElementById('dc-placa').value = row['Placa']||'';
   document.getElementById('dc-whatsapp').value = row['WhatsApp']||'';
+  document.getElementById('dc-email').value = row['Email']||'';
   document.getElementById('dc-ciudad').value = row['Ciudad']||'';
+  if(modo==='completar'){
+    document.getElementById('dc-titulo').textContent = '👤 Completar datos del cliente';
+    document.getElementById('dc-explicacion').textContent = 'Antes de confirmar el pago, el caso necesita nombre y cédula completos — sin esto, el Derecho de Petición saldría con datos vacíos o a medias. Esto pasa sobre todo con casos de WhatsApp donde solo dieron la placa.';
+  } else {
+    document.getElementById('dc-titulo').textContent = '✏️ Editar datos del cliente';
+    document.getElementById('dc-explicacion').textContent = 'Corrige aquí cualquier dato mal digitado (cédula, WhatsApp, correo, etc.) antes de reenviar el enlace de firma o el documento — evita tener que pedirle al cliente que vuelva a empezar.';
+  }
   document.getElementById('modal-datos-cliente').classList.add('show');
 }
 
@@ -1612,6 +1630,7 @@ function guardarDatosCliente(){
       cedula: cedula,
       placa: document.getElementById('dc-placa').value.trim(),
       whatsapp: document.getElementById('dc-whatsapp').value.trim(),
+      emailNuevo: document.getElementById('dc-email').value.trim(),
       ciudad: document.getElementById('dc-ciudad').value.trim(),
     })
   })
@@ -1619,7 +1638,7 @@ function guardarDatosCliente(){
   .then(function(data){
     btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
     if(data.ok){
-      showToast('✅ Datos completados — ya puedes confirmar el pago','success');
+      showToast('✅ Datos guardados','success');
       closeModal('modal-datos-cliente');
       setTimeout(loadData, 1200);
     } else {
@@ -1747,7 +1766,7 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
   // Derecho de Petición saldría con nombre o cédula vacíos.
   if(accion==='confirmar_pago' && (!row['Nombres'] || !row['Cédula'])){
     showToast('⚠️ Falta nombre o cédula — complétalos antes de confirmar el pago','error');
-    openModalDatosCliente(row);
+    openModalDatosCliente(row, 'completar');
     return;
   }
   var generarMsg = MENSAJES_CONFIRM[tipoMsg];

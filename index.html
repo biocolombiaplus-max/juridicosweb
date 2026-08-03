@@ -1919,18 +1919,23 @@ function calcularElegibilidad(){
     // Tercera causal: investigación Supertransporte 2026 por fotomultas 2018-2024
     // sin "concepto de desempeño" del INM (Ley 2251/2022, Res. 718 Mintransporte).
     // Solo se marca cuando el cliente confirmó que fue cámara Y el organismo aparece
-    // en la lista verificada — nunca de forma genérica.
+    // en la lista verificada — nunca de forma genérica. El límite 2018-2024 es
+    // específico de ESTA investigación — NO aplica al causal de notificación
+    // tardía, que es una regla general (Ley 1843 de 2017) vigente para
+    // cualquier fotomulta sin importar el año.
     var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && ciudadEnListaINM(ciudad);
 
     // La pregunta de notificación al RUNT solo decide algo cuando NINGUNA
     // otra causal ya aplica (prescripción o INM) — es la última carta, no la
     // primera — y SOLO tiene sustento legal para fotomultas (Ley 1843/2017,
-    // procedimiento de infracciones detectadas por medios técnicos entre
-    // 2018 y 2024). Un comparendo impuesto por un agente de tránsito se
-    // notifica de inmediato, en el momento y en persona — no pasa por el
-    // trámite de notificación postal/RUNT, así que este causal nunca aplica
-    // si el cliente indicó que no fue una cámara.
-    var enRangoNotifRunt = foto==='si' && anio>=2018 && anio<=2024;
+    // procedimiento de infracciones detectadas por medios técnicos). Un
+    // comparendo impuesto por un agente de tránsito se notifica de
+    // inmediato, en el momento y en persona — no pasa por el trámite de
+    // notificación postal/RUNT, así que este causal nunca aplica si el
+    // cliente indicó que no fue una cámara. No hay límite de año: aplica
+    // igual a una fotomulta reciente que a una de hace tiempo (mientras no
+    // esté ya prescrita, que se evalúa primero).
+    var aplicaNotifRunt = foto==='si';
 
     if(meses >= 36){
       estado='aplica'; tipoCausal='prescripcion';
@@ -1938,10 +1943,10 @@ function calcularElegibilidad(){
     } else if(posibleINM){
       estado='aplica'; tipoCausal='error_fotomulta_inm';
       causal='Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022.';
-    } else if(enRangoNotifRunt && notif==='no'){
+    } else if(aplicaNotifRunt && notif==='no'){
       estado='aplica'; tipoCausal='notificacion_tardia';
       causal='Notificación extemporánea: la Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificarte (10 para validar el comparendo y 3 más para enviarte la notificación a tu dirección del RUNT). Reportaste que no te llegó dentro de ese plazo — impuesta hace '+tiempoTexto+' — lo que da lugar a pedir la caducidad de la facultad sancionatoria y la nulidad del comparendo.';
-    } else if(enRangoNotifRunt && notif==='nose'){
+    } else if(aplicaNotifRunt && notif==='nose'){
       estado='revisar'; tipoCausal='revisar_notificacion';
       causal='Por confirmar: si no te llegó la notificación dentro de los 13 días hábiles siguientes a la infracción (Ley 1843 de 2017) a tu dirección del RUNT, también sería causal para pedir que la eliminen. Revisa en el SIMIT o en tu correo/carta la fecha exacta en que te notificaron.';
     } else {
@@ -1950,9 +1955,9 @@ function calcularElegibilidad(){
     }
 
     // Si ya aplica por prescripción o por el INM, pero ADEMÁS reportaste
-    // notificación tardía dentro del rango vigente, se suma como refuerzo —
-    // nunca resta, solo hace el documento más sólido.
-    if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && enRangoNotifRunt && notif==='no'){
+    // notificación tardía, se suma como refuerzo — nunca resta, solo hace
+    // el documento más sólido.
+    if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && aplicaNotifRunt && notif==='no'){
       causal += ' Adicionalmente, tampoco te notificaron dentro de los 13 días hábiles que exige la Ley 1843 de 2017 a tu dirección del RUNT — otro motivo más para pedir la eliminación.';
     }
 
@@ -2363,10 +2368,7 @@ function construirTextoPeticion(p, multasGrupo){
   // causal — así se cita esta base legal tanto cuando la notificación tardía
   // fue el motivo principal como cuando solo refuerza una prescripción o un
   // caso INM ya aplicable.
-  var hayNotif = aplican.some(function(m){
-    var anio = new Date(m.fecha+'T00:00:00').getFullYear();
-    return m.notif==='no' && anio>=2018 && anio<=2024;
-  });
+  var hayNotif = aplican.some(function(m){ return m.notif==='no' && m.foto==='si'; });
   var hayINM = aplican.some(function(m){ return m.posibleINM; });
   var hayCoactivo = aplican.some(function(m){ return m.notaEstado && /coactiv/i.test(m.notaEstado); });
 
