@@ -65,6 +65,44 @@ var COLUMNAS_FIRMADOS = [
   'Secretarías', 'Enlace del archivo en Drive', 'Canal de radicación',
 ];
 
+// Lectura pública de los casos para admin.html y firmar.html — pasa por
+// esta MISMA implementación web (ya desplegada como "Cualquiera" puede
+// llamarla), así que no depende para nada de cómo esté configurado
+// "Compartir" en la hoja de cálculo. Si alguna vez la lectura directa del
+// Sheet vuelve a fallar por permisos, esta vía siempre funciona porque usa
+// el mismo mecanismo que ya usa guardarLead() para escribir.
+function doGet(e) {
+  try {
+    var accion = e.parameter.accion;
+    if (accion === 'listar_casos') {
+      var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+      var valores = hoja.getDataRange().getValues();
+      if (valores.length < 2) return respuestaJson({ ok: true, casos: [] });
+      var encabezados = valores[0];
+      var casos = valores.slice(1)
+        .filter(function (fila) { return fila.some(function (v) { return v !== ''; }); })
+        .map(function (fila) {
+          var obj = {};
+          encabezados.forEach(function (h, i) {
+            var v = fila[i];
+            // Normaliza fechas (vienen como objeto Date real de Sheets) y
+            // booleanos, para que el frontend reciba siempre texto plano
+            // igual a como lo esperaba con el método anterior.
+            if (v instanceof Date) obj[h] = Utilities.formatDate(v, 'GMT-5', 'yyyy-MM-dd HH:mm:ss');
+            else if (v === true) obj[h] = 'TRUE';
+            else if (v === false) obj[h] = 'FALSE';
+            else obj[h] = v;
+          });
+          return obj;
+        });
+      return respuestaJson({ ok: true, casos: casos });
+    }
+    return respuestaJson({ ok: false, error: 'Acción GET no reconocida: ' + accion });
+  } catch (err) {
+    return respuestaJson({ ok: false, error: String(err) });
+  }
+}
+
 function doPost(e) {
   try {
     var datos = JSON.parse(e.postData.contents);

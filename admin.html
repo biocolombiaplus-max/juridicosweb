@@ -706,92 +706,30 @@ function toggleSidebar(forzar){
 // ══════════════════════════════════════════════════
 // CARGA DE DATOS desde Google Sheets (GViz)
 // ══════════════════════════════════════════════════
-// gid de la pestaña "Control de Casos" — un número fijo que Google le asigna
-// a cada pestaña al crearla (no cambia si la renombras). Si algún día borras
-// y vuelves a crear esa pestaña desde cero, ábrela, mira la URL del
-// navegador (…edit?gid=NÚMERO) y actualiza este valor.
-var SHEET_GID_CASOS = '1990875083';
-
 function loadData(){
-  // Se usa exportación CSV en vez de la consulta GViz — es un mecanismo más
-  // simple de Google que requiere menos configuración de permisos y no
-  // depende de que el nombre de la pestaña (con emoji) coincida
-  // exactamente, solo de su gid.
-  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+SHEET_GID_CASOS+'&_t='+Date.now();
+  // Lee los casos a través del propio Apps Script (acción "listar_casos" en
+  // doGet) en vez de leer el Sheet directamente — así no depende en nada de
+  // la configuración de "Compartir" de la hoja, que venía fallando sin
+  // razón clara. El script ya está desplegado como "Cualquiera puede
+  // acceder", que es lo que permite que los formularios guarden datos hoy.
+  var url = SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now();
   document.getElementById('last-sync').textContent='Actualizando...';
   fetch(url, { cache: 'no-store' })
-    .then(function(r){
-      if(!r.ok) throw new Error('sheet_no_publico');
-      return r.text();
-    })
-    .then(function(text){
-      // Si el Sheet no es público, Google devuelve una página HTML de login
-      // (con código 200) en vez del CSV — la detectamos aquí en vez de
-      // dejar que el resultado se vea como una tabla vacía sin explicación.
-      var inicio = text.trim().slice(0,15).toLowerCase();
-      if(inicio.indexOf('<!doctype') === 0 || inicio.indexOf('<html') === 0){
-        throw new Error('sheet_no_publico');
-      }
-      allRows = csvAObjetos(text);
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(!data.ok) throw new Error(data.error || 'Respuesta inesperada del servidor');
+      allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']; });
       renderAll();
       document.getElementById('last-sync').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CO');
     })
     .catch(function(err){
-      var msg = err.message==='sheet_no_publico'
-        ? 'Tu Google Sheet no está compartido públicamente. Ve a tu hoja → "Compartir" → "Cualquier persona con el enlace" → rol "Lector" → Listo. Si ya hiciste eso, revisa que el gid de la pestaña "Control de Casos" siga siendo '+SHEET_GID_CASOS+' (mira la URL cuando la tengas abierta: …edit?gid=NÚMERO).'
-        : 'Error cargando datos: '+err.message;
-      showToast('⚠️ '+msg,'error');
+      showToast('⚠️ Error cargando datos: '+err.message,'error');
       document.getElementById('last-sync').textContent='Error de carga — mostrando datos de ejemplo';
-      // Datos demo si el sheet no está accesible, para que el panel nunca
-      // se quede vacío mientras se soluciona el acceso.
+      // Datos demo si el script no responde, para que el panel nunca se
+      // quede vacío mientras se soluciona el problema.
       allRows = getDemoRows();
       renderAll();
     });
-}
-
-// Parser CSV completo (RFC 4180): respeta campos entre comillas que traen
-// comas, comillas dobles escapadas ("") y saltos de línea internos — esto
-// último es crítico porque la columna "Multas Reportadas" guarda un JSON
-// que casi siempre trae comas y comillas.
-function parseCSV(texto){
-  var filas = []; var fila = []; var campo = ''; var entreComillas = false;
-  for(var i=0; i<texto.length; i++){
-    var c = texto[i];
-    if(entreComillas){
-      if(c === '"'){
-        if(texto[i+1] === '"'){ campo += '"'; i++; }
-        else { entreComillas = false; }
-      } else {
-        campo += c;
-      }
-    } else if(c === '"'){
-      entreComillas = true;
-    } else if(c === ','){
-      fila.push(campo); campo = '';
-    } else if(c === '\r'){
-      // se ignora, el salto real lo marca \n
-    } else if(c === '\n'){
-      fila.push(campo); filas.push(fila); fila = []; campo = '';
-    } else {
-      campo += c;
-    }
-  }
-  if(campo.length || fila.length){ fila.push(campo); filas.push(fila); }
-  return filas;
-}
-
-function csvAObjetos(texto){
-  var matriz = parseCSV(texto);
-  if(!matriz.length) return [];
-  var encabezados = matriz[0];
-  return matriz.slice(1)
-    .filter(function(fila){ return fila.some(function(v){ return v!==''; }); })
-    .map(function(fila){
-      var obj = {};
-      encabezados.forEach(function(h,i){ obj[h] = fila[i]!==undefined ? fila[i] : ''; });
-      return obj;
-    })
-    .filter(function(r){ return r['Nombres']||r['Email']; });
 }
 
 function getDemoRows(){
