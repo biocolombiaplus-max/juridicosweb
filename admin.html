@@ -1546,12 +1546,24 @@ function consultarVerifikAdmin(){
   var textoOriginal = btn.textContent;
   btn.disabled = true; btn.textContent = '🔍 Consultando SIMIT...';
 
-  fetch(SIMIT_PROXY_URL + '?cedula=' + encodeURIComponent(cedula))
-    .then(function(r){ return r.json(); })
+  // fetch() no tiene límite de tiempo por defecto — si el Worker de
+  // Cloudflare o la API de Verifik se quedan pegados, el botón se quedaría
+  // deshabilitado para siempre ("no deja dar clic"). Este tope de 12s
+  // garantiza que el botón siempre se vuelva a habilitar, pase lo que pase.
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function(){ controller.abort(); }, 12000);
+
+  fetch(SIMIT_PROXY_URL + '?cedula=' + encodeURIComponent(cedula), { signal: controller.signal })
+    .then(function(r){ clearTimeout(timeoutId); return r.json(); })
     .then(function(data){
       btn.disabled = false; btn.textContent = textoOriginal;
       if(!data || !data.success || !(data.multas||[]).length){
-        showToast('⚠️ No se encontraron multas automáticamente para esta cédula — puedes cargarlas manualmente abajo','error');
+        // Muestra el motivo real que devuelve el Worker (ej. "Verifik está en
+        // modo sandbox", "VERIFIK_TOKEN no configurado") en vez de un genérico
+        // "no encontramos nada" — así se sabe si es un caso sin multas o si
+        // hay algo que arreglar en la configuración del Worker.
+        var motivo = (data && data.error) ? ' — '+data.error : '';
+        showToast('⚠️ No se encontraron multas automáticamente'+motivo,'error');
         return;
       }
       document.getElementById('mm-lista').innerHTML = '';
@@ -1568,9 +1580,13 @@ function consultarVerifikAdmin(){
       });
       showToast('✅ Se encontraron '+data.multas.length+' multa'+(data.multas.length===1?'':'s')+' reales en el SIMIT','success');
     })
-    .catch(function(){
+    .catch(function(err){
+      clearTimeout(timeoutId);
       btn.disabled = false; btn.textContent = textoOriginal;
-      showToast('⚠️ No se pudo conectar con la consulta automática — carga las multas manualmente abajo','error');
+      var seAgoto = err && err.name==='AbortError';
+      showToast(seAgoto
+        ? '⚠️ La consulta tardó demasiado y se canceló — intenta de nuevo o carga las multas manualmente'
+        : '⚠️ No se pudo conectar con la consulta automática — carga las multas manualmente abajo','error');
     });
 }
 
