@@ -639,6 +639,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
         Copia lo que dice el SIMIT para cada multa de <strong id="mm-cliente-nombre">—</strong>. Con esto guardado,
         cuando le envíes el enlace de firma, va a ver el documento directo — no tiene que llenar nada.
       </p>
+      <button type="button" id="btn-consultar-verifik" onclick="consultarVerifikAdmin()" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:8px;justify-content:center;">🔍 Consultar SIMIT automáticamente (Verifik)</button>
+      <p style="font-size:11px;color:var(--gray500,#64748b);margin:0 0 16px;text-align:center;">Trae TODAS las multas reales de la cédula, igual que si el cliente hiciera la consulta él mismo — útil sobre todo para el plan que elimina todas.</p>
       <div id="mm-lista"></div>
       <button type="button" onclick="agregarFilaMultaAdmin()" style="background:none;border:2px dashed var(--gray200);border-radius:8px;padding:10px;width:100%;color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px;">+ Agregar otra multa</button>
       <div style="display:flex;gap:10px;">
@@ -738,6 +740,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
 // ══════════════════════════════════════════════════
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
 var SHEET_ID   = '1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl';
+// Mismo proxy (Verifik/SIMIT) que usa index.html cuando el cliente hace su
+// propia consulta — se reutiliza aquí para que el admin pueda traer las
+// multas reales de un cliente sin que él mismo tenga que entrar al sitio.
+var SIMIT_PROXY_URL = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';
 
 var USUARIOS = {
   '88262856':    { pass:'juancarlos8302', nombre:'Juan Carlos Cáceres', rol:'Administrador' },
@@ -1521,6 +1527,51 @@ function openModalMultas(btn){
     agregarFilaMultaAdmin({ ciudad: row['Ciudad']||'' });
   }
   document.getElementById('modal-multas').classList.add('show');
+}
+
+// Consulta el mismo proxy Verifik/SIMIT que usa el sitio cuando el cliente
+// hace la consulta él mismo — trae TODAS sus multas reales en un clic, para
+// cuando toca registrar el caso a mano (WhatsApp, llamada) y no hay forma
+// de que el cliente pase por la página. Nunca inventa nada: si no encuentra
+// nada, se lo dice claro y deja seguir con la carga manual de siempre.
+function consultarVerifikAdmin(){
+  if(!_mmCaso){ showToast('⚠️ Abre primero el caso del cliente','error'); return; }
+  var cedula = (_mmCaso['Cédula']||'').trim();
+  if(!cedula){ showToast('⚠️ Este caso no tiene cédula registrada — agrégala primero con "✏️ Editar datos del caso"','error'); return; }
+
+  var yaHayDatos = Array.prototype.some.call(document.querySelectorAll('#mm-lista .mm-fecha'), function(el){ return el.value; });
+  if(yaHayDatos && !confirm('Ya hay multas cargadas en este formulario. ¿Reemplazarlas con lo que encuentre Verifik?')) return;
+
+  var btn = document.getElementById('btn-consultar-verifik');
+  var textoOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = '🔍 Consultando SIMIT...';
+
+  fetch(SIMIT_PROXY_URL + '?cedula=' + encodeURIComponent(cedula))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      btn.disabled = false; btn.textContent = textoOriginal;
+      if(!data || !data.success || !(data.multas||[]).length){
+        showToast('⚠️ No se encontraron multas automáticamente para esta cédula — puedes cargarlas manualmente abajo','error');
+        return;
+      }
+      document.getElementById('mm-lista').innerHTML = '';
+      data.multas.forEach(function(m){
+        agregarFilaMultaAdmin({
+          fecha: m.fecha||'',
+          valor: m.valor||'',
+          ciudad: m.ciudad||'',
+          // "notif" (¿le llegó la notificación a tiempo?) es un hecho que solo
+          // el cliente sabe, no un dato del SIMIT — nunca se inventa, queda
+          // en "No sé" hasta que él mismo lo confirme.
+          foto: typeof m.fotodeteccion==='boolean' ? (m.fotodeteccion?'si':'no') : 'nose',
+        });
+      });
+      showToast('✅ Se encontraron '+data.multas.length+' multa'+(data.multas.length===1?'':'s')+' reales en el SIMIT','success');
+    })
+    .catch(function(){
+      btn.disabled = false; btn.textContent = textoOriginal;
+      showToast('⚠️ No se pudo conectar con la consulta automática — carga las multas manualmente abajo','error');
+    });
 }
 
 var _mmSeq = 0;
