@@ -70,7 +70,10 @@ src="https://www.facebook.com/tr?id=1756287258733232&ev=PageView&noscript=1"
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- jsPDF servido desde el propio dominio: en móvil, un CDN externo que
+     falla en silencio deja al cliente sin poder firmar sin ningún aviso
+     claro — mejor depender solo de que el sitio mismo cargue. -->
+<script src="vendor/jspdf.umd.min.js"></script>
 <script src="https://checkout.wompi.co/widget.js"></script>
 <style>
 /* ===== VARIABLES ===== */

@@ -564,6 +564,32 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
+<!-- MODAL CORREO DE RADICACIÓN FALTANTE (retry rápido) -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-correo-radicacion">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📨 Falta el correo de radicación</h2>
+      <button class="modal-close" onclick="closeModal('modal-correo-radicacion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
+        No tenemos el correo oficial de radicación para <strong id="cr-ciudad-nombre">—</strong>. Agrégalo aquí y
+        reintentamos la radicación al momento, sin salir del panel.
+      </p>
+      <div class="form-group-m">
+        <label>Correo de la secretaría</label>
+        <input type="email" id="cr-correo" placeholder="tramites@secretariatransito.gov.co">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-primary" id="btn-guardar-cr" onclick="guardarCorreoRadicacionYReintentar()">💾 Guardar y radicar</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-correo-radicacion')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
 <!-- MODAL COMPLETAR MULTAS (para firma sin llenar nada) -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-multas">
@@ -1158,6 +1184,11 @@ function buildAcciones(row, estado){
     if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ '+(tieneMultas?'Enviar enlace de firma':'Enviar enlace (sin multas cargadas)')+'</a>';
     html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultas?'Editar':'Completar')+' datos de multas</button>';
+    // Cubre el caso de "el cliente dice que ya firmó pero el sistema no lo
+    // muestra" (típicamente una firma que sí se generó en el celular pero
+    // no logró avisarle al servidor por mala conexión) — el cliente ya
+    // tiene el PDF guardado, el admin solo lo sube y el proceso sigue igual.
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="subirPdfFirmadoManual(this)">📤 Subir PDF si el cliente ya firmó</button>';
     if(!tieneMultas) html += '<p style="width:100%;font-size:11px;color:#92400e;margin:2px 0 0;">⚠️ Sin datos de multas, el cliente tendrá que llenarlos él mismo al abrir el enlace. Si prefieres que no le toque llenar nada, usa primero "Completar datos de multas".</p>';
   }
   if(firmado){
@@ -1463,6 +1494,92 @@ function guardarDatosCliente(){
   });
 }
 
+// El cliente firma en su celular y el PDF se genera y descarga localmente
+// ANTES de que la app avise al servidor — si esa segunda parte falla por
+// mala conexión, el cliente sí tiene el PDF firmado, solo falta subirlo.
+function subirPdfFirmadoManual(btn){
+  var row;
+  try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/pdf';
+  input.onchange = function(){
+    var file = input.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var textoOriginal = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Subiendo...';
+      fetch(SCRIPT_URL, {
+        method:'POST',
+        body: JSON.stringify({
+          _accion:'marcar_firmado', cedula:row['Cédula'], email:row['Email'], nombres:row['Nombres'],
+          documentos: [{ ciudad: row['Ciudad']||'', archivoBase64: reader.result, archivoNombre: file.name }],
+        })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!data.ok){ showToast('Error: '+(data.error||'desconocido'),'error'); btn.disabled=false; btn.textContent=textoOriginal; return; }
+        return fetch(SCRIPT_URL, {
+          method:'POST',
+          body: JSON.stringify({ _accion:'radicar_por_correo', cedula:row['Cédula'], email:row['Email'] })
+        }).then(function(r){ return r.json(); }).then(function(){
+          showToast('✅ PDF cargado — la radicación quedó en marcha','success');
+          closeModal('modal-caso');
+          setTimeout(loadData, 1200);
+        });
+      })
+      .catch(function(e){
+        showToast('Error de conexión: '+e.message,'error');
+        btn.disabled=false; btn.textContent=textoOriginal;
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+var _crCasoRow = null, _crCiudades = [];
+function abrirModalCorreoFaltante(row, ciudades){
+  _crCasoRow = row;
+  _crCiudades = ciudades;
+  document.getElementById('cr-ciudad-nombre').textContent = ciudades.join(', ');
+  document.getElementById('cr-correo').value = '';
+  document.getElementById('modal-correo-radicacion').classList.add('show');
+}
+
+function guardarCorreoRadicacionYReintentar(){
+  if(!_crCasoRow || !_crCiudades.length) return;
+  var correo = document.getElementById('cr-correo').value.trim();
+  if(!correo){ showToast('⚠️ Escribe el correo','error'); return; }
+
+  var btn = document.getElementById('btn-guardar-cr');
+  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
+
+  var promesas = _crCiudades.map(function(ciudad){
+    return fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ _accion:'agregar_correo_radicacion', ciudad:ciudad, correo:correo }) })
+      .then(function(r){ return r.json(); });
+  });
+
+  Promise.all(promesas).then(function(){
+    return fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ _accion:'radicar_por_correo', cedula:_crCasoRow['Cédula'], email:_crCasoRow['Email'] }) })
+      .then(function(r){ return r.json(); });
+  }).then(function(data){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar y radicar';
+    closeModal('modal-correo-radicacion');
+    if(data.ok){
+      showToast('✅ Correo agregado y radicación completada','success');
+      closeModal('modal-caso');
+      setTimeout(loadData, 1200);
+    } else {
+      showToast('El correo quedó guardado, pero: '+(data.error||'no se pudo radicar todavía'),'error');
+    }
+  }).catch(function(e){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar y radicar';
+    showToast('Error de conexión: '+e.message,'error');
+  });
+}
+
 // Mensajes de WhatsApp pre-armados para los momentos más delicados del
 // seguimiento — el admin solo revisa y envía.
 function waTemplate(row, tipo){
@@ -1513,10 +1630,20 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
       showToast('✅ Acción registrada en Google Sheets','success');
       closeModal('modal-caso');
       setTimeout(loadData, 1500);
-    } else {
-      showToast('Error: '+(data.error||'desconocido'),'error');
-      btn.disabled=false; btn.textContent=textoOriginal;
+      return;
     }
+    // Caso puntual y frecuente: la radicación falla solo porque falta el
+    // correo de esa secretaría en la hoja externa — en vez de un error
+    // genérico, ofrece completarlo ahí mismo y reintenta al momento.
+    var mCorreo = accion==='radicar_por_correo' && /correo oficial de radicación para: ([\s\S]+?)\.\s*Agrégalo/.exec(data.error||'');
+    if(mCorreo){
+      var ciudades = mCorreo[1].split(',').map(function(s){return s.trim();}).filter(Boolean);
+      btn.disabled=false; btn.textContent=textoOriginal;
+      abrirModalCorreoFaltante(row, ciudades);
+      return;
+    }
+    showToast('Error: '+(data.error||'desconocido'),'error');
+    btn.disabled=false; btn.textContent=textoOriginal;
   })
   .catch(function(e){
     showToast('Error de conexión: '+e.message,'error');

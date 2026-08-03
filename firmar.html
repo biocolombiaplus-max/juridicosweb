@@ -9,7 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- jsPDF servido desde el propio dominio: en móvil, un CDN externo que
+     falla en silencio deja al cliente sin poder firmar sin ningún aviso
+     claro — mejor depender solo de que el sitio mismo cargue. -->
+<script src="vendor/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -179,6 +182,15 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
     <a class="btn btn-wa" style="margin-top:16px;" href="https://wa.me/573159318400" target="_blank"><i class="fab fa-whatsapp"></i> Escribir a mi asesor</a>
   </div>
 
+  <!-- ERROR AL ENVIAR: el PDF ya se generó y descargó, pero no logramos
+       avisarle al servidor (mala conexión) — no mostrar éxito falso. -->
+  <div class="card center hidden" id="v-error-envio">
+    <div class="icon-xl" style="color:var(--amber);"><i class="fas fa-triangle-exclamation"></i></div>
+    <h2 style="font-size:1.05rem;margin-bottom:8px;">Tu documento se descargó, pero no pudimos confirmarlo</h2>
+    <p class="lead">Ya quedó firmado y guardado en tu teléfono, pero por una falla de conexión no logramos avisarle a nuestro sistema. Escríbenos por WhatsApp y adjunta el PDF que se descargó — lo registramos al momento.</p>
+    <a class="btn btn-wa" style="margin-top:16px;" href="https://wa.me/573159318400" target="_blank"><i class="fab fa-whatsapp"></i> Enviar mi documento firmado</a>
+  </div>
+
 </div>
 
 <script>
@@ -186,6 +198,20 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
 // CONFIG — mismo backend y misma hoja que admin.html
 // ══════════════════════════════════════════════════
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
+
+// La firma pasa muchas veces por datos móviles inestables — un solo fetch
+// que falla ahí no debe perder el registro de que el cliente ya firmó.
+// Reintenta con espera creciente antes de darse por vencido.
+function postConReintentos(payload, intentos){
+  intentos = intentos || 3;
+  return fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .catch(function(err){
+      if(intentos <= 1) throw err;
+      return new Promise(function(resolve){ setTimeout(resolve, (4-intentos+1)*1500); })
+        .then(function(){ return postConReintentos(payload, intentos-1); });
+    });
+}
 var FUENTE_OFICIAL_INM = 'https://mintransporte.gov.co/publicaciones/12348/gobierno-nacional-investiga-a-37-organismos-de-transito-mas-de-75-millones-de-fotomultas-estan-bajo-la-lupa-y-58-millones-quedaran-sin-validez/';
 var CIUDADES_INVESTIGACION_INM = [
   'bogota','medellin','cali','barranquilla','cartagena','bucaramanga','villavicencio',
@@ -200,7 +226,7 @@ var _documentosGenerados = [];
 var _firmaVacia = true, _firmaDibujando = false, _firmaCtx = null;
 
 function mostrar(id){
-  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-exito'].forEach(function(v){
+  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-exito','v-error-envio'].forEach(function(v){
     document.getElementById(v).classList.toggle('hidden', v!==id);
   });
 }
@@ -654,17 +680,15 @@ function firmarYEnviar(){
     if(!docTutela){ alert('No se pudo generar el PDF. Intenta de nuevo.'); btn.disabled=false; return; }
     var nombreTutela = 'Tutela_Firmada_'+(_caso['Apellidos']||'cliente')+'_'+(_caso['Cédula']||'')+'.pdf';
     docTutela.save(nombreTutela);
-    fetch(SCRIPT_URL, {
-      method:'POST',
-      body: JSON.stringify({
-        _accion:'marcar_tutela_firmada', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
-        archivoBase64: docTutela.output('datauristring'), archivoNombre: nombreTutela,
-      })
-    }).then(function(){
+    postConReintentos({
+      _accion:'marcar_tutela_firmada', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+      archivoBase64: docTutela.output('datauristring'), archivoNombre: nombreTutela,
+    }).then(function(data){
+      if(!data || !data.ok) throw new Error('respuesta no ok');
       document.querySelector('#v-exito h2').textContent = '¡Tu Tutela quedó firmada! ⚖️';
       document.querySelector('#v-exito p.lead').textContent = 'Ya se descargó a tu teléfono y también la enviamos a tu correo. Nuestro equipo la radicará ante el juzgado — te avisamos apenas tengamos noticias.';
       mostrar('v-exito');
-    }).catch(function(){ mostrar('v-exito'); });
+    }).catch(function(){ mostrar('v-error-envio'); });
     return;
   }
 
@@ -679,32 +703,32 @@ function firmarYEnviar(){
     return { ciudad: p.ciudad, archivoBase64: p.doc.output('datauristring'), archivoNombre: nombreArchivo };
   });
 
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    body: JSON.stringify({
-      _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
-      documentos: documentosParaEnviar,
-    })
-  }).then(function(r){ return r.json(); }).then(function(data){
-    if(!data.ok){ mostrar('v-exito'); return; }
+  // marcar_firmado es lo crítico: si esto no queda registrado, el caso
+  // se pierde por completo aunque el cliente sí haya firmado — por eso
+  // reintenta y, si ni así funciona, NO se muestra éxito falso.
+  postConReintentos({
+    _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+    documentos: documentosParaEnviar,
+  }).then(function(data){
+    if(!data || !data.ok) throw new Error('respuesta no ok');
     // Cada Derecho de Petición se radica ante SU secretaría correspondiente
     // — si hay varias ciudades, el backend le manda a cada una solo la
-    // suya. Si por algo falla (ej. alguna ciudad sin correo cargado
-    // todavía), el cliente ve el mensaje normal y el admin la radica
-    // después desde el panel.
-    return fetch(SCRIPT_URL, {
-      method:'POST',
-      body: JSON.stringify({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
-    }).then(function(r){ return r.json(); }).then(function(radicado){
-      if(radicado.ok){
-        document.querySelector('#v-exito h2').textContent = '¡Firmado y radicado! 🎉';
-        document.querySelector('#v-exito p.lead').textContent = documentosParaEnviar.length>1
-          ? 'Tus '+documentosParaEnviar.length+' Derechos de Petición ya quedaron firmados y radicados ante cada secretaría correspondiente. Desde hoy corre el plazo legal de 15 días hábiles para que respondan — te avisaremos apenas se cumpla.'
-          : 'Tu Derecho de Petición ya quedó firmado y radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.';
-      }
-      mostrar('v-exito');
-    });
-  }).catch(function(){ mostrar('v-exito'); });
+    // suya. La radicación en sí es menos crítica que el registro de la
+    // firma: si falla (ej. alguna ciudad sin correo cargado todavía), el
+    // cliente igual ve éxito porque su firma SÍ quedó guardada, y el
+    // admin la radica después desde el panel.
+    return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
+      .then(function(radicado){
+        if(radicado && radicado.ok){
+          document.querySelector('#v-exito h2').textContent = '¡Firmado y radicado! 🎉';
+          document.querySelector('#v-exito p.lead').textContent = documentosParaEnviar.length>1
+            ? 'Tus '+documentosParaEnviar.length+' Derechos de Petición ya quedaron firmados y radicados ante cada secretaría correspondiente. Desde hoy corre el plazo legal de 15 días hábiles para que respondan — te avisaremos apenas se cumpla.'
+            : 'Tu Derecho de Petición ya quedó firmado y radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.';
+        }
+        mostrar('v-exito');
+      })
+      .catch(function(){ mostrar('v-exito'); }); // firma ya registrada; la radicación se reintenta desde el panel
+  }).catch(function(){ mostrar('v-error-envio'); });
 }
 
 init();

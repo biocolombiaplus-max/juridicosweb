@@ -126,6 +126,7 @@ function doPost(e) {
       case 'marcar_tutela_pagada': return marcarTutelaPagada(datos);
       case 'guardar_multas':      return guardarMultasEstructuradas(datos);
       case 'completar_datos_cliente': return completarDatosCliente(datos);
+      case 'agregar_correo_radicacion': return agregarCorreoRadicacion(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -600,6 +601,39 @@ function buscarCorreoRadicacion(ciudad) {
     return mejorParcial;
   } catch (err) {
     return null;
+  }
+}
+
+// Permite agregar el correo de una secretaría directamente desde el panel
+// admin, sin tener que abrir la hoja externa de correos — se usa justo
+// cuando radicarPorCorreo falla por falta de correo para esa ciudad, para
+// poder corregirlo y reintentar sin salir de la app.
+function agregarCorreoRadicacion(datos) {
+  if (!datos.ciudad || !datos.correo) return respuestaJson({ ok: false, error: 'Falta la ciudad o el correo' });
+  try {
+    var libro = SpreadsheetApp.openById(CORREOS_RADICACION_SHEET_ID);
+    var hoja = libro.getSheets()[0];
+    var valores = hoja.getDataRange().getValues();
+    var colCiudad = 0, colCorreo = 1;
+    if (valores.length) {
+      var encabezados = valores[0].map(function (h) { return normalizarTexto(String(h)); });
+      var ci = -1, co = -1;
+      encabezados.forEach(function (h, i) {
+        if (ci === -1 && /ciudad|municipio|organismo/.test(h)) ci = i;
+        if (co === -1 && /correo|email|mail/.test(h)) co = i;
+      });
+      if (ci !== -1) colCiudad = ci;
+      if (co !== -1) colCorreo = co;
+    } else {
+      hoja.appendRow(['Ciudad', 'Correo']);
+    }
+    var fila = [];
+    fila[colCiudad] = datos.ciudad;
+    fila[colCorreo] = datos.correo;
+    hoja.appendRow(fila);
+    return respuestaJson({ ok: true });
+  } catch (err) {
+    return respuestaJson({ ok: false, error: String(err) });
   }
 }
 
