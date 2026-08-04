@@ -536,9 +536,14 @@ function radicarPorCorreo(datos) {
     var asunto = 'DERECHO DE PETICIÓN — Radicación electrónica — ' + nombres + ' ' + apellidos + ' — C.C. ' + cedula;
     var cuerpoHtml = construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente, p.ciudad);
 
+    // "name" cambia el nombre de remitente que ve la secretaría (aunque la
+    // cuenta de correo real siga siendo la del despacho) -- así el correo se
+    // percibe como enviado por el propio ciudadano, no por una firma de
+    // abogados, lo que hace más viable la radicación.
     MailApp.sendEmail({
       to: correoSecretaria, cc: EMAIL_DESPACHO, subject: asunto,
       htmlBody: cuerpoHtml, attachments: blob ? [blob] : [],
+      name: nombres + ' ' + apellidos,
     });
 
     hojaFirmados.getRange(p.filaNum, idx['Canal de radicación'] + 1)
@@ -683,7 +688,15 @@ function extraerIdDrive(url) {
 // derecho de petición y validez de mensajes de datos — no inventa
 // jurisprudencia puntual, precisamente para que el texto sea defendible.
 function construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, emailCliente, ciudad) {
-  var hoy = Utilities.formatDate(new Date(), 'GMT-5', "d 'de' MMMM 'de' yyyy");
+  // Utilities.formatDate con 'MMMM' usa el locale del proyecto de Apps
+  // Script, que por defecto suele quedar en inglés (salía "4 de August de
+  // 2026") -- se arma el mes a mano para que siempre quede en español sin
+  // depender de esa configuración.
+  var MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var ahora = new Date();
+  var hoy = Utilities.formatDate(ahora, 'GMT-5', 'd') + ' de ' +
+    MESES_ES[Number(Utilities.formatDate(ahora, 'GMT-5', 'M')) - 1] + ' de ' +
+    Utilities.formatDate(ahora, 'GMT-5', 'yyyy');
   var ciudadTxt = ciudad || '';
   return '' +
     '<div style="font-family:Georgia,serif;color:#1a1a1a;line-height:1.6;max-width:700px;">' +
@@ -710,9 +723,9 @@ function construirCorreoRadicacionLegal(nombres, apellidos, cedula, placa, email
     '</ol>' +
     '<p>De no recibirse respuesta de fondo dentro del término legal, o de considerarse improcedente el rechazo de esta radicación por el solo hecho de no haberse efectuado a través de un formulario o plataforma interna, el peticionario se reserva el derecho de acudir a los mecanismos judiciales y constitucionales pertinentes, incluida la acción de tutela por vulneración del derecho fundamental de petición.</p>' +
     '<p>Cordialmente,</p>' +
-    '<p><strong>JurídicosWeb.com</strong> — Bufete Experto en Derecho de Tránsito<br>' +
-    'En representación de los intereses de ' + nombres + ' ' + apellidos + ', C.C. No. ' + cedula + '<br>' +
-    WHATSAPP_DESPACHO + ' · ' + EMAIL_DESPACHO + '</p>' +
+    '<p><strong>' + nombres + ' ' + apellidos + '</strong><br>' +
+    'C.C. No. ' + cedula + (placa ? ', placa ' + placa : '') + '<br>' +
+    (emailCliente || '') + '</p>' +
     '</div>';
 }
 
