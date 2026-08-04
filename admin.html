@@ -626,6 +626,41 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
+<!-- MODAL CONFIRMAR PAGO (corrige plan/monto si el cliente pagó distinto a lo seleccionado) -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-confirmar-pago">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>💰 Confirmar Pago</h2>
+      <button class="modal-close" onclick="closeModal('modal-confirmar-pago')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
+        Confirma qué plan y monto realmente pagó <strong id="cp-cliente-nombre">—</strong>. Si eligió un plan en la
+        página pero al final pagó otro (ej. seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar),
+        corrígelo aquí — así el caso queda con el plan correcto y el sistema calcula bien el saldo pendiente.
+      </p>
+      <div class="form-group-m">
+        <label>Plan que realmente pagó</label>
+        <select id="cp-plan" onchange="actualizarMontoSugeridoPago()">
+          <option value="Pago individual — $45.000 c/u">Pago individual — $45.000 c/u</option>
+          <option value="Eliminar todas las que apliquen — $69.000">Eliminar todas las que apliquen — $69.000</option>
+          <option value="Pago al Eliminar — Adelanto $19.800 + $95.500 c/u">Pago al Eliminar — Adelanto $19.800 + $95.500 c/u</option>
+        </select>
+      </div>
+      <div class="form-group-m">
+        <label>Monto realmente pagado</label>
+        <input type="number" id="cp-monto" inputmode="numeric">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-primary" id="btn-confirmar-cp" onclick="confirmarPagoDesdeModal()">💰 Confirmar Pago</button>
+        <button class="btn btn-outline" onclick="closeModal('modal-confirmar-pago')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
 <!-- MODAL COMPLETAR MULTAS (para firma sin llenar nada) -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-multas">
@@ -1316,7 +1351,7 @@ function buildAcciones(row, estado){
   }
 
   if(estado==='pendiente'){
-    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'confirmar_pago\',this,null,\'confirmar_pago\')">💰 Confirmar Pago</button>';
+    html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="abrirModalConfirmarPago(this)">💰 Confirmar Pago</button>';
   }
 
   // A partir de que el pago está confirmado, sin importar la etapa exacta,
@@ -1854,6 +1889,77 @@ function guardarCorreoRadicacionYReintentar(){
     btn.disabled = false; btn.innerHTML = '💾 Guardar y radicar';
     showToast('Error de conexión: '+e.message,'error');
   });
+}
+
+// ══════════════════════════════════════════════════
+// CONFIRMAR PAGO (permite corregir plan/monto si el cliente pagó distinto
+// a lo que había seleccionado en la página)
+// ══════════════════════════════════════════════════
+var _cpCasoRow = null;
+
+function montoSugeridoPlan(plan, row){
+  var n = Number(row['Multas Seleccionadas']) || 1;
+  if(/Eliminar todas/i.test(plan||'')) return 69000;
+  if(/Adelanto/i.test(plan||'')) return 19800;
+  return 45000 * n;
+}
+
+function abrirModalConfirmarPago(btn){
+  var row;
+  try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
+  // Sin nombre o cédula el documento saldría incompleto — igual que antes,
+  // se pide completar los datos primero.
+  if(!row['Nombres'] || !row['Cédula']){
+    showToast('⚠️ Falta nombre o cédula — complétalos antes de confirmar el pago','error');
+    openModalDatosCliente(row, 'completar');
+    return;
+  }
+  _cpCasoRow = row;
+  document.getElementById('cp-cliente-nombre').textContent = (row['Nombres']||'')+' '+(row['Apellidos']||'');
+  var planSel = document.getElementById('cp-plan');
+  var planActual = row['Plan'] || 'Pago individual — $45.000 c/u';
+  var coincide = Array.prototype.some.call(planSel.options, function(o){ return o.value===planActual; });
+  planSel.value = coincide ? planActual : 'Pago individual — $45.000 c/u';
+  document.getElementById('cp-monto').value = row['Monto Total'] || montoSugeridoPlan(planSel.value, row);
+  document.getElementById('modal-confirmar-pago').classList.add('show');
+}
+
+function actualizarMontoSugeridoPago(){
+  if(!_cpCasoRow) return;
+  var plan = document.getElementById('cp-plan').value;
+  document.getElementById('cp-monto').value = montoSugeridoPlan(plan, _cpCasoRow);
+}
+
+function confirmarPagoDesdeModal(){
+  if(!_cpCasoRow) return;
+  var plan = document.getElementById('cp-plan').value;
+  var monto = Number(document.getElementById('cp-monto').value);
+  if(!monto || monto <= 0){ showToast('⚠️ Escribe el monto realmente pagado','error'); return; }
+
+  var btn = document.getElementById('btn-confirmar-cp');
+  btn.disabled = true; var textoOriginal = btn.textContent; btn.textContent='Procesando...';
+  var payload = {
+    _accion: 'confirmar_pago',
+    email: _cpCasoRow['Email'], cedula: _cpCasoRow['Cédula'], nombres: _cpCasoRow['Nombres'],
+    plan: plan, montoTotal: monto, multasSeleccionadas: _cpCasoRow['Multas Seleccionadas'],
+  };
+  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      btn.disabled = false; btn.textContent = textoOriginal;
+      if(data.ok){
+        showToast('✅ Pago confirmado','success');
+        closeModal('modal-confirmar-pago');
+        closeModal('modal-caso');
+        setTimeout(loadData, 1500);
+        return;
+      }
+      showToast('Error: '+(data.error||'desconocido'),'error');
+    })
+    .catch(function(e){
+      btn.disabled = false; btn.textContent = textoOriginal;
+      showToast('Error de conexión: '+e.message,'error');
+    });
 }
 
 // Mensajes de WhatsApp pre-armados para los momentos más delicados del

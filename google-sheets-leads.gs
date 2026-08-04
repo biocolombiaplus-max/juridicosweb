@@ -237,10 +237,17 @@ function actualizarEstadoPago(datos) {
   if (datos.montoTotal) valores['Monto Total'] = datos.montoTotal;
   if (datos.plan) valores['Plan'] = datos.plan;
 
+  // El plan puede venir corregido desde el panel (el cliente eligió uno en la
+  // página pero terminó pagando otro) — recalculamos el saldo pendiente según
+  // el plan definitivo, y lo limpiamos si ya no es el Plan Pago al Eliminar,
+  // para no dejar un saldo fantasma de una corrección anterior.
   var plan = datos.plan || obtenerValorFila(hoja, fila, 'Plan');
   if (/Adelanto/i.test(plan || '')) {
     var n = Number(datos.multasSeleccionadas) || Number(obtenerValorFila(hoja, fila, 'Multas Seleccionadas')) || 1;
     valores['Saldo Pendiente'] = VALOR_SALDO_DIFERIDO * n;
+  } else if (datos.plan) {
+    valores['Saldo Pendiente'] = '';
+    valores['Saldo Pagado'] = 'FALSE';
   }
 
   escribirFila(hoja, fila, valores);
