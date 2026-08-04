@@ -35,7 +35,7 @@ var CARPETA_DRIVE_FIRMAS = 'JuridicosWeb - Documentos Firmados'; // se crea sola
 // no importa, esta función busca por lo que contenga esas palabras.
 var CORREOS_RADICACION_SHEET_ID = '1RB8EfYBtsn3zZ2BayYxJjD8p7w3M7ElGGqFazcnhObU';
 
-var VALOR_SALDO_DIFERIDO = 95900; // lo que falta pagar por multa en el Plan Pago al Eliminar
+var VALOR_SALDO_DIFERIDO = 95500; // lo que falta pagar por multa en el Plan Pago al Eliminar
 var DIAS_HABILES_RESPUESTA = 15;  // Art. 14 CPACA
 var VALOR_TUTELA = 45000; // se cobra SOLO si la tutela resulta positiva — es la garantía
 var WHATSAPP_DESPACHO = '573159318400';

@@ -349,6 +349,7 @@ h2.title span{color:var(--gold);}
 .pc-cool .pc-note{background:rgba(230,57,70,0.04);color:var(--gray);border:1px solid rgba(230,57,70,0.12);}
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
 .btn-nequi{background:linear-gradient(135deg,#7c1f4e,#a02562);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;}
+.btn-wa-sm{background:linear-gradient(135deg,#25d366,#1db954);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;text-decoration:none;}
 .btn-nequi:hover{transform:translateY(-2px);}
 .nequi-card{background:linear-gradient(135deg,#5a1249,#8e1b6b);border-radius:16px;padding:20px;margin:12px 0 16px;text-align:center;box-shadow:0 8px 24px rgba(142,27,107,0.32);}
 .nequi-card-label{color:rgba(255,255,255,0.8);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:6px;}
@@ -898,7 +899,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </ul>
         <button class="btn btn-navy btn-full" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice"></i> Consultar y elegir</button>
         <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi btn-full" onclick="abrirNequi(45000)"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
+          <button class="btn-nequi" onclick="abrirNequi(45000)"><i class="fas fa-mobile-alt"></i> Nequi</button>
+          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('individual')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
       </div>
       <div class="price-card pc-hot">
@@ -916,13 +918,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="pc-note">ℹ️ Si tus multas están en varias secretarías, se genera un documento por cada una — sin costo adicional.</div>
         <button class="btn btn-shimmer btn-full btn-pulse" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-bolt"></i> Consultar y elegir</button>
         <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi btn-full" onclick="abrirNequi(69000)"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
+          <button class="btn-nequi" onclick="abrirNequi(69000)"><i class="fas fa-mobile-alt"></i> Nequi</button>
+          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('masivo')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
       </div>
       <div class="price-card pc-cool" style="opacity:0.92;">
         <div class="pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
         <div class="pc-name">Pago al Eliminar</div>
-        <div class="pc-price">$95.900</div>
+        <div class="pc-price">$95.500</div>
         <div class="pc-desc">Por cada multa, solo cuando se elimine · Adelanto $19.800</div>
         <ul class="pc-features">
           <li><i class="fas fa-check-circle"></i> Pagas la mayor parte al eliminar</li>
@@ -930,10 +933,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><i class="fas fa-check-circle"></i> Derecho de petición profesional</li>
           <li><i class="fas fa-check-circle"></i> Soporte WhatsApp</li>
         </ul>
-        <div class="pc-note">⚠️ Si al eliminarse la multa no pagas los $95.900 restantes, el comparendo se vuelve a notificar y reactivar en el SIMIT.</div>
+        <div class="pc-note">⚠️ Si al eliminarse la multa no pagas los $95.500 restantes, el comparendo se vuelve a notificar y reactivar en el SIMIT.</div>
         <button class="btn btn-navy btn-full" onclick="openSimitModal(event,'diferido')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice-dollar"></i> Pagar Adelanto $19.800</button>
         <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi btn-full" onclick="abrirNequi(19800)"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
+          <button class="btn-nequi" onclick="abrirNequi(19800)"><i class="fas fa-mobile-alt"></i> Nequi</button>
+          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('diferido')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
       </div>
     </div>
@@ -1267,6 +1271,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <button class="btn-nequi btn-full" onclick="closeOverlay('overlay-main');abrirNequi()" style="padding:14px;font-size:0.9rem;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
               <i class="fas fa-mobile-alt"></i> Pagar por Nequi
             </button>
+            <button class="btn-wa-sm btn-full" onclick="pagarPorWhatsApp(pagoSel)" style="padding:14px;font-size:0.9rem;border-radius:11px;">
+              <i class="fab fa-whatsapp"></i> Pagar por WhatsApp
+            </button>
           </div>
           <div style="margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;">
             <p style="font-size:0.77rem;color:#15803d;line-height:1.7;"><i class="fas fa-info-circle"></i> Con Wompi, tu pago se verifica <strong>automáticamente</strong>: no necesitas enviar comprobante para tu documento. Con Nequi, confírmalo por WhatsApp.</p>
@@ -1398,6 +1405,13 @@ var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
 // La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
 var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
+// Links de pago directo de Wompi (checkout hospedado) para quien prefiera
+// pagar por WhatsApp en vez del widget de la página — mismo cobro, mismo
+// proveedor, solo cambia el canal por el que lo confirma.
+var WOMPI_LINK_INDIVIDUAL = 'https://checkout.wompi.co/l/eQDTXj'; // $45.000 — 1 multa
+var WOMPI_LINK_MASIVO     = 'https://checkout.wompi.co/l/JqYl2i'; // $69.000 — todas las que apliquen
+var WOMPI_LINK_DIFERIDO   = 'https://checkout.wompi.co/l/SH4T1o'; // $19.800 — adelanto Pago al Eliminar
+var WOMPI_LINK_SALDO      = 'https://checkout.wompi.co/l/ealA8Z'; // $95.500 — saldo restante, cuando ya resulta positivo
 // URL de un Apps Script (mismo patrón que GOOGLE_SHEET_URL) que reciba el PDF firmado en base64
 // y lo reenvíe a la secretaría de tránsito correspondiente + lo guarde en Drive.
 var RADICAR_UPLOAD_URL  = '';
@@ -2217,7 +2231,7 @@ function recogerDatosFormulario(){
 
 function nombrePlan(sel){
   if(sel==='masivo') return 'Eliminar todas las que apliquen — $69.000';
-  if(sel==='diferido') return 'Pago al Eliminar — Adelanto $19.800 + $95.900 c/u';
+  if(sel==='diferido') return 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u';
   return 'Pago individual — $45.000 c/u';
 }
 
@@ -2322,7 +2336,7 @@ function renderPagoOpcionesSp5(){
     '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$19.800</p>'+
     '</div>'+
     '<button class="btn btn-navy btn-full" style="padding:14px;font-size:0.9rem;" onclick="elegirPagoFinal(\'diferido\')"><i class="fas fa-file-invoice-dollar"></i> Pagar adelanto $19.800</button>'+
-    '<p style="font-size:0.68rem;color:var(--gray);margin:8px 0 0;text-align:center;">+ $95.900'+(n>1?' por multa':'')+' al finalizar el trámite</p>'+
+    '<p style="font-size:0.68rem;color:var(--gray);margin:8px 0 0;text-align:center;">+ $95.500'+(n>1?' por multa':'')+' al finalizar el trámite</p>'+
     '</div>';
 }
 
@@ -2774,6 +2788,31 @@ function abrirNequi(montoFijo){
     btn.href = 'https://wa.me/573159318400?text='+msg;
   }
   openOverlay('overlay-nequi');
+}
+
+// Pagar por WhatsApp: mismo cobro de Wompi (se verifica automático, igual
+// que el widget de la página), solo que el cliente lo pide por chat en vez
+// de tocar el botón aquí mismo — para quien le da más confianza cerrar con
+// una persona. El mensaje ya trae el link, así el asesor no tiene que
+// buscarlo ni el cliente esperar a que se lo manden.
+function pagarPorWhatsApp(tipo){
+  var info = {
+    individual: { link: WOMPI_LINK_INDIVIDUAL, monto: '45.000',  desc: 'plan de 1 multa' },
+    masivo:     { link: WOMPI_LINK_MASIVO,     monto: '69.000',  desc: 'plan que elimina todas las que apliquen' },
+    diferido:   { link: WOMPI_LINK_DIFERIDO,   monto: '19.800',  desc: 'adelanto del Plan Pago al Eliminar' },
+  }[tipo];
+  if(!info) return;
+
+  var nombre = '';
+  try{ nombre = (recogerDatosFormulario().nombres||'').split(' ')[0]; }catch(e){}
+
+  var verificado = _multasReportadas && _multasReportadas.some(function(m){ return m.estado==='aplica'; });
+  var msg = (nombre ? 'Hola, soy '+nombre+'. ' : 'Hola. ') +
+    (verificado ? 'Ya verifiqué que mi multa aplica para eliminarla ✅ ' : '') +
+    'Quiero pagar el '+info.desc+' ($'+info.monto+'). Aquí está el link: '+info.link;
+
+  jwTrack('pago_whatsapp_iniciado', { plan: tipo, monto: info.monto });
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
 function nequiComprobanteEnviado(){

@@ -700,7 +700,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <select id="nc-plan">
             <option value="Pago individual — $45.000 c/u">Plan Completo $45.000</option>
             <option value="Eliminar todas las que apliquen — $69.000">Plan Elimina Todas $69.000</option>
-            <option value="Pago al Eliminar — Adelanto $19.800 + $95.900 c/u">Plan Pago al Eliminar $19.800</option>
+            <option value="Pago al Eliminar — Adelanto $19.800 + $95.500 c/u">Plan Pago al Eliminar $19.800</option>
           </select>
         </div>
         <div class="form-group-m">
@@ -744,6 +744,10 @@ var SHEET_ID   = '1y2KXtOj1Eo2x8aT5Sucfm6tGvrqf-k7r91V_oDprhOl';
 // propia consulta — se reutiliza aquí para que el admin pueda traer las
 // multas reales de un cliente sin que él mismo tenga que entrar al sitio.
 var SIMIT_PROXY_URL = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';
+// Link de pago de Wompi para el saldo restante del Plan Pago al Eliminar
+// ($95.500 por multa, una vez el caso ya resultó positivo) — mismo link
+// que usa index.html, para que el cliente pague directo sin ir a la página.
+var WOMPI_LINK_SALDO = 'https://checkout.wompi.co/l/ealA8Z';
 
 var USUARIOS = {
   '88262856':    { pass:'juancarlos8302', nombre:'Juan Carlos Cáceres', rol:'Administrador' },
@@ -876,7 +880,7 @@ function getDemoRows(){
   return [
     {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace10),'Fecha Límite 15d':fmt(limiteProximo),'Respuesta Secretaría':'','Tutela Requerida':'FALSE',Cerrado:'FALSE',Notas:'Demo'},
     {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Cerrado:'FALSE',Notas:'Demo — remarketing'},
-    {Fecha:'2025-06-03 09:00:00',Nombres:'Andrés',Apellidos:'Ruiz',Cédula:'5551234',Placa:'JKL456',WhatsApp:'3201234567',Email:'andres@demo.com',Ciudad:'Cali',Plan:'Pago al Eliminar — Adelanto $19.800 + $95.900 c/u','Multas Seleccionadas':1,'Monto Total':19800,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace20),'Fecha Límite 15d':fmt(limiteVencido),'Respuesta Secretaría':'Negativa','Tutela Requerida':'TRUE','Tutela Enviada':'FALSE',Cerrado:'FALSE',Notas:'Demo — tutela'},
+    {Fecha:'2025-06-03 09:00:00',Nombres:'Andrés',Apellidos:'Ruiz',Cédula:'5551234',Placa:'JKL456',WhatsApp:'3201234567',Email:'andres@demo.com',Ciudad:'Cali',Plan:'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u','Multas Seleccionadas':1,'Monto Total':19800,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace20),'Fecha Límite 15d':fmt(limiteVencido),'Respuesta Secretaría':'Negativa','Tutela Requerida':'TRUE','Tutela Enviada':'FALSE',Cerrado:'FALSE',Notas:'Demo — tutela'},
   ];
 }
 
@@ -1444,7 +1448,7 @@ var MENSAJES_CONFIRM = {
   respuesta_positiva:    function(row){ return '¿La secretaría respondió A FAVOR de '+row['Nombres']+'?'; },
   respuesta_negativa:    function(row){ return '¿La secretaría respondió EN CONTRA? Esto marca tutela automáticamente.'; },
   sin_respuesta:         function(row){ return '¿Confirmar que no respondieron dentro del plazo? Esto marca tutela automáticamente.'; },
-  marcar_saldo_pagado:   function(row){ return '¿Confirmar que ya pagó el saldo de $95.900 por multa? Esto cierra el caso.'; },
+  marcar_saldo_pagado:   function(row){ return '¿Confirmar que ya pagó el saldo de $95.500 por multa? Esto cierra el caso.'; },
   marcar_tutela_enviada: function(row){ return '¿Marcar la tutela como radicada ante el juzgado?'; },
   cerrar_caso:           function(row){ return '¿Cerrar este caso manualmente?'; },
   reenviar_firmado:      function(row){ return '¿Reenviar el documento ya firmado al correo de '+row['Nombres']+'?'; },
@@ -1862,8 +1866,8 @@ function waTemplate(row, tipo){
       'Ya se cumplió el plazo legal y, según lo que sabemos, procede una Acción de Tutela para exigir la respuesta y proteger tu derecho ($19.800 por multa). '+
       '¿Quieres que la iniciemos ya mismo?';
   } else if(tipo==='saldo'){
-    msg = 'Hola '+nombre+', ¡buenas noticias! La secretaría respondió a favor y tu multa quedó eliminada. '+
-      'Para el Plan Pago al Eliminar, el último paso es pagar el saldo de $95.900 por multa. ¿Te compartimos el link de pago?';
+    msg = 'Hola '+nombre+', ¡buenas noticias! La secretaría respondió a favor y tu multa quedó eliminada 🎉\n\n'+
+      'Último paso: paga el saldo de $95.500 aquí 👉 '+WOMPI_LINK_SALDO;
   } else if(tipo==='tutela_ganada'){
     msg = 'Hola '+nombre+', ¡ganamos la Tutela! 🎉 El juzgado ordenó a la Secretaría responder tu Derecho de Petición. '+
       'Como acordamos, el costo de la Tutela ($45.000) se cobra ahora que ya tuvimos un resultado positivo. ¿Te compartimos el link de pago?';
