@@ -631,14 +631,17 @@ tr:hover td{background:#f8faff;cursor:pointer}
 <div class="modal-overlay" id="modal-confirmar-pago">
   <div class="modal">
     <div class="modal-header">
-      <h2>💰 Confirmar Pago</h2>
+      <h2 id="cp-modal-titulo">💰 Confirmar Pago</h2>
       <button class="modal-close" onclick="closeModal('modal-confirmar-pago')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;">
-        Confirma qué plan y monto realmente pagó <strong id="cp-cliente-nombre">—</strong>. Si eligió un plan en la
-        página pero al final pagó otro (ej. seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar),
-        corrígelo aquí — así el caso queda con el plan correcto y el sistema calcula bien el saldo pendiente.
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:6px;">
+        Cliente: <strong id="cp-cliente-nombre">—</strong>
+      </p>
+      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;" id="cp-explicacion">
+        Confirma qué plan y monto realmente pagó. Si eligió un plan en la página pero al final pagó otro (ej.
+        seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar), corrígelo aquí — así el caso queda con
+        el plan correcto y el sistema calcula bien el saldo pendiente.
       </p>
       <div class="form-group-m">
         <label>Plan que realmente pagó</label>
@@ -1244,11 +1247,28 @@ function abrirCaso(rowJson){
   html += detailItem('Fecha radicación', row['Fecha Radicación']||'—');
   html += detailItem('Fecha límite 15d', row['Fecha Límite 15d'] ? row['Fecha Límite 15d']+' — '+(dias===null?'':badgeDias(dias)) : '—');
   html += detailItem('Respuesta secretaría', row['Respuesta Secretaría']||'Sin respuesta todavía');
-  if(Number(row['Saldo Pendiente']||0) > 0){
-    html += detailItem('Saldo pendiente (Pago al Eliminar)', '$'+Number(row['Saldo Pendiente']).toLocaleString('es-CO')+(row['Saldo Pagado']==='TRUE'?' — ✅ Pagado':' — ⏳ Por cobrar'));
-  }
   html += detailItem('Notas', row['Notas']||'Sin notas');
   html += '</div>';
+
+  // Saldo del Plan Pago al Eliminar — se resalta aparte del resto de datos
+  // porque es dinero que falta cobrar (o ya se cobró), no un dato más.
+  if(Number(row['Saldo Pendiente']||0) > 0){
+    var saldoYaPagado = row['Saldo Pagado']==='TRUE'||row['Saldo Pagado']===true;
+    var saldoMonto = '$'+Number(row['Saldo Pendiente']).toLocaleString('es-CO');
+    if(saldoYaPagado){
+      html += '<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid rgba(22,163,74,0.35);border-radius:12px;padding:14px 16px;margin-bottom:16px;">'+
+        '<span style="font-size:1.6rem;">✅</span>'+
+        '<div><p style="font-size:0.72rem;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:.4px;margin:0 0 2px;">Saldo del Plan Pago al Eliminar</p>'+
+        '<p style="font-size:1.1rem;font-weight:900;color:#15803d;margin:0;">'+saldoMonto+' — cobrado</p></div>'+
+        '</div>';
+    } else {
+      html += '<div style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid rgba(217,119,6,0.4);border-radius:12px;padding:14px 16px;margin-bottom:16px;">'+
+        '<span style="font-size:1.6rem;">⏳</span>'+
+        '<div><p style="font-size:0.72rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.4px;margin:0 0 2px;">Saldo pendiente — Plan Pago al Eliminar</p>'+
+        '<p style="font-size:1.1rem;font-weight:900;color:#92400e;margin:0;">'+saldoMonto+' <span style="font-size:0.8rem;font-weight:700;">por cobrar cuando la secretaría responda a favor</span></p></div>'+
+        '</div>';
+    }
+  }
 
   html += '<div class="section-title">🕐 Línea de Tiempo del Caso</div>';
   html += '<ul class="timeline">'+timeline+'</ul>';
@@ -1358,6 +1378,16 @@ function buildAcciones(row, estado){
   // el admin puede mandar el enlace de firma remota (para casos por
   // WhatsApp que nunca pasaron por el sitio) y, una vez firmado, radicarlo.
   var pagoOk = row['Pago OK']==='TRUE'||row['Pago OK']===true;
+
+  // El cliente puede terminar pagando un plan distinto al que había
+  // seleccionado (ej. eligió $45.000 pero pagó los $19.800 del Plan Pago al
+  // Eliminar) -- esto se detecta muchas veces DESPUÉS de ya confirmado el
+  // pago, así que la corrección queda disponible en cualquier etapa
+  // posterior, no solo al momento de confirmar.
+  if(pagoOk){
+    html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="abrirModalConfirmarPago(this)">✏️ Corregir plan / monto</button>';
+  }
+
   var firmado = row['Firmado']==='TRUE'||row['Firmado']===true;
   if(pagoOk && !firmado && row['Cédula']){
     var tieneMultas = false;
@@ -1915,7 +1945,13 @@ function abrirModalConfirmarPago(btn){
     return;
   }
   _cpCasoRow = row;
+  var yaPagado = row['Pago OK']==='TRUE'||row['Pago OK']===true;
   document.getElementById('cp-cliente-nombre').textContent = (row['Nombres']||'')+' '+(row['Apellidos']||'');
+  document.getElementById('cp-modal-titulo').textContent = yaPagado ? '✏️ Corregir plan / monto' : '💰 Confirmar Pago';
+  document.getElementById('cp-explicacion').textContent = yaPagado
+    ? 'Este caso ya tiene el pago confirmado. Si el plan o el monto quedaron mal registrados, corrígelos aquí — se recalcula el saldo pendiente según el plan definitivo.'
+    : 'Confirma qué plan y monto realmente pagó. Si eligió un plan en la página pero al final pagó otro (ej. seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar), corrígelo aquí — así el caso queda con el plan correcto y el sistema calcula bien el saldo pendiente.';
+  document.getElementById('btn-confirmar-cp').textContent = yaPagado ? '💾 Guardar corrección' : '💰 Confirmar Pago';
   var planSel = document.getElementById('cp-plan');
   var planActual = row['Plan'] || 'Pago individual — $45.000 c/u';
   var coincide = Array.prototype.some.call(planSel.options, function(o){ return o.value===planActual; });
@@ -1948,7 +1984,8 @@ function confirmarPagoDesdeModal(){
     .then(function(data){
       btn.disabled = false; btn.textContent = textoOriginal;
       if(data.ok){
-        showToast('✅ Pago confirmado','success');
+        var yaPagado = _cpCasoRow['Pago OK']==='TRUE'||_cpCasoRow['Pago OK']===true;
+        showToast(yaPagado ? '✅ Plan y monto corregidos' : '✅ Pago confirmado','success');
         closeModal('modal-confirmar-pago');
         closeModal('modal-caso');
         setTimeout(loadData, 1500);
