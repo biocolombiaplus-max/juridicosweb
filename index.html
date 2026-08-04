@@ -183,6 +183,14 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .hero-price-anchor strong{color:var(--gold);font-size:0.86rem;}
 .hero-start-cue{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--gold);font-size:0.92rem;font-weight:800;margin-bottom:10px;animation:hero-cue-bounce 1.6s ease-in-out infinite;}
 @keyframes hero-cue-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+.hero-trust-strip{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.hero-trust-strip span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#e2e8f0;font-size:0.68rem;font-weight:700;padding:6px 12px;border-radius:20px;white-space:nowrap;}
+.hero-trust-strip i{color:var(--gold);font-size:0.72rem;}
+.hero-cta-wrap{position:relative;margin-bottom:4px;}
+.hero-cta-glow{position:absolute;inset:-16px;background:radial-gradient(ellipse at center,rgba(45,212,191,0.5),transparent 72%);filter:blur(20px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.4s ease-in-out infinite;}
+@keyframes hero-glow-pulse{0%,100%{opacity:0.5;transform:scale(0.96);}50%{opacity:1;transform:scale(1.04);}}
+.hero-cta-wrap .btn{position:relative;z-index:1;}
+.hero-cta-ribbon{position:absolute;top:-12px;right:10px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
 .hero-sub strong{color:#e2e8f0;}
 .hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
 .hero-ctas-row{display:flex;gap:12px;flex-wrap:wrap;}
@@ -409,7 +417,8 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .footer-bottom p{color:#334155;font-size:0.78rem;}
 
 /* ===== FLOATING WA ===== */
-.wa-float{position:fixed;bottom:22px;right:22px;z-index:980;display:flex;align-items:center;gap:12px;}
+.wa-float{position:fixed;bottom:22px;right:22px;z-index:980;display:flex;align-items:center;gap:12px;transition:opacity .25s,transform .25s;}
+.wa-float-hidden{opacity:0;transform:translateY(12px) scale(0.9);pointer-events:none;}
 .wa-bubble{background:rgba(46,16,101,0.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:10px;font-size:0.8rem;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(10px);transition:.3s;}
 .wa-float:hover .wa-bubble{opacity:1;transform:translateX(0);}
 .wa-btn{width:58px;height:58px;background:linear-gradient(135deg,#25d366,#128c7e);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,0.4);animation:wa-pulse 2.5s ease-in-out infinite;flex-shrink:0;}
@@ -608,6 +617,10 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .hero-ctas-row .btn{width:100%;}
   .hero-badge{font-size:0.65rem;padding:5px 12px;}
   .hero-sub{font-size:0.88rem;}
+  .hero-pills{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .hero-pill{justify-content:center;text-align:center;padding:9px 5px;font-size:0.65rem;white-space:normal;line-height:1.25;}
+  .hero-pill i{font-size:0.85rem;}
+  .hero-trust-strip span{font-size:0.63rem;padding:5px 10px;}
   .hero-stats{grid-template-columns:1fr 1fr 1fr;}
   .norma-grid{grid-template-columns:1fr;}
   h2.title{font-size:1.9rem;}
@@ -665,7 +678,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-inner">
     <div>
       <div class="hero-badge"><span class="dot"></span> Bufete · Tránsito · Colombia · 2026</div>
-      <h1>Deja de Pagar<br><span class="hl">Multas</span><br>que Ya No Debes</h1>
+      <h1>Deja de Pagar<br><span class="hl">Multas</span> y <span class="hl">Fotomultas</span><br>que Ya No Debes</h1>
       <p class="hero-sub">Cada día que esperas, tu dinero sigue en riesgo por una multa que la ley dice que puede eliminarse.</p>
       <p class="hero-qualifier-label">Toca la que se parezca a tu caso (opcional)</p>
       <div class="hero-pills">
@@ -675,13 +688,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <div class="hero-ctas">
 
+        <!-- Franja de confianza premium -->
+        <div class="hero-trust-strip">
+          <span><i class="fas fa-shield-halved"></i> 100% Legal</span>
+          <span><i class="fas fa-hand-holding-dollar"></i> $0 si no aplica</span>
+          <span><i class="fas fa-bolt"></i> Resultado inmediato</span>
+        </div>
+
         <!-- Guía directa hacia el botón principal -->
         <div class="hero-start-cue"><i class="fas fa-arrow-down"></i> Empieza aquí — es gratis</div>
 
         <!-- Botón principal -->
-        <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)" style="width:100%;font-size:1.25rem;padding:26px 24px;border-radius:16px;letter-spacing:.4px;box-shadow:0 10px 40px rgba(45,212,191,0.5);">
-          <i class="fas fa-fire"></i> CONSULTAR MULTAS Y FOTOMULTAS
-        </button>
+        <div class="hero-cta-wrap">
+          <div class="hero-cta-glow"></div>
+          <span class="hero-cta-ribbon">100% GRATIS</span>
+          <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)" style="width:100%;font-size:1.25rem;padding:26px 24px;border-radius:16px;letter-spacing:.4px;box-shadow:0 10px 40px rgba(45,212,191,0.5);">
+            <i class="fas fa-fire"></i> CONSULTAR MULTAS Y FOTOMULTAS
+          </button>
+        </div>
 
         <!-- Ancla de precio/gratis -->
         <div class="hero-price-anchor"><i class="fas fa-circle-check"></i> Consulta <strong>100% GRATIS</strong> · Elimínala desde <strong>$45.000</strong></div>
@@ -3026,6 +3050,20 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
     if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
   });
 });
+
+// ===================== OCULTAR WHATSAPP FLOTANTE SOBRE EL HERO =====================
+// El botón flotante es fijo a la pantalla, así que en el hero (donde ya hay
+// su propio botón de WhatsApp) terminaba tapando el texto de precio. Se
+// oculta mientras el hero está a la vista y reaparece al bajar.
+(function(){
+  var heroEl = document.getElementById('inicio');
+  var waFloat = document.querySelector('.wa-float');
+  if(!heroEl || !waFloat || !('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function(entries){
+    waFloat.classList.toggle('wa-float-hidden', entries[0].isIntersecting);
+  }, { threshold: 0.15 });
+  obs.observe(heroEl);
+})();
 
 // ===================== PWA: service worker + instalación =====================
 if('serviceWorker' in navigator){
