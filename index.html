@@ -335,6 +335,7 @@ h2.title span{color:var(--gold);}
 .pc-price{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;margin:8px 0 4px;}
 .pc-hot .pc-price{color:var(--gold);}
 .pc-cool .pc-price{color:var(--navy);}
+.pc-warn .pc-price{color:#dc2626;}
 .pc-desc{font-size:0.82rem;margin-bottom:18px;}
 .pc-hot .pc-desc{color:#64748b;}
 .pc-cool .pc-desc{color:var(--gray);}
@@ -568,6 +569,13 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .mmodal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .otros-casos-grid{grid-template-columns:1fr!important;}
 }
+/* Barra de acción fija: en el paso de firma/pago, el documento legal es
+   largo y empuja el botón importante fuera de la pantalla — esta barra
+   queda siempre visible (no scrollea con .mmodal-body) para que nunca haga
+   falta bajar para saber qué sigue. */
+.mmodal-sticky-cta{display:none;flex-shrink:0;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,0.1);}
+.mmodal-sticky-cta.show{display:block;}
+.mmodal-sticky-cta button{width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -922,18 +930,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <button class="btn-wa-sm" onclick="pagarPorWhatsApp('masivo')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         </div>
       </div>
-      <div class="price-card pc-cool" style="opacity:0.92;">
+      <div class="price-card pc-cool pc-warn" style="opacity:0.92;">
         <div class="pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
         <div class="pc-name">Pago al Eliminar</div>
-        <div class="pc-price">$95.500</div>
-        <div class="pc-desc">Por cada multa, solo cuando se elimine · Adelanto $19.800</div>
+        <div style="font-size:0.72rem;color:var(--gray);font-weight:700;margin:8px 0 0;">Hoy pagas solo $19.800</div>
+        <div class="pc-price" style="font-size:2.1rem;margin:2px 0 4px;">+$95.500 al eliminar</div>
+        <div class="pc-desc">Total real: $115.300 por cada multa</div>
         <ul class="pc-features">
           <li><i class="fas fa-check-circle"></i> Pagas la mayor parte al eliminar</li>
           <li><i class="fas fa-check-circle"></i> Adelanto de $19.800 para iniciar</li>
           <li><i class="fas fa-check-circle"></i> Derecho de petición profesional</li>
           <li><i class="fas fa-check-circle"></i> Soporte WhatsApp</li>
         </ul>
-        <div class="pc-note">⚠️ Si al eliminarse la multa no pagas los $95.500 restantes, el comparendo se vuelve a notificar y reactivar en el SIMIT.</div>
+        <div class="pc-note">⚠️ Este plan sale más caro ($115.300 en total) que pagar de una vez por $45.000. Además, si al eliminarse la multa no pagas los $95.500 restantes, el comparendo se vuelve a notificar y reactivar en el SIMIT.</div>
         <button class="btn btn-navy btn-full" onclick="openSimitModal(event,'diferido')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice-dollar"></i> Pagar Adelanto $19.800</button>
         <div class="pay-methods" style="margin-top:9px;">
           <button class="btn-nequi" onclick="abrirNequi(19800)"><i class="fas fa-mobile-alt"></i> Nequi</button>
@@ -1365,6 +1374,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
     </div>
+    <div class="mmodal-sticky-cta" id="mmodal-sticky-cta">
+      <button type="button" id="sticky-cta-btn"></button>
+    </div>
   </div>
 </div>
 
@@ -1597,6 +1609,39 @@ function goToStep(n){
   };
   document.getElementById('mmodal-title').textContent=titles[n]||'';
   document.querySelector('.mmodal-body').scrollTop = 0;
+  actualizarStickyCta();
+}
+
+// Barra fija con el siguiente paso — en el paso de firma/pago (sp5) el
+// documento legal es largo y sin esto el botón importante queda fuera de
+// pantalla en el celular. Se actualiza sola: antes de firmar invita a
+// firmar, después de firmar cambia a invitar a pagar — nunca hace falta
+// bajar para saber qué sigue.
+function actualizarStickyCta(){
+  var bar = document.getElementById('mmodal-sticky-cta');
+  var btn = document.getElementById('sticky-cta-btn');
+  if(!bar || !btn) return;
+  if(currentStep !== 5){ bar.classList.remove('show'); return; }
+
+  var yaFirmado = !!_archivoFirmadoBase64;
+  bar.classList.add('show');
+  if(!yaFirmado){
+    btn.style.background = 'linear-gradient(135deg,#2dd4bf,#5eead4)';
+    btn.style.color = '#2e1065';
+    btn.innerHTML = '<i class="fas fa-signature"></i> Firmar mi documento ahora';
+    btn.onclick = function(){
+      var panel = document.getElementById('firma-panel');
+      if(panel) panel.scrollIntoView({behavior:'smooth', block:'center'});
+    };
+  } else {
+    btn.style.background = 'var(--navy)';
+    btn.style.color = '#fff';
+    btn.innerHTML = '<i class="fas fa-unlock-alt"></i> Activar mi caso — $'+(_totalPago||0).toLocaleString('es-CO');
+    btn.onclick = function(){
+      var wrap = document.getElementById('sp5-pago-wrap');
+      if(wrap) wrap.scrollIntoView({behavior:'smooth', block:'center'});
+    };
+  }
 }
 
 var _valorConsultado = '';
@@ -2143,6 +2188,9 @@ function renderPlanes(aplican){
     '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Pago al Eliminar</p><p style="font-size:0.73rem;color:var(--gray);margin:0;">Adelanto hoy, resto al eliminar</p></div>'+
     '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$19.800</p></div>'+
     '</div>'+
+    '<div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.25);border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
+    '<p style="font-size:0.72rem;color:#dc2626;font-weight:700;margin:0;line-height:1.5;">⚠️ Con este plan terminas pagando <b>$'+(19800+95500*numSel).toLocaleString('es-CO')+'</b> en total ($19.800 hoy + $95.500'+(numSel>1?' por multa':'')+' al eliminar). Pagando de una vez pagas solo <b>$'+totalIndividual.toLocaleString('es-CO')+'</b>.</p>'+
+    '</div>'+
     '<button onclick="elegirPlan(\'diferido\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;">'+
     '<i class="fas fa-file-signature"></i>Elegir este plan — Continuar</button>'+
     '</div></div>'+
@@ -2588,6 +2636,8 @@ function confirmarFirma(){
     var imgFirma = document.getElementById('doc-firma-img');
     if(imgFirma) imgFirma.scrollIntoView({behavior:'smooth', block:'center'});
   });
+
+  actualizarStickyCta();
 }
 
 function descargarPDFFirmado(){
