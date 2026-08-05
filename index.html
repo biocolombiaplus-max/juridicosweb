@@ -360,10 +360,11 @@ h2.title span{color:var(--gold);}
 .pc-note{font-size:0.79rem;padding:10px 14px;border-radius:8px;margin-bottom:18px;line-height:1.5;}
 .pc-hot .pc-note{background:rgba(45,212,191,0.08);color:#94a3b8;border:1px solid rgba(45,212,191,0.15);}
 .pc-cool .pc-note{background:rgba(230,57,70,0.04);color:var(--gray);border:1px solid rgba(230,57,70,0.12);}
-.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
-.btn-nequi{background:linear-gradient(135deg,#7c1f4e,#a02562);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;}
-.btn-wa-sm{background:linear-gradient(135deg,#25d366,#1db954);color:#fff;padding:11px;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;font-family:'Inter',sans-serif;text-decoration:none;}
-.btn-nequi:hover{transform:translateY(-2px);}
+@keyframes shimmer-nequi{0%{background-position:-200% center;}100%{background-position:200% center;}}
+@keyframes glow-pulse-nequi{0%,100%{box-shadow:0 4px 16px rgba(219,39,119,0.45);}50%{box-shadow:0 6px 34px rgba(219,39,119,0.8);}}
+.btn-nequi-pro{background:linear-gradient(90deg,#ff2d78 0%,#c026d3 30%,#7c1fa0 50%,#c026d3 70%,#ff2d78 100%);background-size:200% auto;animation:shimmer-nequi 2.5s linear infinite,glow-pulse-nequi 2.2s ease-in-out infinite;color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;position:relative;overflow:visible;transition:transform .2s;}
+.btn-nequi-pro:hover{transform:translateY(-2px);}
+.btn-nequi-ribbon{position:absolute;top:-11px;right:12px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.62rem;font-weight:900;padding:4px 11px;border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,0.35);letter-spacing:.2px;z-index:2;}
 .nequi-card{background:linear-gradient(135deg,#5a1249,#8e1b6b);border-radius:16px;padding:20px;margin:12px 0 16px;text-align:center;box-shadow:0 8px 24px rgba(142,27,107,0.32);}
 .nequi-card-label{color:rgba(255,255,255,0.8);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .nequi-card-number{color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:2.15rem;letter-spacing:2px;font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:12px;}
@@ -589,6 +590,11 @@ body{padding-bottom:env(safe-area-inset-bottom);}
 .mmodal-sticky-cta{display:none;flex-shrink:0;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,0.1);}
 .mmodal-sticky-cta.show{display:block;}
 .mmodal-sticky-cta button{width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+/* Dorado real (distinto del "--gold" del sitio, que en realidad es teal) —
+   para que el botón de activar el caso se sienta como una recompensa,
+   visualmente distinto del teal que ya se usa en todo el resto del sitio. */
+@keyframes sticky-glow-pulse{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(245,197,24,0.5);}50%{box-shadow:0 4px 28px rgba(0,0,0,0.24),0 0 28px rgba(245,197,24,0.7);}}
+.mmodal-sticky-cta button.sticky-cta-listo{background:linear-gradient(90deg,#f5c518 0%,#facc15 30%,#fde68a 50%,#facc15 70%,#f5c518 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse 2s ease-in-out infinite;color:#2e1065!important;}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -628,7 +634,6 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .mmodal-head h3{font-size:1rem;}
   .mmodal{border-radius:16px 16px 0 0;}
   .overlay{align-items:flex-end;padding:0;}
-  .pay-methods{grid-template-columns:1fr;}
   .social-proof-bar{gap:16px;}
   .step-item{flex:0 0 100%;}
   .footer-inner{gap:24px;}
@@ -938,10 +943,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><i class="fas fa-check-circle"></i> Soporte por WhatsApp</li>
         </ul>
         <button class="btn btn-navy btn-full" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice"></i> Consultar y elegir</button>
-        <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi" onclick="abrirNequi(45000)"><i class="fas fa-mobile-alt"></i> Nequi</button>
-          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('individual')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        </div>
+        <button class="btn-nequi-pro btn-full" onclick="abrirNequi(45000)" style="margin-top:9px;padding:13px;font-size:0.86rem;"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
       </div>
       <div class="price-card pc-hot">
         <div class="pc-ribbon">⭐ MEJOR PRECIO</div>
@@ -957,10 +959,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </ul>
         <div class="pc-note">ℹ️ Si tus multas están en varias secretarías, se genera un documento por cada una — sin costo adicional.</div>
         <button class="btn btn-shimmer btn-full btn-pulse" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-bolt"></i> Consultar y elegir</button>
-        <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi" onclick="abrirNequi(69000)"><i class="fas fa-mobile-alt"></i> Nequi</button>
-          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('masivo')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        </div>
+        <button class="btn-nequi-pro btn-full" onclick="abrirNequi(69000)" style="margin-top:9px;padding:13px;font-size:0.86rem;"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
       </div>
       <div class="price-card pc-cool pc-warn" style="opacity:0.92;">
         <div class="pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -976,10 +975,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </ul>
         <div class="pc-note">⚠️ Este plan sale más caro ($115.300 en total) que pagar de una vez por $45.000. Además, si al eliminarse la multa no pagas los $95.500 restantes, el comparendo se vuelve a notificar y reactivar en el SIMIT.</div>
         <button class="btn btn-navy btn-full" onclick="openSimitModal(event,'diferido')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-invoice-dollar"></i> Pagar Adelanto $19.800</button>
-        <div class="pay-methods" style="margin-top:9px;">
-          <button class="btn-nequi" onclick="abrirNequi(19800)"><i class="fas fa-mobile-alt"></i> Nequi</button>
-          <button class="btn-wa-sm" onclick="pagarPorWhatsApp('diferido')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-        </div>
+        <button class="btn-nequi-pro btn-full" onclick="abrirNequi(19800)" style="margin-top:9px;padding:13px;font-size:0.86rem;"><i class="fas fa-mobile-alt"></i> Pagar por Nequi</button>
       </div>
     </div>
     <div class="tutela-box">
@@ -1305,15 +1301,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p style="color:#2dd4bf;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $45.000</p>
             <p style="color:#94a3b8;font-size:0.8rem;">Al aprobarse, tu documento final se genera automáticamente</p>
           </div>
-          <div id="pago-btns" style="display:flex;flex-direction:column;gap:9px;">
+          <div id="pago-btns" style="display:flex;flex-direction:column;gap:14px;">
             <button id="btn-wompi" class="btn btn-shimmer btn-full btn-pulse" style="padding:15px;font-size:0.93rem;border-radius:11px;" onclick="iniciarPagoPrincipal()">
               <i class="fas fa-credit-card"></i> Pagar con Tarjeta / PSE / Bancolombia – Wompi
             </button>
-            <button class="btn-nequi btn-full" onclick="closeOverlay('overlay-main');abrirNequi()" style="padding:14px;font-size:0.9rem;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <button class="btn-nequi-pro btn-full" onclick="closeOverlay('overlay-main');abrirNequi()" style="padding:15px;font-size:0.93rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <span class="btn-nequi-ribbon">💜 El favorito de los colombianos</span>
               <i class="fas fa-mobile-alt"></i> Pagar por Nequi
-            </button>
-            <button class="btn-wa-sm btn-full" onclick="pagarPorWhatsApp(pagoSel)" style="padding:14px;font-size:0.9rem;border-radius:11px;">
-              <i class="fab fa-whatsapp"></i> Pagar por WhatsApp
             </button>
           </div>
           <div style="margin-top:13px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;">
@@ -1449,12 +1443,6 @@ var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
 // La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
 var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
-// Links de pago directo de Wompi (checkout hospedado) para quien prefiera
-// pagar por WhatsApp en vez del widget de la página — mismo cobro, mismo
-// proveedor, solo cambia el canal por el que lo confirma.
-var WOMPI_LINK_INDIVIDUAL = 'https://checkout.wompi.co/l/eQDTXj'; // $45.000 — 1 multa
-var WOMPI_LINK_MASIVO     = 'https://checkout.wompi.co/l/JqYl2i'; // $69.000 — todas las que apliquen
-var WOMPI_LINK_DIFERIDO   = 'https://checkout.wompi.co/l/SH4T1o'; // $19.800 — adelanto Pago al Eliminar
 var WOMPI_LINK_SALDO      = 'https://checkout.wompi.co/l/ealA8Z'; // $95.500 — saldo restante, cuando ya resulta positivo
 // URL de un Apps Script (mismo patrón que GOOGLE_SHEET_URL) que reciba el PDF firmado en base64
 // y lo reenvíe a la secretaría de tránsito correspondiente + lo guarde en Drive.
@@ -1658,6 +1646,7 @@ function actualizarStickyCta(){
   var yaFirmado = !!_archivoFirmadoBase64;
   bar.classList.add('show');
   if(!yaFirmado){
+    btn.classList.remove('sticky-cta-listo');
     btn.style.background = 'linear-gradient(135deg,#2dd4bf,#5eead4)';
     btn.style.color = '#2e1065';
     btn.innerHTML = '<i class="fas fa-signature"></i> Firmar mi documento ahora';
@@ -1666,8 +1655,12 @@ function actualizarStickyCta(){
       if(panel) panel.scrollIntoView({behavior:'smooth', block:'center'});
     };
   } else {
-    btn.style.background = 'var(--navy)';
-    btn.style.color = '#fff';
+    // Gana el mismo tratamiento dorado y con brillo que el CTA principal del
+    // sitio — justo después de firmar es el momento de más entusiasmo del
+    // cliente, y un botón plano ahí se pierde en vez de aprovecharlo.
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.classList.add('sticky-cta-listo');
     btn.innerHTML = '<i class="fas fa-unlock-alt"></i> Activar mi caso — $'+(_totalPago||0).toLocaleString('es-CO');
     btn.onclick = function(){
       var wrap = document.getElementById('sp5-pago-wrap');
@@ -2415,8 +2408,10 @@ function renderPagoOpcionesSp5(){
     '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar al Eliminar</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">Adelanto hoy, resto solo cuando se elimine</p></div>'+
     '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$19.800</p>'+
     '</div>'+
+    '<div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.25);border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
+    '<p style="font-size:0.72rem;color:#dc2626;font-weight:700;margin:0;line-height:1.5;">⚠️ Con este plan terminas pagando <b>$'+(19800+95500*n).toLocaleString('es-CO')+'</b> en total ($19.800 hoy + $95.500'+(n>1?' por multa':'')+' al eliminar). Pagando de una vez pagas solo <b>$'+totalInmediato.toLocaleString('es-CO')+'</b>.</p>'+
+    '</div>'+
     '<button class="btn btn-navy btn-full" style="padding:14px;font-size:0.9rem;" onclick="elegirPagoFinal(\'diferido\')"><i class="fas fa-file-invoice-dollar"></i> Pagar adelanto $19.800</button>'+
-    '<p style="font-size:0.68rem;color:var(--gray);margin:8px 0 0;text-align:center;">+ $95.500'+(n>1?' por multa':'')+' al finalizar el trámite</p>'+
     '</div>';
 }
 
@@ -2870,31 +2865,6 @@ function abrirNequi(montoFijo){
     btn.href = 'https://wa.me/573159318400?text='+msg;
   }
   openOverlay('overlay-nequi');
-}
-
-// Pagar por WhatsApp: mismo cobro de Wompi (se verifica automático, igual
-// que el widget de la página), solo que el cliente lo pide por chat en vez
-// de tocar el botón aquí mismo — para quien le da más confianza cerrar con
-// una persona. El mensaje ya trae el link, así el asesor no tiene que
-// buscarlo ni el cliente esperar a que se lo manden.
-function pagarPorWhatsApp(tipo){
-  var info = {
-    individual: { link: WOMPI_LINK_INDIVIDUAL, monto: '45.000',  desc: 'plan de 1 multa' },
-    masivo:     { link: WOMPI_LINK_MASIVO,     monto: '69.000',  desc: 'plan que elimina todas las que apliquen' },
-    diferido:   { link: WOMPI_LINK_DIFERIDO,   monto: '19.800',  desc: 'adelanto del Plan Pago al Eliminar' },
-  }[tipo];
-  if(!info) return;
-
-  var nombre = '';
-  try{ nombre = (recogerDatosFormulario().nombres||'').split(' ')[0]; }catch(e){}
-
-  var verificado = _multasReportadas && _multasReportadas.some(function(m){ return m.estado==='aplica'; });
-  var msg = (nombre ? 'Hola, soy '+nombre+'. ' : 'Hola. ') +
-    (verificado ? 'Ya verifiqué que mi multa aplica para eliminarla ✅ ' : '') +
-    'Quiero pagar el '+info.desc+' ($'+info.monto+'). Aquí está el link: '+info.link;
-
-  jwTrack('pago_whatsapp_iniciado', { plan: tipo, monto: info.monto });
-  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
 function nequiComprobanteEnviado(){
