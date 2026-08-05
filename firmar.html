@@ -68,14 +68,24 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
 .mres-check.is-on{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-color:transparent}
 /* Documento */
 .doc-preview{background:#fdfdfb;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:Georgia,serif;font-size:.76rem;line-height:1.65;white-space:pre-wrap;max-height:340px;overflow-y:auto;color:#1e293b}
+.doc-preview.collapsed{max-height:110px}
+.doc-toggle{display:block;width:100%;text-align:center;font-size:.74rem;font-weight:700;color:var(--navy);text-decoration:underline;background:none;border:none;cursor:pointer;padding:8px 0 4px;}
 .doc-tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
 .doc-tab{flex-shrink:0;padding:7px 13px;border-radius:20px;font-size:.72rem;font-weight:700;background:var(--light);color:var(--navy);cursor:pointer;border:1.5px solid transparent}
 .doc-tab.active{background:var(--navy);color:#fff}
 /* Firma */
-.firma-box{border:2.5px dashed var(--border);border-radius:14px;padding:8px;margin:14px 0;background:#fff}
+.firma-box{border:2.5px solid var(--teal);border-radius:14px;padding:8px;margin:10px 0 14px;background:#fff;position:relative;box-shadow:0 0 0 4px rgba(45,212,191,.14);animation:firma-pulse 2s ease-in-out infinite;}
+.firma-box.tiene-firma{animation:none;border-color:var(--green);box-shadow:0 0 0 4px rgba(22,163,74,.14);}
+@keyframes firma-pulse{0%,100%{box-shadow:0 0 0 4px rgba(45,212,191,.14);}50%{box-shadow:0 0 0 10px rgba(45,212,191,.05);}}
+.firma-placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:.82rem;font-weight:700;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.firma-placeholder i{font-size:1.4rem;color:var(--teal);}
 #firma-canvas{width:100%;height:170px;touch-action:none;border-radius:8px;background:#fbfbfd;display:block}
 .firma-actions{display:flex;gap:8px;margin-bottom:14px}
 .firma-actions .btn{padding:10px;font-size:.78rem}
+/* Barra fija de firma — siempre visible, sin depender de scroll */
+.firma-sticky{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.14);}
+.firma-sticky .btn{max-width:520px;margin:0 auto;box-shadow:0 4px 18px rgba(45,212,191,.45);}
+body.pad-sticky{padding-bottom:92px;}
 /* Progreso */
 .steps{display:flex;gap:5px;margin-bottom:18px}
 .steps span{flex:1;height:4px;border-radius:3px;background:var(--border)}
@@ -180,18 +190,29 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
   <!-- PASO 3: DOCUMENTO + FIRMA -->
   <div class="card hidden" id="v-documento">
     <h2 style="font-size:1.05rem;margin-bottom:4px;"><i class="fas fa-file-contract" style="color:var(--teal);"></i> Tu Derecho de Petición</h2>
-    <p class="lead" style="margin-bottom:12px;">Este es exactamente el texto que se radicará a tu nombre.</p>
+    <p class="lead" style="margin-bottom:10px;">Este es exactamente el texto que se radicará a tu nombre.</p>
     <div class="doc-tabs" id="doc-tabs"></div>
-    <div class="doc-preview" id="doc-preview"></div>
+    <div class="doc-preview collapsed" id="doc-preview"></div>
+    <button type="button" class="doc-toggle" id="doc-toggle-btn" onclick="toggleDocCompleto()">Ver documento completo ▾</button>
 
-    <h3 style="font-size:.95rem;margin:18px 0 6px;"><i class="fas fa-signature" style="color:var(--teal);"></i> Firma aquí</h3>
-    <p class="lead" style="margin-bottom:8px;">Dibuja tu firma con el dedo dentro del recuadro.</p>
-    <div class="firma-box"><canvas id="firma-canvas" width="600" height="220"></canvas></div>
+    <h3 style="font-size:1rem;margin:14px 0 4px;"><i class="fas fa-signature" style="color:var(--teal);"></i> Firma aquí — es lo único que falta</h3>
+    <p class="lead" style="margin-bottom:8px;">Dibuja tu firma con el dedo dentro del recuadro de abajo 👇</p>
+    <div class="firma-box" id="firma-box">
+      <canvas id="firma-canvas" width="600" height="220"></canvas>
+      <div class="firma-placeholder" id="firma-placeholder"><i class="fas fa-hand-point-down"></i>Firma aquí con el dedo</div>
+    </div>
     <div class="firma-actions">
       <button class="btn btn-outline btn-sm" onclick="limpiarFirma()"><i class="fas fa-eraser"></i> Borrar</button>
     </div>
     <button class="btn btn-primary" id="btn-firmar" onclick="firmarYEnviar()"><i class="fas fa-check-circle"></i> Firmar y enviar</button>
     <p class="footer-note">Al firmar, se genera tu PDF, se descarga a tu teléfono y te lo enviamos también por correo.</p>
+  </div>
+
+  <!-- Barra fija: siempre visible mientras se firma, así nunca hace falta
+       bajar para saber qué falta hacer. Cambia sola de "ve a firmar" a
+       "firmar y enviar" apenas empieza a dibujar la firma. -->
+  <div class="firma-sticky hidden" id="firma-sticky-cta">
+    <button type="button" class="btn btn-primary" id="firma-sticky-btn"></button>
   </div>
 
   <!-- PASO 4: PAGO (solo si firmó sin tener el pago confirmado todavía) -->
@@ -239,10 +260,7 @@ var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqn
 // Pago en línea (mismos datos reales que usa index.html) — quien firma sin
 // haber pagado todavía puede activar y pagar su caso aquí mismo, sin tener
 // que volver a WhatsApp a esperar que le manden un link.
-var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
-var WOMPI_LINK_INDIVIDUAL = 'https://checkout.wompi.co/l/eQDTXj'; // $45.000 — 1 multa
-var WOMPI_LINK_MASIVO     = 'https://checkout.wompi.co/l/JqYl2i'; // $69.000 — todas las que apliquen
-var WOMPI_LINK_DIFERIDO   = 'https://checkout.wompi.co/l/SH4T1o'; // $19.800 — adelanto Pago al Eliminar
+var WOMPI_PUBLIC_KEY = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
 var NEQUI_NUMERO = '3505457420';
 
 // La firma pasa muchas veces por datos móviles inestables — un solo fetch
@@ -277,6 +295,39 @@ function mostrar(id){
   ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-pago','v-exito','v-error-envio'].forEach(function(v){
     document.getElementById(v).classList.toggle('hidden', v!==id);
   });
+  actualizarFirmaSticky();
+}
+
+// Barra fija que siempre muestra el siguiente paso mientras se firma —
+// nunca hace falta bajar para saber qué hacer. Se actualiza sola: antes de
+// dibujar la firma invita a firmar, apenas se dibuja algo cambia a firmar y
+// enviar.
+function actualizarFirmaSticky(){
+  var bar = document.getElementById('firma-sticky-cta');
+  var btn = document.getElementById('firma-sticky-btn');
+  if(!bar || !btn) return;
+  var enDocumento = !document.getElementById('v-documento').classList.contains('hidden');
+  if(!enDocumento){
+    bar.classList.add('hidden');
+    document.body.classList.remove('pad-sticky');
+    return;
+  }
+  bar.classList.remove('hidden');
+  document.body.classList.add('pad-sticky');
+  if(_firmaVacia){
+    btn.innerHTML = '<i class="fas fa-hand-point-down"></i> Firma tu documento aquí abajo';
+    btn.onclick = function(){ document.getElementById('firma-box').scrollIntoView({behavior:'smooth', block:'center'}); };
+  } else {
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Firmar y enviar';
+    btn.onclick = function(){ firmarYEnviar(); };
+  }
+}
+
+function toggleDocCompleto(){
+  var prev = document.getElementById('doc-preview');
+  var btn = document.getElementById('doc-toggle-btn');
+  var expandido = prev.classList.toggle('collapsed') === false;
+  btn.textContent = expandido ? 'Mostrar menos ▴' : 'Ver documento completo ▾';
 }
 function setStepBar(n){
   document.getElementById('steps-bar').classList.remove('hidden');
@@ -695,7 +746,16 @@ function initFirmaPad(){
     var clientX=t?t.clientX:e.clientX, clientY=t?t.clientY:e.clientY;
     return { x:(clientX-rect.left)*(canvas.width/rect.width), y:(clientY-rect.top)*(canvas.height/rect.height) };
   }
-  function iniciar(e){ e.preventDefault(); _firmaDibujando=true; _firmaVacia=false; var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y); }
+  function iniciar(e){
+    e.preventDefault(); _firmaDibujando=true;
+    if(_firmaVacia){
+      _firmaVacia=false;
+      var placeholder=document.getElementById('firma-placeholder'); if(placeholder) placeholder.style.display='none';
+      var box=document.getElementById('firma-box'); if(box) box.classList.add('tiene-firma');
+      actualizarFirmaSticky();
+    }
+    var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y);
+  }
   function mover(e){ if(!_firmaDibujando) return; e.preventDefault(); var pt=posicion(e); ctx.lineTo(pt.x,pt.y); ctx.stroke(); }
   function terminar(){ _firmaDibujando=false; }
   canvas.addEventListener('mousedown', iniciar);
@@ -710,6 +770,9 @@ function limpiarFirma(){
   if(!canvas||!_firmaCtx) return;
   _firmaCtx.clearRect(0,0,canvas.width,canvas.height);
   _firmaVacia=true;
+  var placeholder=document.getElementById('firma-placeholder'); if(placeholder) placeholder.style.display='';
+  var box=document.getElementById('firma-box'); if(box) box.classList.remove('tiene-firma');
+  actualizarFirmaSticky();
 }
 
 // Sin membrete ni logo: el documento debe verse como lo redactó y radicó
@@ -876,6 +939,11 @@ function renderPlanesFirmar(n, totalIndividual){
   return html;
 }
 
+// Sin botón de "pagar por WhatsApp" aquí: mandar al cliente a otra app justo
+// en el último paso enfría la decisión y hace que muchos no vuelvan. Tarjeta
+// y Nequi se pagan sin salir de la página; el WhatsApp que sí se deja es
+// el de "ya pagué, envío el comprobante" (imprescindible para Nequi, que no
+// se verifica solo).
 function botonesPagoFirmar(plan, monto){
   var idNequi = 'nequi-'+plan;
   return ''+
@@ -883,11 +951,10 @@ function botonesPagoFirmar(plan, monto){
     '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar('+monto+',\''+plan+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
     '<button class="btn btn-navy btn-sm" onclick="toggleNequiFirmar(\''+idNequi+'\','+monto+')"><i class="fas fa-mobile-alt"></i> Nequi</button>'+
     '</div>'+
-    '<button class="btn btn-wa-sm btn-sm" style="margin-top:8px;" onclick="pagarPorWhatsAppFirmar(\''+plan+'\')"><i class="fab fa-whatsapp"></i> Pagar por WhatsApp</button>'+
     '<div class="nequi-inline" id="'+idNequi+'">'+
     '<p>Transfiere el monto exacto a este Nequi:</p>'+
     '<div class="nequi-num"><span>'+NEQUI_NUMERO+'</span><button type="button" class="btn-quitar" style="color:var(--navy);" onclick="copiarNequiFirmar()"><i class="fas fa-copy"></i> Copiar</button></div>'+
-    '<a class="btn btn-wa-sm btn-sm" href="'+linkWhatsAppPagoFirmar(plan,monto,true)+'" target="_blank"><i class="fab fa-whatsapp"></i> Ya pagué, enviar comprobante</a>'+
+    '<a class="btn btn-wa-sm btn-sm" href="'+linkWhatsAppComprobanteNequi(plan,monto)+'" target="_blank"><i class="fab fa-whatsapp"></i> Ya pagué, enviar comprobante</a>'+
     '</div>';
 }
 
@@ -900,18 +967,11 @@ function copiarNequiFirmar(){
   navigator.clipboard.writeText(NEQUI_NUMERO);
 }
 
-function linkWhatsAppPagoFirmar(plan, monto, yaPago){
+function linkWhatsAppComprobanteNequi(plan, monto){
   var nombre = (_caso['Nombres']||'').split(' ')[0];
   var desc = { individual:'plan de activar mi caso', masivo:'plan que elimina todas las que apliquen', diferido:'adelanto del Plan Pago al Eliminar' }[plan];
-  var link = { individual:WOMPI_LINK_INDIVIDUAL, masivo:WOMPI_LINK_MASIVO, diferido:WOMPI_LINK_DIFERIDO }[plan];
-  var msg = 'Hola, soy '+nombre+'. Ya firmé mi Derecho de Petición ✅ '+
-    (yaPago ? 'Ya pagué por Nequi los $'+monto.toLocaleString('es-CO')+' del '+desc+', adjunto mi comprobante.'
-            : 'Quiero pagar el '+desc+' ($'+monto.toLocaleString('es-CO')+'). Aquí está el link: '+link);
+  var msg = 'Hola, soy '+nombre+'. Ya firmé mi Derecho de Petición ✅ Ya pagué por Nequi los $'+monto.toLocaleString('es-CO')+' del '+desc+', adjunto mi comprobante.';
   return 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
-}
-
-function pagarPorWhatsAppFirmar(plan){
-  window.open(linkWhatsAppPagoFirmar(plan, {individual:45000,masivo:69000,diferido:19800}[plan], false), '_blank');
 }
 
 function pagarConWompiFirmar(monto, plan){
