@@ -13,6 +13,7 @@
      falla en silencio deja al cliente sin poder firmar sin ningún aviso
      claro — mejor depender solo de que el sitio mismo cargue. -->
 <script src="vendor/jspdf.umd.min.js"></script>
+<script src="https://checkout.wompi.co/widget.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -82,6 +83,25 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
 .spinner{width:34px;height:34px;border:3px solid rgba(46,16,101,.15);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .footer-note{text-align:center;font-size:.68rem;color:var(--gray);margin-top:10px;line-height:1.6}
+/* Paso de pago tras la firma */
+.un-paso-badge{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(217,119,6,.35);padding:7px 14px;border-radius:20px;font-size:.72rem;font-weight:800;margin-bottom:10px;}
+.urgencia-box{background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1.5px solid rgba(220,38,38,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:#7c2d12;line-height:1.55;}
+.plan-card{border:2px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.plan-card.plan-top{border-color:rgba(22,163,74,.4);box-shadow:0 4px 18px rgba(22,163,74,.14);}
+.plan-ribbon{position:absolute;top:0;right:0;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-size:.62rem;font-weight:800;padding:4px 10px;border-bottom-left-radius:10px;letter-spacing:.3px;}
+.plan-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.plan-name{font-size:.92rem;font-weight:800;color:var(--navy);margin-bottom:2px;}
+.plan-desc{font-size:.72rem;color:var(--gray);}
+.plan-price{font-size:1.5rem;font-weight:900;color:var(--navy);line-height:1;}
+.plan-price.is-red{color:var(--red);}
+.pay-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pay-row .btn{padding:11px 8px;font-size:.76rem;}
+.btn-wa-sm{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;}
+.nequi-inline{display:none;background:var(--light);border-radius:10px;padding:12px;margin-top:10px;font-size:.78rem;}
+.nequi-inline.show{display:block;}
+.nequi-num{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px dashed var(--border);border-radius:8px;padding:9px 12px;margin:8px 0;font-weight:800;color:var(--navy);}
+.trust-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:14px 0 4px;font-size:.68rem;color:var(--gray);}
+.trust-row span{display:flex;align-items:center;gap:4px;}
 </style>
 </head>
 <body>
@@ -174,6 +194,23 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
     <p class="footer-note">Al firmar, se genera tu PDF, se descarga a tu teléfono y te lo enviamos también por correo.</p>
   </div>
 
+  <!-- PASO 4: PAGO (solo si firmó sin tener el pago confirmado todavía) -->
+  <div class="card hidden" id="v-pago">
+    <div class="center">
+      <div class="un-paso-badge"><i class="fas fa-circle-check"></i> Documento firmado</div>
+      <h2 style="font-size:1.15rem;margin-bottom:6px;">Estás a un solo paso de radicarlo 🎯</h2>
+      <p class="lead" style="margin-bottom:14px;">Ya hiciste lo más importante: tu Derecho de Petición quedó firmado y listo. Ahora solo falta activar tu caso para que lo radiquemos ante la secretaría.</p>
+    </div>
+    <div class="urgencia-box"><i class="fas fa-triangle-exclamation"></i> Mientras no se radique, tu multa sigue activa en el SIMIT y puede seguir generando intereses o pasar a cobro coactivo. Actívalo ahora y la radicamos hoy mismo.</div>
+    <div id="planes-pago-wrap"></div>
+    <div class="trust-row">
+      <span><i class="fas fa-lock" style="color:#16a34a;"></i> Pago 100% seguro</span>
+      <span><i class="fas fa-file-shield" style="color:#16a34a;"></i> No pagas si no aplica</span>
+      <span><i class="fas fa-headset" style="color:#16a34a;"></i> Asesor responde en minutos</span>
+    </div>
+    <p class="footer-note">¿Dudas antes de pagar? <a href="https://wa.me/573159318400" target="_blank" style="color:var(--navy);font-weight:700;">Escríbenos por WhatsApp</a></p>
+  </div>
+
   <!-- ÉXITO -->
   <div class="card center hidden" id="v-exito">
     <div class="icon-xl" style="color:var(--green);"><i class="fas fa-circle-check"></i></div>
@@ -198,6 +235,15 @@ p.lead{color:var(--gray);font-size:0.88rem;line-height:1.6}
 // CONFIG — mismo backend y misma hoja que admin.html
 // ══════════════════════════════════════════════════
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
+
+// Pago en línea (mismos datos reales que usa index.html) — quien firma sin
+// haber pagado todavía puede activar y pagar su caso aquí mismo, sin tener
+// que volver a WhatsApp a esperar que le manden un link.
+var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
+var WOMPI_LINK_INDIVIDUAL = 'https://checkout.wompi.co/l/eQDTXj'; // $45.000 — 1 multa
+var WOMPI_LINK_MASIVO     = 'https://checkout.wompi.co/l/JqYl2i'; // $69.000 — todas las que apliquen
+var WOMPI_LINK_DIFERIDO   = 'https://checkout.wompi.co/l/SH4T1o'; // $19.800 — adelanto Pago al Eliminar
+var NEQUI_NUMERO = '3505457420';
 
 // La firma pasa muchas veces por datos móviles inestables — un solo fetch
 // que falla ahí no debe perder el registro de que el cliente ya firmó.
@@ -224,9 +270,11 @@ var _tipo = 'peticion'; // 'peticion' | 'tutela'
 var _multasReportadas = [];
 var _documentosGenerados = [];
 var _firmaVacia = true, _firmaDibujando = false, _firmaCtx = null;
+var _pagoYaConfirmado = false;
+var _totalPagoFirmar = 45000, _planSelFirmar = 'individual';
 
 function mostrar(id){
-  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-exito','v-error-envio'].forEach(function(v){
+  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-pago','v-exito','v-error-envio'].forEach(function(v){
     document.getElementById(v).classList.toggle('hidden', v!==id);
   });
 }
@@ -286,13 +334,21 @@ function init(){
       return;
     }
 
-    var pagoOk = match['Pago OK']==='TRUE' || match['Pago OK']===true;
-    if(!pagoOk){ mostrar('v-bloqueado'); return; }
+    // Antes esto bloqueaba la firma hasta que el pago estuviera confirmado
+    // -- pero eso obligaba a negociar el pago por WhatsApp ANTES de que el
+    // cliente viera su documento real, justo cuando menos convencido está.
+    // Ahora puede firmar primero (se emociona al ver que es real) y el pago
+    // queda como el único paso que falta, mostrado aquí mismo tras firmar.
+    _pagoYaConfirmado = match['Pago OK']==='TRUE' || match['Pago OK']===true;
 
     var yaFirmado = match['Firmado']==='TRUE' || match['Firmado']===true;
     if(yaFirmado){ mostrar('v-yafirmado'); return; }
 
     document.getElementById('saludo-nombre').textContent = match['Nombres']||'';
+    if(!_pagoYaConfirmado){
+      document.querySelector('#v-saludo .simit-inner h5').textContent = 'Documento listo para firmar';
+      document.querySelector('#v-saludo .simit-inner p').textContent = 'Tu Derecho de Petición ya está redactado con tu caso real — fírmalo primero y actívalo cuando quieras';
+    }
     mostrar('v-saludo');
   }).catch(function(err){
     document.getElementById('v-error-texto').textContent = (err && err.message==='sheet_no_publico')
@@ -740,12 +796,22 @@ function firmarYEnviar(){
 
   // marcar_firmado es lo crítico: si esto no queda registrado, el caso
   // se pierde por completo aunque el cliente sí haya firmado — por eso
-  // reintenta y, si ni así funciona, NO se muestra éxito falso.
+  // reintenta y, si ni así funciona, NO se muestra éxito falso. Se guarda
+  // SIEMPRE, tenga o no el pago confirmado — la firma no cuesta nada,
+  // lo único que de verdad depende del pago es la radicación.
   postConReintentos({
     _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
     documentos: documentosParaEnviar,
   }).then(function(data){
     if(!data || !data.ok) throw new Error('respuesta no ok');
+
+    if(!_pagoYaConfirmado){
+      // Ya está firmado y guardado — solo falta pagar para radicarlo.
+      // Se muestra aquí mismo, sin mandar al cliente de vuelta a WhatsApp.
+      mostrarPagoTrasFirma(documentosParaEnviar.length);
+      return;
+    }
+
     // Cada Derecho de Petición se radica ante SU secretaría correspondiente
     // — si hay varias ciudades, el backend le manda a cada una solo la
     // suya. La radicación en sí es menos crítica que el registro de la
@@ -764,6 +830,168 @@ function firmarYEnviar(){
       })
       .catch(function(){ mostrar('v-exito'); }); // firma ya registrada; la radicación se reintenta desde el panel
   }).catch(function(){ mostrar('v-error-envio'); });
+}
+
+// ══════════════════════════════════════════════════
+// 5. PAGO TRAS FIRMAR (cuando el cliente firma sin haber pagado todavía)
+// ══════════════════════════════════════════════════
+function mostrarPagoTrasFirma(numDocs){
+  var n = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; }).length || 1;
+  var totalIndividual = 45000 * n;
+  var comparacion = numDocs>1
+    ? 'Tienes '+numDocs+' Derechos de Petición firmados, uno por cada secretaría.'
+    : 'Tu documento ya está firmado y guardado.';
+  document.querySelector('#v-pago p.lead').textContent = comparacion+' Ahora solo falta activar tu caso para que lo radiquemos.';
+  document.getElementById('planes-pago-wrap').innerHTML = renderPlanesFirmar(n, totalIndividual);
+  mostrar('v-pago');
+}
+
+function renderPlanesFirmar(n, totalIndividual){
+  var html =
+    '<div class="plan-card plan-top">'+
+    '<div class="plan-ribbon">MÁS RÁPIDO</div>'+
+    '<div class="plan-head"><div><div class="plan-name">Activar y radicar ahora</div><div class="plan-desc">'+n+' multa'+(n!==1?'s':'')+' · pago único</div></div>'+
+    '<div class="plan-price">$'+totalIndividual.toLocaleString('es-CO')+'</div></div>'+
+    botonesPagoFirmar('individual', totalIndividual)+
+    '</div>';
+
+  if(n >= 2){
+    var ahorra = n*45000 - 69000;
+    html +=
+      '<div class="plan-card">'+
+      '<div class="plan-head"><div><div class="plan-name">Eliminar TODAS las que apliquen</div><div class="plan-desc">ahorras $'+ahorra.toLocaleString('es-CO')+'</div></div>'+
+      '<div class="plan-price">$69.000</div></div>'+
+      botonesPagoFirmar('masivo', 69000)+
+      '</div>';
+  }
+
+  html +=
+    '<div class="plan-card">'+
+    '<div class="plan-head"><div><div class="plan-name">Plan Pago al Eliminar</div><div class="plan-desc">adelanto hoy, resto al eliminar</div></div>'+
+    '<div class="plan-price">$19.800</div></div>'+
+    '<p style="font-size:.7rem;color:var(--red);margin:-4px 0 10px;">Total real si se elimina: $'+(19800+95500*n).toLocaleString('es-CO')+' — sale más caro que activar ahora por $'+totalIndividual.toLocaleString('es-CO')+'</p>'+
+    botonesPagoFirmar('diferido', 19800)+
+    '</div>';
+
+  return html;
+}
+
+function botonesPagoFirmar(plan, monto){
+  var idNequi = 'nequi-'+plan;
+  return ''+
+    '<div class="pay-row">'+
+    '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar('+monto+',\''+plan+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
+    '<button class="btn btn-navy btn-sm" onclick="toggleNequiFirmar(\''+idNequi+'\','+monto+')"><i class="fas fa-mobile-alt"></i> Nequi</button>'+
+    '</div>'+
+    '<button class="btn btn-wa-sm btn-sm" style="margin-top:8px;" onclick="pagarPorWhatsAppFirmar(\''+plan+'\')"><i class="fab fa-whatsapp"></i> Pagar por WhatsApp</button>'+
+    '<div class="nequi-inline" id="'+idNequi+'">'+
+    '<p>Transfiere el monto exacto a este Nequi:</p>'+
+    '<div class="nequi-num"><span>'+NEQUI_NUMERO+'</span><button type="button" class="btn-quitar" style="color:var(--navy);" onclick="copiarNequiFirmar()"><i class="fas fa-copy"></i> Copiar</button></div>'+
+    '<a class="btn btn-wa-sm btn-sm" href="'+linkWhatsAppPagoFirmar(plan,monto,true)+'" target="_blank"><i class="fab fa-whatsapp"></i> Ya pagué, enviar comprobante</a>'+
+    '</div>';
+}
+
+function toggleNequiFirmar(id, monto){
+  document.querySelectorAll('.nequi-inline').forEach(function(el){ if(el.id!==id) el.classList.remove('show'); });
+  document.getElementById(id).classList.toggle('show');
+}
+
+function copiarNequiFirmar(){
+  navigator.clipboard.writeText(NEQUI_NUMERO);
+}
+
+function linkWhatsAppPagoFirmar(plan, monto, yaPago){
+  var nombre = (_caso['Nombres']||'').split(' ')[0];
+  var desc = { individual:'plan de activar mi caso', masivo:'plan que elimina todas las que apliquen', diferido:'adelanto del Plan Pago al Eliminar' }[plan];
+  var link = { individual:WOMPI_LINK_INDIVIDUAL, masivo:WOMPI_LINK_MASIVO, diferido:WOMPI_LINK_DIFERIDO }[plan];
+  var msg = 'Hola, soy '+nombre+'. Ya firmé mi Derecho de Petición ✅ '+
+    (yaPago ? 'Ya pagué por Nequi los $'+monto.toLocaleString('es-CO')+' del '+desc+', adjunto mi comprobante.'
+            : 'Quiero pagar el '+desc+' ($'+monto.toLocaleString('es-CO')+'). Aquí está el link: '+link);
+  return 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
+}
+
+function pagarPorWhatsAppFirmar(plan){
+  window.open(linkWhatsAppPagoFirmar(plan, {individual:45000,masivo:69000,diferido:19800}[plan], false), '_blank');
+}
+
+function pagarConWompiFirmar(monto, plan){
+  if(!WOMPI_PUBLIC_KEY || typeof WidgetCheckout === 'undefined'){
+    alert('El pago en línea aún no está activado. Escríbenos por WhatsApp y coordinamos tu pago.');
+    return;
+  }
+  var referencia = 'JWF-'+Date.now();
+  var checkout = new WidgetCheckout({
+    currency: 'COP',
+    amountInCents: monto * 100,
+    reference: referencia,
+    publicKey: WOMPI_PUBLIC_KEY,
+    redirectUrl: location.origin + location.pathname,
+    customerData: {
+      email: _caso['Email'],
+      fullName: (_caso['Nombres']||'') + ' ' + (_caso['Apellidos']||''),
+      phoneNumber: (_caso['WhatsApp']||'').replace(/\D/g,''),
+      phoneNumberPrefix: '+57',
+      legalId: _caso['Cédula'],
+      legalIdType: 'CC'
+    }
+  });
+  checkout.open(function(result){
+    var transaction = result && result.transaction;
+    if(transaction && transaction.id){
+      verificarTransaccionWompiFirmar(transaction.id, 0, plan, monto);
+    }
+  });
+}
+
+function verificarTransaccionWompiFirmar(id, intentos, plan, monto){
+  intentos = intentos || 0;
+  var wompiApiBase = WOMPI_PUBLIC_KEY.indexOf('test') !== -1 ? 'https://sandbox.wompi.co/v1' : 'https://production.wompi.co/v1';
+  fetch(wompiApiBase + '/transactions/' + id)
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      var status = json.data && json.data.status;
+      if(status === 'APPROVED'){
+        onPagoAprobadoFirmar(json.data, plan, monto);
+      } else if(status === 'DECLINED' || status === 'ERROR' || status === 'VOIDED'){
+        alert('No pudimos confirmar tu pago. Si el dinero salió de tu cuenta, escríbenos por WhatsApp con tu comprobante y lo verificamos manualmente.');
+      } else if(intentos < 25){
+        setTimeout(function(){ verificarTransaccionWompiFirmar(id, intentos+1, plan, monto); }, 3000);
+      } else {
+        alert('La verificación tardó demasiado. Si el dinero salió de tu cuenta, escríbenos por WhatsApp con tu comprobante.');
+      }
+    })
+    .catch(function(){
+      if(intentos < 6){ setTimeout(function(){ verificarTransaccionWompiFirmar(id, intentos+1, plan, monto); }, 4000); }
+      else { alert('No pudimos verificar tu pago por una falla de conexión. Escríbenos por WhatsApp con tu comprobante.'); }
+    });
+}
+
+// Pago aprobado por Wompi (automático): confirma el pago con el plan/monto
+// reales y de una vez radica ante la secretaría — el cliente no tiene que
+// hacer nada más ni esperar a que un asesor lo active manualmente.
+function onPagoAprobadoFirmar(txData, plan, monto){
+  var planTexto = {
+    individual: 'Pago individual — $45.000 c/u',
+    masivo: 'Eliminar todas las que apliquen — $69.000',
+    diferido: 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u',
+  }[plan];
+
+  postConReintentos({
+    _accion:'confirmar_pago', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+    plan: planTexto, montoTotal: monto,
+    multasSeleccionadas: _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; }).length,
+    estadoPago: 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : ''),
+  }).then(function(){
+    return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] });
+  }).then(function(radicado){
+    document.querySelector('#v-exito h2').textContent = '¡Pago confirmado y radicado! 🎉';
+    document.querySelector('#v-exito p.lead').textContent = (radicado && radicado.ok)
+      ? 'Tu Derecho de Petición ya quedó radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.'
+      : 'Tu pago quedó confirmado. Estamos radicando tu documento ante la secretaría — te avisamos apenas quede listo.';
+    mostrar('v-exito');
+  }).catch(function(){
+    alert('Tu pago fue aprobado por Wompi, pero no pudimos registrarlo por una falla de conexión. Escríbenos por WhatsApp para activarlo al momento.');
+  });
 }
 
 init();
