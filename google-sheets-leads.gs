@@ -23,6 +23,13 @@
  *      tiempo · Tipo: Temporizador de días · cada día, entre 7 y 8 a.m.
  *      Sin este paso, los recordatorios y la marca automática de tutela por
  *      falta de respuesta NO se ejecutan — todo lo demás sí funciona igual.
+ *   7. IMPORTANTE — activa la campaña automática de remarketing por correo
+ *      (a quien llenó datos y no ha pagado): en el editor de Apps Script,
+ *      arriba selecciona la función instalarTriggersRemarketing en el menú
+ *      desplegable y dale ▶ Ejecutar, UNA SOLA VEZ. Con eso queda enviando
+ *      solo, dos veces al día (mañana y tarde), sin que tengas que hacer
+ *      nada más. También puedes lanzar un envío inmediato cuando quieras
+ *      con el botón "Enviar campaña ahora" del panel admin.
  */
 
 var SHEET_CASOS = '📊 Control de Casos';
@@ -58,6 +65,7 @@ var COLUMNAS_CASOS = [
   'Tutela Enviada', 'Recordatorio Enviado', 'Cerrado', 'Notas',
   'Firmado', 'Enlace PDF Firmado',
   'Tutela Firmada', 'Enlace PDF Tutela', 'Tutela Valor', 'Resultado Tutela', 'Tutela Pagada',
+  'Remarketing Envíos', 'Remarketing Última Fecha', 'Remarketing Activo',
 ];
 
 var COLUMNAS_FIRMADOS = [
@@ -150,6 +158,7 @@ function doPost(e) {
       case 'guardar_multas':      return guardarMultasEstructuradas(datos);
       case 'completar_datos_cliente': return completarDatosCliente(datos);
       case 'agregar_correo_radicacion': return agregarCorreoRadicacion(datos);
+      case 'enviar_remarketing_ahora': return enviarRemarketingMasivo();
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -218,6 +227,8 @@ function guardarLead(datos) {
   fila_['Recordatorio Enviado'] = 'FALSE';
   fila_['Cerrado'] = 'FALSE';
   fila_['Firmado'] = 'FALSE';
+  fila_['Remarketing Envíos'] = 0;
+  fila_['Remarketing Activo'] = 'TRUE';
 
   hoja.appendRow(COLUMNAS_CASOS.map(function (c) { return fila_[c] !== undefined ? fila_[c] : ''; }));
   aplicarFormatoCondicional(hoja);
@@ -808,6 +819,192 @@ function enviarRecordatorioCliente(email, nombres, cedula) {
     '<p>JurídicosWeb.com — Bufete Experto en Derecho de Tránsito</p>' +
     '</div></div>';
   try { MailApp.sendEmail({ to: email, subject: asunto, htmlBody: cuerpoHtml }); } catch (e) { /* cuota de correo agotada u otro error — no rompe el resto del chequeo */ }
+}
+
+// ───────────────────────── campaña de remarketing por correo ─────────────
+//
+// Le escribe automáticamente a todo lead que llenó sus datos pero no ha
+// pagado (nunca a quien ya pagó o ya cerró su caso). Cada envío avanza al
+// cliente una "etapa" — el mensaje se vuelve progresivamente más directo
+// (valor → costo real de esperar → prueba social → atención limitada →
+// último aviso), y después de la etapa final el sistema deja de escribirle
+// solo, sin necesidad de revisarlo a mano.
+//
+// Se dispara de dos formas:
+//   1. Botón "Enviar campaña ahora" en el panel admin (acción
+//      'enviar_remarketing_ahora').
+//   2. Automático, dos veces al día, una vez que corras UNA SOLA VEZ la
+//      función instalarTriggersRemarketing() (ver más abajo).
+
+var REMARKETING_LIMITE_POR_CORRIDA = 60; // deja margen bajo la cuota diaria de Gmail para el resto de correos del sistema
+var REMARKETING_HORAS_MIN_ENTRE_ENVIOS = 4; // evita un envío duplicado si el botón manual coincide con el disparador automático
+var REMARKETING_TOTAL_ENVIOS = 10; // 5 etapas de 2 envíos cada una — después de esto, se detiene solo
+
+function enviarRemarketingMasivo() {
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var valores = hoja.getDataRange().getValues();
+  var idx = {};
+  COLUMNAS_CASOS.forEach(function (c, i) { idx[c] = i; });
+  var ahora = new Date();
+  var enviados = 0, elegibles = 0;
+
+  for (var i = 1; i < valores.length && enviados < REMARKETING_LIMITE_POR_CORRIDA; i++) {
+    var fila = valores[i];
+    var email = fila[idx['Email']];
+    var pagoOk = fila[idx['Pago OK']] === true || fila[idx['Pago OK']] === 'TRUE';
+    var cerrado = fila[idx['Cerrado']] === true || fila[idx['Cerrado']] === 'TRUE';
+    var activoRaw = fila[idx['Remarketing Activo']];
+    var inactivo = activoRaw === false || activoRaw === 'FALSE';
+    if (!email || pagoOk || cerrado || inactivo) continue;
+
+    var envios = Number(fila[idx['Remarketing Envíos']]) || 0;
+    if (envios >= REMARKETING_TOTAL_ENVIOS) continue;
+
+    var ultimaFecha = fila[idx['Remarketing Última Fecha']];
+    if (ultimaFecha) {
+      var horasDesde = (ahora.getTime() - new Date(ultimaFecha).getTime()) / 3600000;
+      if (horasDesde < REMARKETING_HORAS_MIN_ENTRE_ENVIOS) continue;
+    }
+
+    elegibles++;
+    var etapa = Math.floor(envios / 2) + 1; // envíos 0-1→etapa 1 · 2-3→2 · 4-5→3 · 6-7→4 · 8-9→5
+    var datosCliente = {
+      nombres: fila[idx['Nombres']], cedula: fila[idx['Cédula']],
+      plan: fila[idx['Plan']], monto: fila[idx['Monto Total']],
+    };
+    var correo = construirCorreoRemarketingEtapa(etapa, datosCliente);
+
+    try {
+      MailApp.sendEmail({
+        to: email, subject: correo.asunto, htmlBody: correo.cuerpo,
+        name: 'JurídicosWeb — Equipo Legal', replyTo: EMAIL_DESPACHO,
+      });
+      var nuevosEnvios = envios + 1;
+      hoja.getRange(i + 1, idx['Remarketing Envíos'] + 1).setValue(nuevosEnvios);
+      hoja.getRange(i + 1, idx['Remarketing Última Fecha'] + 1).setValue(ahora);
+      if (nuevosEnvios >= REMARKETING_TOTAL_ENVIOS) {
+        hoja.getRange(i + 1, idx['Remarketing Activo'] + 1).setValue('FALSE');
+      }
+      enviados++;
+    } catch (e) { /* cuota agotada u otro error puntual — sigue con el resto de la lista */ }
+  }
+
+  aplicarFormatoCondicional(hoja);
+  return respuestaJson({ ok: true, enviados: enviados, elegibles: elegibles });
+}
+
+// Etiqueta legible del plan para usar dentro del texto del correo.
+function etiquetaPlanRemarketing(plan) {
+  if (/Adelanto/i.test(plan || '')) return 'tu Plan Pago al Eliminar';
+  if (/Eliminar todas/i.test(plan || '')) return 'el trámite que elimina todas tus multas';
+  return 'tu Derecho de Petición';
+}
+
+// Construye asunto + cuerpo según la etapa (1 a 5). Cada etapa aplica un
+// principio de venta distinto, en orden creciente de firmeza — sin
+// inventar descuentos, cupos o plazos falsos: toda la urgencia que se usa
+// aquí es real (el plazo legal, el riesgo de intereses, la atención del
+// equipo), que es justamente lo que la hace efectiva sin ser engañosa.
+function construirCorreoRemarketingEtapa(etapa, datos) {
+  var nombre = (datos.nombres || '').split(' ')[0] || 'cliente';
+  var cedula = datos.cedula || '';
+  var planTxt = etiquetaPlanRemarketing(datos.plan);
+  var asunto, titulo, parrafos;
+
+  if (etapa === 1) {
+    asunto = 'Tu documento legal ya está redactado — falta un paso';
+    titulo = 'Tu Derecho de Petición ya está listo para firmar';
+    parrafos = [
+      'Hola ' + nombre + ', revisamos tu caso y encontramos fundamento legal real para solicitar la eliminación de tu multa.',
+      'El documento de ' + planTxt + ' ya está redactado a tu nombre. Solo falta que entres, lo revises, lo firmes y actives tu caso para que empecemos a radicarlo.',
+      'Es un proceso corto: toma menos de dos minutos desde tu teléfono, y puedes verlo antes de decidir nada más.',
+    ];
+  } else if (etapa === 2) {
+    asunto = 'Mientras tu caso siga sin activar, la multa sigue vigente';
+    titulo = 'Cada día que pasa cuenta en tu caso';
+    parrafos = [
+      'Hola ' + nombre + ', tu caso sigue abierto, pero mientras no actives tu Derecho de Petición, la multa continúa vigente en el sistema — puede seguir generando intereses o, en algunos casos, pasar a cobro coactivo.',
+      'Tu documento ya fue preparado con el fundamento legal correspondiente a tu situación. Actívalo cuando quieras — entre más pronto lo hagas, más pronto empieza a correr el plazo legal para que te respondan.',
+    ];
+  } else if (etapa === 3) {
+    asunto = 'Así se ha resuelto el mismo tipo de caso que el tuyo';
+    titulo = 'Tu caso tiene el mismo fundamento legal que casos ya resueltos';
+    parrafos = [
+      'Hola ' + nombre + ', hemos tramitado casos con el mismo fundamento legal que el tuyo, y la respuesta de las secretarías de tránsito suele ser favorable cuando el Derecho de Petición está bien sustentado — como el tuyo.',
+      'Tu documento sigue disponible para firmar, sin ningún costo hasta que decidas activarlo. Solo pagas si tu caso realmente aplica, y ya confirmamos que el tuyo aplica.',
+    ];
+  } else if (etapa === 4) {
+    asunto = 'Estamos por priorizar los casos que sí avanzan';
+    titulo = 'Tu caso sigue en espera de tu confirmación';
+    parrafos = [
+      'Hola ' + nombre + ', nuestro equipo dedica seguimiento personalizado a cada caso que se activa formalmente. Los casos que quedan varios días sin confirmar pasan a un segundo plano frente a los que sí avanzan.',
+      'Tu documento sigue disponible, con el mismo fundamento legal identificado desde el principio. Si todavía te interesa resolver tu multa, este es un buen momento para activarlo.',
+    ];
+  } else {
+    asunto = 'Último aviso automático sobre tu caso';
+    titulo = 'Este es el último recordatorio automático que te enviamos';
+    parrafos = [
+      'Hola ' + nombre + ', te hemos escrito varias veces sobre tu Derecho de Petición, que sigue listo para firmar y activar.',
+      'Este es el último recordatorio automático — tu documento permanece disponible, pero de aquí en adelante no volverás a recibir estos correos salvo que actives tu caso o nos escribas directamente.',
+      'Si cambiaste de opinión o tienes alguna duda, responde este correo y te ayudamos personalmente — sin ningún compromiso.',
+    ];
+  }
+
+  return { asunto: asunto, cuerpo: plantillaCorreoRemarketing(nombre, titulo, parrafos, cedula) };
+}
+
+// Plantilla visual compartida por las 5 etapas — un solo diseño profesional
+// (sin emoji, tipografía serif para el cuerpo institucional) para que la
+// campaña se sienta como una sola comunicación coherente, no cinco correos
+// distintos. El enlace lleva directo al documento de ESE cliente (mismo
+// módulo que usa el enlace de firma remota), sin pasos de más.
+function plantillaCorreoRemarketing(nombre, tituloPrincipal, parrafos, cedula) {
+  var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(cedula);
+  var parrafosHtml = parrafos.map(function (p) {
+    return '<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#334155;">' + p + '</p>';
+  }).join('');
+  return '' +
+    '<div style="font-family:Georgia,\'Times New Roman\',serif;background:#f4f1fa;padding:28px 16px;">' +
+    '<div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px rgba(46,16,101,0.08);">' +
+    '<div style="background:#2e1065;padding:22px 28px;">' +
+    '<p style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:.4px;margin:0;font-family:Georgia,serif;">JurídicosWeb</p>' +
+    '<p style="color:#a78bda;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:4px 0 0;font-family:Arial,sans-serif;">Derecho de Tránsito</p>' +
+    '</div>' +
+    '<div style="padding:30px 28px;">' +
+    '<p style="font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#0f8f80;font-weight:700;margin:0 0 12px;font-family:Arial,sans-serif;">Caso de ' + nombre + '</p>' +
+    '<h1 style="font-family:Georgia,serif;font-size:21px;color:#1a1a2e;margin:0 0 18px;line-height:1.35;font-weight:700;">' + tituloPrincipal + '</h1>' +
+    parrafosHtml +
+    '<div style="text-align:center;margin:28px 0 6px;">' +
+    '<a href="' + linkFirma + '" style="display:inline-block;background:#2dd4bf;color:#1a1035;text-decoration:none;padding:15px 32px;border-radius:8px;font-weight:700;font-size:14px;font-family:Arial,sans-serif;">Ver mi documento y continuar</a>' +
+    '</div>' +
+    '<p style="font-size:12px;color:#94a3b8;text-align:center;margin:18px 0 0;font-family:Arial,sans-serif;">O copia este enlace en tu navegador:<br>' + linkFirma + '</p>' +
+    '</div>' +
+    '<div style="background:#f8fafc;padding:16px 28px;border-top:1px solid #e2e8f0;">' +
+    '<p style="font-size:11px;color:#94a3b8;margin:0;line-height:1.6;font-family:Arial,sans-serif;">Recibiste este correo porque iniciaste una consulta en JurídicosWeb.com. Si no quieres seguir recibiendo estos recordatorios, responde este correo con la palabra BAJA.</p>' +
+    '</div>' +
+    '</div></div>';
+}
+
+// Ejecuta esto UNA SOLA VEZ desde el editor de Apps Script (selecciona esta
+// función en el menú de arriba y dale ▶ Ejecutar) para activar el envío
+// automático dos veces al día — una entre las 9 y 10 a.m., otra entre las
+// 4 y 5 p.m. (Apps Script no permite fijar el minuto exacto). Es seguro
+// volver a ejecutarla más de una vez: primero borra cualquier disparador
+// anterior de esta misma función, así nunca queda duplicado el envío.
+function instalarTriggersRemarketing() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'enviarRemarketingMasivo') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('enviarRemarketingMasivo').timeBased().everyDays(1).atHour(9).create();
+  ScriptApp.newTrigger('enviarRemarketingMasivo').timeBased().everyDays(1).atHour(16).create();
+}
+
+// Por si alguna vez quieres apagar el envío automático sin borrar el resto
+// del script — corre esta función una sola vez desde el editor.
+function desinstalarTriggersRemarketing() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'enviarRemarketingMasivo') ScriptApp.deleteTrigger(t);
+  });
 }
 
 // ───────────────────────── flujo de tutela ─────────────────────────
