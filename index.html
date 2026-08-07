@@ -192,6 +192,22 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .hero-cta-wrap .btn{position:relative;z-index:1;}
 .hero-cta-ribbon{position:absolute;top:-12px;right:10px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
 .hero-sub strong{color:#e2e8f0;}
+/* Módulo de consulta rápida — la cédula se escribe directo en el hero, sin
+   tocar ningún botón para siquiera verlo, así nadie se pierde antes de
+   consultar. */
+.hero-consult-wrap{position:relative;margin-bottom:6px;}
+.hero-consult-glow{position:absolute;inset:-16px;background:radial-gradient(ellipse at center,rgba(45,212,191,0.5),transparent 72%);filter:blur(20px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.4s ease-in-out infinite;}
+.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);border:1.5px solid rgba(45,212,191,0.45);border-radius:18px;padding:20px 18px 16px;}
+.hero-consult-ribbon{position:absolute;top:-12px;right:14px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
+.hero-consult-label{display:flex;align-items:center;gap:7px;color:#fff;font-size:0.88rem;font-weight:800;margin-bottom:11px;line-height:1.3;}
+.hero-consult-label i{color:#2dd4bf;}
+.hero-consult-row{display:flex;gap:8px;}
+.hero-consult-input{flex:1;min-width:0;padding:15px 16px;border-radius:12px;border:2px solid transparent;font-size:1.05rem;font-weight:700;font-family:'Inter',sans-serif;background:#fff;color:var(--navy);letter-spacing:.5px;transition:border-color .2s;}
+.hero-consult-input:focus{outline:none;border-color:#2dd4bf;}
+.hero-consult-input::placeholder{color:#94a3b8;font-weight:500;letter-spacing:normal;}
+.hero-consult-btn{flex-shrink:0;width:58px;border:none;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#5eead4);color:#2e1065;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(45,212,191,0.5);animation:glow-pulse 2.2s ease-in-out infinite;}
+.hero-consult-hint{color:rgba(255,255,255,0.6);font-size:0.72rem;text-align:center;margin-top:10px;}
+.hero-consult-alt{display:block;width:100%;text-align:center;color:rgba(255,255,255,0.55);font-size:0.75rem;margin-top:4px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:4px 0;}
 .hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
 .hero-ctas-row{display:flex;gap:12px;flex-wrap:wrap;}
 .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
@@ -700,16 +716,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span><i class="fas fa-bolt"></i> Resultado inmediato</span>
         </div>
 
-        <!-- Guía directa hacia el botón principal -->
+        <!-- Guía directa hacia el módulo de consulta -->
         <div class="hero-start-cue"><i class="fas fa-arrow-down"></i> Empieza aquí — es gratis</div>
 
-        <!-- Botón principal -->
-        <div class="hero-cta-wrap">
-          <div class="hero-cta-glow"></div>
-          <span class="hero-cta-ribbon">100% GRATIS</span>
-          <button class="btn btn-shimmer btn-xl btn-pulse" onclick="openSimitModal(event)" style="width:100%;font-size:1.25rem;padding:26px 24px;border-radius:16px;letter-spacing:.4px;box-shadow:0 10px 40px rgba(45,212,191,0.5);">
-            <i class="fas fa-fire"></i> CONSULTAR MULTAS Y FOTOMULTAS
-          </button>
+        <!-- Módulo de consulta rápida: la cédula se escribe directo aquí,
+             sin tocar ningún botón para verlo — apenas se carga la página
+             ya está listo para consultar. -->
+        <div class="hero-consult-wrap">
+          <div class="hero-consult-glow"></div>
+          <div class="hero-consult-card">
+            <span class="hero-consult-ribbon">100% GRATIS</span>
+            <label for="hero-cedula" class="hero-consult-label"><i class="fas fa-id-card"></i> Escribe tu cédula y consulta si tu multa se puede eliminar</label>
+            <div class="hero-consult-row">
+              <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Ej: 1023456789" inputmode="numeric" maxlength="12" onkeydown="if(event.key==='Enter')consultarDesdeHero()">
+              <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar"><i class="fas fa-search"></i></button>
+            </div>
+            <p class="hero-consult-hint"><i class="fas fa-lock"></i> Resultado inmediato · Sin puntos ni espacios · Datos protegidos</p>
+            <button type="button" class="hero-consult-alt" onclick="openSimitModal(event);switchStab('placa');">¿Prefieres consultar por placa?</button>
+          </div>
         </div>
 
         <!-- Ancla de precio/gratis -->
@@ -1671,6 +1695,25 @@ function actualizarStickyCta(){
 
 var _valorConsultado = '';
 var _tipoConsultado = 'cedula';
+
+// Consulta rápida desde el módulo del hero — abre el mismo modal/flujo de
+// siempre (nada duplicado) pero ya con la cédula puesta, así el cliente no
+// tiene que escribirla dos veces.
+function consultarDesdeHero(){
+  var input = document.getElementById('hero-cedula');
+  var val = (input.value||'').trim();
+  if(!val){
+    input.focus();
+    input.style.borderColor = '#dc2626';
+    setTimeout(function(){ input.style.borderColor = 'transparent'; }, 1500);
+    return;
+  }
+  jwTrack('consulta_hero_iniciada', {});
+  openSimitModal();
+  var cedInput = document.getElementById('si-cedula');
+  if(cedInput) cedInput.value = val;
+  iniciarConsulta();
+}
 
 function iniciarConsulta(){
   var cedTab=document.querySelector('.stab2.active');
