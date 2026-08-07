@@ -552,6 +552,18 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .doc-final{border-color:#bbf7d0;background:#fdfffe;}
 .doc-preview.doc-pendiente::before{content:'PENDIENTE DE PAGO';font-size:1.9rem;color:rgba(217,119,6,0.16);}
 .doc-preview.doc-pendiente{border-color:#fed7aa;user-select:none;-webkit-user-select:none;}
+/* Borrador colapsado por defecto — deja espacio para que el recuadro de
+   firma sea visible sin scroll apenas se entra a este paso. */
+#doc-preview-text.collapsed{max-height:110px;}
+.doc-toggle-sp5{display:block;width:100%;text-align:center;font-size:0.74rem;font-weight:700;color:var(--navy);text-decoration:underline;background:none;border:none;cursor:pointer;padding:8px 0 4px;font-family:'Inter',sans-serif;}
+/* Recuadro de firma — pulso animado mientras está vacío para que sea
+   imposible no verlo como el siguiente paso, sólido verde apenas se firma. */
+#firma-panel{position:relative;animation:firma-pulse-sp5 2s ease-in-out infinite;}
+#firma-panel.tiene-firma{animation:none;border-color:#16a34a!important;background:linear-gradient(135deg,rgba(22,163,74,0.07),rgba(22,163,74,0.02))!important;box-shadow:0 0 0 4px rgba(22,163,74,.12)!important;}
+@keyframes firma-pulse-sp5{0%,100%{box-shadow:0 0 0 4px rgba(45,212,191,.16);}50%{box-shadow:0 0 0 10px rgba(45,212,191,.05);}}
+.firma-canvas-wrap{position:relative;}
+.firma-placeholder-sp5{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:0.78rem;font-weight:700;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+.firma-placeholder-sp5 i{font-size:1.25rem;color:#2dd4bf;}
 
 /* ===== PAGO: verificación ===== */
 .pago-verify{text-align:center;padding:30px 10px;}
@@ -593,6 +605,8 @@ body{padding-bottom:env(safe-area-inset-bottom);}
    visualmente distinto del teal que ya se usa en todo el resto del sitio. */
 @keyframes sticky-glow-pulse{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(245,197,24,0.5);}50%{box-shadow:0 4px 28px rgba(0,0,0,0.24),0 0 28px rgba(245,197,24,0.7);}}
 .mmodal-sticky-cta button.sticky-cta-listo{background:linear-gradient(90deg,#f5c518 0%,#facc15 30%,#fde68a 50%,#facc15 70%,#f5c518 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse 2s ease-in-out infinite;color:#2e1065!important;}
+@keyframes sticky-glow-pulse-teal{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(45,212,191,0.45);}50%{box-shadow:0 4px 26px rgba(0,0,0,0.22),0 0 26px rgba(45,212,191,0.65);}}
+.mmodal-sticky-cta button.sticky-cta-firmar{background:linear-gradient(90deg,#2dd4bf 0%,#5eead4 30%,#99f6e4 50%,#5eead4 70%,#2dd4bf 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse-teal 2s ease-in-out infinite;color:#2e1065!important;}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -1239,14 +1253,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="doc-preview-wrap">
           <span class="doc-lock-badge" id="doc-preview-badge"><i class="fas fa-pen-nib"></i> Borrador — listo para firmar</span>
-          <div class="doc-preview" id="doc-preview-text"></div>
+          <div class="doc-preview collapsed" id="doc-preview-text"></div>
         </div>
+        <button type="button" class="doc-toggle-sp5" id="doc-toggle-sp5-btn" onclick="toggleDocCompletoSp5()">Ver documento completo ▾</button>
 
-        <!-- FIRMA DIGITAL EN PANTALLA — antes de pagar, para generar confianza -->
+        <!-- FIRMA DIGITAL EN PANTALLA — antes de pagar, para generar confianza.
+             Colapsar el borrador de arriba deja espacio para que este bloque
+             sea visible sin scroll apenas se entra al paso. -->
         <div id="firma-panel" style="border:2px solid #2dd4bf;border-radius:14px;padding:16px;margin:16px 0;background:linear-gradient(135deg,rgba(45,212,191,0.06),rgba(45,212,191,0.02));">
-          <p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:2px;"><i class="fas fa-signature" style="color:var(--gold);margin-right:5px;"></i>Firma aquí mismo — 10 segundos</p>
-          <p style="font-size:0.74rem;color:var(--gray);margin-bottom:10px;">Dibuja tu firma con el dedo o el mouse. Verás tu documento firmado al instante — así confirmas que el proceso es real antes de decidir nada más.</p>
-          <canvas id="firma-canvas" width="600" height="200" style="width:100%;height:130px;background:#fff;border:1.5px dashed var(--border);border-radius:10px;touch-action:none;cursor:crosshair;display:block;"></canvas>
+          <p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:2px;"><i class="fas fa-signature" style="color:var(--gold);margin-right:5px;"></i>Firma aquí para continuar con el proceso</p>
+          <p style="font-size:0.74rem;color:var(--gray);margin-bottom:10px;">Dibuja tu firma con el dedo o el mouse — toma 10 segundos. Verás tu documento firmado al instante, así confirmas que el proceso es real antes de decidir nada más.</p>
+          <div class="firma-canvas-wrap">
+            <canvas id="firma-canvas" width="600" height="200" style="width:100%;height:130px;background:#fff;border:1.5px dashed var(--border);border-radius:10px;touch-action:none;cursor:crosshair;display:block;"></canvas>
+            <div class="firma-placeholder-sp5" id="firma-placeholder-sp5"><i class="fas fa-hand-point-down"></i>Firma aquí con el dedo</div>
+          </div>
           <div style="display:flex;gap:8px;margin-top:10px;">
             <button type="button" class="btn btn-outline" style="flex:1;color:var(--navy);border-color:var(--border);padding:11px;font-size:0.82rem;" onclick="limpiarFirma()"><i class="fas fa-eraser"></i> Borrar</button>
             <button type="button" class="btn btn-shimmer" style="flex:2;padding:11px;font-size:0.85rem;" onclick="confirmarFirma()"><i class="fas fa-check"></i> Confirmar mi firma</button>
@@ -1632,14 +1652,16 @@ function actualizarStickyCta(){
   bar.classList.add('show');
   if(!yaFirmado){
     btn.classList.remove('sticky-cta-listo');
-    btn.style.background = 'linear-gradient(135deg,#2dd4bf,#5eead4)';
-    btn.style.color = '#2e1065';
-    btn.innerHTML = '<i class="fas fa-signature"></i> Firmar mi documento ahora';
+    btn.classList.add('sticky-cta-firmar');
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.innerHTML = '<i class="fas fa-signature"></i> Firma aquí para continuar';
     btn.onclick = function(){
       var panel = document.getElementById('firma-panel');
       if(panel) panel.scrollIntoView({behavior:'smooth', block:'center'});
     };
   } else {
+    btn.classList.remove('sticky-cta-firmar');
     // Gana el mismo tratamiento dorado y con brillo que el CTA principal del
     // sitio — justo después de firmar es el momento de más entusiasmo del
     // cliente, y un botón plano ahí se pierde en vez de aprovecharlo.
@@ -1652,6 +1674,14 @@ function actualizarStickyCta(){
       if(wrap) wrap.scrollIntoView({behavior:'smooth', block:'center'});
     };
   }
+}
+
+function toggleDocCompletoSp5(){
+  var prev = document.getElementById('doc-preview-text');
+  var btn = document.getElementById('doc-toggle-sp5-btn');
+  if(!prev || !btn) return;
+  var expandido = prev.classList.toggle('collapsed') === false;
+  btn.textContent = expandido ? 'Mostrar menos ▴' : 'Ver documento completo ▾';
 }
 
 var _valorConsultado = '';
@@ -2590,7 +2620,15 @@ function initFirmaPad(){
     var clientY = t ? t.clientY : e.clientY;
     return { x: (clientX-rect.left) * (canvas.width/rect.width), y: (clientY-rect.top) * (canvas.height/rect.height) };
   }
-  function iniciar(e){ e.preventDefault(); _firmaDibujando=true; _firmaVacia=false; var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y); }
+  function iniciar(e){
+    e.preventDefault(); _firmaDibujando=true;
+    if(_firmaVacia){
+      _firmaVacia=false;
+      var placeholder=document.getElementById('firma-placeholder-sp5'); if(placeholder) placeholder.style.display='none';
+      var panel=document.getElementById('firma-panel'); if(panel) panel.classList.add('tiene-firma');
+    }
+    var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y);
+  }
   function mover(e){ if(!_firmaDibujando) return; e.preventDefault(); var pt=posicion(e); ctx.lineTo(pt.x,pt.y); ctx.stroke(); }
   function terminar(){ _firmaDibujando=false; }
 
@@ -2607,6 +2645,8 @@ function limpiarFirma(){
   if(!canvas || !_firmaCtx) return;
   _firmaCtx.clearRect(0,0,canvas.width,canvas.height);
   _firmaVacia = true;
+  var placeholder=document.getElementById('firma-placeholder-sp5'); if(placeholder) placeholder.style.display='';
+  var panel=document.getElementById('firma-panel'); if(panel) panel.classList.remove('tiene-firma');
 }
 
 function mostrarFirmaManual(){
