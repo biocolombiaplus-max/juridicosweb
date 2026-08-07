@@ -173,10 +173,10 @@ body.pad-sticky{padding-bottom:92px;}
 
   <!-- PASO 1: MULTAS -->
   <div class="card hidden" id="v-multas">
-    <h2 style="font-size:1.05rem;margin-bottom:4px;"><i class="fas fa-clipboard-list" style="color:var(--teal);"></i> Tus multas</h2>
+    <h2 style="font-size:1.05rem;margin-bottom:4px;"><i class="fas fa-clipboard-list" style="color:var(--teal);"></i> Tus multas o fotomultas</h2>
     <p class="lead" style="margin-bottom:14px;">Copia lo que dice el SIMIT para cada comparendo. Con la fecha real calculamos si ya se puede eliminar.</p>
     <div id="multas-list"></div>
-    <button type="button" class="btn-add-multa" onclick="agregarMultaRow()"><i class="fas fa-plus"></i> Agregar otra multa</button>
+    <button type="button" class="btn-add-multa" onclick="agregarMultaRow()"><i class="fas fa-plus"></i> Agregar otra multa o fotomulta</button>
     <button class="btn btn-primary" onclick="calcularYMostrarResultado()"><i class="fas fa-calculator"></i> Ver resultado</button>
   </div>
 
@@ -222,7 +222,7 @@ body.pad-sticky{padding-bottom:92px;}
       <h2 style="font-size:1.15rem;margin-bottom:6px;">Estás a un solo paso de radicarlo 🎯</h2>
       <p class="lead" style="margin-bottom:14px;">Ya hiciste lo más importante: tu Derecho de Petición quedó firmado y listo. Ahora solo falta activar tu caso para que lo radiquemos ante la secretaría.</p>
     </div>
-    <div class="urgencia-box"><i class="fas fa-triangle-exclamation"></i> Mientras no se radique, tu multa sigue activa en el SIMIT y puede seguir generando intereses o pasar a cobro coactivo. Actívalo ahora y la radicamos hoy mismo.</div>
+    <div class="urgencia-box"><i class="fas fa-triangle-exclamation"></i> Mientras no se radique, tu multa o fotomulta sigue activa en el SIMIT y puede seguir generando intereses o pasar a cobro coactivo. Actívalo ahora y la radicamos hoy mismo.</div>
     <div id="planes-pago-wrap"></div>
     <div class="trust-row">
       <span><i class="fas fa-lock" style="color:#16a34a;"></i> Pago 100% seguro</span>
@@ -443,7 +443,7 @@ function agregarMultaRow(){
   div.className='multa-block';
   div.dataset.id=id;
   div.innerHTML =
-    '<div class="mb-head"><strong><i class="fas fa-file-invoice" style="color:var(--teal);margin-right:5px;"></i>Multa #'+n+'</strong>'+
+    '<div class="mb-head"><strong><i class="fas fa-file-invoice" style="color:var(--teal);margin-right:5px;"></i>Multa o Fotomulta #'+n+'</strong>'+
     (n>1?'<button type="button" class="btn-quitar" onclick="this.closest(\'.multa-block\').remove()">Quitar</button>':'')+'</div>'+
     '<div class="fg"><label>Fecha de la infracción</label><input type="date" class="mf-fecha" max="'+new Date().toISOString().slice(0,10)+'"></div>'+
     '<div class="fg"><label>Valor (opcional)</label><input type="number" class="mf-valor" placeholder="Ej: 450000"></div>'+
@@ -491,7 +491,7 @@ function calcularYMostrarResultado(){
       if(!fecha){ faltaFecha=true; return; }
       lista.push(calcularCausal(fecha,valor,ciudad,notif,foto));
     });
-    if(!lista.length){ alert(faltaFecha?'Ingresa al menos la fecha de cada multa.':'Agrega al menos una multa.'); return; }
+    if(!lista.length){ alert(faltaFecha?'Ingresa al menos la fecha de cada multa o fotomulta.':'Agrega al menos una multa o fotomulta.'); return; }
     _multasReportadas = lista;
   } else {
     // Vienen de 'Multas Reportadas' ya calculadas en el sitio — se recalculan
@@ -569,7 +569,7 @@ function mostrarResultado(){
     var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
     var chk = m.estado==='aplica' ? '<button type="button" class="mres-check '+(m.seleccionada?'is-on':'')+'" onclick="toggleMulta('+i+')"><i class="fas '+(m.seleccionada?'fa-circle-check':'fa-hand-pointer')+'"></i> '+(m.seleccionada?'Incluida en tu documento':'Tocar para incluir')+'</button>' : '';
     return '<div class="mres-card mres-'+m.estado+'">'+
-      '<div class="mres-top"><span class="mres-fecha">Multa #'+(i+1)+' · '+fechaFmt+(m.ciudad?' · '+m.ciudad:'')+'</span>'+(valorFmt?'<span class="mres-valor">'+valorFmt+'</span>':'')+'</div>'+
+      '<div class="mres-top"><span class="mres-fecha">Multa o Fotomulta #'+(i+1)+' · '+fechaFmt+(m.ciudad?' · '+m.ciudad:'')+'</span>'+(valorFmt?'<span class="mres-valor">'+valorFmt+'</span>':'')+'</div>'+
       '<div class="mres-veredicto" style="color:'+b.color+';background:'+b.bg+';"><i class="fas '+b.icon+'"></i> '+b.texto+'</div>'+
       '<p class="mres-motivo">'+m.causal+'</p>'+chk+
     '</div>';
@@ -913,7 +913,7 @@ function renderPlanesFirmar(n, totalIndividual){
   var html =
     '<div class="plan-card plan-top">'+
     '<div class="plan-ribbon">MÁS RÁPIDO</div>'+
-    '<div class="plan-head"><div><div class="plan-name">Activar y radicar ahora</div><div class="plan-desc">'+n+' multa'+(n!==1?'s':'')+' · pago único</div></div>'+
+    '<div class="plan-head"><div><div class="plan-name">Activar y radicar ahora</div><div class="plan-desc">'+n+' multa'+(n!==1?'s':'')+' o fotomulta'+(n!==1?'s':'')+' · pago único</div></div>'+
     '<div class="plan-price">$'+totalIndividual.toLocaleString('es-CO')+'</div></div>'+
     botonesPagoFirmar('individual', totalIndividual)+
     '</div>';
