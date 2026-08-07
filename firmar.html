@@ -96,6 +96,8 @@ body.pad-sticky{padding-bottom:92px;}
 /* Paso de pago tras la firma */
 .un-paso-badge{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:1px solid rgba(217,119,6,.35);padding:7px 14px;border-radius:20px;font-size:.72rem;font-weight:800;margin-bottom:10px;}
 .urgencia-box{background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1.5px solid rgba(220,38,38,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:#7c2d12;line-height:1.55;}
+.pago-fallback{background:#fffbeb;border:1.5px solid rgba(217,119,6,.3);border-radius:12px;padding:14px;margin:6px 0 16px;font-size:.82rem;color:#92400e;line-height:1.55;}
+.pago-fallback a.btn{margin-top:10px;}
 .plan-card{border:2px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:14px;position:relative;overflow:hidden;}
 .plan-card.plan-top{border-color:rgba(22,163,74,.4);box-shadow:0 4px 18px rgba(22,163,74,.14);}
 .plan-ribbon{position:absolute;top:0;right:0;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;font-size:.62rem;font-weight:800;padding:4px 10px;border-bottom-left-radius:10px;letter-spacing:.3px;}
@@ -224,6 +226,10 @@ body.pad-sticky{padding-bottom:92px;}
     </div>
     <div class="urgencia-box"><i class="fas fa-triangle-exclamation"></i> Mientras no se radique, tu multa o fotomulta sigue activa en el SIMIT y puede seguir generando intereses o pasar a cobro coactivo. Actívalo ahora y la radicamos hoy mismo.</div>
     <div id="planes-pago-wrap"></div>
+    <div class="pago-fallback hidden" id="pago-fallback-firmar">
+      <p><i class="fas fa-circle-info"></i> El pago en línea no cargó en tu navegador — pasa muy seguido dentro de apps como Gmail o Instagram. Escríbenos y te ayudamos a completarlo al momento, sin perder tu caso.</p>
+      <a class="btn btn-wa" id="pago-fallback-link" href="#" target="_blank"><i class="fab fa-whatsapp"></i> Completar mi pago por WhatsApp</a>
+    </div>
     <div class="trust-row">
       <span><i class="fas fa-lock" style="color:#16a34a;"></i> Pago 100% seguro</span>
       <span><i class="fas fa-file-shield" style="color:#16a34a;"></i> No pagas si no aplica</span>
@@ -948,7 +954,7 @@ function botonesPagoFirmar(plan, monto){
   var idNequi = 'nequi-'+plan;
   return ''+
     '<div class="pay-row">'+
-    '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar('+monto+',\''+plan+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar(this,'+monto+',\''+plan+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
     '<button class="btn btn-navy btn-sm" onclick="toggleNequiFirmar(\''+idNequi+'\','+monto+')"><i class="fas fa-mobile-alt"></i> Nequi</button>'+
     '</div>'+
     '<div class="nequi-inline" id="'+idNequi+'">'+
@@ -974,11 +980,48 @@ function linkWhatsAppComprobanteNequi(plan, monto){
   return 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
 }
 
-function pagarConWompiFirmar(monto, plan){
-  if(!WOMPI_PUBLIC_KEY || typeof WidgetCheckout === 'undefined'){
-    alert('El pago en línea aún no está activado. Escríbenos por WhatsApp y coordinamos tu pago.');
-    return;
-  }
+// El script del widget de pago se carga desde el CDN de Wompi (widget.js) y
+// en redes móviles lentas — o dentro del navegador interno de apps como
+// Gmail o Instagram — a veces todavía no terminó de cargar en el instante
+// exacto en que el cliente toca el botón. En vez de rendirse con el primer
+// toque, reintenta unos segundos antes de asumir que de verdad falló, y si
+// falla de verdad, muestra un aviso permanente en la página (no una alerta
+// nativa, que en varios navegadores internos de apps puede no verse) con un
+// enlace directo para completar el pago por WhatsApp sin perder el caso.
+function pagarConWompiFirmar(btn, monto, plan){
+  document.getElementById('pago-fallback-firmar').classList.add('hidden');
+  if(!WOMPI_PUBLIC_KEY){ mostrarFallbackPagoFirmar(monto, plan); return; }
+  if(typeof WidgetCheckout !== 'undefined'){ abrirWompiFirmar(monto, plan); return; }
+
+  var original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando pago...';
+  var intentos = 0;
+  var espera = setInterval(function(){
+    intentos++;
+    if(typeof WidgetCheckout !== 'undefined'){
+      clearInterval(espera);
+      btn.disabled = false; btn.innerHTML = original;
+      abrirWompiFirmar(monto, plan);
+    } else if(intentos >= 25){ // ~5 segundos de reintento
+      clearInterval(espera);
+      btn.disabled = false; btn.innerHTML = original;
+      mostrarFallbackPagoFirmar(monto, plan);
+    }
+  }, 200);
+}
+
+function mostrarFallbackPagoFirmar(monto, plan){
+  var nombre = (_caso['Nombres']||'').split(' ')[0] || '';
+  var desc = { individual:'el plan de activar mi caso', masivo:'el plan que elimina todas las que apliquen', diferido:'el adelanto del Plan Pago al Eliminar' }[plan] || 'mi plan';
+  var msg = 'Hola, soy '+nombre+'. Ya firmé mi Derecho de Petición y quiero pagar '+desc+' por $'+monto.toLocaleString('es-CO')+', pero el pago en línea no cargó en mi navegador. ¿Me ayudan a completarlo?';
+  document.getElementById('pago-fallback-link').href = 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
+  var caja = document.getElementById('pago-fallback-firmar');
+  caja.classList.remove('hidden');
+  caja.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function abrirWompiFirmar(monto, plan){
   var referencia = 'JWF-'+Date.now();
   var checkout = new WidgetCheckout({
     currency: 'COP',

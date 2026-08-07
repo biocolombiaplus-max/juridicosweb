@@ -2725,11 +2725,56 @@ function descargarPDFFinal(idx){
 }
 
 // ===================== PAGO — Wompi Widget (verificación automática, sin backend) ====
-function pagarConWompi(monto, referenciaPrefijo, onAprobado){
-  if(!WOMPI_PUBLIC_KEY || typeof WidgetCheckout === 'undefined'){
-    alert('El pago en línea aún no está activado. Escríbenos por WhatsApp y coordinamos tu pago.');
+// El widget.js de Wompi se carga desde su CDN, y en redes móviles lentas —
+// o dentro del navegador interno de apps como Gmail o Instagram, muy
+// frecuente en quienes llegan desde un enlace de correo — a veces todavía
+// no terminó de cargar en el instante exacto en que el cliente toca el
+// botón de pago. En vez de rendirse con el primer toque, reintenta unos
+// segundos antes de asumir que de verdad falló, y si falla de verdad,
+// avisa con un enlace directo a WhatsApp para completar el pago sin perder
+// el caso — nunca con una alerta nativa sola, que en varios navegadores
+// internos de apps puede pasar desapercibida.
+function pagarConWompi(monto, referenciaPrefijo, onAprobado, btnId){
+  var btn = btnId ? document.getElementById(btnId) : null;
+  if(!WOMPI_PUBLIC_KEY){ mostrarFallbackPagoWompi(monto); return; }
+  if(typeof WidgetCheckout !== 'undefined'){ abrirWompiPrincipal(monto, referenciaPrefijo, onAprobado); return; }
+
+  if(!btn){ // sin botón para mostrar estado de carga, reintenta igual pero en silencio
+    var intentosSinBtn = 0;
+    var esperaSinBtn = setInterval(function(){
+      intentosSinBtn++;
+      if(typeof WidgetCheckout !== 'undefined'){ clearInterval(esperaSinBtn); abrirWompiPrincipal(monto, referenciaPrefijo, onAprobado); }
+      else if(intentosSinBtn >= 25){ clearInterval(esperaSinBtn); mostrarFallbackPagoWompi(monto); }
+    }, 200);
     return;
   }
+
+  var original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando pago...';
+  var intentos = 0;
+  var espera = setInterval(function(){
+    intentos++;
+    if(typeof WidgetCheckout !== 'undefined'){
+      clearInterval(espera);
+      btn.disabled = false; btn.innerHTML = original;
+      abrirWompiPrincipal(monto, referenciaPrefijo, onAprobado);
+    } else if(intentos >= 25){ // ~5 segundos de reintento
+      clearInterval(espera);
+      btn.disabled = false; btn.innerHTML = original;
+      mostrarFallbackPagoWompi(monto);
+    }
+  }, 200);
+}
+
+function mostrarFallbackPagoWompi(monto){
+  var datos = _leadGuardado || recogerDatosFormulario();
+  var nombre = (datos.nombres||'').split(' ')[0] || '';
+  var msg = 'Hola, soy '+nombre+'. Quiero pagar $'+monto.toLocaleString('es-CO')+' para activar mi caso, pero el pago en línea no cargó en mi navegador. ¿Me ayudan a completarlo?';
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
+}
+
+function abrirWompiPrincipal(monto, referenciaPrefijo, onAprobado){
   var datos = _leadGuardado || recogerDatosFormulario();
   var referencia = referenciaPrefijo + '-' + Date.now();
   jwTrack('pago_iniciado', { referencia: referencia, valor: monto });
@@ -2795,7 +2840,7 @@ function onPagoFallido(motivo){
 
 // Botón de Wompi en el paso 6 — usa el total ya calculado en el paso 3/5.
 function iniciarPagoPrincipal(){
-  pagarConWompi(_totalPago, 'JW', onPagoAprobado);
+  pagarConWompi(_totalPago, 'JW', onPagoAprobado, 'btn-wompi');
 }
 
 function onPagoAprobado(txData){
@@ -2979,7 +3024,7 @@ function mostrarInstruccionesRadicacionManual(){
 }
 
 function pagarRadicacion(){
-  pagarConWompi(10000, 'JW-RAD', onRadicacionPagada);
+  pagarConWompi(10000, 'JW-RAD', onRadicacionPagada, 'btn-radicar');
 }
 
 function onRadicacionPagada(txData){
