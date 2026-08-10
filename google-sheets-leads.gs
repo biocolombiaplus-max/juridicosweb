@@ -159,6 +159,9 @@ function doPost(e) {
       case 'completar_datos_cliente': return completarDatosCliente(datos);
       case 'agregar_correo_radicacion': return agregarCorreoRadicacion(datos);
       case 'enviar_remarketing_ahora': return enviarRemarketingMasivo();
+      case 'buscar_caso_telefono': return buscarCasoPorTelefono(datos);
+      case 'guardar_mensaje_ia':  return guardarMensajeIA(datos);
+      case 'obtener_historial_ia': return obtenerHistorialIA(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -1005,6 +1008,75 @@ function desinstalarTriggersRemarketing() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'enviarRemarketingMasivo') ScriptApp.deleteTrigger(t);
   });
+}
+
+// ───────────────────────── agente de WhatsApp con IA ──────────────────────
+//
+// El agente (Cloudflare Worker + Claude, ver whatsapp-agent/) llama a estas
+// 3 acciones para: 1) saber si quien escribe ya tiene un caso, 2) leer el
+// historial de la conversación (para recordar de qué hablaron aunque el
+// Worker se reinicie), y 3) guardar cada mensaje — todo queda en esta misma
+// hoja, visible para ti igual que el resto del CRM.
+
+var SHEET_CONVERSACIONES_IA = 'Conversaciones IA';
+var COLUMNAS_CONVERSACIONES_IA = ['Fecha', 'Teléfono', 'Rol', 'Mensaje'];
+
+// Compara solo los últimos 10 dígitos — así "573001234567", "3001234567" y
+// "+57 300 123 4567" se reconocen como el mismo número sin importar el
+// formato en que haya llegado.
+function normalizarTelefono(t) {
+  return String(t || '').replace(/\D/g, '').slice(-10);
+}
+
+function buscarCasoPorTelefono(datos) {
+  if (!datos.telefono) return respuestaJson({ ok: false, error: 'Falta el teléfono' });
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var valores = hoja.getDataRange().getValues();
+  var idx = {};
+  COLUMNAS_CASOS.forEach(function (c, i) { idx[c] = i; });
+  var tel = normalizarTelefono(datos.telefono);
+  for (var i = valores.length - 1; i >= 1; i--) {
+    if (normalizarTelefono(valores[i][idx['WhatsApp']]) === tel) {
+      var fila = valores[i];
+      return respuestaJson({
+        ok: true, encontrado: true, caso: {
+          nombres: fila[idx['Nombres']], apellidos: fila[idx['Apellidos']], cedula: fila[idx['Cédula']],
+          plan: fila[idx['Plan']], montoTotal: fila[idx['Monto Total']],
+          pagoOk: fila[idx['Pago OK']] === 'TRUE' || fila[idx['Pago OK']] === true,
+          firmado: fila[idx['Firmado']] === 'TRUE' || fila[idx['Firmado']] === true,
+          docEnviado: fila[idx['Doc Enviado']] === 'TRUE' || fila[idx['Doc Enviado']] === true,
+        },
+      });
+    }
+  }
+  return respuestaJson({ ok: true, encontrado: false });
+}
+
+function guardarMensajeIA(datos) {
+  if (!datos.telefono || !datos.rol || datos.mensaje === undefined) {
+    return respuestaJson({ ok: false, error: 'Faltan teléfono, rol o mensaje' });
+  }
+  var hoja = obtenerOCrearHoja(SHEET_CONVERSACIONES_IA, COLUMNAS_CONVERSACIONES_IA);
+  hoja.appendRow([new Date().toLocaleString('es-CO'), normalizarTelefono(datos.telefono), datos.rol, datos.mensaje]);
+  return respuestaJson({ ok: true });
+}
+
+// Devuelve los últimos N mensajes (cliente + agente intercalados, en orden
+// cronológico) de este número — así el agente recuerda la conversación
+// aunque el Worker se haya reiniciado entre un mensaje y el siguiente.
+function obtenerHistorialIA(datos) {
+  if (!datos.telefono) return respuestaJson({ ok: false, error: 'Falta el teléfono' });
+  var hoja = obtenerOCrearHoja(SHEET_CONVERSACIONES_IA, COLUMNAS_CONVERSACIONES_IA);
+  var valores = hoja.getDataRange().getValues();
+  var tel = normalizarTelefono(datos.telefono);
+  var limite = Number(datos.limite) || 20;
+  var mensajes = [];
+  for (var i = valores.length - 1; i >= 1 && mensajes.length < limite; i--) {
+    if (normalizarTelefono(valores[i][1]) === tel) {
+      mensajes.unshift({ rol: valores[i][2], mensaje: valores[i][3], fecha: valores[i][0] });
+    }
+  }
+  return respuestaJson({ ok: true, mensajes: mensajes });
 }
 
 // ───────────────────────── flujo de tutela ─────────────────────────
