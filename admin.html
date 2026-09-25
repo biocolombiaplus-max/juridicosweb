@@ -1688,6 +1688,46 @@ function consultarVerifikAdmin(){
   }
 }
 
+// ── Días hábiles Colombia (excluye sábados, domingos y festivos) ──
+function calcDiasHabilesColombia(isoInicio, isoFin){
+  var inicio = new Date(isoInicio+'T00:00:00');
+  var fin    = new Date(isoFin+'T00:00:00');
+  if(fin <= inicio) return 0;
+  var festivos = _getFestivosSet(inicio.getFullYear(), fin.getFullYear());
+  var count = 0;
+  var cur = new Date(inicio);
+  cur.setDate(cur.getDate()+1);
+  while(cur <= fin){
+    var d = cur.getDay();
+    var iso = cur.toISOString().slice(0,10);
+    if(d!==0 && d!==6 && !festivos[iso]) count++;
+    cur.setDate(cur.getDate()+1);
+  }
+  return count;
+}
+function _getFestivosSet(y1, y2){
+  var s = {};
+  var add = function(d){ if(d) s[d.toISOString().slice(0,10)]=1; };
+  for(var y=y1; y<=y2; y++){
+    add(new Date(y,0,1)); add(new Date(y,4,1)); add(new Date(y,6,20));
+    add(new Date(y,7,7)); add(new Date(y,11,8)); add(new Date(y,11,25));
+    [[0,6],[2,19],[5,29],[7,15],[9,12],[10,1],[10,11]].forEach(function(p){ add(_nextMon(new Date(y,p[0],p[1]))); });
+    var p = _pascua(y);
+    add(_addD(p,-3)); add(_addD(p,-2));
+    add(_nextMon(_addD(p,39))); add(_nextMon(_addD(p,60))); add(_nextMon(_addD(p,68)));
+  }
+  return s;
+}
+function _nextMon(d){ var r=new Date(d),w=r.getDay(); if(w===1)return r; r.setDate(r.getDate()+(w===0?1:8-w)); return r; }
+function _addD(d,n){ var r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function _pascua(y){
+  var a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4;
+  var f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+  var i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7;
+  var m=Math.floor((a+11*h+22*l)/451);
+  return new Date(y,Math.floor((h+l-7*m+114)/31)-1,((h+l-7*m+114)%31)+1);
+}
+
 var _mmSeq = 0;
 function agregarFilaMultaAdmin(datos){
   datos = datos || {};
@@ -1697,19 +1737,58 @@ function agregarFilaMultaAdmin(datos){
   var div = document.createElement('div');
   div.className = 'mm-row';
   div.dataset.id = id;
+  var hoy = new Date().toISOString().slice(0,10);
   div.innerHTML =
     '<div class="mm-row-head"><strong>Multa #'+n+'</strong>'+(n>1?'<button type="button" class="btn-quitar-mm" onclick="this.closest(\'.mm-row\').remove()">Quitar</button>':'')+'</div>'+
     '<div class="mm-grid">'+
-    '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+new Date().toISOString().slice(0,10)+'" value="'+(datos.fecha||'')+'"></div>'+
-    '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" value="'+(datos.valor||'')+'"></div>'+
-    '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" value="'+escHtml(datos.ciudad||'')+'"></div>'+
-    '<div class="mm-fg"><label>¿Detectada por cámara?</label><select class="mm-foto" onchange="toggleNotifMm(this)"><option value="nose">No sé</option><option value="si">Sí</option><option value="no">No</option></select></div>'+
-    '<div class="mm-fg full-col mm-notif-wrap" style="display:none;"><label>¿Le llegó la notificación a su dirección del RUNT en los 13 días hábiles siguientes? <span style="font-weight:400;color:var(--gray500,#64748b);">(solo aplica a fotomultas; un agente notifica de inmediato)</span></label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
+    // Fila 1
+    '<div class="mm-fg"><label>Número de comparendo</label><input type="text" class="mm-comparendo" placeholder="ej: 08078001000054018132" value="'+escHtml(datos.comparendo||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+hoy+'" value="'+(datos.fecha||'')+'"></div>'+
+    // Fila 2
+    '<div class="mm-fg full-col"><label>Dirección de la multa</label><input type="text" class="mm-direccion" placeholder="ej: TRAMO VIA AL MAR KM 71 SALINAS DEL REY" value="'+escHtml(datos.direccion||'')+'"></div>'+
+    // Fila 3
+    '<div class="mm-fg"><label>Fecha de notificación</label><input type="date" class="mm-fechanotif" value="'+(datos.fechaNotif||'')+'"></div>'+
+    '<div class="mm-fg"><label>Días hábiles notificación</label><input type="number" class="mm-diasnotif" placeholder="Se calcula solo" readonly value="'+(datos.diasNotif||'')+'"></div>'+
+    // Fila 4
+    '<div class="mm-fg"><label>Secretaría de tránsito</label><input type="text" class="mm-secretaria" placeholder="ej: Atlantico" value="'+escHtml(datos.secretaria||'')+'"></div>'+
+    '<div class="mm-fg"><label>Nombre del agente</label><input type="text" class="mm-agente" placeholder="ej: 0 0" value="'+escHtml(datos.agente||'')+'"></div>'+
+    // Fila 5
+    '<div class="mm-fg"><label>Código de infracción</label><input type="text" class="mm-codigo" placeholder="ej: C29" value="'+escHtml(datos.codigo||'')+'"></div>'+
+    '<div class="mm-fg"><label>¿Detectada por cámara?</label><select class="mm-foto" onchange="toggleNotifMm(this)"><option value="nose">No sé</option><option value="si">Sí — Fotomulta</option><option value="no">No — Agente</option></select></div>'+
+    // Fila 6
+    '<div class="mm-fg full-col"><label>Descripción de la infracción</label><input type="text" class="mm-descripcion" placeholder="ej: Conducir a velocidad superior a la máxima permitida" value="'+escHtml(datos.descripcion||'')+'"></div>'+
+    // Fila 7
+    '<div class="mm-fg"><label>Placa del vehículo</label><input type="text" class="mm-placa" placeholder="ej: HER760" maxlength="7" style="text-transform:uppercase" value="'+escHtml(datos.placa||'')+'"></div>'+
+    '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" placeholder="ej: 604054" value="'+(datos.valor||'')+'"></div>'+
+    // Fila 8 — Resolución
+    '<div class="mm-fg"><label>Número de resolución</label><input type="text" class="mm-numresol" placeholder="ej: 0000137107" value="'+escHtml(datos.numResol||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha de resolución</label><input type="date" class="mm-fecharesol" value="'+(datos.fechaResol||'')+'"></div>'+
+    // Fila 9 — Coactivo
+    '<div class="mm-fg"><label>Número de coactivo</label><input type="text" class="mm-numcoactivo" placeholder="ej: ATF2023017520" value="'+escHtml(datos.numCoactivo||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha del coactivo</label><input type="date" class="mm-fechacoactivo" value="'+(datos.fechaCoactivo||'')+'"></div>'+
+    // Fila 10
+    '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" placeholder="ej: Medellín" value="'+escHtml(datos.ciudad||'')+'"></div>'+
+    '<div class="mm-fg"><label>Tipo de multa</label><select class="mm-tipo"><option value="">— Selecciona —</option><option value="comparendo">Comparendo</option><option value="fotomulta">Fotomulta</option><option value="coactivo">Cobro coactivo</option><option value="prescrita">Prescrita (+3 años)</option><option value="mal_notificada">Mal notificada</option></select></div>'+
+    // Notificación (condicional fotomulta)
+    '<div class="mm-fg full-col mm-notif-wrap" style="display:none;"><label>¿Le llegó la notificación en los 13 días hábiles? <span style="font-weight:400;color:var(--gray500,#64748b);">(solo fotomultas)</span></label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
     '</div>';
   document.getElementById('mm-lista').appendChild(div);
   if(datos.notif) div.querySelector('.mm-notif').value = datos.notif;
-  if(datos.foto) div.querySelector('.mm-foto').value = datos.foto;
+  if(datos.foto)  div.querySelector('.mm-foto').value  = datos.foto;
   if(datos.foto==='si') div.querySelector('.mm-notif-wrap').style.display = '';
+  if(datos.tipo)  div.querySelector('.mm-tipo').value  = datos.tipo;
+  // Placa en mayúsculas
+  div.querySelector('.mm-placa').addEventListener('input', function(){ this.value = this.value.toUpperCase(); });
+  // Auto-calcular días hábiles al cambiar fechas
+  var fComp = div.querySelector('.mm-fecha');
+  var fNoti = div.querySelector('.mm-fechanotif');
+  var fDias = div.querySelector('.mm-diasnotif');
+  function recalcDias(){
+    if(fComp.value && fNoti.value)
+      fDias.value = calcDiasHabilesColombia(fComp.value, fNoti.value);
+  }
+  fComp.addEventListener('change', recalcDias);
+  fNoti.addEventListener('change', recalcDias);
 }
 
 function toggleNotifMm(select){
@@ -1725,12 +1804,33 @@ function guardarMultasAdmin(){
   filas.forEach(function(f){
     var fecha = f.querySelector('.mm-fecha').value;
     if(!fecha){ faltaFecha = true; return; }
+    var fechaNotif = f.querySelector('.mm-fechanotif').value;
+    var diasNotif  = f.querySelector('.mm-diasnotif').value;
+    // Recalcular días hábiles si las fechas están pero el campo está vacío
+    if(fecha && fechaNotif && !diasNotif){
+      diasNotif = String(calcDiasHabilesColombia(fecha, fechaNotif));
+      f.querySelector('.mm-diasnotif').value = diasNotif;
+    }
     lista.push({
-      fecha: fecha,
-      valor: f.querySelector('.mm-valor').value,
-      ciudad: f.querySelector('.mm-ciudad').value.trim(),
-      notif: f.querySelector('.mm-notif').value,
-      foto: f.querySelector('.mm-foto').value,
+      comparendo:   f.querySelector('.mm-comparendo').value.trim(),
+      fecha:        fecha,
+      direccion:    f.querySelector('.mm-direccion').value.trim(),
+      fechaNotif:   fechaNotif,
+      diasNotif:    diasNotif,
+      secretaria:   f.querySelector('.mm-secretaria').value.trim(),
+      agente:       f.querySelector('.mm-agente').value.trim(),
+      codigo:       f.querySelector('.mm-codigo').value.trim(),
+      descripcion:  f.querySelector('.mm-descripcion').value.trim(),
+      placa:        f.querySelector('.mm-placa').value.trim().toUpperCase(),
+      valor:        f.querySelector('.mm-valor').value,
+      numResol:     f.querySelector('.mm-numresol').value.trim(),
+      fechaResol:   f.querySelector('.mm-fecharesol').value,
+      numCoactivo:  f.querySelector('.mm-numcoactivo').value.trim(),
+      fechaCoactivo:f.querySelector('.mm-fechacoactivo').value,
+      ciudad:       f.querySelector('.mm-ciudad').value.trim(),
+      tipo:         f.querySelector('.mm-tipo').value,
+      foto:         f.querySelector('.mm-foto').value,
+      notif:        f.querySelector('.mm-notif').value,
     });
   });
   if(!lista.length){ showToast(faltaFecha?'⚠️ Ingresa al menos la fecha de cada multa':'⚠️ Agrega al menos una multa','error'); return; }
