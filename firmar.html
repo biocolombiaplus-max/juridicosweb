@@ -133,6 +133,7 @@ body.pad-sticky{padding-bottom:92px;}
   <div class="card center" id="v-cargando">
     <div class="spinner"></div>
     <p class="lead">Buscando tu caso...</p>
+    <p style="font-size:12px;color:var(--gray400,#9ca3af);margin-top:10px;">Si esto tarda más de 20 segundos,<br><button onclick="mostrar('v-cargando');init();" style="background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;font-size:inherit;">toca aquí para reintentar</button></p>
   </div>
 
   <!-- ERROR: sin cédula o caso no encontrado -->
@@ -361,12 +362,18 @@ function init(){
   // Lee el caso a través del propio Apps Script (igual que admin.html) en
   // vez de leer el Sheet directamente, para no depender de su configuración
   // de "Compartir".
+  // Timeout de 25 s: Apps Script en frío puede tardar 10-20 s; sin timeout
+  // el spinner queda girando indefinidamente si la respuesta nunca llega.
   var url = SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now();
-  fetch(url, { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(data){
+  var ctrl = new AbortController();
+  var toutId = setTimeout(function(){ ctrl.abort(); }, 25000);
+  fetch(url, { cache: 'no-store', signal: ctrl.signal })
+  .then(function(r){ clearTimeout(toutId); return r.json(); })
+  .then(function(data){
     if(!data.ok) throw new Error(data.error||'sheet_no_publico');
     var filas = data.casos || [];
     var match = filas.filter(function(r){ return String(r['Cédula']||'').trim()===cedula; }).pop();
-    if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos un caso con esa cédula. Pídele a tu asesor que revise el enlace.'; mostrar('v-error'); return; }
+    if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos un caso con esa cédula ('+cedula+'). Pídele a tu asesor que revise el enlace o que verifique que la cédula quedó bien guardada.'; mostrar('v-error'); return; }
     _caso = match;
 
     if(_tipo==='tutela'){
@@ -408,9 +415,24 @@ function init(){
     }
     mostrar('v-saludo');
   }).catch(function(err){
-    document.getElementById('v-error-texto').textContent = (err && err.message==='sheet_no_publico')
-      ? 'No pudimos verificar tu caso ahora mismo. Escríbenos por WhatsApp y lo revisamos al momento.'
+    clearTimeout(toutId);
+    var esTimeout = err && (err.name === 'AbortError' || err.message === 'sheet_no_publico');
+    var msg = esTimeout
+      ? 'El servidor tardó demasiado en responder. Toca el botón de abajo para intentar de nuevo — suele funcionar al segundo intento.'
       : 'No pudimos cargar tu caso — revisa tu conexión e intenta de nuevo.';
+    document.getElementById('v-error-texto').textContent = msg;
+    // Botón de reintentar — reemplaza el de WhatsApp solo en este caso
+    if(esTimeout){
+      var btnWa = document.querySelector('#v-error .btn-wa');
+      if(btnWa){
+        var btnRetry = document.createElement('button');
+        btnRetry.className = 'btn btn-primary';
+        btnRetry.style.cssText = 'margin-top:12px;';
+        btnRetry.innerHTML = '<i class="fas fa-rotate-right"></i> Intentar de nuevo';
+        btnRetry.onclick = function(){ mostrar('v-cargando'); init(); };
+        btnWa.parentNode.insertBefore(btnRetry, btnWa);
+      }
+    }
     mostrar('v-error');
   });
 }
