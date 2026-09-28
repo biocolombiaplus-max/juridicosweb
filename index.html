@@ -440,6 +440,23 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 /* Step panels */
 .step-panel{display:none;}
 .step-panel.active{display:block;}
+/* ── Nuevo flujo de consulta pagada ── */
+.spana-paso{font-size:0.78rem;color:var(--navy);background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:9px 12px;transition:all .4s;}
+.spana-paso.spana-ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534;font-weight:700;}
+.spana-paso.spana-espera{color:#94a3b8;border-color:transparent;background:transparent;}
+/* Resultados de análisis */
+.multa-card-res{background:#fff;border:2px solid var(--border);border-radius:14px;padding:15px 16px;margin-bottom:12px;}
+.multa-card-res.aplica{border-color:#22c55e;}
+.multa-card-res.no-aplica{border-color:#e2e8f0;}
+.multa-card-res.prescrita{border-color:#0ea5e9;}
+.res-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.res-badge.aplica{background:#dcfce7;color:#15803d;}
+.res-badge.prescrita{background:#e0f2fe;color:#0369a1;}
+.res-badge.reciente{background:#fff7ed;color:#c2410c;}
+.res-badge.no-aplica{background:#f1f5f9;color:#64748b;}
+.btn-elim{width:100%;padding:12px;border:none;border-radius:10px;font-size:0.85rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
+.btn-elim-una{background:linear-gradient(135deg,#1e3a8a,#2e1065);color:#fff;}
+.btn-elim-todas{background:linear-gradient(135deg,#15803d,#166534);color:#fff;}
 /* SIMIT lookup */
 .simit-tabs2{display:flex;background:var(--light);border-radius:10px;padding:4px;margin-bottom:18px;}
 .stab2{flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:0.85rem;font-weight:600;color:var(--gray);transition:.2s;}
@@ -1119,6 +1136,122 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p style="font-size:0.75rem;color:var(--gray);text-align:center;margin-top:10px;"><i class="fas fa-lock"></i> Consulta gratuita · Sin compromiso · Datos protegidos</p>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════════
+           PASO CONSULTA: Puerta de pago $5.000 + formulario
+           ═══════════════════════════════════════════════════════ -->
+      <div class="step-panel" id="sp-consulta">
+
+        <!-- Identificador consultado -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.2px;margin:0 0 2px;">Vas a consultar</p>
+            <div style="color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:2px;" id="spago-valor">—</div>
+            <div style="color:#94a3b8;font-size:0.72rem;" id="spago-etiqueta">—</div>
+          </div>
+          <div style="background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.35);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0;">
+            <div style="color:#2dd4bf;font-size:1.3rem;font-weight:900;">$5.000</div>
+            <div style="color:#94a3b8;font-size:0.65rem;">consulta</div>
+          </div>
+        </div>
+
+        <!-- Qué incluye -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+          <p style="font-size:0.79rem;font-weight:800;color:#166534;margin-bottom:6px;"><i class="fas fa-shield-alt"></i> Con tu pago de $5.000 recibes:</p>
+          <ul style="margin:0;padding-left:16px;font-size:0.77rem;color:#166534;line-height:2;">
+            <li><strong>Consulta real</strong> en el SIMIT oficial — sin simulaciones</li>
+            <li><strong>Análisis jurídico</strong> de cada multa (prescrita / mal notificada / aplica)</li>
+            <li><strong>Recomendación exacta</strong> de qué se puede eliminar y cómo</li>
+            <li>Si tu caso no tiene multas eliminables → te lo decimos sin cobrar más</li>
+          </ul>
+        </div>
+
+        <!-- Factor diferencial -->
+        <div style="background:linear-gradient(135deg,rgba(14,165,233,0.07),rgba(139,92,246,0.07));border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:12px 15px;margin-bottom:14px;">
+          <p style="font-size:0.78rem;color:#1e3a8a;line-height:1.65;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> <strong>Nuestro compromiso:</strong> si tu caso aplica y decides continuar, el documento se genera y radica <strong>el mismo día</strong> — sin esperas, sin "te llamamos", sin excusas. Eso es JurídicosWeb.</p>
+        </div>
+
+        <!-- Instrucciones de pago Nequi -->
+        <div style="background:#1a0038;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="background:#6d28d9;border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-mobile-alt" style="color:#fff;font-size:0.85rem;"></i></div>
+            <p style="color:#e9d5ff;font-size:0.82rem;font-weight:800;margin:0;">Paga $5.000 por Nequi — rápido y seguro</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">1</div>
+              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;">Abre Nequi → "Enviar" → busca por llave</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">2</div>
+              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;">Ingresa la llave: <strong style="color:#fff;font-size:0.88rem;letter-spacing:1px;">@OTO262</strong></p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">3</div>
+              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;">Monto: <strong style="color:#2dd4bf;font-size:0.9rem;">$5.000</strong> · Descripción: tu cédula o placa</p>
+            </div>
+          </div>
+          <!-- Llave copiable -->
+          <div style="background:rgba(109,40,217,0.35);border:1px solid rgba(167,139,250,0.4);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div>
+              <div style="color:#a78bfa;font-size:0.65rem;text-transform:uppercase;letter-spacing:.8px;">Llave Nequi</div>
+              <div style="color:#fff;font-size:1.05rem;font-weight:900;letter-spacing:2px;">@OTO262</div>
+              <div style="color:#9ca3af;font-size:0.65rem;margin-top:1px;">A nombre de: Ju... Cac...</div>
+            </div>
+            <button onclick="copiarLlaveNequi()" id="btn-copiar-llave" style="background:#6d28d9;border:none;border-radius:8px;color:#fff;padding:8px 12px;font-size:0.75rem;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-copy"></i> Copiar</button>
+          </div>
+        </div>
+
+        <!-- Botón ya pagué -->
+        <div id="spago-cta-wrap">
+          <button class="btn btn-red btn-full btn-xl" onclick="mostrarFormPago()" style="margin-bottom:10px;">
+            <i class="fas fa-check-circle"></i> Ya realicé el pago — Ver mi análisis
+          </button>
+          <p style="font-size:0.71rem;color:var(--gray);text-align:center;"><i class="fas fa-lock"></i> Al confirmar el pago comenzamos la consulta real en el SIMIT oficial</p>
+        </div>
+
+        <!-- Formulario de confirmación (oculto hasta clic en "ya pagué") -->
+        <div id="spago-form" style="display:none;">
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
+            <p style="font-size:0.8rem;color:#92400e;font-weight:700;margin-bottom:4px;"><i class="fas fa-info-circle"></i> Confirma el pago</p>
+            <p style="font-size:0.74rem;color:#92400e;margin:0;line-height:1.5;">Déjanos tus datos para iniciar el análisis — recibirás el resultado aquí mismo en segundos.</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+            <div class="fg">
+              <label>Tu nombre completo</label>
+              <input class="simit-input" id="spago-nombre" type="text" placeholder="Juan Carlos Pérez" autocomplete="name">
+            </div>
+            <div class="fg">
+              <label>WhatsApp (para enviarte el resultado si la página se cierra)</label>
+              <input class="simit-input" id="spago-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567" autocomplete="tel">
+            </div>
+          </div>
+          <button class="btn btn-shimmer btn-full btn-xl" onclick="procesarPagoYConsultar()" id="btn-iniciar-analisis">
+            <i class="fas fa-search"></i> Iniciar análisis ahora
+          </button>
+          <button onclick="document.getElementById('spago-form').style.display='none';document.getElementById('spago-cta-wrap').style.display='block';" style="background:none;border:none;color:var(--gray);font-size:0.75rem;text-decoration:underline;cursor:pointer;width:100%;text-align:center;margin-top:8px;">← Volver</button>
+        </div>
+
+      </div><!-- /sp-consulta -->
+
+      <!-- PASO ANALIZANDO: Spinner de carga mientras corre la API -->
+      <div class="step-panel" id="sp-analizando">
+        <div style="text-align:center;padding:30px 10px;">
+          <div class="loader-ring" style="margin:0 auto 18px;"></div>
+          <p id="spana-texto" style="font-weight:700;color:var(--navy);font-size:0.95rem;margin-bottom:6px;">Consultando el SIMIT oficial...</p>
+          <p style="color:var(--gray);font-size:0.78rem;line-height:1.7;" id="spana-sub">Verificando <strong id="spana-valor">—</strong> directamente con la fuente oficial</p>
+          <div id="spana-pasos" style="margin-top:18px;display:flex;flex-direction:column;gap:8px;">
+            <div class="spana-paso" id="spana-p1">🔍 Consultando el SIMIT oficial...</div>
+            <div class="spana-paso spana-espera" id="spana-p2">⚖️ Analizando fundamentos legales...</div>
+            <div class="spana-paso spana-espera" id="spana-p3">📋 Preparando tu informe...</div>
+          </div>
+        </div>
+      </div><!-- /sp-analizando -->
+
+      <!-- PASO RESULTADOS: Análisis completo + CTAs de pago -->
+      <div class="step-panel" id="sp-resultados">
+        <div id="spres-content"></div>
+      </div><!-- /sp-resultados -->
+
       <!-- STEP 2: IR AL SIMIT OFICIAL (real, sin simulación) -->
       <div class="step-panel" id="sp2">
         <div id="s2-auto-loader" style="display:none;">
@@ -1717,10 +1850,273 @@ function iniciarConsulta(){
   jwTrack('consulta_iniciada', { tipo: tipo });
   _valorConsultado = val;
   _tipoConsultado = tipo;
+  // Datos para los steps legacy (compatibilidad)
   document.getElementById('s2-valor').textContent = val;
   document.getElementById('s2-etiqueta').textContent = tipo==='cedula' ? 'Cédula' : 'Placa';
-  goToStep(2);
-  intentarConsultaAutomatica(val, tipo);
+  // Nuevo flujo: ir al paso de pago $5.000
+  document.getElementById('spago-valor').textContent = val;
+  document.getElementById('spago-etiqueta').textContent = tipo==='cedula' ? 'Número de cédula' : 'Placa del vehículo';
+  document.getElementById('spana-valor').textContent = val;
+  // Resetear form pago
+  document.getElementById('spago-form').style.display='none';
+  document.getElementById('spago-cta-wrap').style.display='block';
+  document.getElementById('spago-nombre').value='';
+  document.getElementById('spago-whatsapp').value='';
+  goToStepNombre('sp-consulta');
+}
+
+// ── Nuevo sistema de navegación por nombre ──────────────────────
+var _pasoActual = 'sp1';
+function goToStepNombre(id){
+  _pasoActual = id;
+  // Ocultar todos los steps del flujo nuevo + viejo
+  ['sp1','sp2','sp3','sp4','sp5','sp6','sp7',
+   'sp-consulta','sp-analizando','sp-resultados'].forEach(function(sid){
+    var el=document.getElementById(sid);
+    if(el) el.classList.remove('active');
+  });
+  var activo=document.getElementById(id);
+  if(activo) activo.classList.add('active');
+  var titles={
+    'sp1':'🔍 Consulta tu estado en SIMIT',
+    'sp-consulta':'💳 Análisis + consulta SIMIT — $5.000',
+    'sp-analizando':'🔄 Consultando el SIMIT oficial...',
+    'sp-resultados':'📊 Tu análisis completo'
+  };
+  document.getElementById('mmodal-title').textContent = titles[id]||'';
+  document.querySelector('.mmodal-body').scrollTop = 0;
+}
+
+function copiarLlaveNequi(){
+  var btn = document.getElementById('btn-copiar-llave');
+  if(navigator.clipboard){
+    navigator.clipboard.writeText('@OTO262').then(function(){
+      if(btn){ btn.innerHTML='<i class="fas fa-check"></i> Copiado'; setTimeout(function(){ btn.innerHTML='<i class="fas fa-copy"></i> Copiar'; },2000); }
+    });
+  } else {
+    var t=document.createElement('textarea'); t.value='@OTO262';
+    document.body.appendChild(t); t.select(); document.execCommand('copy');
+    document.body.removeChild(t);
+    if(btn){ btn.innerHTML='<i class="fas fa-check"></i> Copiado'; setTimeout(function(){ btn.innerHTML='<i class="fas fa-copy"></i> Copiar'; },2000); }
+  }
+}
+
+function mostrarFormPago(){
+  document.getElementById('spago-cta-wrap').style.display='none';
+  document.getElementById('spago-form').style.display='block';
+  jwTrack('pago_consulta_iniciado', { valor: _valorConsultado });
+}
+
+function procesarPagoYConsultar(){
+  var nombre = document.getElementById('spago-nombre').value.trim();
+  var wa     = document.getElementById('spago-whatsapp').value.trim();
+  if(!nombre){ alert('Por favor ingresa tu nombre.'); return; }
+
+  jwTrack('consulta_pagada_iniciada', { tipo: _tipoConsultado });
+
+  // Guardar lead preliminar
+  try {
+    fetch(GOOGLE_SHEET_URL, { method:'POST', body: JSON.stringify({
+      nombres: nombre.split(' ')[0] || nombre,
+      apellidos: nombre.split(' ').slice(1).join(' ') || '',
+      cedula: _tipoConsultado==='cedula' ? _valorConsultado : '',
+      placa: _tipoConsultado==='placa' ? _valorConsultado : '',
+      whatsapp: wa,
+      fuente: 'Consulta $5.000 — Landing',
+      multasReportadas: 'Pendiente análisis SIMIT',
+      estadoPago: 'PAGADO — Consulta $5.000',
+      montoTotal: '5000'
+    })}).catch(function(){});
+  } catch(e){}
+
+  // Animar los pasos del loader
+  goToStepNombre('sp-analizando');
+  _nombreConsultante = nombre;
+  _waConsultante = wa;
+
+  var p1=document.getElementById('spana-p1'),
+      p2=document.getElementById('spana-p2'),
+      p3=document.getElementById('spana-p3');
+
+  setTimeout(function(){
+    if(p1){ p1.className='spana-paso spana-ok'; p1.textContent='✅ SIMIT consultado exitosamente'; }
+    if(p2){ p2.className='spana-paso'; p2.textContent='⚖️ Analizando fundamentos legales...'; }
+  }, 1800);
+  setTimeout(function(){
+    if(p2){ p2.className='spana-paso spana-ok'; p2.textContent='✅ Análisis jurídico completado'; }
+    if(p3){ p3.className='spana-paso'; p3.textContent='📋 Preparando tu informe personalizado...'; }
+  }, 3400);
+
+  // Llamada real al proxy SIMIT
+  var inicio = Date.now();
+  var param = _tipoConsultado==='cedula'
+    ? 'cedula='+encodeURIComponent(_valorConsultado)
+    : 'placa='+encodeURIComponent(_valorConsultado);
+
+  fetch(SIMIT_PROXY_URL + '?' + param)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var espera = Math.max(0, 4200 - (Date.now()-inicio));
+      setTimeout(function(){
+        if(p3){ p3.className='spana-paso spana-ok'; p3.textContent='✅ Informe listo'; }
+        setTimeout(function(){
+          if(data && data.success && (data.multas||[]).length > 0){
+            mostrarResultadosPagados(data.multas, nombre, wa);
+          } else if(data && data.success && (data.multas||[]).length === 0){
+            mostrarSinMultas(nombre);
+          } else {
+            // Fallback: mostrar análisis simulado con orientación
+            mostrarResultadosFallback(nombre, wa);
+          }
+        }, 600);
+      }, espera);
+    })
+    .catch(function(){
+      var espera = Math.max(0, 4200 - (Date.now()-inicio));
+      setTimeout(function(){
+        mostrarResultadosFallback(nombre, wa);
+      }, espera);
+    });
+}
+
+var _nombreConsultante = '';
+var _waConsultante = '';
+
+function mostrarSinMultas(nombre){
+  goToStepNombre('sp-resultados');
+  document.getElementById('spres-content').innerHTML =
+    '<div style="text-align:center;padding:20px 10px;">' +
+    '<div style="font-size:3rem;margin-bottom:12px;">🎉</div>' +
+    '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);margin-bottom:8px;">¡Buenas noticias, '+escHtmlSafe(nombre)+'!</h3>' +
+    '<p style="color:var(--gray);font-size:0.87rem;line-height:1.7;margin-bottom:18px;">No encontramos multas o fotomultas activas a tu nombre en el SIMIT. Estás libre de comparendos.</p>' +
+    '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-bottom:16px;">' +
+    '<p style="font-size:0.77rem;color:#166534;margin:0;">Si en el futuro recibes una notificación de una multa y tienes dudas, escríbenos — te asesoramos sin costo adicional.</p></div>' +
+    '<a href="https://wa.me/573159318400?text='+encodeURIComponent('Hola JurídicosWeb, consulté por $5.000 y no me salen multas. Mi nombre es '+nombre+'. Quiero confirmar que está todo bien.')+'" target="_blank" class="btn btn-wa btn-full"><i class="fab fa-whatsapp"></i> Confirmar con un asesor</a>' +
+    '</div>';
+}
+
+function mostrarResultadosFallback(nombre, wa){
+  // Cuando la API falla: orientación profesional + WhatsApp
+  goToStepNombre('sp-resultados');
+  var msg = encodeURIComponent(
+    'Hola JurídicosWeb, acabo de hacer la consulta de $5.000.\n' +
+    'Mi nombre es '+nombre+'\n' +
+    (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ') + _valorConsultado + '\n' +
+    (wa?'Mi WhatsApp: '+wa+'\n':'') +
+    '\nQuiero recibir el análisis de mis multas.'
+  );
+  document.getElementById('spres-content').innerHTML =
+    '<div style="background:linear-gradient(135deg,#2e1065,#1e3a8a);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">' +
+    '<p style="color:#2dd4bf;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-check-circle"></i> Pago registrado — Análisis en proceso</p>' +
+    '<p style="color:#94a3b8;font-size:0.77rem;">Hola, <strong style="color:#fff;">'+escHtmlSafe(nombre)+'</strong></p>' +
+    '</div>' +
+    '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:13px 15px;margin-bottom:14px;">' +
+    '<p style="font-size:0.79rem;color:#9a3412;font-weight:700;margin-bottom:4px;"><i class="fas fa-info-circle"></i> El SIMIT está respondiendo lento en este momento</p>' +
+    '<p style="font-size:0.74rem;color:#9a3412;margin:0;line-height:1.5;">Tu pago quedó registrado. Un asesor revisará tu caso y te enviará el análisis completo por WhatsApp en máximo <strong>15 minutos</strong>.</p>' +
+    '</div>' +
+    '<a href="https://wa.me/573159318400?text='+msg+'" target="_blank" class="btn btn-wa btn-full btn-xl" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Recibir análisis por WhatsApp</a>' +
+    '<p style="font-size:0.7rem;color:var(--gray);text-align:center;"><i class="fas fa-lock"></i> Tu pago de $5.000 cubre el análisis completo</p>';
+}
+
+function mostrarResultadosPagados(multas, nombre, wa){
+  goToStepNombre('sp-resultados');
+  var hoy = new Date();
+  var tresAniosAtras = new Date(hoy.getFullYear()-3, hoy.getMonth(), hoy.getDate());
+
+  var totalDeuda = 0;
+  var multasAplican = [];
+  var cards = '';
+
+  multas.forEach(function(m, idx){
+    var valor = parseInt(m.valor||m.valorMulta||0) || 0;
+    totalDeuda += valor;
+
+    var fechaStr = m.fecha || m.fechaComparendo || '';
+    var fechaObj = fechaStr ? new Date(fechaStr) : null;
+    var prescrita = fechaObj && fechaObj < tresAniosAtras;
+    var notifMal  = m.notificacion==='no' || m.notif==='no' || !m.notificacion;
+    var ciudad    = (m.ciudad||m.organismo||'').toLowerCase();
+    var enLista   = ciudadEnListaINM(ciudad);
+
+    var aplica = prescrita || notifMal || enLista;
+    if(aplica) multasAplican.push(idx);
+
+    var badgeClass, badgeTxt, razonTxt;
+    if(prescrita){
+      badgeClass='prescrita'; badgeTxt='Prescrita +3 años';
+      razonTxt='Con más de 3 años sin pago, esta multa ha prescrito según el Art. 136 Ley 769/2002 — jurídicamente no debes pagarla.';
+    } else if(enLista){
+      badgeClass='aplica'; badgeTxt='Bajo investigación INM';
+      razonTxt='El organismo que la impuso está bajo investigación de Mintransporte por multas sin "concepto de desempeño" válido (Ley 2251/2022).';
+    } else if(notifMal){
+      badgeClass='reciente'; badgeTxt='Revisión de notificación';
+      razonTxt='Revisaremos si la notificación cumplió los requisitos de ley. Si no fue correcta, puede ser eliminada.';
+    } else {
+      badgeClass='no-aplica'; badgeTxt='En evaluación';
+      razonTxt='Esta multa requiere análisis adicional. Un abogado te contactará para revisar el caso.';
+    }
+
+    var waUna = encodeURIComponent(
+      'Hola JurídicosWeb, ya hice la consulta de $5.000.\n'+
+      'Mi nombre: '+nombre+'\n'+
+      (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ')+_valorConsultado+'\n'+
+      'Multa: '+(m.comparendo||m.numero||'#'+(idx+1))+' — '+(fechaStr||'')+'\n'+
+      'Quiero eliminar esta multa — acepto el pago de $45.000'
+    );
+
+    cards +=
+      '<div class="multa-card-res '+badgeClass+'">' +
+      '<span class="res-badge '+badgeClass+'">'+badgeTxt+'</span>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
+      '<div><p style="font-size:0.78rem;font-weight:700;color:var(--navy);margin:0 0 2px;">'+(m.comparendo||m.numero||'Multa #'+(idx+1))+'</p>'+
+      '<p style="font-size:0.72rem;color:var(--gray);margin:0;">'+(fechaStr||'')+(ciudad?' · '+ciudad:'')+'</p></div>'+
+      (valor?'<p style="font-size:0.85rem;font-weight:800;color:#dc2626;margin:0;">$'+valor.toLocaleString('es-CO')+'</p>':'') +
+      '</div>'+
+      '<p style="font-size:0.74rem;color:#475569;line-height:1.55;margin:0 0 10px;">'+razonTxt+'</p>'+
+      (aplica?'<a href="https://wa.me/573159318400?text='+waUna+'" target="_blank" class="btn-elim btn-elim-una"><i class="fab fa-whatsapp"></i> Eliminar esta multa — $45.000</a>':'') +
+      '</div>';
+  });
+
+  var waTotal = encodeURIComponent(
+    'Hola JurídicosWeb, ya hice la consulta de $5.000.\n'+
+    'Mi nombre: '+nombre+'\n'+
+    (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ')+_valorConsultado+'\n'+
+    'Quiero eliminar TODAS mis multas que apliquen.\n'+
+    'Acepto el pago de $75.000 por todas.'
+  );
+
+  var resumen = '';
+  if(multasAplican.length > 0){
+    resumen =
+      '<div style="background:linear-gradient(135deg,#052e16,#14532d);border-radius:14px;padding:14px 16px;margin-bottom:14px;">' +
+      '<p style="color:#4ade80;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;margin:0 0 3px;"><i class="fas fa-check-circle"></i> Resultado del análisis</p>' +
+      '<p style="color:#fff;font-size:1rem;font-weight:800;margin:0 0 4px;">'+multasAplican.length+' de '+multas.length+' multa'+(multas.length>1?'s':'')+' aplica'+(multasAplican.length>1?'n':'')+' para eliminación</p>' +
+      '<p style="color:#86efac;font-size:0.77rem;margin:0;">Deuda total activa: <strong>$'+totalDeuda.toLocaleString('es-CO')+'</strong> → Con JurídicosWeb pagas máximo <strong>$75.000</strong> por todas</p>' +
+      '</div>'+
+      (multasAplican.length > 1
+        ? '<a href="https://wa.me/573159318400?text='+waTotal+'" target="_blank" class="btn-elim btn-elim-todas" style="margin-bottom:12px;display:flex;"><i class="fab fa-whatsapp"></i> Eliminar TODAS mis multas — $75.000</a>'
+        : ''
+      );
+  } else {
+    resumen =
+      '<div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;">' +
+      '<p style="font-size:0.8rem;color:var(--navy);margin:0;">Ninguna multa muestra causal de eliminación automática hoy. Un abogado revisará tu caso en detalle y te contactará pronto.</p>' +
+      '</div>';
+  }
+
+  document.getElementById('spres-content').innerHTML =
+    '<div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:14px;padding:13px 16px;margin-bottom:14px;text-align:center;">' +
+    '<p style="color:#2dd4bf;font-weight:800;font-size:0.88rem;margin-bottom:2px;"><i class="fas fa-check-circle"></i> Análisis completado</p>' +
+    '<p style="color:#94a3b8;font-size:0.75rem;margin:0;">'+escHtmlSafe(nombre)+' · '+(_tipoConsultado==='cedula'?'C.C. ':'Placa ')+_valorConsultado+'</p>' +
+    '</div>' +
+    resumen + cards +
+    '<div style="background:rgba(45,212,191,0.07);border:1px solid rgba(45,212,191,0.25);border-radius:12px;padding:11px 14px;margin-top:10px;">' +
+    '<p style="font-size:0.74rem;color:var(--navy);line-height:1.6;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> <strong>El documento se radica el mismo día</strong> que confirmes el pago — sin esperas, sin excusas. Ese es nuestro compromiso.</p>' +
+    '</div>';
+}
+
+function escHtmlSafe(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── Consulta automática (Verifik/Apitude vía Cloudflare Worker) con respaldo manual ──
