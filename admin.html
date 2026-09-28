@@ -2200,17 +2200,16 @@ function waTemplate(row, tipo){
       'Ya se cumplió el plazo legal y, según lo que sabemos, procede una Acción de Tutela para exigir la respuesta y proteger tu derecho ($19.800 por multa). '+
       '¿Quieres que la iniciemos ya mismo?';
   } else if(tipo==='saldo'){
-    msg = '🔔 *'+nombre+', atención — tienes una notificación importante de JurídicosWeb.*\n\n'+
-      '✅ *¡La secretaría de tránsito respondió A FAVOR!* Tu multa fue eliminada oficialmente.\n\n'+
-      '⚠️ *Necesitamos confirmar tu pago de saldo antes de las próximas 48 horas.*\n\n'+
-      'Si no logramos completar el proceso, existe el riesgo de que la multa vuelva a aparecer en el SIMIT porque el trámite quedaría incompleto en nuestro sistema. No podemos garantizar el resultado si el caso se queda abierto.\n\n'+
-      '👉 *Paga el saldo de $95.500 por transferencia a esta llave breve:*\n\n'+
-      '🔑 *Llave breve (Transfiya):* @OTO262\n'+
-      '👤 *A nombre de:* Ju... Cac... _(verifica el nombre al momento de pagar)_\n'+
-      '💳 Puedes pagar desde *Nequi, Daviplata, Bancolombia, Davivienda* o cualquier banco con Transfiya.\n\n'+
-      '✅ Una vez realices el pago, envíanos el *comprobante por este chat* para cerrar tu caso de inmediato.\n\n'+
-      '_Una vez confirmes el pago, cerramos tu caso y la eliminación queda registrada. Si tienes alguna duda, escríbenos aquí mismo._\n\n'+
-      '⚖️ JurídicosWeb — Trámite 100% legal';
+    msg = '*'+nombre+', tenemos noticias importantes sobre tu caso.*\n\n'+
+      '✅ *La secretaría de tránsito respondió A FAVOR.* Tu multa fue eliminada oficialmente.\n\n'+
+      '⚠️ *Atención:* Para cerrar el caso necesitamos confirmar tu pago de saldo en las próximas *48 horas*.\n\n'+
+      'Si no logramos comunicarnos a tiempo, corremos el riesgo de que lo avanzado se revierta y la multa vuelva a aparecer en el SIMIT. El trámite queda incompleto hasta que se confirme el pago.\n\n'+
+      '*Paga el saldo de $95.500 a esta llave breve (Transfiya):*\n\n'+
+      '> Llave: *@OTO262*\n'+
+      '> A nombre de: *Ju... Cac...* (verifica al momento de pagar)\n'+
+      '> Acepta: Nequi, Daviplata, Bancolombia, Davivienda y cualquier banco con Transfiya.\n\n'+
+      'Una vez pagues, *envíanos el comprobante por este chat* y cerramos tu caso de inmediato.\n\n'+
+      '_JurídicosWeb — Tramite 100% legal_';
   } else if(tipo==='tutela_ganada'){
     msg = 'Hola '+nombre+', ¡ganamos la Tutela! 🎉 El juzgado ordenó a la Secretaría responder tu Derecho de Petición. '+
       'Como acordamos, el costo de la Tutela ($45.000) se cobra ahora que ya tuvimos un resultado positivo. ¿Te compartimos el link de pago?';
