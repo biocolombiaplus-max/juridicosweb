@@ -2132,26 +2132,36 @@ function mostrarSinMultas(nombre){
 }
 
 function mostrarResultadosFallback(nombre, wa){
-  // Cuando la API falla: orientación profesional + WhatsApp
   goToStepNombre('sp-resultados');
+  var planLabel = _planSeleccionado === 'todas' ? 'eliminar TODAS mis multas ($49.000)' : 'eliminar una multa ($25.000)';
   var msg = encodeURIComponent(
-    'Hola JurídicosWeb, acabo de hacer la consulta de $5.000.\n' +
-    'Mi nombre es '+nombre+'\n' +
+    'Hola JurídicosWeb 👋\n' +
+    'Mi nombre es ' + nombre + '\n' +
     (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ') + _valorConsultado + '\n' +
-    (wa?'Mi WhatsApp: '+wa+'\n':'') +
-    '\nQuiero recibir el análisis de mis multas.'
+    (wa ? 'WhatsApp: ' + wa + '\n' : '') +
+    'Plan elegido: ' + planLabel + '\n\n' +
+    'Acabo de hacer el pago. Quedo esperando el enlace para firmar mi documento.'
   );
   document.getElementById('spres-content').innerHTML =
-    '<div style="background:linear-gradient(135deg,#2e1065,#1e3a8a);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">' +
-    '<p style="color:#2dd4bf;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-check-circle"></i> Pago registrado — Análisis en proceso</p>' +
-    '<p style="color:#94a3b8;font-size:0.77rem;">Hola, <strong style="color:#fff;">'+escHtmlSafe(nombre)+'</strong></p>' +
+    // Header de confirmación
+    '<div style="background:linear-gradient(135deg,#15803d,#166534);border-radius:14px;padding:18px 16px;margin-bottom:16px;text-align:center;">' +
+    '<div style="width:52px;height:52px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><i class="fas fa-check" style="color:#fff;font-size:1.4rem;"></i></div>' +
+    '<p style="color:#fff;font-weight:900;font-size:1rem;margin:0 0 3px;">¡Todo listo, '+escHtmlSafe(nombre.split(' ')[0])+'!</p>' +
+    '<p style="color:rgba(255,255,255,0.75);font-size:0.75rem;margin:0;">Tu pago quedó registrado correctamente ✅</p>' +
     '</div>' +
-    '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:13px 15px;margin-bottom:14px;">' +
-    '<p style="font-size:0.79rem;color:#9a3412;font-weight:700;margin-bottom:4px;"><i class="fas fa-info-circle"></i> El SIMIT está respondiendo lento en este momento</p>' +
-    '<p style="font-size:0.74rem;color:#9a3412;margin:0;line-height:1.5;">Tu pago quedó registrado. Un asesor revisará tu caso y te enviará el análisis completo por WhatsApp en máximo <strong>15 minutos</strong>.</p>' +
-    '</div>' +
-    '<a href="https://wa.me/573159318400?text='+msg+'" target="_blank" class="btn btn-wa btn-full btn-xl" style="margin-bottom:10px;"><i class="fab fa-whatsapp"></i> Recibir análisis por WhatsApp</a>' +
-    '<p style="font-size:0.7rem;color:var(--gray);text-align:center;"><i class="fas fa-lock"></i> Tu pago de $5.000 cubre el análisis completo</p>';
+    // Próximo paso
+    '<div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:12px;padding:14px 16px;margin-bottom:16px;">' +
+    '<p style="font-size:0.82rem;font-weight:800;color:#15803d;margin:0 0 8px;">📋 ¿Qué sigue ahora?</p>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    '<div style="display:flex;align-items:flex-start;gap:9px;"><div style="width:20px;height:20px;min-width:20px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;"><span style="color:#fff;font-size:0.6rem;font-weight:800;">1</span></div><p style="font-size:0.78rem;color:#166534;margin:0;line-height:1.4;">Toca el botón de abajo para enviarnos tus datos por WhatsApp</p></div>' +
+    '<div style="display:flex;align-items:flex-start;gap:9px;"><div style="width:20px;height:20px;min-width:20px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;"><span style="color:#fff;font-size:0.6rem;font-weight:800;">2</span></div><p style="font-size:0.78rem;color:#166534;margin:0;line-height:1.4;">Te enviamos el link para firmar tu documento <strong>en minutos</strong></p></div>' +
+    '<div style="display:flex;align-items:flex-start;gap:9px;"><div style="width:20px;height:20px;min-width:20px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;"><span style="color:#fff;font-size:0.6rem;font-weight:800;">3</span></div><p style="font-size:0.78rem;color:#166534;margin:0;line-height:1.4;">Firmas desde tu celular y nosotros radicamos el mismo día</p></div>' +
+    '</div></div>' +
+    // Botón WhatsApp grande
+    '<a href="https://wa.me/573159318400?text='+msg+'" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#16a34a;color:#fff;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;text-decoration:none;margin-bottom:10px;box-shadow:0 4px 16px rgba(22,163,74,0.4);">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+    'Enviar mis datos por WhatsApp</a>' +
+    '<p style="font-size:0.68rem;color:var(--gray);text-align:center;margin:0;"><i class="fas fa-lock"></i> Proceso 100% seguro · Sin letras ocultas · Trámite legal</p>';
 }
 
 function mostrarResultadosPagados(multas, nombre, wa){
