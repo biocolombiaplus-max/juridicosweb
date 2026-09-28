@@ -1274,6 +1274,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <label>Número de WhatsApp</label>
                 <input class="simit-input" id="spago-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567" autocomplete="tel">
               </div>
+              <div class="fg">
+                <label>Ciudad de residencia actual</label>
+                <input class="simit-input" id="spago-ciudad" type="text" placeholder="Ej: Bogotá, Medellín, Cali..." autocomplete="address-level2">
+              </div>
+              <div class="fg">
+                <label>Dirección de residencia actual</label>
+                <input class="simit-input" id="spago-direccion" type="text" placeholder="Ej: Cra 15 # 45-32, Apto 201" autocomplete="street-address">
+              </div>
+              <div class="fg">
+                <label>Correo electrónico</label>
+                <input class="simit-input" id="spago-correo" type="email" inputmode="email" placeholder="tucorreo@gmail.com" autocomplete="email">
+                <p style="font-size:0.68rem;color:var(--gray);margin:4px 0 0;"><i class="fas fa-info-circle"></i> La secretaría de tránsito enviará su respuesta a este correo</p>
+              </div>
             </div>
             <button class="btn btn-shimmer btn-full btn-xl" onclick="procesarPagoYConsultar()" id="btn-iniciar-analisis">
               <i class="fas fa-file-alt"></i> Confirmar y generar documento
@@ -1922,6 +1935,9 @@ function iniciarConsulta(){
   document.getElementById('spago-pago-wrap').style.display='none';
   document.getElementById('spago-nombre').value='';
   document.getElementById('spago-whatsapp').value='';
+  document.getElementById('spago-ciudad').value='';
+  document.getElementById('spago-direccion').value='';
+  document.getElementById('spago-correo').value='';
   // Preseleccionar plan "todas" por ser la mejor opción
   seleccionarPlan('todas');
   goToStepNombre('sp-consulta');
@@ -2014,13 +2030,23 @@ function mostrarFormPago(){
 }
 
 function procesarPagoYConsultar(){
-  var nombre = document.getElementById('spago-nombre').value.trim();
-  var wa     = document.getElementById('spago-whatsapp').value.trim();
-  if(!nombre){ alert('Por favor ingresa tu nombre.'); return; }
+  var nombre    = document.getElementById('spago-nombre').value.trim();
+  var wa        = document.getElementById('spago-whatsapp').value.trim();
+  var ciudad    = document.getElementById('spago-ciudad').value.trim();
+  var direccion = document.getElementById('spago-direccion').value.trim();
+  var correo    = document.getElementById('spago-correo').value.trim();
+  if(!nombre)    { alert('Por favor ingresa tu nombre completo.'); return; }
+  if(!wa)        { alert('Por favor ingresa tu número de WhatsApp.'); return; }
+  if(!ciudad)    { alert('Por favor ingresa tu ciudad de residencia.'); return; }
+  if(!direccion) { alert('Por favor ingresa tu dirección de residencia.'); return; }
+  if(!correo)    { alert('Por favor ingresa tu correo electrónico.'); return; }
 
-  jwTrack('consulta_pagada_iniciada', { tipo: _tipoConsultado });
+  var monto = _planSeleccionado === 'todas' ? '49000' : '25000';
+  var planLabel = _planSeleccionado === 'todas' ? 'Eliminar TODAS — $49.000' : 'Eliminar una multa — $25.000';
 
-  // Guardar lead preliminar
+  jwTrack('consulta_pagada_iniciada', { tipo: _tipoConsultado, plan: _planSeleccionado });
+
+  // Guardar lead con todos los datos
   try {
     fetch(GOOGLE_SHEET_URL, { method:'POST', body: JSON.stringify({
       nombres: nombre.split(' ')[0] || nombre,
@@ -2028,10 +2054,14 @@ function procesarPagoYConsultar(){
       cedula: _tipoConsultado==='cedula' ? _valorConsultado : '',
       placa: _tipoConsultado==='placa' ? _valorConsultado : '',
       whatsapp: wa,
-      fuente: 'Consulta $5.000 — Landing',
+      ciudad: ciudad,
+      direccion: direccion,
+      correo: correo,
+      fuente: 'Landing — Pago directo',
       multasReportadas: 'Pendiente análisis SIMIT',
-      estadoPago: 'PAGADO — Consulta $5.000',
-      montoTotal: '5000'
+      estadoPago: 'PAGADO — ' + planLabel,
+      montoTotal: monto,
+      plan: planLabel
     })}).catch(function(){});
   } catch(e){}
 
