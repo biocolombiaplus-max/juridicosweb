@@ -1404,6 +1404,11 @@ function buildAcciones(row, estado){
 
   if(estado==='pendiente'){
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="abrirModalConfirmarPago(this)">💰 Confirmar Pago</button>';
+    if(row['Cédula']){
+      var tieneMultasPend = false;
+      try{ tieneMultasPend = Array.isArray(JSON.parse(row['Multas Reportadas'])) && JSON.parse(row['Multas Reportadas']).length>0; }catch(e){}
+      html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultasPend?'Editar':'Completar')+' datos de multas</button>';
+    }
   }
 
   // A partir de que el pago está confirmado, sin importar la etapa exacta,
