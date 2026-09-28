@@ -1117,7 +1117,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- STEP 1: SIMIT LOOKUP -->
       <div class="step-panel active" id="sp1">
-        <p style="color:var(--gray);font-size:0.87rem;margin-bottom:16px;line-height:1.6;">Antes de cualquier pago, consulta <strong>gratis</strong> cuántas multas o fotomultas tienes y cuáles aplican para eliminar.</p>
+        <p style="color:var(--gray);font-size:0.87rem;margin-bottom:16px;line-height:1.6;">Ingresa tu cédula o placa — te mostramos los planes disponibles y eliminamos tus multas <strong>el mismo día</strong>, sin esperas.</p>
         <div class="simit-tabs2">
           <div class="stab2 active" onclick="switchStab('cedula')"><i class="fas fa-id-card"></i> Por Cédula</div>
           <div class="stab2" onclick="switchStab('placa')"><i class="fas fa-car"></i> Por Placa</div>
@@ -1137,110 +1137,173 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════
-           PASO CONSULTA: Puerta de pago $5.000 + formulario
+           PASO PLANES: Selector de plan + pago + formulario
            ═══════════════════════════════════════════════════════ -->
       <div class="step-panel" id="sp-consulta">
 
         <!-- Identificador consultado -->
-        <div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:12px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-id-card" style="color:#94a3b8;font-size:0.9rem;flex-shrink:0;"></i>
           <div>
-            <p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.2px;margin:0 0 2px;">Vas a consultar</p>
-            <div style="color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:2px;" id="spago-valor">—</div>
-            <div style="color:#94a3b8;font-size:0.72rem;" id="spago-etiqueta">—</div>
-          </div>
-          <div style="background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.35);border-radius:10px;padding:8px 12px;text-align:center;flex-shrink:0;">
-            <div style="color:#2dd4bf;font-size:1.3rem;font-weight:900;">$5.000</div>
-            <div style="color:#94a3b8;font-size:0.65rem;">consulta</div>
+            <p style="color:#94a3b8;font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;margin:0 0 1px;">Consultando para</p>
+            <div style="color:#fff;font-size:1.1rem;font-weight:900;letter-spacing:1.5px;line-height:1;" id="spago-valor">—</div>
+            <div style="color:#64748b;font-size:0.68rem;" id="spago-etiqueta">—</div>
           </div>
         </div>
 
-        <!-- Qué incluye -->
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
-          <p style="font-size:0.79rem;font-weight:800;color:#166534;margin-bottom:6px;"><i class="fas fa-shield-alt"></i> Con tu pago de $5.000 recibes:</p>
-          <ul style="margin:0;padding-left:16px;font-size:0.77rem;color:#166534;line-height:2;">
-            <li><strong>Consulta real</strong> en el SIMIT oficial — sin simulaciones</li>
-            <li><strong>Análisis jurídico</strong> de cada multa (prescrita / mal notificada / aplica)</li>
-            <li><strong>Recomendación exacta</strong> de qué se puede eliminar y cómo</li>
-            <li>Si tu caso no tiene multas eliminables → te lo decimos sin cobrar más</li>
-          </ul>
+        <!-- Promesa principal -->
+        <div style="text-align:center;margin-bottom:16px;">
+          <p style="font-size:1rem;font-weight:900;color:var(--navy);margin:0 0 4px;line-height:1.3;">Elimina tu multa hoy mismo</p>
+          <p style="font-size:0.78rem;color:var(--gray);margin:0;line-height:1.5;">Todo incluido: consulta + análisis legal + documento + radicación</p>
         </div>
 
-        <!-- Factor diferencial -->
-        <div style="background:linear-gradient(135deg,rgba(14,165,233,0.07),rgba(139,92,246,0.07));border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:12px 15px;margin-bottom:14px;">
-          <p style="font-size:0.78rem;color:#1e3a8a;line-height:1.65;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> <strong>Nuestro compromiso:</strong> si tu caso aplica y decides continuar, el documento se genera y radica <strong>el mismo día</strong> — sin esperas, sin "te llamamos", sin excusas. Eso es JurídicosWeb.</p>
-        </div>
+        <!-- Tarjetas de planes -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;" id="spago-planes">
 
-        <!-- Instrucciones de pago -->
-        <div style="background:#1a0038;border-radius:14px;padding:16px;margin-bottom:14px;">
-
-          <!-- Título -->
-          <p style="color:#fff;font-size:0.88rem;font-weight:800;margin:0 0 4px;text-align:center;letter-spacing:.3px;">¿Cómo pagar los $5.000?</p>
-          <p style="color:#a78bfa;font-size:0.72rem;margin:0 0 14px;text-align:center;line-height:1.5;">Elige el método que prefieras — todos llegan al mismo destino</p>
-
-          <!-- Chips de métodos -->
-          <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px;">
-            <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#e9d5ff;font-size:0.72rem;font-weight:700;padding:5px 11px;display:flex;align-items:center;gap:5px;"><i class="fas fa-mobile-alt" style="color:#ec4899;"></i> Nequi</span>
-            <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#e9d5ff;font-size:0.72rem;font-weight:700;padding:5px 11px;display:flex;align-items:center;gap:5px;"><i class="fas fa-wallet" style="color:#f59e0b;"></i> Daviplata</span>
-            <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#e9d5ff;font-size:0.72rem;font-weight:700;padding:5px 11px;display:flex;align-items:center;gap:5px;"><i class="fas fa-university" style="color:#60a5fa;"></i> Bancolombia</span>
-            <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#e9d5ff;font-size:0.72rem;font-weight:700;padding:5px 11px;display:flex;align-items:center;gap:5px;"><i class="fas fa-university" style="color:#f87171;"></i> Davivienda</span>
-            <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#e9d5ff;font-size:0.72rem;font-weight:700;padding:5px 11px;display:flex;align-items:center;gap:5px;"><i class="fas fa-university" style="color:#34d399;"></i> Cualquier banco</span>
+          <!-- Plan 1: Una multa -->
+          <div id="plan-una" onclick="seleccionarPlan('una')" style="border:2px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.2s;position:relative;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:20px;height:20px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;" id="radio-una"></div>
+                <div>
+                  <p style="font-weight:800;color:var(--navy);font-size:0.9rem;margin:0;">Eliminar una multa</p>
+                  <p style="font-size:0.72rem;color:var(--gray);margin:0;margin-top:2px;">Elegimos la que tenga más probabilidad de éxito</p>
+                </div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:1.35rem;font-weight:900;color:var(--navy);">$25.000</div>
+                <div style="font-size:0.63rem;color:var(--gray);">pago único</div>
+              </div>
+            </div>
+            <ul style="margin:10px 0 0;padding-left:18px;font-size:0.73rem;color:#475569;line-height:1.9;">
+              <li>Consulta real en SIMIT oficial</li>
+              <li>Análisis jurídico completo de tu caso</li>
+              <li>Documento generado al instante</li>
+              <li><strong>Enviado a tu WhatsApp en minutos</strong></li>
+              <li>Nosotros lo radicamos — tú solo firmas</li>
+            </ul>
           </div>
 
-          <!-- Cómo hacerlo -->
-          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;min-width:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;margin-top:1px;">1</div>
-              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;line-height:1.5;">Abre tu app bancaria, Nequi o Daviplata → toca <strong style="color:#fff;">"Transferir"</strong> o <strong style="color:#fff;">"Enviar dinero"</strong></p>
+          <!-- Plan 2: Todas las multas -->
+          <div id="plan-todas" onclick="seleccionarPlan('todas')" style="border:2px solid #22c55e;border-radius:14px;padding:14px 16px;cursor:pointer;transition:.2s;position:relative;background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(21,128,61,0.06));">
+            <div style="position:absolute;top:-11px;right:14px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:0.62rem;font-weight:900;padding:4px 12px;border-radius:20px;box-shadow:0 3px 10px rgba(21,128,61,0.4);letter-spacing:.3px;">MEJOR OPCIÓN</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:20px;height:20px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;flex-shrink:0;" id="radio-todas"><i class="fas fa-check" style="color:#fff;font-size:0.6rem;"></i></div>
+                <div>
+                  <p style="font-weight:800;color:var(--navy);font-size:0.9rem;margin:0;">Eliminar TODAS las que apliquen</p>
+                  <p style="font-size:0.72rem;color:#15803d;margin:0;margin-top:2px;font-weight:700;">Máxima eliminación — un solo pago</p>
+                </div>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <div style="font-size:1.35rem;font-weight:900;color:#15803d;">$49.000</div>
+                <div style="font-size:0.63rem;color:#16a34a;font-weight:700;">todas incluidas</div>
+              </div>
             </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;min-width:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;margin-top:1px;">2</div>
-              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;line-height:1.5;">Selecciona transferir <strong style="color:#fff;">por llave</strong> (o "llave breve" / "alias") e ingresa la llave <strong style="color:#2dd4bf;letter-spacing:1px;">@OTO262</strong></p>
-            </div>
-            <div style="display:flex;align-items:flex-start;gap:10px;">
-              <div style="background:#6d28d9;color:#fff;width:20px;height:20px;min-width:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;margin-top:1px;">3</div>
-              <p style="color:#d8b4fe;font-size:0.77rem;margin:0;line-height:1.5;">Monto: <strong style="color:#2dd4bf;font-size:0.9rem;">$5.000</strong> — en la descripción escribe tu cédula o placa</p>
-            </div>
+            <ul style="margin:10px 0 0;padding-left:18px;font-size:0.73rem;color:#166534;line-height:1.9;">
+              <li>Todo lo del plan anterior</li>
+              <li><strong>Analizamos TODAS tus multas</strong> — sin límite</li>
+              <li>Un documento por cada multa que aplique</li>
+              <li><strong>Todo llega a tu WhatsApp al mismo tiempo</strong></li>
+              <li>Radicación simultánea — máximo ahorro</li>
+            </ul>
           </div>
 
-          <!-- Llave copiable -->
-          <div style="background:rgba(109,40,217,0.45);border:1.5px solid rgba(167,139,250,0.5);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        </div><!-- /planes -->
+
+        <!-- Sección de pago (se muestra al seleccionar plan) -->
+        <div id="spago-pago-wrap" style="display:none;">
+
+          <!-- Monto seleccionado -->
+          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #22c55e;border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
             <div>
-              <div style="color:#a78bfa;font-size:0.63rem;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Llave de destino</div>
-              <div style="color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:2px;">@OTO262</div>
-              <div style="color:#9ca3af;font-size:0.65rem;margin-top:2px;">A nombre de: Ju... Cac... · Funciona desde cualquier banco</div>
+              <p style="font-size:0.68rem;text-transform:uppercase;letter-spacing:.8px;color:#166534;margin:0 0 2px;font-weight:700;">Plan seleccionado</p>
+              <p style="font-size:0.85rem;color:#15803d;font-weight:800;margin:0;" id="spago-plan-label">—</p>
             </div>
-            <button onclick="copiarLlaveNequi()" id="btn-copiar-llave" style="background:#6d28d9;border:none;border-radius:8px;color:#fff;padding:9px 13px;font-size:0.75rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;"><i class="fas fa-copy"></i> Copiar</button>
+            <div style="text-align:right;">
+              <div style="font-size:1.5rem;font-weight:900;color:#15803d;" id="spago-monto-label">—</div>
+              <div style="font-size:0.62rem;color:#16a34a;">pago único · todo incluido</div>
+            </div>
           </div>
-        </div>
 
-        <!-- Botón ya pagué -->
-        <div id="spago-cta-wrap">
-          <button class="btn btn-red btn-full btn-xl" onclick="mostrarFormPago()" style="margin-bottom:10px;">
-            <i class="fas fa-check-circle"></i> Ya realicé el pago — Ver mi análisis
-          </button>
-          <p style="font-size:0.71rem;color:var(--gray);text-align:center;"><i class="fas fa-lock"></i> Al confirmar el pago comenzamos la consulta real en el SIMIT oficial</p>
-        </div>
+          <!-- Cómo pagar -->
+          <div style="background:#1a0038;border-radius:14px;padding:15px;margin-bottom:14px;">
+            <p style="color:#fff;font-size:0.85rem;font-weight:800;margin:0 0 3px;text-align:center;">Realiza el pago ahora</p>
+            <p style="color:#a78bfa;font-size:0.7rem;margin:0 0 13px;text-align:center;">Desde Nequi, Daviplata, Bancolombia, Davivienda<br>o cualquier banco — con tu llave breve</p>
 
-        <!-- Formulario de confirmación (oculto hasta clic en "ya pagué") -->
-        <div id="spago-form" style="display:none;">
-          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:13px 15px;margin-bottom:14px;">
-            <p style="font-size:0.8rem;color:#92400e;font-weight:700;margin-bottom:4px;"><i class="fas fa-info-circle"></i> Confirma el pago</p>
-            <p style="font-size:0.74rem;color:#92400e;margin:0;line-height:1.5;">Déjanos tus datos para iniciar el análisis — recibirás el resultado aquí mismo en segundos.</p>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-            <div class="fg">
-              <label>Tu nombre completo</label>
-              <input class="simit-input" id="spago-nombre" type="text" placeholder="Juan Carlos Pérez" autocomplete="name">
+            <!-- Chips bancos -->
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:13px;">
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#e9d5ff;font-size:0.68rem;font-weight:700;padding:4px 10px;"><i class="fas fa-mobile-alt" style="color:#ec4899;margin-right:4px;"></i>Nequi</span>
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#e9d5ff;font-size:0.68rem;font-weight:700;padding:4px 10px;"><i class="fas fa-wallet" style="color:#f59e0b;margin-right:4px;"></i>Daviplata</span>
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#e9d5ff;font-size:0.68rem;font-weight:700;padding:4px 10px;"><i class="fas fa-university" style="color:#60a5fa;margin-right:4px;"></i>Bancolombia</span>
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#e9d5ff;font-size:0.68rem;font-weight:700;padding:4px 10px;"><i class="fas fa-university" style="color:#f87171;margin-right:4px;"></i>Davivienda</span>
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;color:#e9d5ff;font-size:0.68rem;font-weight:700;padding:4px 10px;"><i class="fas fa-university" style="color:#34d399;margin-right:4px;"></i>Cualquier banco</span>
             </div>
-            <div class="fg">
-              <label>WhatsApp (para enviarte el resultado si la página se cierra)</label>
-              <input class="simit-input" id="spago-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567" autocomplete="tel">
+
+            <!-- Pasos -->
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:13px;">
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <div style="background:#6d28d9;color:#fff;width:18px;height:18px;min-width:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;margin-top:1px;">1</div>
+                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Abre tu app bancaria → toca <strong style="color:#fff;">"Transferir"</strong> o <strong style="color:#fff;">"Enviar dinero"</strong></p>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <div style="background:#6d28d9;color:#fff;width:18px;height:18px;min-width:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;margin-top:1px;">2</div>
+                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Selecciona <strong style="color:#fff;">"por llave"</strong> e ingresa <strong style="color:#2dd4bf;letter-spacing:1px;">@OTO262</strong></p>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <div style="background:#6d28d9;color:#fff;width:18px;height:18px;min-width:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;margin-top:1px;">3</div>
+                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Monto: <strong style="color:#2dd4bf;" id="spago-monto-paso">—</strong> · Descripción: tu cédula o placa</p>
+              </div>
+            </div>
+
+            <!-- Llave copiable -->
+            <div style="background:rgba(109,40,217,0.45);border:1.5px solid rgba(167,139,250,0.5);border-radius:12px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="color:#a78bfa;font-size:0.6rem;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;">Llave breve para pagar</div>
+                <div style="color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:2px;">@OTO262</div>
+                <div style="color:#9ca3af;font-size:0.62rem;margin-top:2px;">A nombre de: Ju... Cac...</div>
+              </div>
+              <button onclick="copiarLlaveNequi()" id="btn-copiar-llave" style="background:#6d28d9;border:none;border-radius:8px;color:#fff;padding:9px 12px;font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;"><i class="fas fa-copy"></i> Copiar</button>
             </div>
           </div>
-          <button class="btn btn-shimmer btn-full btn-xl" onclick="procesarPagoYConsultar()" id="btn-iniciar-analisis">
-            <i class="fas fa-search"></i> Iniciar análisis ahora
-          </button>
-          <button onclick="document.getElementById('spago-form').style.display='none';document.getElementById('spago-cta-wrap').style.display='block';" style="background:none;border:none;color:var(--gray);font-size:0.75rem;text-decoration:underline;cursor:pointer;width:100%;text-align:center;margin-top:8px;">← Volver</button>
+
+          <!-- Botón ya pagué -->
+          <div id="spago-cta-wrap">
+            <button class="btn btn-red btn-full btn-xl" onclick="mostrarFormPago()" style="margin-bottom:8px;">
+              <i class="fas fa-check-circle"></i> Ya pagué — Generar mi documento ahora
+            </button>
+            <p style="font-size:0.68rem;color:var(--gray);text-align:center;margin:0;"><i class="fas fa-lock"></i> Recibes el documento en tu WhatsApp en minutos · Sin esperas · Sin fraudes</p>
+          </div>
+
+          <!-- Formulario de confirmación -->
+          <div id="spago-form" style="display:none;">
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+              <p style="font-size:0.78rem;color:#92400e;font-weight:700;margin-bottom:3px;"><i class="fas fa-whatsapp" style="color:#16a34a;"></i> ¿A dónde te enviamos el documento?</p>
+              <p style="font-size:0.72rem;color:#92400e;margin:0;line-height:1.5;">En cuanto confirmemos tu pago, el documento llega directo a tu WhatsApp — firma y listo.</p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+              <div class="fg">
+                <label>Tu nombre completo</label>
+                <input class="simit-input" id="spago-nombre" type="text" placeholder="Juan Carlos Pérez" autocomplete="name">
+              </div>
+              <div class="fg">
+                <label>Número de WhatsApp</label>
+                <input class="simit-input" id="spago-whatsapp" type="tel" inputmode="tel" placeholder="300 123 4567" autocomplete="tel">
+              </div>
+            </div>
+            <button class="btn btn-shimmer btn-full btn-xl" onclick="procesarPagoYConsultar()" id="btn-iniciar-analisis">
+              <i class="fas fa-file-alt"></i> Confirmar y generar documento
+            </button>
+            <button onclick="document.getElementById('spago-form').style.display='none';document.getElementById('spago-cta-wrap').style.display='block';" style="background:none;border:none;color:var(--gray);font-size:0.73rem;text-decoration:underline;cursor:pointer;width:100%;text-align:center;margin-top:8px;">← Volver</button>
+          </div>
+
+        </div><!-- /spago-pago-wrap -->
+
+        <!-- Trust strip -->
+        <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:4px;">
+          <span style="font-size:0.68rem;color:#64748b;display:flex;align-items:center;gap:4px;"><i class="fas fa-bolt" style="color:#d97706;"></i> Documento inmediato</span>
+          <span style="font-size:0.68rem;color:#64748b;display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-alt" style="color:#16a34a;"></i> Sin letras ocultas</span>
+          <span style="font-size:0.68rem;color:#64748b;display:flex;align-items:center;gap:4px;"><i class="fas fa-gavel" style="color:#1e3a8a;"></i> Trámite 100% legal</span>
         </div>
 
       </div><!-- /sp-consulta -->
@@ -1865,16 +1928,63 @@ function iniciarConsulta(){
   // Datos para los steps legacy (compatibilidad)
   document.getElementById('s2-valor').textContent = val;
   document.getElementById('s2-etiqueta').textContent = tipo==='cedula' ? 'Cédula' : 'Placa';
-  // Nuevo flujo: ir al paso de pago $5.000
+  // Nuevo flujo: ir al selector de planes
   document.getElementById('spago-valor').textContent = val;
   document.getElementById('spago-etiqueta').textContent = tipo==='cedula' ? 'Número de cédula' : 'Placa del vehículo';
   document.getElementById('spana-valor').textContent = val;
-  // Resetear form pago
+  // Resetear estado del paso
   document.getElementById('spago-form').style.display='none';
   document.getElementById('spago-cta-wrap').style.display='block';
+  document.getElementById('spago-pago-wrap').style.display='none';
   document.getElementById('spago-nombre').value='';
   document.getElementById('spago-whatsapp').value='';
+  // Preseleccionar plan "todas" por ser la mejor opción
+  seleccionarPlan('todas');
   goToStepNombre('sp-consulta');
+}
+
+var _planSeleccionado = 'todas';
+function seleccionarPlan(plan){
+  _planSeleccionado = plan;
+  var esTodas = plan === 'todas';
+  // Estilos tarjeta una
+  var cardUna = document.getElementById('plan-una');
+  var cardTodas = document.getElementById('plan-todas');
+  var radioUna = document.getElementById('radio-una');
+  var radioTodas = document.getElementById('radio-todas');
+  if(cardUna){
+    cardUna.style.borderColor = esTodas ? 'var(--border)' : '#1e3a8a';
+    cardUna.style.background = esTodas ? '' : 'linear-gradient(135deg,rgba(30,58,138,0.04),rgba(46,16,101,0.06))';
+  }
+  if(cardTodas){
+    cardTodas.style.borderColor = esTodas ? '#22c55e' : 'var(--border)';
+    cardTodas.style.background = esTodas ? 'linear-gradient(135deg,rgba(34,197,94,0.04),rgba(21,128,61,0.06))' : '';
+  }
+  if(radioUna){
+    radioUna.innerHTML = esTodas ? '' : '<i class="fas fa-check" style="color:#fff;font-size:0.6rem;"></i>';
+    radioUna.style.background = esTodas ? 'transparent' : '#1e3a8a';
+    radioUna.style.borderColor = esTodas ? '#cbd5e1' : '#1e3a8a';
+  }
+  if(radioTodas){
+    radioTodas.innerHTML = esTodas ? '<i class="fas fa-check" style="color:#fff;font-size:0.6rem;"></i>' : '';
+    radioTodas.style.background = esTodas ? '#22c55e' : 'transparent';
+    radioTodas.style.border = esTodas ? 'none' : '2px solid #cbd5e1';
+  }
+  // Actualizar bloque de pago
+  var monto = esTodas ? '$49.000' : '$25.000';
+  var label = esTodas ? 'Eliminar TODAS las multas que apliquen' : 'Eliminar una multa';
+  var el = document.getElementById('spago-plan-label');
+  var em = document.getElementById('spago-monto-label');
+  var ep = document.getElementById('spago-monto-paso');
+  if(el) el.textContent = label;
+  if(em) em.textContent = monto;
+  if(ep) ep.textContent = monto;
+  // Mostrar bloque de pago
+  var pw = document.getElementById('spago-pago-wrap');
+  if(pw) pw.style.display = 'block';
+  // Scroll al bloque de pago
+  setTimeout(function(){ if(pw) pw.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 100);
+  jwTrack('plan_seleccionado', { plan: plan, monto: monto });
 }
 
 // ── Nuevo sistema de navegación por nombre ──────────────────────
@@ -1891,7 +2001,7 @@ function goToStepNombre(id){
   if(activo) activo.classList.add('active');
   var titles={
     'sp1':'🔍 Consulta tu estado en SIMIT',
-    'sp-consulta':'💳 Análisis + consulta SIMIT — $5.000',
+    'sp-consulta':'⚖️ Elige tu plan — Todo incluido',
     'sp-analizando':'🔄 Consultando el SIMIT oficial...',
     'sp-resultados':'📊 Tu análisis completo'
   };
