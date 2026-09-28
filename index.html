@@ -2068,7 +2068,10 @@ function procesarPagoYConsultar(){
   // Animar los pasos del loader
   goToStepNombre('sp-analizando');
   _nombreConsultante = nombre;
-  _waConsultante = wa;
+  _waConsultante     = wa;
+  _ciudadConsultante    = ciudad;
+  _direccionConsultante = direccion;
+  _correoConsultante    = correo;
 
   var p1=document.getElementById('spana-p1'),
       p2=document.getElementById('spana-p2'),
@@ -2115,8 +2118,11 @@ function procesarPagoYConsultar(){
     });
 }
 
-var _nombreConsultante = '';
-var _waConsultante = '';
+var _nombreConsultante    = '';
+var _waConsultante        = '';
+var _ciudadConsultante    = '';
+var _direccionConsultante = '';
+var _correoConsultante    = '';
 
 function mostrarSinMultas(nombre){
   goToStepNombre('sp-resultados');
@@ -2133,14 +2139,20 @@ function mostrarSinMultas(nombre){
 
 function mostrarResultadosFallback(nombre, wa){
   goToStepNombre('sp-resultados');
-  var planLabel = _planSeleccionado === 'todas' ? 'eliminar TODAS mis multas ($49.000)' : 'eliminar una multa ($25.000)';
+  var planLabel = _planSeleccionado === 'todas' ? 'Eliminar TODAS las multas — $49.000' : 'Eliminar una multa — $25.000';
+  var ciudad    = _ciudadConsultante    || '';
+  var direccion = _direccionConsultante || '';
+  var correo    = _correoConsultante    || '';
   var msg = encodeURIComponent(
-    'Hola JurídicosWeb 👋\n' +
-    'Mi nombre es ' + nombre + '\n' +
-    (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ') + _valorConsultado + '\n' +
-    (wa ? 'WhatsApp: ' + wa + '\n' : '') +
-    'Plan elegido: ' + planLabel + '\n\n' +
-    'Acabo de hacer el pago. Quedo esperando el enlace para firmar mi documento.'
+    'Hola JurídicosWeb 👋 Acabo de hacer el pago.\n\n' +
+    '👤 Nombre: ' + nombre + '\n' +
+    '🪪 ' + (_tipoConsultado==='cedula'?'Cédula':'Placa') + ': ' + _valorConsultado + '\n' +
+    (wa        ? '📱 WhatsApp: ' + wa        + '\n' : '') +
+    (ciudad    ? '📍 Ciudad: '   + ciudad    + '\n' : '') +
+    (direccion ? '🏠 Dirección: '+ direccion + '\n' : '') +
+    (correo    ? '📧 Correo: '   + correo    + '\n' : '') +
+    '💳 Plan: ' + planLabel + '\n\n' +
+    'Quedo esperando el enlace para firmar mi documento. ✅'
   );
   document.getElementById('spres-content').innerHTML =
     // Header de confirmación
