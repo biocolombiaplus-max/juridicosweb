@@ -1690,6 +1690,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
 // ===================== CONFIGURACIÓN =====================
 var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycby9xzMA6-fEI0ouGQAPYqnwYssvREKXjApmSbYIGoIQGOyBxwYXnvhYhiI72-pT0zm9/exec';
+
+// Registrar visita en Google Sheets (sin bloquear la carga)
+(function(){
+  try {
+    var p = new URLSearchParams(window.location.search);
+    var payload = {
+      _accion: 'registrar_visita',
+      fuente:  p.get('utm_source') || p.get('fbclid') ? 'meta_ads' : (document.referrer ? 'referral' : 'directo'),
+      utm_source:   p.get('utm_source')  || '',
+      utm_medium:   p.get('utm_medium')  || '',
+      utm_campaign: p.get('utm_campaign')|| '',
+      utm_content:  p.get('utm_content') || '',
+      referrer:     document.referrer    || '',
+      dispositivo:  /Mobi|Android/i.test(navigator.userAgent) ? 'movil' : 'escritorio',
+      pagina:       window.location.pathname || '/'
+    };
+    var fd = new FormData();
+    Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
+    fetch(GOOGLE_SHEET_URL, { method:'POST', body: fd }).catch(function(){});
+  } catch(e){}
+})();
 var SIMIT_PROXY_URL    = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';
 var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
