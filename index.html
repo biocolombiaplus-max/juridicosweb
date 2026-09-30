@@ -169,6 +169,8 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 @keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.6;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulseGreen{0%,100%{box-shadow:0 4px 24px rgba(34,197,94,0.4);}50%{box-shadow:0 4px 40px rgba(34,197,94,0.75);}}
+@keyframes pulseOrange{0%,100%{box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);transform:scale(1);}50%{box-shadow:0 8px 48px rgba(249,115,22,0.85),0 2px 12px rgba(0,0,0,0.35);transform:scale(1.02);}}
+@keyframes shimmerBtn{0%{left:-100%;}100%{left:200%;}}
 .hero h1{font-family:'Playfair Display',serif;font-size:3rem;color:#fff;line-height:1.12;margin-bottom:18px;}
 .hero h1 .hl{color:var(--gold);position:relative;}
 .hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
@@ -1156,10 +1158,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <p style="color:#fde047;font-size:0.82rem;font-weight:700;margin:0;">⚠️ Esta verificación es válida por <span id="sim-timer" style="font-weight:900;">09:59</span> minutos</p>
               <p style="color:#fef08a;font-size:0.75rem;margin:4px 0 0;">Los registros del SIMIT se actualizan constantemente — actúa ahora para asegurar tu caso.</p>
             </div>
-            <button onclick="goToStepNombre('sp-consulta')" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;padding:16px 28px;font-size:1.05rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(34,197,94,0.4);letter-spacing:0.5px;animation:pulseGreen 1.8s infinite;">
-              ✅ QUIERO ELIMINAR MIS MULTAS →
+            <button onclick="goToStepNombre('sp-consulta')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px 28px;font-size:1.12rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.5px;animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;">
+              <span style="position:relative;z-index:1;">🚀 QUIERO ELIMINAR MIS MULTAS →</span>
+              <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;"></span>
             </button>
-            <p style="color:#4ade80;font-size:0.75rem;margin:10px 0 0;">$0 si no aplica · Sin compromisos · Resultado en menos de 24 hrs</p>
+            <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;">
+              <span style="color:#4ade80;font-size:0.72rem;">🔒 Pago 100% seguro</span>
+              <span style="color:#4ade80;font-size:0.72rem;">✅ $0 si no aplica</span>
+              <span style="color:#4ade80;font-size:0.72rem;">⚡ Resultado inmediato</span>
+            </div>
           </div>
         </div>
       </div>
