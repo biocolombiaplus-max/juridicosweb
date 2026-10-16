@@ -1144,28 +1144,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- Panel de resultado (oculto hasta el final) -->
-        <div id="sim-resultado" style="display:none;margin-top:8px;">
-          <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:20px 18px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;">
-            <div style="position:absolute;top:-18px;right:-18px;font-size:5rem;opacity:0.08;">✅</div>
-            <div style="font-size:2rem;margin-bottom:6px;">🎉</div>
-            <p style="color:#4ade80;font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin:0 0 6px;">¡Buenas noticias!</p>
-            <h3 style="color:#fff;font-size:1.25rem;font-weight:900;margin:0 0 8px;line-height:1.25;" id="sim-titulo-resultado">Tu caso califica para eliminación</h3>
-            <p style="color:#86efac;font-size:0.9rem;margin:0 0 14px;line-height:1.45;" id="sim-detalle-resultado">Nuestro equipo jurídico encontró inconsistencias en la notificación que hacen viable la eliminación de tu multa o fotomulta.</p>
-            <!-- Razones encontradas -->
-            <div id="sim-razones" style="text-align:left;display:flex;flex-direction:column;gap:7px;margin-bottom:16px;"></div>
-            <!-- Urgencia -->
-            <div style="background:rgba(250,204,21,0.12);border:1px solid #ca8a04;border-radius:8px;padding:9px 12px;margin-bottom:16px;">
-              <p style="color:#fde047;font-size:0.82rem;font-weight:700;margin:0;">⚠️ Esta verificación es válida por <span id="sim-timer" style="font-weight:900;">09:59</span> minutos</p>
-              <p style="color:#fef08a;font-size:0.75rem;margin:4px 0 0;">Los registros del SIMIT se actualizan constantemente — actúa ahora para asegurar tu caso.</p>
+        <div id="sim-resultado" style="display:none;margin-top:6px;">
+          <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:14px 14px 12px;text-align:center;position:relative;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:1.4rem;">🎉</span>
+              <p style="color:#4ade80;font-size:0.72rem;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin:0;">¡Buenas noticias!</p>
             </div>
-            <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px 28px;font-size:1.12rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.5px;animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;">
-              <span style="position:relative;z-index:1;">📄 GENERAR MI DERECHO DE PETICIÓN GRATIS →</span>
+            <h3 style="color:#fff;font-size:1.1rem;font-weight:900;margin:0 0 6px;line-height:1.2;">Tu caso califica para eliminación</h3>
+            <!-- Razones compactas (2 columnas) -->
+            <div id="sim-razones" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;text-align:left;"></div>
+            <!-- Urgencia compacta -->
+            <div style="background:rgba(250,204,21,0.12);border:1px solid #ca8a04;border-radius:7px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:0.85rem;">⚠️</span>
+              <p style="color:#fde047;font-size:0.75rem;font-weight:700;margin:0;">Válido por <span id="sim-timer" style="font-weight:900;">09:59</span> min — actúa ahora</p>
+            </div>
+            <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:15px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.65);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;">
+              <span style="position:relative;z-index:1;">📄 GENERAR MI DERECHO DE PETICIÓN →</span>
               <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;"></span>
             </button>
-            <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;">
-              <span style="color:#4ade80;font-size:0.72rem;">📄 Documento real</span>
-              <span style="color:#4ade80;font-size:0.72rem;">✅ 100% gratis ver</span>
-              <span style="color:#4ade80;font-size:0.72rem;">✍️ Firmas con el dedo</span>
+            <div style="display:flex;justify-content:center;gap:10px;margin-top:7px;flex-wrap:wrap;">
+              <span style="color:#4ade80;font-size:0.68rem;">📄 Gratis verlo</span>
+              <span style="color:#4ade80;font-size:0.68rem;">✍️ Firmas con el dedo</span>
+              <span style="color:#4ade80;font-size:0.68rem;">✅ $0 si no aplica</span>
             </div>
           </div>
         </div>
@@ -2251,9 +2251,17 @@ function generarDocPreview(){
   var nombre  = document.getElementById('dd-nombre').value.trim();
   var wa      = document.getElementById('dd-whatsapp').value.trim();
   var correo  = document.getElementById('dd-correo').value.trim();
-  if(!nombre){ alert('Por favor ingresa tu nombre completo'); return; }
-  if(!wa || wa.length < 10){ alert('Ingresa tu número de WhatsApp (10 dígitos)'); return; }
-  if(!correo || !correo.includes('@')){ alert('Ingresa un correo electrónico válido'); return; }
+  function marcaError(id, msg){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.borderColor='#ef4444';
+    el.placeholder = msg;
+    el.focus();
+    setTimeout(function(){ el.style.borderColor='#e2e8f0'; }, 3000);
+  }
+  if(!nombre){ marcaError('dd-nombre','⚠️ Escribe tu nombre completo'); return; }
+  if(!wa || wa.length < 10){ marcaError('dd-whatsapp','⚠️ 10 dígitos, ej: 3001234567'); return; }
+  if(!correo || !correo.includes('@')){ marcaError('dd-correo','⚠️ Correo inválido'); return; }
   _nombreConsultante = nombre;
   _waConsultante     = wa;
   _correoConsultante = correo;
@@ -2313,11 +2321,16 @@ function limpiarFirma(){
 
 function confirmarFirma(){
   if(!_firmaCanvas) return;
-  // Verificar que se dibujó algo
   var pix = _firmaCtx.getImageData(0,0,_firmaCanvas.width,_firmaCanvas.height).data;
   var tiene = false;
   for(var i=3; i<pix.length; i+=4){ if(pix[i]>10){ tiene=true; break; } }
-  if(!tiene){ alert('Por favor dibuja tu firma primero'); return; }
+  if(!tiene){
+    // Mensaje inline sin alert
+    var hint = document.getElementById('firma-hint');
+    if(hint){ hint.textContent='⚠️ Dibuja tu firma primero'; hint.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ef4444;font-size:0.85rem;pointer-events:none;text-align:center;margin:0;font-weight:700;'; hint.style.display='block'; }
+    setTimeout(function(){ if(hint){ hint.textContent='✍️ Dibuja aquí tu firma'; hint.style.color='#cbd5e1'; hint.style.fontWeight='400'; } }, 2000);
+    return;
+  }
   _firmaDataUrl = _firmaCanvas.toDataURL('image/png');
   // Mostrar mini en el doc preview
   var prev = document.getElementById('dp-firma-preview');
@@ -2330,9 +2343,9 @@ function confirmarFirma(){
     img2.onload = function(){ mCtx.clearRect(0,0,mini.width,mini.height); mCtx.drawImage(img2,0,0,mini.width,mini.height); };
     img2.src = _firmaDataUrl;
   }
-  // Guardar lead provisional en Sheets
   guardarLeadFirma();
   jwTrack('documento_firmado', {});
+  seleccionarPlanFinal('todas');
   goToStepNombre('sp-post-firma');
 }
 
@@ -2454,9 +2467,9 @@ function mostrarResultadoSimulacion(){
     { icon:'✅', txt:'Procede Derecho de Petición para eliminación' }
   ];
   var htmlRazones = razones.map(function(r){
-    return '<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">'+
-      '<span style="font-size:1rem;flex-shrink:0;">'+r.icon+'</span>'+
-      '<span style="color:#bbf7d0;font-size:0.83rem;font-weight:600;">'+r.txt+'</span></div>';
+    return '<div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:7px;padding:6px 8px;display:flex;align-items:flex-start;gap:5px;">'+
+      '<span style="font-size:0.85rem;flex-shrink:0;margin-top:1px;">'+r.icon+'</span>'+
+      '<span style="color:#bbf7d0;font-size:0.72rem;font-weight:600;line-height:1.3;">'+r.txt+'</span></div>';
   }).join('');
   document.getElementById('sim-razones').innerHTML = htmlRazones;
 
