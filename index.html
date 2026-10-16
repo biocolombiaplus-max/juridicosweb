@@ -2525,7 +2525,8 @@ function guardarLeadFirma(){
       monto:     '',
       ciudad:    _ciudadConsultante || '',
       direccion: _direccionConsultante || '',
-      notas:     'Documento firmado digitalmente — pendiente de pago para activar datos'
+      notas:     'Documento firmado digitalmente — pendiente de pago para activar datos',
+    ultimo_paso: 'firma_completada'
     };
     var fd = new FormData();
     Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
@@ -2640,6 +2641,13 @@ function yaHiceElPago(){
     'Adjunto el comprobante de pago. Quedo esperando que activen el documento y lo radiquen. ✅\n\n'+
     '_JurídicosWeb — Trámite firmado y listo_';
   jwTrack('pago_comprobante_enviado', { plan: _planFinal });
+  // Beacon: pago iniciado
+  try {
+    var _bp = { _accion:'registrar_paso', paso:'pago_iniciado', cedula: _valorConsultado||'' };
+    var _bfd = new FormData(); Object.keys(_bp).forEach(function(k){ _bfd.append(k, _bp[k]); });
+    navigator.sendBeacon ? navigator.sendBeacon(GOOGLE_SHEET_URL, _bfd)
+      : fetch(GOOGLE_SHEET_URL, { method:'POST', body:_bfd, keepalive:true }).catch(function(){});
+  } catch(e){}
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
@@ -2652,6 +2660,16 @@ goToStepNombre = function(id){
   }
   if(id==='sp-post-firma'){
     seleccionarPlanFinal('todas');
+  }
+  // Funnel step tracking
+  var _pasosTracks = ['sp-simulacion','sp-datos-doc','sp-firma-canvas','sp-pdf-firmado','sp-post-firma','sp-pago-radicar'];
+  if(_pasosTracks.indexOf(id) !== -1){
+    try {
+      var _tp = { _accion:'registrar_paso', paso: id, cedula: (typeof _valorConsultado !== 'undefined' ? _valorConsultado : '') };
+      var _tfd = new FormData(); Object.keys(_tp).forEach(function(k){ _tfd.append(k, _tp[k]); });
+      navigator.sendBeacon ? navigator.sendBeacon(GOOGLE_SHEET_URL, _tfd)
+        : fetch(GOOGLE_SHEET_URL, { method:'POST', body:_tfd, keepalive:true }).catch(function(){});
+    } catch(e){}
   }
 };
 

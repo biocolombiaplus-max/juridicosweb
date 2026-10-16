@@ -370,6 +370,13 @@ tr:hover td{background:#f8faff;cursor:pointer}
 
     <!-- DASHBOARD -->
     <div class="section active" id="section-dashboard">
+
+      <!-- GLOBAL SEARCH -->
+      <div style="margin-bottom:18px;">
+        <input id="buscar-global" type="text" placeholder="🔍 Buscar por nombre, cédula, placa, email, WhatsApp, ciudad..." oninput="buscarGlobal(this.value)" style="width:100%;box-sizing:border-box;padding:13px 16px;font-size:15px;background:#1e293b;color:#f1f5f9;border:1.5px solid #334155;border-radius:10px;outline:none;" />
+        <div id="resultados-busqueda" style="margin-top:6px;"></div>
+      </div>
+
       <div class="stats-grid">
         <div class="stat-card navy">
           <div class="stat-label">Total Leads</div>
@@ -396,6 +403,15 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <div class="stat-value" id="stat-pendientes">—</div>
           <div class="stat-sub">Llenaron datos, no pagaron</div>
         </div>
+      </div>
+
+      <!-- FUNNEL VISUALIZATION -->
+      <div id="funnel-viz" style="margin-bottom:18px;background:#1e293b;border-radius:12px;padding:18px 20px;border:1px solid #334155;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <h3 style="margin:0;font-size:15px;color:#f1f5f9;">🔽 Embudo de conversión</h3>
+          <span id="funnel-conv-rate" style="font-size:13px;color:#94a3b8;"></span>
+        </div>
+        <div id="funnel-steps" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
       </div>
 
       <!-- PANEL VISITAS WEB -->
@@ -500,17 +516,18 @@ tr:hover td{background:#f8faff;cursor:pointer}
 
     <!-- REMARKETING (NO PAGARON) -->
     <div class="section" id="section-remarketing">
-      <div class="table-wrap">
-        <div class="table-header">
-          <h3>🎯 Remarketing — Llenaron datos, no pagaron</h3>
-          <span class="table-count" id="remarketing-count"></span>
-        </div>
-        <div style="padding:14px 20px;border-bottom:1px solid var(--gray200);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" id="btn-campana-remarketing" onclick="enviarCampanaRemarketingAhora()">📧 Enviar campaña ahora</button>
-          <span id="campana-remarketing-status" style="font-size:12px;color:var(--gray500,#64748b);"></span>
-        </div>
-        <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      <!-- Stats header -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;" id="remarketing-stats-grid"></div>
+      <!-- Filters -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;" id="remarketing-filters">
+        <button class="btn btn-primary btn-sm" onclick="filtrarRemarketing('todos')">Todos</button>
+        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('cedula')">Solo cédula</button>
+        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('firma')">Llegaron a firma</button>
+        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('precio')">Vieron precio</button>
+        <button class="btn btn-sm" style="background:#16a34a;color:#fff;border:none;" onclick="enviarATodos()">📲 Enviar a todos por WA</button>
+        <span id="campana-remarketing-status" style="font-size:12px;color:var(--gray500,#64748b);align-self:center;"></span>
       </div>
+      <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
     </div>
 
     <!-- AUTORIZADOS / POR RADICAR -->
@@ -1111,6 +1128,7 @@ function renderTablaDocumentos(lista){
 // ══════════════════════════════════════════════════
 function renderAll(){
   updateStats();
+  renderFunnel();
   renderDashboardTable();
   renderKanban();
   renderSection('casos');
@@ -1231,9 +1249,7 @@ function renderSection(sec){
     return;
   }
   if(sec==='remarketing'){
-    filtered = allRows.filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true); });
-    document.getElementById('remarketing-count').textContent = filtered.length+' leads sin pagar';
-    document.getElementById('table-remarketing-wrap').innerHTML = buildTable(filtered);
+    renderRemarketing('todos');
     return;
   }
   if(sec==='seguimiento'){
@@ -2542,6 +2558,179 @@ function enviarCampanaRemarketingAhora(){
     showToast('Error de conexión: '+e.message,'error');
     status.textContent = 'Error de conexión';
   });
+}
+
+// ══════════════════════════════════════════════════
+// GLOBAL SEARCH
+// ══════════════════════════════════════════════════
+function buscarGlobal(q){
+  var wrap = document.getElementById('resultados-busqueda');
+  if(!q || q.trim().length < 2){ wrap.innerHTML=''; return; }
+  var t = q.trim().toLowerCase();
+  var campos = ['Nombres','Apellidos','Cédula','Placa','Email','Ciudad','WhatsApp','Celular','Teléfono'];
+  var found = (allRows||[]).filter(function(r){
+    return campos.some(function(c){ return r[c] && String(r[c]).toLowerCase().indexOf(t)!==-1; });
+  });
+  if(!found.length){ wrap.innerHTML='<div style="padding:10px 14px;color:#94a3b8;font-size:13px;">Sin resultados para "'+q+'"</div>'; return; }
+  var html = '<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;max-height:320px;overflow-y:auto;">';
+  found.slice(0,30).forEach(function(r){
+    var nombre = (r['Nombres']||'')+' '+(r['Apellidos']||'');
+    var id = r['Cédula']||r['Placa']||'';
+    var estado = r['Estado']||'';
+    html += '<div onclick="abrirCaso(\''+encodeURIComponent(JSON.stringify(r))+'\')" style="padding:10px 16px;border-bottom:1px solid #334155;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background=\'#273549\'" onmouseout="this.style.background=\'\'">'+
+      '<div><div style="font-size:14px;color:#f1f5f9;font-weight:500;">'+nombre.trim()+'</div>'+
+      '<div style="font-size:12px;color:#94a3b8;">'+id+' &nbsp;·&nbsp; '+(r['Email']||'')+'</div></div>'+
+      '<span style="font-size:11px;background:#334155;color:#94a3b8;padding:2px 8px;border-radius:9999px;">'+estado+'</span></div>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+// FUNNEL VISUALIZATION
+// ══════════════════════════════════════════════════
+function renderFunnel(){
+  if(!allRows || !allRows.length) return;
+  var total = allRows.filter(function(r){ return r['Nombres']||r['Email']; }).length;
+  var firma = allRows.filter(function(r){
+    return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);
+  }).length;
+  var pago = allRows.filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true; }).length;
+  var radicado = allRows.filter(function(r){ var e=getEstado(r); return e==='esperando_respuesta'||e==='cerrado'; }).length;
+  var steps = [
+    { label:'Leads', count:total, color:'#2563eb' },
+    { label:'Firmaron', count:firma, color:'#7c3aed' },
+    { label:'Pagaron', count:pago, color:'#16a34a' },
+    { label:'Radicados', count:radicado, color:'#f59e0b' }
+  ];
+  var html = '';
+  steps.forEach(function(s, i){
+    var pct = total ? Math.round(s.count/total*100) : 0;
+    html += '<div style="flex:1;min-width:100px;background:#0f172a;border-radius:8px;padding:12px 10px;text-align:center;border:1px solid #334155;">'+
+      '<div style="font-size:22px;font-weight:700;color:'+s.color+';">'+s.count+'</div>'+
+      '<div style="font-size:12px;color:#f1f5f9;margin:2px 0;">'+s.label+'</div>'+
+      '<div style="font-size:11px;color:#94a3b8;">'+pct+'% del total</div></div>';
+    if(i < steps.length-1) html += '<div style="color:#475569;font-size:20px;align-self:center;">›</div>';
+  });
+  document.getElementById('funnel-steps').innerHTML = html;
+  var convRate = total ? (pago/total*100).toFixed(1) : 0;
+  document.getElementById('funnel-conv-rate').textContent = 'Conversión total: '+convRate+'%';
+}
+
+// ══════════════════════════════════════════════════
+// REMARKETING ENHANCED
+// ══════════════════════════════════════════════════
+var _rmFilter = 'todos';
+
+function limpiarWA(num){
+  if(!num) return '';
+  var n = String(num).replace(/[\s\-\+]/g,'');
+  if(n.startsWith('0')) n = n.slice(1);
+  if(n.startsWith('57') && n.length > 10) return n;
+  if(n.length === 10) return '57'+n;
+  return '57'+n;
+}
+
+function recuperarLead(nombre, waNum){
+  var wa = limpiarWA(waNum);
+  if(!wa || wa.length < 10){ alert('No hay número de WhatsApp disponible para este lead.'); return; }
+  var msg = 'Hola '+nombre+', vi que estás en proceso de eliminar tu(s) fotomulta(s) en JurídicosWeb 🚨\n\n'+
+    'Tu documento ya está generado y firmado — solo falta activarlo para radicarlo ante la secretaría.\n\n'+
+    '¿Te ayudo a terminar el trámite ahora? Te toma menos de 2 minutos 🎯\n\n'+
+    '— Equipo JurídicosWeb';
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
+}
+
+function filtrarRemarketing(filtro){
+  _rmFilter = filtro;
+  // Update button styles
+  var btns = document.querySelectorAll('#remarketing-filters .btn');
+  btns.forEach(function(b){
+    var f = b.getAttribute('onclick') && b.getAttribute('onclick').match(/filtrarRemarketing\('([^']+)'\)/);
+    if(f) { b.className = f[1]===filtro ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm'; }
+  });
+  renderRemarketing(filtro);
+}
+
+function enviarATodos(){
+  var leads = getRemarketingFiltered(_rmFilter);
+  var conWA = leads.filter(function(r){ return r['WhatsApp']||r['Celular']||r['Teléfono']; });
+  if(!conWA.length){ alert('Ningún lead tiene WhatsApp disponible en este filtro.'); return; }
+  if(!confirm('¿Abrir '+conWA.length+' conversaciones de WhatsApp? Tu navegador puede bloquear ventanas emergentes.')){ return; }
+  conWA.forEach(function(r, i){
+    setTimeout(function(){
+      var nombre = (r['Nombres']||'')+(r['Apellidos']?' '+r['Apellidos']:'');
+      recuperarLead(nombre.trim()||'cliente', r['WhatsApp']||r['Celular']||r['Teléfono']);
+    }, i*800);
+  });
+}
+
+function getRemarketingFiltered(filtro){
+  var base = (allRows||[]).filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true); });
+  if(filtro==='cedula') return base.filter(function(r){ return r['Cédula']&&!r['Placa']; });
+  if(filtro==='firma') return base.filter(function(r){
+    return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);
+  });
+  if(filtro==='precio') return base.filter(function(r){
+    return (r['Ultimo Paso']&&(r['Ultimo Paso'].indexOf('sp-post-firma')!==-1||r['Ultimo Paso'].indexOf('sp-pago')!==-1));
+  });
+  return base;
+}
+
+function renderRemarketing(filtro){
+  filtro = filtro || _rmFilter || 'todos';
+  var all = (allRows||[]).filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true); });
+  var filtered = getRemarketingFiltered(filtro);
+  var conFirma = all.filter(function(r){
+    return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);
+  }).length;
+  var conWA = all.filter(function(r){ return r['WhatsApp']||r['Celular']||r['Teléfono']; }).length;
+  var valorPerdido = all.length * 49000;
+
+  // Render stats
+  var statsHtml = [
+    { label:'Total abandonados', value:all.length, color:'navy' },
+    { label:'Llegaron a firma', value:conFirma+' ('+Math.round(conFirma/(all.length||1)*100)+'%)', color:'blue' },
+    { label:'Con WhatsApp', value:conWA, color:'green' },
+    { label:'Valor potencial', value:'$'+(valorPerdido/1000).toFixed(0)+'K', color:'gold' }
+  ].map(function(s){
+    return '<div class="stat-card '+s.color+'" style="margin:0;"><div class="stat-label">'+s.label+'</div><div class="stat-value">'+s.value+'</div></div>';
+  }).join('');
+  document.getElementById('remarketing-stats-grid').innerHTML = statsHtml;
+
+  // Render table
+  if(!filtered.length){
+    document.getElementById('table-remarketing-wrap').innerHTML='<div class="empty-state"><div class="icon">🎉</div><p>Sin leads en este filtro</p></div>';
+    return;
+  }
+
+  var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+  html += '<thead><tr style="background:#0f172a;color:#94a3b8;">';
+  ['Nombre','Cédula/Placa','WhatsApp','Ciudad','Último paso','Fecha','Recuperar'].forEach(function(h){
+    html += '<th style="padding:10px 12px;text-align:left;font-weight:600;border-bottom:1px solid #334155;">'+h+'</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  filtered.forEach(function(r, idx){
+    var nombre = ((r['Nombres']||'')+(r['Apellidos']?' '+r['Apellidos']:'')).trim() || 'Sin nombre';
+    var id = r['Cédula']||r['Placa']||'—';
+    var wa = r['WhatsApp']||r['Celular']||r['Teléfono']||'';
+    var ciudad = r['Ciudad']||'—';
+    var paso = r['Ultimo Paso']||r['Notas']||'—';
+    var fecha = r['Timestamp']||r['Fecha']||'—';
+    var bg = idx%2===0?'#1e293b':'#162032';
+    var waBtn = wa
+      ? '<button class="btn btn-sm" style="background:#16a34a;color:#fff;border:none;" onclick="recuperarLead(\''+nombre.replace(/'/g,"\\'")+'\',' +'\''+wa+'\')">📲 Recuperar</button>'
+      : '<span style="color:#475569;font-size:11px;">Sin WA</span>';
+    html += '<tr style="background:'+bg+';cursor:pointer;" onclick="abrirCaso(\''+encodeURIComponent(JSON.stringify(r))+'\')" onmouseover="this.style.background=\'#1a2d44\'" onmouseout="this.style.background=\''+bg+'\'">';
+    [nombre, id, wa||'—', ciudad, paso.slice(0,40), fecha.slice(0,16)].forEach(function(v){
+      html += '<td style="padding:9px 12px;border-bottom:1px solid #334155;color:#cbd5e1;">'+v+'</td>';
+    });
+    html += '<td style="padding:9px 12px;border-bottom:1px solid #334155;" onclick="event.stopPropagation()">'+waBtn+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('table-remarketing-wrap').innerHTML = html;
 }
 
 // ══════════════════════════════════════════════════
