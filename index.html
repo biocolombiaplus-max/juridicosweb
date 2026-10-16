@@ -1398,55 +1398,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Pago final
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-pago-radicar">
-        <div style="text-align:center;margin-bottom:14px;">
-          <p style="color:#2563eb;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">Último paso</p>
-          <h3 style="color:#1e3a8a;font-size:1.05rem;font-weight:900;margin:0 0 4px;">Realiza el pago y radicamos hoy</h3>
-          <p style="color:#64748b;font-size:0.82rem;margin:0;">Transfiere desde cualquier banco — Nequi, Daviplata, Bancolombia o cualquier entidad con Transfiya.</p>
+        <!-- Header monto -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:14px;">
+          <p style="color:#93c5fd;font-size:0.7rem;margin:0 0 2px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Último paso — Valor a pagar</p>
+          <p style="color:#fff;font-size:2rem;font-weight:900;margin:0 0 2px;" id="pr-monto">$49.000</p>
+          <p style="color:#bfdbfe;font-size:0.73rem;margin:0;" id="pr-plan-desc">Activación + radicación de una multa</p>
         </div>
 
-        <!-- Monto destacado -->
-        <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;">
-          <p style="color:#93c5fd;font-size:0.75rem;margin:0 0 4px;font-weight:600;">VALOR A TRANSFERIR</p>
-          <p style="color:#fff;font-size:2rem;font-weight:900;margin:0 0 4px;" id="pr-monto">$49.000</p>
-          <p style="color:#bfdbfe;font-size:0.75rem;margin:0;" id="pr-plan-desc">Activación + radicación de una multa</p>
+        <!-- Selector método de pago -->
+        <p style="font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;text-align:center;">Elige cómo pagar</p>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button id="btn-metodo-llave" onclick="seleccionarMetodoPago('llave')"
+            style="flex:1;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:2.5px solid #2563eb;border-radius:12px;padding:12px 8px;font-size:0.82rem;font-weight:800;cursor:pointer;transition:.2s;line-height:1.3;">
+            📲 Llave breve<br><span style="font-size:0.7rem;font-weight:600;opacity:.85;">@OTO262 · Transfiya</span>
+          </button>
+          <button id="btn-metodo-epayco" onclick="seleccionarMetodoPago('epayco')"
+            style="flex:1;background:#fff;color:#1e3a8a;border:2px solid #e2e8f0;border-radius:12px;padding:12px 8px;font-size:0.82rem;font-weight:800;cursor:pointer;transition:.2s;line-height:1.3;">
+            💳 Tarjeta / PSE<br><span style="font-size:0.7rem;font-weight:600;opacity:.75;">Visa · MC · PSE</span>
+          </button>
         </div>
 
-        <!-- Datos de pago -->
-        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
-          <p style="font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">Datos para la transferencia</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
-              <span style="font-size:0.82rem;color:#64748b;">Tipo</span>
-              <span style="font-size:0.85rem;font-weight:700;color:#1e293b;">Llave breve (Transfiya)</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
-              <span style="font-size:0.82rem;color:#64748b;">Llave</span>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="font-size:1rem;font-weight:900;color:#1e3a8a;letter-spacing:1px;">@OTO262</span>
-                <button onclick="copiarLlave(this)" style="background:#e0f2fe;color:#0369a1;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">Copiar</button>
+        <!-- Panel: Llave breve -->
+        <div id="panel-llave" style="display:block;">
+          <div style="background:#f8fafc;border:1.5px solid #dbeafe;border-radius:12px;padding:13px 16px;margin-bottom:10px;">
+            <p style="font-size:0.68rem;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">Transferencia con llave breve (Transfiya)</p>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+                <span style="font-size:0.8rem;color:#64748b;">Red</span>
+                <span style="font-size:0.82rem;font-weight:700;color:#1e293b;">Nequi · Daviplata · Cualquier banco</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+                <span style="font-size:0.8rem;color:#64748b;">Llave breve</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:1.05rem;font-weight:900;color:#1e3a8a;letter-spacing:1.5px;">@OTO262</span>
+                  <button onclick="copiarLlave(this)" style="background:#dbeafe;color:#1d4ed8;border:none;border-radius:6px;padding:4px 10px;font-size:0.7rem;font-weight:700;cursor:pointer;">Copiar</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+                <span style="font-size:0.8rem;color:#64748b;">A nombre de</span>
+                <span style="font-size:0.8rem;font-weight:600;color:#1e293b;">Ju... Cac... <span style="font-size:0.68rem;color:#94a3b8;">(verifica al pagar)</span></span>
               </div>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
-              <span style="font-size:0.82rem;color:#64748b;">A nombre de</span>
-              <span style="font-size:0.82rem;font-weight:600;color:#1e293b;">Ju... Cac... <span style="font-size:0.7rem;color:#94a3b8;">(verifica al pagar)</span></span>
-            </div>
           </div>
+          <button onclick="yaHiceElPago()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;padding:15px;font-size:0.95rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 20px rgba(22,163,74,0.45);margin-bottom:6px;animation:pulseGreen 1.8s infinite;">
+            ✅ YA TRANSFERÍ — ENVIAR COMPROBANTE
+          </button>
+          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Envías el comprobante por WhatsApp al <strong>315 931 8400</strong> y radicamos de inmediato.</p>
         </div>
 
-        <!-- Bancos aceptados -->
-        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
-          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Nequi</span>
-          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Daviplata</span>
-          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Bancolombia</span>
-          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Davivienda</span>
-          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Cualquier banco</span>
+        <!-- Panel: ePayco -->
+        <div id="panel-epayco" style="display:none;">
+          <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:12px;text-align:center;">
+            <p style="font-size:0.72rem;color:#64748b;margin:0 0 6px;">Pago seguro con</p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <span style="background:#1e3a8a;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:5px;">VISA</span>
+              <span style="background:#eb001b;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:5px;">Mastercard</span>
+              <span style="background:#f97316;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:5px;">PSE</span>
+              <span style="background:#16a34a;color:#fff;font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:5px;">Nequi</span>
+            </div>
+            <p style="font-size:0.7rem;color:#94a3b8;margin:0;">Encriptado SSL · Procesado por ePayco</p>
+          </div>
+          <button onclick="abrirEpayco()" id="btn-pagar-epayco"
+            style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(249,115,22,0.55);animation:pulseOrange 1.8s infinite;margin-bottom:6px;position:relative;overflow:hidden;">
+            <span style="position:relative;z-index:1;">💳 PAGAR AHORA CON TARJETA / PSE →</span>
+            <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
+          </button>
+          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Al completar el pago radicamos tu documento ese mismo día.</p>
         </div>
-
-        <!-- Botón ya pagué -->
-        <button onclick="yaHiceElPago()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(22,163,74,0.45);margin-bottom:8px;animation:pulseGreen 1.8s infinite;">
-          ✅ YA HICE EL PAGO — ENVIAR COMPROBANTE
-        </button>
-        <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin:0;">Enviarás el comprobante por WhatsApp y activamos tu trámite de inmediato.</p>
       </div>
 
       <div class="step-panel" id="sp-consulta">
@@ -2476,6 +2494,69 @@ function copiarLlave(btn){
   }).catch(function(){});
 }
 
+// ── Selector método de pago ─────────────────────────────────────────────────
+function seleccionarMetodoPago(metodo){
+  var esLlave = metodo==='llave';
+  document.getElementById('panel-llave').style.display   = esLlave ? 'block' : 'none';
+  document.getElementById('panel-epayco').style.display  = esLlave ? 'none'  : 'block';
+  var btnL = document.getElementById('btn-metodo-llave');
+  var btnE = document.getElementById('btn-metodo-epayco');
+  if(esLlave){
+    btnL.style.background='linear-gradient(135deg,#1e3a8a,#2563eb)';
+    btnL.style.color='#fff'; btnL.style.border='2.5px solid #2563eb';
+    btnE.style.background='#fff'; btnE.style.color='#1e3a8a'; btnE.style.border='2px solid #e2e8f0';
+  } else {
+    btnE.style.background='linear-gradient(135deg,#f97316,#ea580c)';
+    btnE.style.color='#fff'; btnE.style.border='2.5px solid #f97316';
+    btnL.style.background='#fff'; btnL.style.color='#1e3a8a'; btnL.style.border='2px solid #e2e8f0';
+  }
+}
+
+// ── ePayco checkout ─────────────────────────────────────────────────────────
+// REEMPLAZA 'TU_LLAVE_PUBLICA' con tu P_CUST_ID_CLIENTE de tu cuenta ePayco
+var EPAYCO_KEY = 'TU_LLAVE_PUBLICA';
+
+function abrirEpayco(){
+  var esUna   = _planFinal==='una';
+  var monto   = esUna ? 49000 : 79000;
+  var planDesc= esUna ? 'Activar y radicar una multa - JurídicosWeb'
+                      : 'Activar y radicar todas las multas - JurídicosWeb';
+  if(!window.ePayco){
+    var s=document.createElement('script');
+    s.src='https://checkout.epayco.co/checkout.js';
+    s.onload=function(){ _lanzarEpayco(monto,planDesc); };
+    document.head.appendChild(s);
+  } else {
+    _lanzarEpayco(monto,planDesc);
+  }
+}
+
+function _lanzarEpayco(monto,desc){
+  var handler = ePayco.checkout.configure({
+    key: EPAYCO_KEY,
+    test: false
+  });
+  handler.open({
+    name:          'JurídicosWeb',
+    description:   desc,
+    invoice:       'JW-'+Date.now(),
+    currency:      'cop',
+    amount:        String(monto),
+    tax_base:      '0',
+    tax:           '0',
+    country:       'co',
+    lang:          'es',
+    external:      'false',
+    extra1:        _nombreConsultante,
+    extra2:        _valorConsultado,
+    extra3:        _waConsultante,
+    response:      'https://juridicosweb.com',
+    confirmation:  'https://juridicosweb.com',
+    email_billing: _correoConsultante || '',
+    name_billing:  _nombreConsultante || ''
+  });
+}
+
 function yaHiceElPago(){
   var esUna   = _planFinal==='una';
   var monto   = esUna ? '$49.000' : '$79.000';
@@ -2489,7 +2570,7 @@ function yaHiceElPago(){
     'Adjunto el comprobante de pago. Quedo esperando que activen el documento y lo radiquen. ✅\n\n'+
     '_JurídicosWeb — Trámite firmado y listo_';
   jwTrack('pago_comprobante_enviado', { plan: _planFinal });
-  window.open('https://wa.me/573174025077?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
 // Inicializar canvas cuando se active ese paso
