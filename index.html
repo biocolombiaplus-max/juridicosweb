@@ -1347,46 +1347,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-post-firma">
         <!-- Confirmación firma -->
-        <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:14px;">
-          <div style="font-size:2.2rem;margin-bottom:6px;">✅</div>
-          <p style="color:#4ade80;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">¡Documento firmado!</p>
-          <h3 style="color:#fff;font-size:1.05rem;font-weight:900;margin:0 0 8px;">Tu Derecho de Petición está listo para radicar</h3>
-          <!-- Mini preview firma -->
-          <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px;margin-bottom:10px;">
-            <canvas id="firma-preview-mini" width="280" height="70" style="border-radius:4px;display:block;margin:0 auto;"></canvas>
+        <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:1.8rem;flex-shrink:0;">✅</div>
+          <div style="text-align:left;">
+            <p style="color:#4ade80;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">¡Documento firmado!</p>
+            <p style="color:#fff;font-size:0.9rem;font-weight:900;margin:0;">Listo para radicar — elige tu plan</p>
           </div>
-          <p style="color:#86efac;font-size:0.82rem;margin:0;line-height:1.5;">Solo falta activar los datos de tu multa y nosotros lo radicamos ante la secretaría correspondiente.</p>
         </div>
 
         <!-- Pregunta de activación -->
-        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:12px;text-align:center;">
-          <p style="font-size:1rem;font-weight:900;color:#1e3a8a;margin:0 0 6px;">¿Deseas que activemos los datos de tus multas y radicemos el documento?</p>
-          <p style="font-size:0.8rem;color:#64748b;margin:0 0 14px;">Nosotros completamos el documento, elegimos la secretaría correcta y lo enviamos ese mismo día.</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-bottom:10px;">
+          <p style="font-size:0.88rem;font-weight:900;color:#1e3a8a;margin:0 0 10px;text-align:center;">¿Con cuántas multas trabajamos?</p>
+          <div style="display:flex;flex-direction:column;gap:7px;">
             <!-- Plan una multa -->
-            <div id="pf-plan-una" onclick="seleccionarPlanFinal('una')" style="border:2px solid #e2e8f0;border-radius:12px;padding:13px 16px;cursor:pointer;text-align:left;transition:.2s;">
+            <div id="pf-plan-una" onclick="seleccionarPlanFinal('una')" style="border:2px solid #e2e8f0;border-radius:10px;padding:10px 13px;cursor:pointer;text-align:left;transition:.2s;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="font-weight:800;color:#1e3a8a;font-size:0.92rem;margin:0;">Activar una multa</p>
-                  <p style="font-size:0.73rem;color:#64748b;margin:2px 0 0;">La que tenga mayor probabilidad de éxito</p>
+                  <p style="font-weight:800;color:#1e3a8a;font-size:0.88rem;margin:0;">Activar una multa</p>
+                  <p style="font-size:0.7rem;color:#64748b;margin:1px 0 0;">Mayor probabilidad de éxito</p>
                 </div>
                 <div style="text-align:right;">
-                  <p style="font-size:1.2rem;font-weight:900;color:#1e3a8a;margin:0;">$49.000</p>
-                  <p style="font-size:0.65rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
+                  <p style="font-size:1.1rem;font-weight:900;color:#1e3a8a;margin:0;">$49.000</p>
+                  <p style="font-size:0.62rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
                 </div>
               </div>
             </div>
             <!-- Plan todas -->
-            <div id="pf-plan-todas" onclick="seleccionarPlanFinal('todas')" style="border:2px solid #f97316;border-radius:12px;padding:13px 16px;cursor:pointer;text-align:left;background:linear-gradient(135deg,#fff7ed,#fff);transition:.2s;position:relative;">
-              <div style="position:absolute;top:-10px;right:12px;background:#f97316;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 10px;border-radius:999px;letter-spacing:0.5px;">MEJOR OPCIÓN</div>
+            <div id="pf-plan-todas" onclick="seleccionarPlanFinal('todas')" style="border:2px solid #f97316;border-radius:10px;padding:10px 13px;cursor:pointer;text-align:left;background:linear-gradient(135deg,#fff7ed,#fff);transition:.2s;position:relative;">
+              <div style="position:absolute;top:-9px;right:10px;background:#f97316;color:#fff;font-size:0.62rem;font-weight:800;padding:2px 9px;border-radius:999px;">MEJOR OPCIÓN</div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="font-weight:800;color:#1e3a8a;font-size:0.92rem;margin:0;">Activar TODAS las que apliquen</p>
-                  <p style="font-size:0.73rem;color:#64748b;margin:2px 0 0;">Máxima eliminación posible en tu caso</p>
+                  <p style="font-weight:800;color:#1e3a8a;font-size:0.88rem;margin:0;">Activar TODAS las que apliquen</p>
+                  <p style="font-size:0.7rem;color:#64748b;margin:1px 0 0;">Máxima eliminación posible</p>
                 </div>
                 <div style="text-align:right;">
-                  <p style="font-size:1.2rem;font-weight:900;color:#ea580c;margin:0;">$79.000</p>
-                  <p style="font-size:0.65rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
+                  <p style="font-size:1.1rem;font-weight:900;color:#ea580c;margin:0;">$79.000</p>
+                  <p style="font-size:0.62rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
                 </div>
               </div>
             </div>
