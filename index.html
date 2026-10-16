@@ -1205,80 +1205,76 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Previsualización del documento
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-doc-preview">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div>
-            <p style="color:#22c55e;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">✅ Documento generado</p>
-            <h3 style="color:#1e3a8a;font-size:1rem;font-weight:900;margin:0;">Tu Derecho de Petición</h3>
-          </div>
-          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.72rem;font-weight:700;color:#15803d;">OFICIAL</div>
+        <!-- Badge documento listo -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.7rem;font-weight:700;color:#15803d;">✅ DOCUMENTO LISTO</div>
+          <div style="background:#fef3c7;border:1.5px solid #d97706;border-radius:8px;padding:4px 10px;font-size:0.7rem;font-weight:700;color:#92400e;">OFICIAL · Art. 23 C.P.</div>
         </div>
 
-        <!-- Documento simulado -->
-        <div id="doc-preview-card" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-          <!-- Encabezado doc -->
-          <div style="background:#1e3a8a;color:#fff;padding:12px 16px;text-align:center;">
-            <p style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 2px;opacity:0.7;">República de Colombia</p>
-            <p style="font-size:0.85rem;font-weight:900;margin:0;letter-spacing:0.5px;">DERECHO DE PETICIÓN</p>
-            <p style="font-size:0.68rem;margin:2px 0 0;opacity:0.8;">Eliminación de Multa / Fotomulta — Art. 23 C.P.</p>
+        <!-- Documento compacto -->
+        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(30,58,138,0.15);">
+          <div style="background:#1e3a8a;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <p style="font-size:0.6rem;opacity:0.7;margin:0;letter-spacing:1.5px;text-transform:uppercase;">República de Colombia</p>
+              <p style="font-size:0.82rem;font-weight:900;margin:0;">DERECHO DE PETICIÓN</p>
+            </div>
+            <div style="font-size:1.4rem;">📜</div>
           </div>
-          <!-- Cuerpo doc -->
-          <div style="padding:14px 16px;font-size:0.78rem;color:#1e293b;line-height:1.7;">
-            <p style="margin:0 0 8px;"><strong>Señores:</strong><br>
-            <span style="color:#2563eb;font-weight:700;" id="dp-secretaria-nombre">Secretaría de Tránsito</span></p>
-            <p style="margin:0 0 8px;"><strong>Peticionario:</strong> <span id="dp-nombre-cliente">—</span><br>
-            <strong>C.C./Placa:</strong> <span id="dp-cedula-cliente">—</span></p>
-            <p style="margin:0 0 10px;"><strong>Asunto:</strong> Solicitud de eliminación de comparendo por falla en proceso de notificación, de conformidad con la Ley 769 de 2002 y el Código General del Proceso.</p>
-            <!-- Sección bloqueada -->
-            <div style="position:relative;margin-bottom:10px;">
-              <div style="filter:blur(5px);user-select:none;pointer-events:none;background:#f8fafc;border-radius:8px;padding:10px 12px;border:1px dashed #cbd5e1;">
-                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>MULTA No.:</strong> COM-2024-XXXX-XXX</p>
-                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>Fecha infracción:</strong> XX/XX/XXXX</p>
-                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>Valor:</strong> $XXX.XXX pesos</p>
-                <p style="margin:0;font-size:0.75rem;"><strong>Fundamento jurídico:</strong> Art. XX Ley XXXX...</p>
+          <div style="padding:10px 14px;font-size:0.76rem;color:#1e293b;line-height:1.55;">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 8px;margin-bottom:8px;">
+              <span style="color:#64748b;font-weight:600;">Para:</span><span style="color:#2563eb;font-weight:700;" id="dp-secretaria-nombre">Secretaría de Tránsito</span>
+              <span style="color:#64748b;font-weight:600;">Peticionario:</span><span id="dp-nombre-cliente" style="font-weight:700;">—</span>
+              <span style="color:#64748b;font-weight:600;">C.C./Placa:</span><span id="dp-cedula-cliente">—</span>
+            </div>
+            <!-- Sección bloqueada compacta -->
+            <div style="position:relative;margin-bottom:8px;">
+              <div style="filter:blur(4px);user-select:none;pointer-events:none;background:#f8fafc;border-radius:7px;padding:7px 10px;border:1px dashed #cbd5e1;font-size:0.72rem;">
+                <p style="margin:0;">MULTA No.: COM-2024-XXXX · Valor: $XXX.XXX · Fecha: XX/XX/XXXX · Art. XX...</p>
               </div>
-              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
-                <div style="background:rgba(30,58,138,0.92);border-radius:10px;padding:8px 16px;text-align:center;">
-                  <p style="color:#fff;font-size:0.8rem;font-weight:800;margin:0;">🔒 Se completa al activar</p>
-                  <p style="color:#93c5fd;font-size:0.68rem;margin:2px 0 0;">Datos específicos de tu multa</p>
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                <div style="background:rgba(30,58,138,0.93);border-radius:8px;padding:5px 14px;text-align:center;">
+                  <p style="color:#fff;font-size:0.75rem;font-weight:800;margin:0;">🔒 Se completa al activar</p>
                 </div>
               </div>
             </div>
-            <p style="margin:0;font-size:0.76rem;color:#475569;line-height:1.6;">Por lo anterior, respetuosamente solicito dar trámite al presente Derecho de Petición dentro del término legal establecido de <strong>15 días hábiles</strong>, so pena de acción de tutela por vulneración del derecho fundamental de petición.</p>
+            <p style="margin:0;font-size:0.7rem;color:#64748b;line-height:1.5;">Solicito trámite en <strong>15 días hábiles</strong>, so pena de acción de tutela — Art. 23 C.P.</p>
           </div>
           <!-- Línea de firma -->
-          <div style="border-top:1px solid #f1f5f9;padding:12px 16px;background:#f8fafc;text-align:center;">
-            <div style="width:160px;border-bottom:1.5px solid #334155;margin:0 auto 4px;height:20px;" id="dp-firma-preview"></div>
-            <p style="font-size:0.7rem;color:#64748b;margin:0;" id="dp-nombre-firma">— Firma del peticionario —</p>
+          <div style="border-top:1px solid #f1f5f9;padding:8px 14px;background:#f8fafc;display:flex;align-items:center;gap:10px;">
+            <div style="flex:1;border-bottom:1.5px solid #334155;height:22px;" id="dp-firma-preview"></div>
+            <p style="font-size:0.68rem;color:#64748b;margin:0;white-space:nowrap;" id="dp-nombre-firma">Firma pendiente</p>
           </div>
         </div>
 
-        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(249,115,22,0.5);animation:pulseOrange 1.8s infinite;margin-bottom:10px;">
-          ✍️ FIRMAR CON EL DEDO →
+        <!-- CTA firmar - GRANDE Y LLAMATIVO -->
+        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px;font-size:1.05rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:8px;">
+          <span style="position:relative;z-index:1;">✍️ DAR CLIC AQUÍ PARA FIRMAR EL DOCUMENTO →</span>
+          <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <p style="text-align:center;color:#64748b;font-size:0.73rem;margin:0;">Al firmar confirmas que los datos son correctos y autorizas el trámite legal.</p>
+        <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">✅ Gratis · Sin compromisos · Firma con el dedo en segundos</p>
       </div>
 
       <!-- ══════════════════════════════════════
            PASO: Canvas de firma
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-firma-canvas">
-        <div style="text-align:center;margin-bottom:12px;">
-          <p style="color:#2563eb;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">Paso 2 de 3 · Firma tu documento</p>
-          <h3 style="color:#1e3a8a;font-size:1.05rem;font-weight:900;margin:0 0 4px;">Firma con el dedo</h3>
-          <p style="color:#64748b;font-size:0.8rem;margin:0;">Dibuja tu firma en el recuadro de abajo</p>
+        <div style="text-align:center;margin-bottom:10px;">
+          <p style="color:#2563eb;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 3px;">Paso final · Firma tu Derecho de Petición</p>
+          <h3 style="color:#1e3a8a;font-size:1.05rem;font-weight:900;margin:0;">✍️ Dibuja tu firma con el dedo</h3>
         </div>
         <!-- Canvas firma -->
-        <div style="background:#fff;border:2px dashed #3b82f6;border-radius:12px;overflow:hidden;margin-bottom:10px;position:relative;">
-          <canvas id="firma-canvas" style="display:block;touch-action:none;cursor:crosshair;" width="600" height="180"></canvas>
-          <p id="firma-hint" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#cbd5e1;font-size:0.85rem;pointer-events:none;text-align:center;margin:0;">✍️ Dibuja aquí tu firma</p>
+        <div style="background:#fff;border:2.5px solid #3b82f6;border-radius:14px;overflow:hidden;margin-bottom:10px;position:relative;box-shadow:0 4px 16px rgba(59,130,246,0.2);">
+          <div style="background:#eff6ff;padding:6px 12px;border-bottom:1px solid #bfdbfe;text-align:center;">
+            <p style="color:#1d4ed8;font-size:0.72rem;font-weight:700;margin:0;">👆 Toca aquí y firma con el dedo</p>
+          </div>
+          <canvas id="firma-canvas" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:160px;" width="600" height="160"></canvas>
+          <p id="firma-hint" style="position:absolute;top:55%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:1rem;pointer-events:none;text-align:center;margin:0;font-weight:500;">✍️ Firma aquí</p>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <button onclick="limpiarFirma()" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:11px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
-          <button onclick="confirmarFirma()" id="btn-confirmar-firma" style="flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:11px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 3px 14px rgba(22,163,74,0.4);">✅ Confirmar firma →</button>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button onclick="limpiarFirmaLanding()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
+          <button onclick="confirmarFirmaLanding()" style="flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,0.45);">✅ Confirmar y continuar →</button>
         </div>
-        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;text-align:center;">
-          <p style="color:#0369a1;font-size:0.75rem;margin:0;line-height:1.5;">🔒 Tu firma queda vinculada a este documento y tiene validez legal como aceptación del trámite.</p>
-        </div>
+        <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">🔒 Tu firma tiene validez legal y queda vinculada al documento</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -2312,30 +2308,27 @@ function ocultarHint(){
   if(h) h.style.display='none';
 }
 
-function limpiarFirma(){
+function limpiarFirmaLanding(){
   if(_firmaCtx) _firmaCtx.clearRect(0,0,_firmaCanvas.width,_firmaCanvas.height);
   var h = document.getElementById('firma-hint');
-  if(h) h.style.display='block';
+  if(h){ h.textContent='✍️ Dibuja aquí tu firma'; h.style.display='block'; h.style.color='#cbd5e1'; h.style.fontWeight='400'; }
   _firmaDataUrl = null;
 }
 
-function confirmarFirma(){
+function confirmarFirmaLanding(){
   if(!_firmaCanvas) return;
   var pix = _firmaCtx.getImageData(0,0,_firmaCanvas.width,_firmaCanvas.height).data;
   var tiene = false;
   for(var i=3; i<pix.length; i+=4){ if(pix[i]>10){ tiene=true; break; } }
   if(!tiene){
-    // Mensaje inline sin alert
     var hint = document.getElementById('firma-hint');
-    if(hint){ hint.textContent='⚠️ Dibuja tu firma primero'; hint.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ef4444;font-size:0.85rem;pointer-events:none;text-align:center;margin:0;font-weight:700;'; hint.style.display='block'; }
-    setTimeout(function(){ if(hint){ hint.textContent='✍️ Dibuja aquí tu firma'; hint.style.color='#cbd5e1'; hint.style.fontWeight='400'; } }, 2000);
+    if(hint){ hint.textContent='⚠️ Dibuja tu firma primero'; hint.style.color='#ef4444'; hint.style.fontWeight='700'; hint.style.display='block'; }
+    setTimeout(function(){ if(hint){ hint.textContent='✍️ Dibuja aquí tu firma'; hint.style.color='#cbd5e1'; hint.style.fontWeight='400'; } }, 2500);
     return;
   }
   _firmaDataUrl = _firmaCanvas.toDataURL('image/png');
-  // Mostrar mini en el doc preview
   var prev = document.getElementById('dp-firma-preview');
   if(prev){ var img=document.createElement('img'); img.src=_firmaDataUrl; img.style='max-width:120px;height:28px;object-fit:contain;'; prev.innerHTML=''; prev.appendChild(img); }
-  // Mostrar mini en post-firma
   var mini = document.getElementById('firma-preview-mini');
   if(mini){
     var mCtx = mini.getContext('2d');
