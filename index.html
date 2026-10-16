@@ -723,27 +723,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="hero-consult-glow"></div>
           <div class="hero-consult-card">
             <span class="hero-consult-ribbon">100% GRATIS</span>
-            <label for="hero-cedula" class="hero-consult-label"><i class="fas fa-id-card"></i> Pon tu cédula aquí 👇 y te decimos gratis si tu multa o fotomulta se puede eliminar</label>
-            <div class="hero-consult-row">
-              <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Ej: 1023456789" inputmode="numeric" maxlength="12" onkeydown="if(event.key==='Enter')consultarDesdeHero()">
-              <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar"><i class="fas fa-search"></i></button>
+            <label for="hero-cedula" class="hero-consult-label" style="font-size:0.95rem;margin-bottom:14px;"><i class="fas fa-id-card"></i> Ingresa tu cédula — te decimos si puedes eliminar tu multa</label>
+            <div class="hero-consult-row" style="gap:10px;">
+              <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Número de cédula" inputmode="numeric" maxlength="12" style="font-size:1.25rem;padding:18px 18px;letter-spacing:2px;" onkeydown="if(event.key==='Enter')consultarDesdeHero()">
+              <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar" style="width:66px;font-size:1.4rem;border-radius:14px;"><i class="fas fa-search"></i></button>
             </div>
-            <p class="hero-consult-hint"><i class="fas fa-lock"></i> Resultado inmediato · Sin puntos ni espacios · Datos protegidos</p>
-            <button type="button" class="hero-consult-alt" onclick="openSimitModal(event);switchStab('placa');">¿Prefieres consultar por placa?</button>
+            <p class="hero-consult-hint" style="margin-top:8px;">🔒 Gratis · Sin registros · Datos protegidos</p>
+            <button type="button" class="hero-consult-alt" onclick="openSimitModal(event);switchStab('placa');">¿Consultar por placa del vehículo?</button>
           </div>
         </div>
 
-        <!-- Ancla de precio/gratis -->
-        <div class="hero-price-anchor"><i class="fas fa-bolt"></i> Todo incluido desde <strong>$25.000</strong> · Documento en tu WhatsApp <strong>al instante</strong></div>
-
-        <!-- Cómo funciona: rápido, fácil, real, inmediato -->
-        <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:12px;">
-          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-bolt" style="color:#2dd4bf;"></i> Rápido</span>
-          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-hand-pointer" style="color:#2dd4bf;"></i> Fácil</span>
-          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-database" style="color:#2dd4bf;"></i> Datos reales del SIMIT</span>
-          <span style="color:rgba(255,255,255,0.85);font-size:0.74rem;font-weight:700;display:flex;align-items:center;gap:5px;"><i class="fas fa-file-signature" style="color:#2dd4bf;"></i> Derecho de Petición al instante</span>
+        <!-- 3 sellos compactos -->
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+          <span style="color:#2dd4bf;font-size:0.75rem;font-weight:700;">⚡ Resultado inmediato</span>
+          <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
+          <span style="color:#fbbf24;font-size:0.75rem;font-weight:700;">📄 Documento al instante</span>
+          <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
+          <span style="color:#4ade80;font-size:0.75rem;font-weight:700;">✅ $0 si no aplica</span>
         </div>
-        <p style="color:rgba(255,255,255,0.6);font-size:0.76rem;text-align:center;margin:8px 0 0;">Consultas con tu cédula, ves de inmediato si tu multa o fotomulta se puede eliminar, y si aplica, tu Derecho de Petición queda listo para firmar en el momento — sin filas ni papeleo.</p>
 
         <!-- Subtítulo separador -->
         <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
@@ -1339,7 +1336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <!-- CTA radicar -->
         <button onclick="goToStepNombre('sp-post-firma')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;margin-bottom:8px;">
-          <span style="position:relative;z-index:1;">🚀 RADICAR ESTE DOCUMENTO →</span>
+          <span style="position:relative;z-index:1;">✅ CLIC AQUÍ PARA TERMINAR EL TRÁMITE Y RADICAR →</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
         <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">El documento no se puede descargar hasta que esté radicado · Proceso 100% legal</p>
