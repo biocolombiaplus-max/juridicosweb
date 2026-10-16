@@ -1158,19 +1158,239 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <p style="color:#fde047;font-size:0.82rem;font-weight:700;margin:0;">⚠️ Esta verificación es válida por <span id="sim-timer" style="font-weight:900;">09:59</span> minutos</p>
               <p style="color:#fef08a;font-size:0.75rem;margin:4px 0 0;">Los registros del SIMIT se actualizan constantemente — actúa ahora para asegurar tu caso.</p>
             </div>
-            <button onclick="goToStepNombre('sp-consulta')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px 28px;font-size:1.12rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.5px;animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;">
-              <span style="position:relative;z-index:1;">🚀 QUIERO ELIMINAR MIS MULTAS →</span>
+            <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px 28px;font-size:1.12rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);letter-spacing:0.5px;animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;">
+              <span style="position:relative;z-index:1;">📄 GENERAR MI DERECHO DE PETICIÓN GRATIS →</span>
               <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;"></span>
             </button>
             <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap;">
-              <span style="color:#4ade80;font-size:0.72rem;">🔒 Pago 100% seguro</span>
-              <span style="color:#4ade80;font-size:0.72rem;">✅ $0 si no aplica</span>
-              <span style="color:#4ade80;font-size:0.72rem;">⚡ Resultado inmediato</span>
+              <span style="color:#4ade80;font-size:0.72rem;">📄 Documento real</span>
+              <span style="color:#4ade80;font-size:0.72rem;">✅ 100% gratis ver</span>
+              <span style="color:#4ade80;font-size:0.72rem;">✍️ Firmas con el dedo</span>
             </div>
           </div>
         </div>
       </div>
       <!-- /sp-simulacion -->
+
+      <!-- ══════════════════════════════════════
+           PASO: Datos básicos para el documento
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-datos-doc">
+        <div style="text-align:center;margin-bottom:14px;">
+          <div style="font-size:2rem;margin-bottom:6px;">📄</div>
+          <h3 style="color:#1e3a8a;font-size:1.1rem;font-weight:900;margin:0 0 4px;">Tu Derecho de Petición está listo</h3>
+          <p style="color:#475569;font-size:0.83rem;margin:0;">Ingresa tus datos para generar el documento oficial — es gratis verlo y firmarlo.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Nombre completo *</label>
+            <input id="dd-nombre" type="text" placeholder="Ej: Carlos Andrés Gómez" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">WhatsApp (10 dígitos) *</label>
+            <input id="dd-whatsapp" type="tel" placeholder="Ej: 3001234567" maxlength="10" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Correo electrónico *</label>
+            <input id="dd-correo" type="email" placeholder="tu@correo.com" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+        </div>
+        <button onclick="generarDocPreview()" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:15px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;box-shadow:0 4px 20px rgba(30,64,175,0.4);">
+          📄 Generar mi Derecho de Petición →
+        </button>
+        <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin:10px 0 0;">🔒 Tus datos están protegidos · No compartimos información</p>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PASO: Previsualización del documento
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-doc-preview">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <p style="color:#22c55e;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">✅ Documento generado</p>
+            <h3 style="color:#1e3a8a;font-size:1rem;font-weight:900;margin:0;">Tu Derecho de Petición</h3>
+          </div>
+          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.72rem;font-weight:700;color:#15803d;">OFICIAL</div>
+        </div>
+
+        <!-- Documento simulado -->
+        <div id="doc-preview-card" style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+          <!-- Encabezado doc -->
+          <div style="background:#1e3a8a;color:#fff;padding:12px 16px;text-align:center;">
+            <p style="font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 2px;opacity:0.7;">República de Colombia</p>
+            <p style="font-size:0.85rem;font-weight:900;margin:0;letter-spacing:0.5px;">DERECHO DE PETICIÓN</p>
+            <p style="font-size:0.68rem;margin:2px 0 0;opacity:0.8;">Eliminación de Multa / Fotomulta — Art. 23 C.P.</p>
+          </div>
+          <!-- Cuerpo doc -->
+          <div style="padding:14px 16px;font-size:0.78rem;color:#1e293b;line-height:1.7;">
+            <p style="margin:0 0 8px;"><strong>Señores:</strong><br>
+            <span style="color:#2563eb;font-weight:700;" id="dp-secretaria-nombre">Secretaría de Tránsito</span></p>
+            <p style="margin:0 0 8px;"><strong>Peticionario:</strong> <span id="dp-nombre-cliente">—</span><br>
+            <strong>C.C./Placa:</strong> <span id="dp-cedula-cliente">—</span></p>
+            <p style="margin:0 0 10px;"><strong>Asunto:</strong> Solicitud de eliminación de comparendo por falla en proceso de notificación, de conformidad con la Ley 769 de 2002 y el Código General del Proceso.</p>
+            <!-- Sección bloqueada -->
+            <div style="position:relative;margin-bottom:10px;">
+              <div style="filter:blur(5px);user-select:none;pointer-events:none;background:#f8fafc;border-radius:8px;padding:10px 12px;border:1px dashed #cbd5e1;">
+                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>MULTA No.:</strong> COM-2024-XXXX-XXX</p>
+                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>Fecha infracción:</strong> XX/XX/XXXX</p>
+                <p style="margin:0 0 4px;font-size:0.75rem;"><strong>Valor:</strong> $XXX.XXX pesos</p>
+                <p style="margin:0;font-size:0.75rem;"><strong>Fundamento jurídico:</strong> Art. XX Ley XXXX...</p>
+              </div>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+                <div style="background:rgba(30,58,138,0.92);border-radius:10px;padding:8px 16px;text-align:center;">
+                  <p style="color:#fff;font-size:0.8rem;font-weight:800;margin:0;">🔒 Se completa al activar</p>
+                  <p style="color:#93c5fd;font-size:0.68rem;margin:2px 0 0;">Datos específicos de tu multa</p>
+                </div>
+              </div>
+            </div>
+            <p style="margin:0;font-size:0.76rem;color:#475569;line-height:1.6;">Por lo anterior, respetuosamente solicito dar trámite al presente Derecho de Petición dentro del término legal establecido de <strong>15 días hábiles</strong>, so pena de acción de tutela por vulneración del derecho fundamental de petición.</p>
+          </div>
+          <!-- Línea de firma -->
+          <div style="border-top:1px solid #f1f5f9;padding:12px 16px;background:#f8fafc;text-align:center;">
+            <div style="width:160px;border-bottom:1.5px solid #334155;margin:0 auto 4px;height:20px;" id="dp-firma-preview"></div>
+            <p style="font-size:0.7rem;color:#64748b;margin:0;" id="dp-nombre-firma">— Firma del peticionario —</p>
+          </div>
+        </div>
+
+        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(249,115,22,0.5);animation:pulseOrange 1.8s infinite;margin-bottom:10px;">
+          ✍️ FIRMAR CON EL DEDO →
+        </button>
+        <p style="text-align:center;color:#64748b;font-size:0.73rem;margin:0;">Al firmar confirmas que los datos son correctos y autorizas el trámite legal.</p>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PASO: Canvas de firma
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-firma-canvas">
+        <div style="text-align:center;margin-bottom:12px;">
+          <p style="color:#2563eb;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">Paso 2 de 3 · Firma tu documento</p>
+          <h3 style="color:#1e3a8a;font-size:1.05rem;font-weight:900;margin:0 0 4px;">Firma con el dedo</h3>
+          <p style="color:#64748b;font-size:0.8rem;margin:0;">Dibuja tu firma en el recuadro de abajo</p>
+        </div>
+        <!-- Canvas firma -->
+        <div style="background:#fff;border:2px dashed #3b82f6;border-radius:12px;overflow:hidden;margin-bottom:10px;position:relative;">
+          <canvas id="firma-canvas" style="display:block;touch-action:none;cursor:crosshair;" width="600" height="180"></canvas>
+          <p id="firma-hint" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#cbd5e1;font-size:0.85rem;pointer-events:none;text-align:center;margin:0;">✍️ Dibuja aquí tu firma</p>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <button onclick="limpiarFirma()" style="flex:1;background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:11px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
+          <button onclick="confirmarFirma()" id="btn-confirmar-firma" style="flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:11px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 3px 14px rgba(22,163,74,0.4);">✅ Confirmar firma →</button>
+        </div>
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;text-align:center;">
+          <p style="color:#0369a1;font-size:0.75rem;margin:0;line-height:1.5;">🔒 Tu firma queda vinculada a este documento y tiene validez legal como aceptación del trámite.</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PASO: Post-firma → activar y radicar
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-post-firma">
+        <!-- Confirmación firma -->
+        <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:14px;">
+          <div style="font-size:2.2rem;margin-bottom:6px;">✅</div>
+          <p style="color:#4ade80;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">¡Documento firmado!</p>
+          <h3 style="color:#fff;font-size:1.05rem;font-weight:900;margin:0 0 8px;">Tu Derecho de Petición está listo para radicar</h3>
+          <!-- Mini preview firma -->
+          <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:8px;margin-bottom:10px;">
+            <canvas id="firma-preview-mini" width="280" height="70" style="border-radius:4px;display:block;margin:0 auto;"></canvas>
+          </div>
+          <p style="color:#86efac;font-size:0.82rem;margin:0;line-height:1.5;">Solo falta activar los datos de tu multa y nosotros lo radicamos ante la secretaría correspondiente.</p>
+        </div>
+
+        <!-- Pregunta de activación -->
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:12px;text-align:center;">
+          <p style="font-size:1rem;font-weight:900;color:#1e3a8a;margin:0 0 6px;">¿Deseas que activemos los datos de tus multas y radicemos el documento?</p>
+          <p style="font-size:0.8rem;color:#64748b;margin:0 0 14px;">Nosotros completamos el documento, elegimos la secretaría correcta y lo enviamos ese mismo día.</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <!-- Plan una multa -->
+            <div id="pf-plan-una" onclick="seleccionarPlanFinal('una')" style="border:2px solid #e2e8f0;border-radius:12px;padding:13px 16px;cursor:pointer;text-align:left;transition:.2s;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <p style="font-weight:800;color:#1e3a8a;font-size:0.92rem;margin:0;">Activar una multa</p>
+                  <p style="font-size:0.73rem;color:#64748b;margin:2px 0 0;">La que tenga mayor probabilidad de éxito</p>
+                </div>
+                <div style="text-align:right;">
+                  <p style="font-size:1.2rem;font-weight:900;color:#1e3a8a;margin:0;">$49.000</p>
+                  <p style="font-size:0.65rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
+                </div>
+              </div>
+            </div>
+            <!-- Plan todas -->
+            <div id="pf-plan-todas" onclick="seleccionarPlanFinal('todas')" style="border:2px solid #f97316;border-radius:12px;padding:13px 16px;cursor:pointer;text-align:left;background:linear-gradient(135deg,#fff7ed,#fff);transition:.2s;position:relative;">
+              <div style="position:absolute;top:-10px;right:12px;background:#f97316;color:#fff;font-size:0.65rem;font-weight:800;padding:3px 10px;border-radius:999px;letter-spacing:0.5px;">MEJOR OPCIÓN</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <p style="font-weight:800;color:#1e3a8a;font-size:0.92rem;margin:0;">Activar TODAS las que apliquen</p>
+                  <p style="font-size:0.73rem;color:#64748b;margin:2px 0 0;">Máxima eliminación posible en tu caso</p>
+                </div>
+                <div style="text-align:right;">
+                  <p style="font-size:1.2rem;font-weight:900;color:#ea580c;margin:0;">$79.000</p>
+                  <p style="font-size:0.65rem;color:#22c55e;font-weight:700;margin:0;">TODO INCLUIDO</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button onclick="irAPagoFinal()" id="btn-ir-pago" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(249,115,22,0.5);animation:pulseOrange 1.8s infinite;">
+          ✅ SÍ, ACTIVAR Y RADICAR →
+        </button>
+        <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin:8px 0 0;">$0 si tu caso no aplica · Radicación el mismo día</p>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           PASO: Pago final
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-pago-radicar">
+        <div style="text-align:center;margin-bottom:14px;">
+          <p style="color:#2563eb;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">Último paso</p>
+          <h3 style="color:#1e3a8a;font-size:1.05rem;font-weight:900;margin:0 0 4px;">Realiza el pago y radicamos hoy</h3>
+          <p style="color:#64748b;font-size:0.82rem;margin:0;">Transfiere desde cualquier banco — Nequi, Daviplata, Bancolombia o cualquier entidad con Transfiya.</p>
+        </div>
+
+        <!-- Monto destacado -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;">
+          <p style="color:#93c5fd;font-size:0.75rem;margin:0 0 4px;font-weight:600;">VALOR A TRANSFERIR</p>
+          <p style="color:#fff;font-size:2rem;font-weight:900;margin:0 0 4px;" id="pr-monto">$49.000</p>
+          <p style="color:#bfdbfe;font-size:0.75rem;margin:0;" id="pr-plan-desc">Activación + radicación de una multa</p>
+        </div>
+
+        <!-- Datos de pago -->
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+          <p style="font-size:0.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px;">Datos para la transferencia</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+              <span style="font-size:0.82rem;color:#64748b;">Tipo</span>
+              <span style="font-size:0.85rem;font-weight:700;color:#1e293b;">Llave breve (Transfiya)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+              <span style="font-size:0.82rem;color:#64748b;">Llave</span>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:1rem;font-weight:900;color:#1e3a8a;letter-spacing:1px;">@OTO262</span>
+                <button onclick="copiarLlave(this)" style="background:#e0f2fe;color:#0369a1;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;">Copiar</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+              <span style="font-size:0.82rem;color:#64748b;">A nombre de</span>
+              <span style="font-size:0.82rem;font-weight:600;color:#1e293b;">Ju... Cac... <span style="font-size:0.7rem;color:#94a3b8;">(verifica al pagar)</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bancos aceptados -->
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Nequi</span>
+          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Daviplata</span>
+          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Bancolombia</span>
+          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Davivienda</span>
+          <span style="background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:999px;">Cualquier banco</span>
+        </div>
+
+        <!-- Botón ya pagué -->
+        <button onclick="yaHiceElPago()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 24px rgba(22,163,74,0.45);margin-bottom:8px;animation:pulseGreen 1.8s infinite;">
+          ✅ YA HICE EL PAGO — ENVIAR COMPROBANTE
+        </button>
+        <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin:0;">Enviarás el comprobante por WhatsApp y activamos tu trámite de inmediato.</p>
+      </div>
 
       <div class="step-panel" id="sp-consulta">
 
@@ -2013,6 +2233,180 @@ function iniciarConsulta(){
   iniciarSimulacion();
 }
 
+// ══════════════════════════════════════════════════
+// NUEVO FLUJO: datos → doc preview → firma → pago
+// ══════════════════════════════════════════════════
+var _planFinal = 'todas';
+var _firmaDataUrl = null;
+
+function irADatosDoc(){
+  // Pre-llenar si ya tenemos datos del flujo anterior
+  if(_nombreConsultante) document.getElementById('dd-nombre').value = _nombreConsultante;
+  if(_waConsultante)     document.getElementById('dd-whatsapp').value = _waConsultante;
+  if(_correoConsultante) document.getElementById('dd-correo').value = _correoConsultante;
+  goToStepNombre('sp-datos-doc');
+}
+
+function generarDocPreview(){
+  var nombre  = document.getElementById('dd-nombre').value.trim();
+  var wa      = document.getElementById('dd-whatsapp').value.trim();
+  var correo  = document.getElementById('dd-correo').value.trim();
+  if(!nombre){ alert('Por favor ingresa tu nombre completo'); return; }
+  if(!wa || wa.length < 10){ alert('Ingresa tu número de WhatsApp (10 dígitos)'); return; }
+  if(!correo || !correo.includes('@')){ alert('Ingresa un correo electrónico válido'); return; }
+  _nombreConsultante = nombre;
+  _waConsultante     = wa;
+  _correoConsultante = correo;
+  // Rellenar datos visibles en el doc
+  document.getElementById('dp-nombre-cliente').textContent  = nombre;
+  document.getElementById('dp-cedula-cliente').textContent  = (_tipoConsultado==='cedula'?'C.C. ':'')+_valorConsultado;
+  document.getElementById('dp-nombre-firma').textContent    = nombre;
+  document.getElementById('dp-secretaria-nombre').textContent = 'Secretaría de Tránsito y Movilidad';
+  // Limpiar firma previa
+  _firmaDataUrl = null;
+  document.getElementById('dp-firma-preview').innerHTML = '';
+  jwTrack('doc_preview_generado', {});
+  goToStepNombre('sp-doc-preview');
+}
+
+// ── Canvas de firma ──────────────────────────────
+var _firmando = false;
+var _firmaCanvas, _firmaCtx;
+
+function inicializarCanvas(){
+  _firmaCanvas = document.getElementById('firma-canvas');
+  if(!_firmaCanvas) return;
+  _firmaCtx = _firmaCanvas.getContext('2d');
+  // Ajustar al ancho real
+  var rect = _firmaCanvas.parentElement.getBoundingClientRect();
+  _firmaCanvas.width  = Math.round(rect.width) || 340;
+  _firmaCanvas.height = 180;
+  _firmaCtx.strokeStyle = '#1e3a8a';
+  _firmaCtx.lineWidth   = 2.5;
+  _firmaCtx.lineCap     = 'round';
+  _firmaCtx.lineJoin    = 'round';
+
+  function getPos(e){
+    var r = _firmaCanvas.getBoundingClientRect();
+    var src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+  _firmaCanvas.addEventListener('mousedown',  function(e){ _firmando=true; var p=getPos(e); _firmaCtx.beginPath(); _firmaCtx.moveTo(p.x,p.y); ocultarHint(); });
+  _firmaCanvas.addEventListener('mousemove',  function(e){ if(!_firmando) return; var p=getPos(e); _firmaCtx.lineTo(p.x,p.y); _firmaCtx.stroke(); });
+  _firmaCanvas.addEventListener('mouseup',    function(){ _firmando=false; });
+  _firmaCanvas.addEventListener('touchstart', function(e){ e.preventDefault(); _firmando=true; var p=getPos(e); _firmaCtx.beginPath(); _firmaCtx.moveTo(p.x,p.y); ocultarHint(); }, {passive:false});
+  _firmaCanvas.addEventListener('touchmove',  function(e){ e.preventDefault(); if(!_firmando) return; var p=getPos(e); _firmaCtx.lineTo(p.x,p.y); _firmaCtx.stroke(); }, {passive:false});
+  _firmaCanvas.addEventListener('touchend',   function(){ _firmando=false; });
+}
+
+function ocultarHint(){
+  var h = document.getElementById('firma-hint');
+  if(h) h.style.display='none';
+}
+
+function limpiarFirma(){
+  if(_firmaCtx) _firmaCtx.clearRect(0,0,_firmaCanvas.width,_firmaCanvas.height);
+  var h = document.getElementById('firma-hint');
+  if(h) h.style.display='block';
+  _firmaDataUrl = null;
+}
+
+function confirmarFirma(){
+  if(!_firmaCanvas) return;
+  // Verificar que se dibujó algo
+  var pix = _firmaCtx.getImageData(0,0,_firmaCanvas.width,_firmaCanvas.height).data;
+  var tiene = false;
+  for(var i=3; i<pix.length; i+=4){ if(pix[i]>10){ tiene=true; break; } }
+  if(!tiene){ alert('Por favor dibuja tu firma primero'); return; }
+  _firmaDataUrl = _firmaCanvas.toDataURL('image/png');
+  // Mostrar mini en el doc preview
+  var prev = document.getElementById('dp-firma-preview');
+  if(prev){ var img=document.createElement('img'); img.src=_firmaDataUrl; img.style='max-width:120px;height:28px;object-fit:contain;'; prev.innerHTML=''; prev.appendChild(img); }
+  // Mostrar mini en post-firma
+  var mini = document.getElementById('firma-preview-mini');
+  if(mini){
+    var mCtx = mini.getContext('2d');
+    var img2 = new Image();
+    img2.onload = function(){ mCtx.clearRect(0,0,mini.width,mini.height); mCtx.drawImage(img2,0,0,mini.width,mini.height); };
+    img2.src = _firmaDataUrl;
+  }
+  // Guardar lead provisional en Sheets
+  guardarLeadFirma();
+  jwTrack('documento_firmado', {});
+  goToStepNombre('sp-post-firma');
+}
+
+function guardarLeadFirma(){
+  // Guardar el lead en Google Sheets para que aparezca en el admin
+  try {
+    var payload = {
+      _accion:   'guardar_lead',
+      nombres:   _nombreConsultante,
+      whatsapp:  _waConsultante,
+      correo:    _correoConsultante,
+      tipo:      _tipoConsultado,
+      valor:     _valorConsultado,
+      plan:      'pendiente_pago',
+      monto:     '',
+      ciudad:    _ciudadConsultante || '',
+      direccion: _direccionConsultante || '',
+      notas:     'Documento firmado digitalmente — pendiente de pago para activar datos'
+    };
+    var fd = new FormData();
+    Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
+    fetch(GOOGLE_SHEET_URL, { method:'POST', body:fd }).catch(function(){});
+  } catch(e){}
+}
+
+function seleccionarPlanFinal(plan){
+  _planFinal = plan;
+  var esUna = plan==='una';
+  document.getElementById('pf-plan-una').style.borderColor   = esUna ? '#2563eb' : '#e2e8f0';
+  document.getElementById('pf-plan-todas').style.borderColor = esUna ? '#e2e8f0' : '#f97316';
+}
+
+function irAPagoFinal(){
+  var esUna  = _planFinal==='una';
+  document.getElementById('pr-monto').textContent    = esUna ? '$49.000' : '$79.000';
+  document.getElementById('pr-plan-desc').textContent = esUna ? 'Activación + radicación de una multa' : 'Activación + radicación de TODAS las multas que apliquen';
+  goToStepNombre('sp-pago-radicar');
+}
+
+function copiarLlave(btn){
+  navigator.clipboard.writeText('@OTO262').then(function(){
+    btn.textContent='✅ Copiado';
+    setTimeout(function(){ btn.textContent='Copiar'; }, 2000);
+  }).catch(function(){});
+}
+
+function yaHiceElPago(){
+  var esUna   = _planFinal==='una';
+  var monto   = esUna ? '$49.000' : '$79.000';
+  var planLbl = esUna ? 'una multa' : 'TODAS las multas';
+  var msg = '*¡Hice el pago! ✅*\n\n'+
+    '👤 Nombre: '+ _nombreConsultante +'\n'+
+    '🪪 '+(_tipoConsultado==='cedula'?'Cédula':'Placa')+': '+ _valorConsultado +'\n'+
+    '📱 WhatsApp: '+ _waConsultante +'\n'+
+    '📧 Correo: '+ _correoConsultante +'\n'+
+    '💳 Plan: '+ monto +' — '+ planLbl +'\n\n'+
+    'Adjunto el comprobante de pago. Quedo esperando que activen el documento y lo radiquen. ✅\n\n'+
+    '_JurídicosWeb — Trámite firmado y listo_';
+  jwTrack('pago_comprobante_enviado', { plan: _planFinal });
+  window.open('https://wa.me/573174025077?text='+encodeURIComponent(msg), '_blank');
+}
+
+// Inicializar canvas cuando se active ese paso
+var _goToStepOriginal = goToStepNombre;
+goToStepNombre = function(id){
+  _goToStepOriginal(id);
+  if(id==='sp-firma-canvas'){
+    setTimeout(inicializarCanvas, 80);
+  }
+  if(id==='sp-post-firma'){
+    seleccionarPlanFinal('todas');
+  }
+};
+
 var _simTimer = null;
 var _simCountdown = null;
 function iniciarSimulacion(){
@@ -2130,7 +2524,8 @@ function goToStepNombre(id){
   _pasoActual = id;
   // Ocultar todos los steps del flujo nuevo + viejo
   ['sp1','sp2','sp3','sp4','sp5','sp6','sp7',
-   'sp-simulacion','sp-consulta','sp-analizando','sp-resultados'].forEach(function(sid){
+   'sp-simulacion','sp-datos-doc','sp-doc-preview','sp-firma-canvas','sp-post-firma','sp-pago-radicar',
+   'sp-consulta','sp-analizando','sp-resultados'].forEach(function(sid){
     var el=document.getElementById(sid);
     if(el) el.classList.remove('active');
   });
@@ -2139,6 +2534,11 @@ function goToStepNombre(id){
   var titles={
     'sp1':'🔍 Consulta tu estado en SIMIT',
     'sp-simulacion':'🔎 Verificando tu caso...',
+    'sp-datos-doc':'📄 Generar tu documento',
+    'sp-doc-preview':'📄 Tu Derecho de Petición',
+    'sp-firma-canvas':'✍️ Firma tu documento',
+    'sp-post-firma':'✅ Documento firmado',
+    'sp-pago-radicar':'💳 Activar y radicar',
     'sp-consulta':'⚖️ Elige tu plan — Todo incluido',
     'sp-analizando':'🔄 Consultando el SIMIT oficial...',
     'sp-resultados':'📊 Tu análisis completo'
