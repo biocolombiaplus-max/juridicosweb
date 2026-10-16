@@ -339,6 +339,12 @@ tr:hover td{background:#f8faff;cursor:pointer}
     </div>
   </div>
   <div class="nav-section">
+    <div class="nav-section-title">Contenido Web</div>
+    <div class="nav-item" data-sec="contenido-web" onclick="showSection('contenido-web')">
+      <span class="icon">🖼️</span> Asesores & Casos
+    </div>
+  </div>
+  <div class="nav-section">
     <div class="nav-section-title">Acciones</div>
     <div class="nav-item" onclick="openNuevoCaso()">
       <span class="icon">➕</span> Nuevo Caso Manual
@@ -594,6 +600,45 @@ tr:hover td{background:#f8faff;cursor:pointer}
         </div>
       </div>
     </div>
+
+    <!-- ===== CONTENIDO WEB: ASESORES & CASOS ===== -->
+    <div class="section" id="section-contenido-web">
+      <div class="table-wrap" style="margin-bottom:20px;background:#fffbeb;border:1px solid rgba(201,162,39,0.3);">
+        <div style="padding:14px 20px;font-size:13px;color:#92400e;">
+          🖼️ Gestiona aquí los asesores y casos de éxito que se muestran en la landing <strong>juridicosweb.com</strong>. Los cambios se publican automáticamente.
+        </div>
+      </div>
+
+      <!-- ASESORES -->
+      <div class="table-wrap" style="margin-bottom:20px;">
+        <div class="table-header"><h3>👔 Asesores del Bufete</h3><span class="table-count" id="asesores-admin-count">—</span></div>
+        <div style="padding:18px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Nombre completo</label><input id="asesor-nombre" type="text" placeholder="Dr. Carlos Moreno" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Especialidad</label><input id="asesor-especialidad" type="text" placeholder="Derecho de Tránsito" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Años de experiencia</label><input id="asesor-experiencia" type="text" placeholder="10 años de experiencia" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">URL foto (opcional)</label><input id="asesor-foto" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+          </div>
+          <button onclick="guardarAsesor()" style="background:linear-gradient(135deg,#0a1628,#112240);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Asesor</button>
+        </div>
+        <div id="asesores-admin-list" style="padding:0 18px 18px;"><div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">Cargando asesores...</div></div>
+      </div>
+
+      <!-- CASOS DE ÉXITO -->
+      <div class="table-wrap">
+        <div class="table-header"><h3>🏆 Casos de Éxito (Pantallazos WhatsApp)</h3><span class="table-count" id="casos-admin-count">—</span></div>
+        <div style="padding:18px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Nombre (solo primero)</label><input id="caso-nombre" type="text" placeholder="Juan C." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Ciudad</label><input id="caso-ciudad" type="text" placeholder="Bogotá" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Descripción del resultado</label><input id="caso-descripcion" type="text" placeholder="Fotomulta de $462.000 eliminada en 8 días hábiles." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">URL imagen / pantallazo WhatsApp (opcional)</label><input id="caso-imagen" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+          </div>
+          <button onclick="guardarCaso()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Caso de Éxito</button>
+        </div>
+        <div id="casos-admin-list" style="padding:0 18px 18px;"><div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">Cargando casos...</div></div>
+      </div>
+    </div><!-- /section-contenido-web -->
 
   </div><!-- /content -->
 </div><!-- /main -->
@@ -2758,6 +2803,112 @@ document.querySelectorAll('.modal-overlay').forEach(function(m){
 
 // Auto-refresh cada 2 minutos si hay sesión activa
 setInterval(function(){ if(currentUser) loadData(); }, 2*60*1000);
+
+/* ===== CONTENIDO WEB: ASESORES & CASOS ===== */
+function guardarAsesor(){
+  var nombre = document.getElementById('asesor-nombre').value.trim();
+  var especialidad = document.getElementById('asesor-especialidad').value.trim();
+  var experiencia = document.getElementById('asesor-experiencia').value.trim();
+  var foto = document.getElementById('asesor-foto').value.trim();
+  if(!nombre || !especialidad){ alert('Nombre y especialidad son requeridos.'); return; }
+  var fd = new FormData();
+  fd.append('_accion', 'guardar_asesor');
+  fd.append('nombre', nombre);
+  fd.append('especialidad', especialidad);
+  fd.append('experiencia', experiencia || '');
+  fd.append('foto', foto || '');
+  fetch(SCRIPT_URL, { method:'POST', body: fd })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      ['asesor-nombre','asesor-especialidad','asesor-experiencia','asesor-foto'].forEach(function(id){ document.getElementById(id).value=''; });
+      loadAsesoresAdmin();
+    })
+    .catch(function(e){ alert('Error al guardar: ' + e.message); });
+}
+
+function guardarCaso(){
+  var nombre = document.getElementById('caso-nombre').value.trim();
+  var ciudad = document.getElementById('caso-ciudad').value.trim();
+  var descripcion = document.getElementById('caso-descripcion').value.trim();
+  var imagen = document.getElementById('caso-imagen').value.trim();
+  if(!nombre || !descripcion){ alert('Nombre y descripción son requeridos.'); return; }
+  var fd = new FormData();
+  fd.append('_accion', 'guardar_caso');
+  fd.append('nombre', nombre);
+  fd.append('ciudad', ciudad || '');
+  fd.append('descripcion', descripcion);
+  fd.append('imagen', imagen || '');
+  fetch(SCRIPT_URL, { method:'POST', body: fd })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      ['caso-nombre','caso-ciudad','caso-descripcion','caso-imagen'].forEach(function(id){ document.getElementById(id).value=''; });
+      loadCasosAdmin();
+    })
+    .catch(function(e){ alert('Error al guardar: ' + e.message); });
+}
+
+function eliminarAsesor(id){
+  if(!confirm('¿Eliminar este asesor?')) return;
+  var fd = new FormData();
+  fd.append('_accion', 'eliminar_asesor');
+  fd.append('id', id);
+  fetch(SCRIPT_URL, { method:'POST', body: fd }).then(function(){ loadAsesoresAdmin(); }).catch(function(){});
+}
+
+function eliminarCaso(id){
+  if(!confirm('¿Eliminar este caso?')) return;
+  var fd = new FormData();
+  fd.append('_accion', 'eliminar_caso');
+  fd.append('id', id);
+  fetch(SCRIPT_URL, { method:'POST', body: fd }).then(function(){ loadCasosAdmin(); }).catch(function(){});
+}
+
+function loadAsesoresAdmin(){
+  var list = document.getElementById('asesores-admin-list');
+  var count = document.getElementById('asesores-admin-count');
+  if(!list) return;
+  fetch(SCRIPT_URL + '?_accion=listar_asesores')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var items = (data && data.asesores) ? data.asesores : [];
+      if(count) count.textContent = items.length + ' asesor(es)';
+      if(!items.length){ list.innerHTML = '<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">No hay asesores aún. Agrega el primero arriba.</div>'; return; }
+      list.innerHTML = items.map(function(a){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #e0ddd5;border-radius:8px;margin-bottom:8px;background:#fafaf8;">' +
+          (a.foto ? '<img src="'+a.foto+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:40px;height:40px;border-radius:50%;background:#0a1628;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#c9a227;font-size:1.2rem;">👤</span></div>') +
+          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+a.nombre+'</strong><br><span style="font-size:12px;color:#6b7280;">'+a.especialidad+'</span></div>' +
+          '<button onclick="eliminarAsesor(\''+a.id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">✕ Eliminar</button>' +
+          '</div>';
+      }).join('');
+    }).catch(function(){ list.innerHTML = '<div style="color:#dc2626;font-size:13px;text-align:center;padding:12px;">Error al cargar. Verifica el Apps Script.</div>'; });
+}
+
+function loadCasosAdmin(){
+  var list = document.getElementById('casos-admin-list');
+  var count = document.getElementById('casos-admin-count');
+  if(!list) return;
+  fetch(SCRIPT_URL + '?_accion=listar_casos')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var items = (data && data.casos) ? data.casos : [];
+      if(count) count.textContent = items.length + ' caso(s)';
+      if(!items.length){ list.innerHTML = '<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">No hay casos aún. Agrega el primero arriba.</div>'; return; }
+      list.innerHTML = items.map(function(c){
+        return '<div style="display:flex;align-items:flex-start;gap:12px;padding:10px;border:1px solid #e0ddd5;border-radius:8px;margin-bottom:8px;background:#fafaf8;">' +
+          (c.imagen ? '<img src="'+c.imagen+'" style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:56px;height:56px;border-radius:8px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem;">💬</div>') +
+          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+c.nombre+' · '+c.ciudad+'</strong><br><span style="font-size:12px;color:#6b7280;">'+c.descripcion+'</span></div>' +
+          '<button onclick="eliminarCaso(\''+c.id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>' +
+          '</div>';
+      }).join('');
+    }).catch(function(){ list.innerHTML = '<div style="color:#dc2626;font-size:13px;text-align:center;padding:12px;">Error al cargar. Verifica el Apps Script.</div>'; });
+}
+
+// Load contenido web data when section is shown
+var _origShowSection = showSection;
+showSection = function(sec){
+  _origShowSection(sec);
+  if(sec === 'contenido-web'){ loadAsesoresAdmin(); loadCasosAdmin(); }
+};
 </script>
 </body>
 </html>

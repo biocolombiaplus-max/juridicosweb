@@ -12,7 +12,7 @@
 <meta name="description" content="5.8 millones de fotomultas serán anuladas en Colombia. Derecho de petición desde $25.000 — documento en tu WhatsApp al instante, radicado el mismo día.">
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#2e1065">
+<meta name="theme-color" content="#0a1628">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -80,53 +80,56 @@ src="https://www.facebook.com/tr?id=1756287258733232&ev=PageView&noscript=1"
 /* ===== VARIABLES ===== */
 :root{
   color-scheme: light only;
-  --navy:#2e1065;
-  --navy2:#4c1d95;
-  --gold:#2dd4bf;
-  --gold2:#5eead4;
-  --gold3:#99f6e4;
+  --navy:#0a1628;
+  --navy2:#112240;
+  --navy-light:#1e3a5f;
+  --gold:#c9a227;
+  --gold2:#e8bc3a;
+  --gold3:#f5d06a;
+  --cream:#f8f6f1;
+  --cream-dark:#ede8df;
   --red:#e63946;
-  --green:#2ec76d;
+  --green:#059669;
   --white:#ffffff;
-  --light:#f5f2fc;
-  --gray:#64748b;
-  --border:#e2e8f0;
+  --light:#f5f4ef;
+  --gray:#6b7280;
+  --border:#e0ddd5;
   --card:#fff;
   --radius:14px;
-  --shadow:0 4px 24px rgba(46,16,101,0.10);
-  --glow-gold:0 0 30px rgba(45,212,191,0.35);
-  --glow-green:0 0 30px rgba(46,199,109,0.3);
+  --shadow:0 4px 24px rgba(10,22,40,0.12);
+  --glow-gold:0 0 30px rgba(201,162,39,0.40);
+  --glow-green:0 0 30px rgba(5,150,105,0.3);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a2e;overflow-x:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:#1a1a2e;overflow-x:hidden;}
 
 /* ===== GLOBAL BUTTONS ===== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;border-radius:12px;transition:all .25s cubic-bezier(.34,1.56,.64,1);text-decoration:none;position:relative;overflow:hidden;}
 .btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:.25s;}
 .btn:hover::after{background:rgba(255,255,255,0.08);}
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);padding:16px 28px;font-size:1rem;box-shadow:var(--glow-gold);}
-.btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 45px rgba(45,212,191,0.55);}
+.btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 45px rgba(201,162,39,0.55);}
 .btn-gold:active{transform:scale(0.97);}
 .btn-navy{background:var(--navy);color:#fff;padding:15px 26px;font-size:0.95rem;}
 .btn-navy:hover{transform:translateY(-2px);background:var(--navy2);}
 .btn-outline{background:transparent;color:#fff;padding:14px 24px;font-size:0.9rem;border:2px solid rgba(255,255,255,0.4);}
 .btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.06);}
 .btn-wa{background:linear-gradient(135deg,#25d366,#1db954);color:#fff;padding:15px 24px;font-size:0.95rem;box-shadow:var(--glow-green);}
-.btn-wa:hover{transform:translateY(-3px);box-shadow:0 0 45px rgba(46,199,109,0.55);}
+.btn-wa:hover{transform:translateY(-3px);box-shadow:0 0 45px rgba(5,150,105,0.55);}
 .btn-red{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;padding:16px 28px;font-size:1rem;box-shadow:0 0 30px rgba(230,57,70,0.3);}
 .btn-red:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 0 45px rgba(230,57,70,0.5);}
 .btn-full{width:100%;}
 .btn-xl{padding:18px 36px;font-size:1.1rem;border-radius:14px;}
 .btn-sm{padding:9px 18px;font-size:0.82rem;border-radius:9px;}
-@keyframes glow-pulse{0%,100%{box-shadow:var(--glow-gold);}50%{box-shadow:0 0 55px rgba(45,212,191,0.7);}}
+@keyframes glow-pulse{0%,100%{box-shadow:var(--glow-gold);}50%{box-shadow:0 0 55px rgba(201,162,39,0.7);}}
 .btn-pulse{animation:glow-pulse 2.2s ease-in-out infinite;}
 @keyframes shimmer{0%{background-position:-200% center;}100%{background-position:200% center;}}
 .btn-shimmer{background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 30%,var(--gold3) 50%,var(--gold2) 70%,var(--gold) 100%);background-size:200% auto;animation:shimmer 2.5s linear infinite;color:var(--navy);}
 
 /* ===== NAV ===== */
 nav{position:fixed;top:0;width:100%;z-index:990;transition:.3s;}
-nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,0.3);}
+nav.scrolled{background:rgba(10,22,40,0.97);backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,0.3);}
 .nav-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:9px;display:flex;align-items:center;justify-content:center;}
@@ -137,16 +140,16 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 @media(max-width:600px){.nav-cta-text{display:none;}}
 
 /* ===== ALERT BAR ===== */
-.alert-bar{background:linear-gradient(90deg,var(--navy),var(--navy2));padding:0;margin-top:68px;border-bottom:1px solid rgba(45,212,191,0.25);overflow:hidden;cursor:pointer;}
+.alert-bar{background:linear-gradient(90deg,var(--navy),var(--navy2));padding:0;margin-top:68px;border-bottom:1px solid rgba(201,162,39,0.25);overflow:hidden;cursor:pointer;}
 .alert-bar-inner{display:flex;align-items:stretch;min-height:46px;}
-.alert-bar-badge{background:rgba(45,212,191,0.14);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;border-right:1px solid rgba(45,212,191,0.2);}
+.alert-bar-badge{background:rgba(201,162,39,0.14);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;border-right:1px solid rgba(201,162,39,0.2);}
 .alert-bar-badge span{color:var(--gold3);font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap;}
 .alert-bar-badge i{color:var(--gold);font-size:0.7rem;animation:ping 1.6s ease-in-out infinite;}
 .alert-bar-scroll{flex:1;overflow:hidden;display:flex;align-items:center;padding:0 16px;}
 .alert-bar-scroll p{color:#fff;font-size:0.78rem;font-weight:500;line-height:1.5;white-space:nowrap;}
 .alert-bar-scroll strong{color:var(--gold3);font-weight:800;}
-.alert-bar-cta{background:rgba(45,212,191,0.16);display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-left:1px solid rgba(45,212,191,0.2);cursor:pointer;transition:.2s;}
-.alert-bar-cta:hover{background:rgba(45,212,191,0.28);}
+.alert-bar-cta{background:rgba(201,162,39,0.16);display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-left:1px solid rgba(201,162,39,0.2);cursor:pointer;transition:.2s;}
+.alert-bar-cta:hover{background:rgba(201,162,39,0.28);}
 .alert-bar-cta span{color:var(--gold3);font-size:0.72rem;font-weight:800;white-space:nowrap;}
 @media(max-width:600px){
   .logo-name small{display:none;}
@@ -160,12 +163,12 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 }
 
 /* ===== HERO ===== */
-.hero{min-height:100vh;background:linear-gradient(160deg,#0f0524 0%,#2e1065 40%,#3b0f6b 70%,#170a30 100%);display:flex;align-items:center;padding:60px 5% 80px;position:relative;overflow:hidden;}
+.hero{min-height:100vh;background:linear-gradient(160deg,#020a14 0%,#0a1628 40%,#112240 70%,#05101e 100%);display:flex;align-items:center;padding:60px 5% 80px;position:relative;overflow:hidden;}
 .hero-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=70') center/cover no-repeat;opacity:0.12;}
-.hero-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(45,212,191,0.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
-.hero-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,199,109,0.07) 0%,transparent 70%);bottom:-50px;left:-50px;pointer-events:none;}
+.hero-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,0.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
+.hero-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(5,150,105,0.07) 0%,transparent 70%);bottom:-50px;left:-50px;pointer-events:none;}
 .hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;position:relative;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.12);border:1px solid rgba(45,212,191,0.4);color:var(--gold);padding:7px 16px;border-radius:30px;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.4);color:var(--gold);padding:7px 16px;border-radius:30px;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
 .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:ping 1.5s ease-in-out infinite;}
 @keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.6;}}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -176,23 +179,23 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .hero h1 .hl{color:var(--gold);position:relative;}
 .hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
 .hero-price-anchor{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;color:rgba(226,248,245,0.8);font-size:0.8rem;font-weight:600;margin-bottom:10px;}
-.hero-price-anchor i{color:#2dd4bf;}
+.hero-price-anchor i{color:#c9a227;}
 .hero-price-anchor strong{color:var(--gold);font-size:0.86rem;}
 @keyframes hero-glow-pulse{0%,100%{opacity:0.5;transform:scale(0.96);}50%{opacity:1;transform:scale(1.04);}}
 /* Módulo de consulta rápida — la cédula se escribe directo en el hero, sin
    tocar ningún botón para siquiera verlo, así nadie se pierde antes de
    consultar. */
 .hero-consult-wrap{position:relative;margin-bottom:6px;}
-.hero-consult-glow{position:absolute;inset:-16px;background:radial-gradient(ellipse at center,rgba(45,212,191,0.5),transparent 72%);filter:blur(20px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.4s ease-in-out infinite;}
-.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);border:1.5px solid rgba(45,212,191,0.45);border-radius:18px;padding:20px 18px 16px;}
-.hero-consult-ribbon{position:absolute;top:-12px;right:14px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
+.hero-consult-glow{position:absolute;inset:-16px;background:radial-gradient(ellipse at center,rgba(201,162,39,0.5),transparent 72%);filter:blur(20px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.4s ease-in-out infinite;}
+.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);border:1.5px solid rgba(201,162,39,0.45);border-radius:18px;padding:20px 18px 16px;}
+.hero-consult-ribbon{position:absolute;top:-12px;right:14px;background:linear-gradient(135deg,#f5c518,#facc15);color:#0a1628;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
 .hero-consult-label{display:flex;align-items:center;gap:7px;color:#fff;font-size:0.88rem;font-weight:800;margin-bottom:11px;line-height:1.3;}
-.hero-consult-label i{color:#2dd4bf;}
+.hero-consult-label i{color:#c9a227;}
 .hero-consult-row{display:flex;gap:8px;}
 .hero-consult-input{flex:1;min-width:0;padding:15px 16px;border-radius:12px;border:2px solid transparent;font-size:1.05rem;font-weight:700;font-family:'Inter',sans-serif;background:#fff;color:var(--navy);letter-spacing:.5px;transition:border-color .2s;}
-.hero-consult-input:focus{outline:none;border-color:#2dd4bf;}
+.hero-consult-input:focus{outline:none;border-color:#c9a227;}
 .hero-consult-input::placeholder{color:#94a3b8;font-weight:500;letter-spacing:normal;}
-.hero-consult-btn{flex-shrink:0;width:58px;border:none;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#5eead4);color:#2e1065;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(45,212,191,0.5);animation:glow-pulse 2.2s ease-in-out infinite;}
+.hero-consult-btn{flex-shrink:0;width:58px;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(201,162,39,0.5);animation:glow-pulse 2.2s ease-in-out infinite;}
 .hero-consult-hint{color:rgba(255,255,255,0.6);font-size:0.72rem;text-align:center;margin-top:10px;}
 .hero-consult-alt{display:block;width:100%;text-align:center;color:rgba(255,255,255,0.55);font-size:0.75rem;margin-top:4px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:4px 0;}
 .hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
@@ -202,18 +205,18 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .hstat-n{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--gold);}
 .hstat-l{color:#64748b;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 /* Hero card */
-.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(45,212,191,0.2);border-radius:18px;backdrop-filter:blur(12px);overflow:hidden;}
-.hero-card-header{background:linear-gradient(135deg,rgba(45,212,191,0.15),rgba(45,212,191,0.05));padding:18px 22px;border-bottom:1px solid rgba(45,212,191,0.15);}
+.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(201,162,39,0.2);border-radius:18px;backdrop-filter:blur(12px);overflow:hidden;}
+.hero-card-header{background:linear-gradient(135deg,rgba(201,162,39,0.15),rgba(201,162,39,0.05));padding:18px 22px;border-bottom:1px solid rgba(201,162,39,0.15);}
 .hero-card-header h3{color:#fff;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
 .hero-card-body{padding:18px 22px;}
 .alert-line{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
 .alert-line:last-child{border:none;padding-bottom:0;}
-.al-icon{width:28px;height:28px;border-radius:7px;background:rgba(45,212,191,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.al-icon{width:28px;height:28px;border-radius:7px;background:rgba(201,162,39,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
 .al-icon i{color:var(--gold);font-size:12px;}
 .al-text{color:#94a3b8;font-size:0.82rem;line-height:1.5;}
 .al-text strong{color:#e2e8f0;}
 /* Counter bar */
-.live-bar{background:rgba(46,199,109,0.08);border:1px solid rgba(46,199,109,0.2);border-radius:10px;padding:12px 16px;margin-top:14px;display:flex;align-items:center;gap:10px;}
+.live-bar{background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:10px;padding:12px 16px;margin-top:14px;display:flex;align-items:center;gap:10px;}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:ping 1.5s infinite;}
 .live-bar p{color:#94a3b8;font-size:0.8rem;}<br>.live-bar strong{color:var(--green);}
 
@@ -222,17 +225,17 @@ nav.scrolled{background:rgba(46,16,101,0.97);backdrop-filter:blur(16px);box-shad
 .section-inner{max-width:1100px;margin:0 auto;}
 .section-center{text-align:center;max-width:660px;margin:0 auto 48px;}
 .tag{display:inline-block;padding:5px 16px;border-radius:30px;font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
-.tag-gold{background:rgba(45,212,191,0.1);color:var(--gold);}
+.tag-gold{background:rgba(201,162,39,0.1);color:var(--gold);}
 .tag-red{background:rgba(230,57,70,0.1);color:var(--red);}
-.tag-green{background:rgba(46,199,109,0.1);color:var(--green);}
+.tag-green{background:rgba(5,150,105,0.1);color:var(--green);}
 h2.title{font-family:'Playfair Display',serif;font-size:2.3rem;color:var(--navy);line-height:1.2;}
 h2.title span{color:var(--gold);}
 .subtitle{color:var(--gray);font-size:0.97rem;line-height:1.75;margin-top:12px;}
 
 /* ===== URGENCY STRIP ===== */
-.urgency-strip{background:linear-gradient(135deg,#2e1065,#4c1d95);padding:44px 5%;border-top:1px solid rgba(45,212,191,0.15);border-bottom:1px solid rgba(45,212,191,0.15);}
+.urgency-strip{background:linear-gradient(135deg,#0a1628,#112240);padding:44px 5%;border-top:1px solid rgba(201,162,39,0.15);border-bottom:1px solid rgba(201,162,39,0.15);}
 .urgency-centered{max-width:640px;margin:0 auto;text-align:center;}
-.urgency-kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.14);border:1px solid rgba(45,212,191,0.35);color:var(--gold3);padding:6px 16px;border-radius:20px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
+.urgency-kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(201,162,39,0.14);border:1px solid rgba(201,162,39,0.35);color:var(--gold3);padding:6px 16px;border-radius:20px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
 .urgency-headline{color:#fff;font-size:1.25rem;line-height:1.5;margin-bottom:26px;}
 .urgency-headline strong{color:var(--gold3);}
 @media(max-width:600px){
@@ -242,7 +245,7 @@ h2.title span{color:var(--gold);}
 .urgency-timer{display:flex;align-items:center;gap:14px;}
 .urgency-timer span{color:var(--gold);font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;}
 .timer-boxes{display:flex;gap:6px;}
-.t-box{background:linear-gradient(135deg,rgba(45,212,191,0.12),rgba(45,212,191,0.06));border:1px solid rgba(45,212,191,0.35);border-radius:10px;padding:9px 13px;text-align:center;min-width:52px;box-shadow:0 2px 8px rgba(45,212,191,0.1);}
+.t-box{background:linear-gradient(135deg,rgba(201,162,39,0.12),rgba(201,162,39,0.06));border:1px solid rgba(201,162,39,0.35);border-radius:10px;padding:9px 13px;text-align:center;min-width:52px;box-shadow:0 2px 8px rgba(201,162,39,0.1);}
 .t-box .t-num{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);font-weight:700;display:block;line-height:1;}
 .t-box .t-lbl{font-size:0.58rem;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;margin-top:2px;display:block;}
 .urgency-right{flex:1;}
@@ -254,20 +257,20 @@ h2.title span{color:var(--gold);}
 }
 
 /* ===== IMAGE TRUST SECTION ===== */
-.trust-images{padding:60px 5%;background:linear-gradient(180deg,#2e1065 0%,#4c1d95 20%,var(--light) 58%,var(--light) 100%);position:relative;overflow:hidden;}
-.trust-images::before{content:'';position:absolute;top:15%;right:-10%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(45,212,191,0.16) 0%,transparent 70%);pointer-events:none;}
-.trust-images::after{content:'';position:absolute;bottom:5%;left:-10%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(76,29,149,0.1) 0%,transparent 70%);pointer-events:none;}
+.trust-images{padding:60px 5%;background:linear-gradient(180deg,#0a1628 0%,#112240 20%,var(--light) 58%,var(--light) 100%);position:relative;overflow:hidden;}
+.trust-images::before{content:'';position:absolute;top:15%;right:-10%;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,0.16) 0%,transparent 70%);pointer-events:none;}
+.trust-images::after{content:'';position:absolute;bottom:5%;left:-10%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(17,34,64,0.1) 0%,transparent 70%);pointer-events:none;}
 .trust-images-inner{position:relative;z-index:1;}
 .trust-images-inner{max-width:1100px;margin:0 auto;}
 .img-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:30px;}
-.img-card{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/3;cursor:pointer;box-shadow:0 10px 28px rgba(46,16,101,0.14);transition:.3s;}
-.img-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(46,16,101,0.2);}
+.img-card{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/3;cursor:pointer;box-shadow:0 10px 28px rgba(10,22,40,0.14);transition:.3s;}
+.img-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(10,22,40,0.2);}
 .img-card img{width:100%;height:100%;object-fit:cover;transition:.4s;}
 .img-card:hover img{transform:scale(1.05);}
 .icon-card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:.4s;}
 .icon-card-bg i{font-size:3.4rem;color:rgba(255,255,255,0.35);transition:.4s;}
 .img-card:hover .icon-card-bg i{transform:scale(1.12);color:rgba(255,255,255,0.5);}
-.img-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(46,16,101,0.85) 100%);display:flex;align-items:flex-end;padding:20px;}
+.img-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,22,40,0.85) 100%);display:flex;align-items:flex-end;padding:20px;}
 .img-card-text h4{color:#fff;font-size:0.95rem;font-weight:700;}
 .img-card-text p{color:rgba(255,255,255,0.7);font-size:0.78rem;margin-top:4px;}
 .social-proof-bar{display:flex;justify-content:center;align-items:center;gap:30px;margin-top:30px;flex-wrap:wrap;}
@@ -281,12 +284,12 @@ h2.title span{color:var(--gold);}
 .norma-section .title{color:#fff;}
 .norma-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;}
 .norma-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:24px;transition:.3s;}
-.norma-card:hover{border-color:rgba(45,212,191,0.4);transform:translateY(-4px);}
+.norma-card:hover{border-color:rgba(201,162,39,0.4);transform:translateY(-4px);}
 .nc-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
 .nc-icon i{color:var(--navy);font-size:20px;}
 .norma-card h3{color:#fff;font-size:0.95rem;font-weight:700;margin-bottom:8px;}
 .norma-card p{color:#64748b;font-size:0.83rem;line-height:1.6;}
-.norma-banner{max-width:1100px;margin:24px auto 0;background:linear-gradient(135deg,rgba(45,212,191,0.12),rgba(45,212,191,0.04));border:1px solid rgba(45,212,191,0.25);border-radius:14px;padding:24px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.norma-banner{max-width:1100px;margin:24px auto 0;background:linear-gradient(135deg,rgba(201,162,39,0.12),rgba(201,162,39,0.04));border:1px solid rgba(201,162,39,0.25);border-radius:14px;padding:24px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 .norma-banner i{font-size:2.5rem;color:var(--gold);flex-shrink:0;}
 .norma-banner p{color:#94a3b8;font-size:0.9rem;line-height:1.6;}
 .norma-banner strong{color:#fff;}
@@ -294,7 +297,7 @@ h2.title span{color:var(--gold);}
 /* ===== DOCUMENT PREVIEW ===== */
 .docprev-section{padding:80px 5%;background:#fff;}
 .docprev-wrap{display:grid;grid-template-columns:1.1fr 0.9fr;gap:50px;align-items:center;max-width:1100px;margin:0 auto;}
-.doc-mock{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(46,16,101,0.18);padding:36px 32px;position:relative;overflow:hidden;border:1px solid var(--border);transform:rotate(-1deg);}
+.doc-mock{background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(10,22,40,0.18);padding:36px 32px;position:relative;overflow:hidden;border:1px solid var(--border);transform:rotate(-1deg);}
 .doc-mock-head{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:2px solid var(--navy);margin-bottom:20px;}
 .doc-mock-logo{font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:1rem;display:flex;align-items:center;gap:8px;}
 .doc-mock-logo i{color:var(--gold);}
@@ -305,11 +308,11 @@ h2.title span{color:var(--gold);}
 .doc-mock-body{position:relative;max-height:190px;overflow:hidden;margin-bottom:14px;}
 .doc-mock-body p{font-size:0.72rem;color:#334155;line-height:1.7;text-align:justify;margin-bottom:10px;}
 .doc-mock-body strong{color:var(--navy);}
-.doc-mock-body .hl{background:rgba(45,212,191,0.3);padding:0 2px;border-radius:2px;}
+.doc-mock-body .hl{background:rgba(201,162,39,0.3);padding:0 2px;border-radius:2px;}
 .doc-mock-fade{margin-top:-46px;height:46px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff);position:relative;z-index:1;}
 .doc-mock-foot{font-size:0.68rem;color:var(--gray);border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;gap:6px;}
 .doc-mock-foot i{color:var(--gold);}
-.doc-mock-watermark{position:absolute;top:18px;right:-38px;transform:rotate(35deg);background:rgba(45,212,191,0.9);color:#fff;font-size:0.62rem;font-weight:800;letter-spacing:1px;padding:4px 42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+.doc-mock-watermark{position:absolute;top:18px;right:-38px;transform:rotate(35deg);background:rgba(201,162,39,0.9);color:#fff;font-size:0.62rem;font-weight:800;letter-spacing:1px;padding:4px 42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
 .docprev-points{display:flex;flex-direction:column;gap:22px;}
 .docprev-point{display:flex;gap:14px;align-items:flex-start;}
 .docprev-point i{color:var(--gold);font-size:1.2rem;margin-top:3px;flex-shrink:0;}
@@ -336,11 +339,11 @@ h2.title span{color:var(--gold);}
 @media(max-width:900px){.pricing-grid-3{grid-template-columns:1fr;max-width:520px;}}
 .price-card{border-radius:18px;padding:34px;position:relative;transition:.3s;}
 .price-card:hover{transform:translateY(-4px);}
-.pc-hot{background:linear-gradient(155deg,#2e1065,#0f2040);border:2px solid var(--gold);box-shadow:0 16px 40px rgba(45,212,191,0.18);}
-.pc-cool{background:#fff;border:2px solid var(--border);box-shadow:0 10px 28px rgba(46,16,101,0.08);}
+.pc-hot{background:linear-gradient(155deg,#0a1628,#0f2040);border:2px solid var(--gold);box-shadow:0 16px 40px rgba(201,162,39,0.18);}
+.pc-cool{background:#fff;border:2px solid var(--border);box-shadow:0 10px 28px rgba(10,22,40,0.08);}
 .pc-ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--gold),var(--gold2));color:var(--navy);padding:5px 22px;border-radius:20px;font-size:0.75rem;font-weight:800;white-space:nowrap;}
 .pc-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
-.pc-hot .pc-icon{background:rgba(45,212,191,0.15);}
+.pc-hot .pc-icon{background:rgba(201,162,39,0.15);}
 .pc-hot .pc-icon i{color:var(--gold);font-size:22px;}
 .pc-cool .pc-icon{background:var(--light);}
 .pc-cool .pc-icon i{color:var(--navy);font-size:22px;}
@@ -361,19 +364,19 @@ h2.title span{color:var(--gold);}
 .pc-features li:last-child{border:none;}
 .pc-features li i{color:var(--green);font-size:0.85rem;flex-shrink:0;}
 .pc-note{font-size:0.79rem;padding:10px 14px;border-radius:8px;margin-bottom:18px;line-height:1.5;}
-.pc-hot .pc-note{background:rgba(45,212,191,0.08);color:#94a3b8;border:1px solid rgba(45,212,191,0.15);}
+.pc-hot .pc-note{background:rgba(201,162,39,0.08);color:#94a3b8;border:1px solid rgba(201,162,39,0.15);}
 .pc-cool .pc-note{background:rgba(230,57,70,0.04);color:var(--gray);border:1px solid rgba(230,57,70,0.12);}
 @keyframes shimmer-nequi{0%{background-position:-200% center;}100%{background-position:200% center;}}
 @keyframes glow-pulse-nequi{0%,100%{box-shadow:0 4px 16px rgba(219,39,119,0.45);}50%{box-shadow:0 6px 34px rgba(219,39,119,0.8);}}
 .btn-nequi-pro{background:linear-gradient(90deg,#ff2d78 0%,#c026d3 30%,#7c1fa0 50%,#c026d3 70%,#ff2d78 100%);background-size:200% auto;animation:shimmer-nequi 2.5s linear infinite,glow-pulse-nequi 2.2s ease-in-out infinite;color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;position:relative;overflow:visible;transition:transform .2s;}
 .btn-nequi-pro:hover{transform:translateY(-2px);}
-.btn-nequi-ribbon{position:absolute;top:-11px;right:12px;background:linear-gradient(135deg,#f5c518,#facc15);color:#2e1065;font-size:0.62rem;font-weight:900;padding:4px 11px;border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,0.35);letter-spacing:.2px;z-index:2;}
+.btn-nequi-ribbon{position:absolute;top:-11px;right:12px;background:linear-gradient(135deg,#f5c518,#facc15);color:#0a1628;font-size:0.62rem;font-weight:900;padding:4px 11px;border-radius:20px;box-shadow:0 3px 10px rgba(0,0,0,0.35);letter-spacing:.2px;z-index:2;}
 .nequi-card{background:linear-gradient(135deg,#5a1249,#8e1b6b);border-radius:16px;padding:20px;margin:12px 0 16px;text-align:center;box-shadow:0 8px 24px rgba(142,27,107,0.32);}
 .nequi-card-label{color:rgba(255,255,255,0.8);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .nequi-card-number{color:#fff;font-family:'Inter',sans-serif;font-weight:800;font-size:2.15rem;letter-spacing:2px;font-variant-numeric:tabular-nums;line-height:1.2;margin-bottom:12px;}
 .nequi-card-copy{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.16);border:1.5px solid rgba(255,255,255,0.35);color:#fff;font-size:0.8rem;font-weight:700;padding:9px 18px;border-radius:22px;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;}
 .nequi-card-copy:hover{background:rgba(255,255,255,0.26);}
-.nequi-card-copy.copied{background:rgba(46,199,109,0.35);border-color:rgba(46,199,109,0.6);}
+.nequi-card-copy.copied{background:rgba(5,150,105,0.35);border-color:rgba(5,150,105,0.6);}
 .tutela-box{max-width:860px;margin:20px auto 0;background:#fff;border:2px solid rgba(230,57,70,0.2);border-radius:14px;padding:22px 26px;}
 .tutela-box h4{color:var(--red);font-size:0.95rem;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .tutela-box p{color:var(--gray);font-size:0.85rem;line-height:1.7;}
@@ -420,10 +423,59 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .footer-bottom{max-width:1100px;margin:36px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
 .footer-bottom p{color:#334155;font-size:0.78rem;}
 
+/* ===== CREDENTIALS BAR ===== */
+.cred-bar{background:var(--navy);border-top:1px solid rgba(201,162,39,0.15);border-bottom:1px solid rgba(201,162,39,0.15);padding:18px 5%;}
+.cred-bar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;}
+.cred-item{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,0.55);font-size:0.75rem;font-weight:600;letter-spacing:.5px;}
+.cred-item i{color:var(--gold);font-size:1.1rem;}
+.cred-divider{width:1px;height:24px;background:rgba(255,255,255,0.1);flex-shrink:0;}
+@media(max-width:600px){.cred-divider{display:none;}.cred-bar-inner{gap:14px;}}
+
+/* ===== ASESOR CARDS ===== */
+.asesor-card-ph{background:#fff;border:1px solid var(--border);border-radius:18px;padding:28px 20px;text-align:center;transition:.3s;box-shadow:0 2px 12px rgba(10,22,40,0.06);}
+.asesor-card-ph:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(10,22,40,0.12);border-color:var(--gold);}
+.asesor-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:3px solid var(--gold);}
+.asesor-avatar i{color:var(--gold);font-size:2rem;}
+.asesor-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.asesor-card-ph h3{color:var(--navy);font-size:1rem;font-weight:700;margin-bottom:4px;}
+.asesor-card-ph p{color:var(--gray);font-size:0.82rem;margin-bottom:6px;}
+.asesor-card-ph span{font-size:0.72rem;color:var(--gold);font-weight:700;background:rgba(201,162,39,0.1);padding:3px 10px;border-radius:20px;}
+
+/* ===== CASOS CARDS ===== */
+.caso-card-ph{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:.3s;box-shadow:0 2px 12px rgba(10,22,40,0.06);}
+.caso-card-ph:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(10,22,40,0.12);}
+.caso-img-wrap{height:160px;background:var(--cream-dark);overflow:hidden;}
+.caso-img-wrap img{width:100%;height:100%;object-fit:cover;}
+.caso-img-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#e8f5e9,#f1f8e9);}
+.caso-img-placeholder span{font-size:0.72rem;color:#4caf50;font-weight:700;}
+.caso-info{padding:16px;}
+.caso-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:800;margin-bottom:8px;}
+.caso-badge.aplica{background:#dcfce7;color:#15803d;}
+.caso-info strong{display:block;color:var(--navy);font-size:0.9rem;margin-bottom:4px;}
+.caso-info p{color:var(--gray);font-size:0.82rem;line-height:1.55;}
+
+/* ===== INLINE CTA ===== */
+.inline-cta-wrap{max-width:900px;margin:40px auto 0;}
+.inline-cta-card{background:var(--cream-dark);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;cursor:pointer;transition:.2s;}
+.inline-cta-card:hover{border-color:var(--gold);box-shadow:0 4px 20px rgba(201,162,39,0.15);}
+.inline-cta-icon{width:48px;height:48px;background:rgba(201,162,39,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.inline-cta-icon i{color:var(--gold);font-size:1.3rem;}
+.inline-cta-text{flex:1;min-width:200px;}
+.inline-cta-text strong{display:block;color:var(--navy);font-size:0.95rem;margin-bottom:3px;}
+.inline-cta-text span{color:var(--gray);font-size:0.82rem;}
+
+/* ===== STATS RESPONSIVE ===== */
+@media(max-width:700px){
+  .stats-grid-resp{grid-template-columns:1fr 1fr!important;}
+}
+@media(max-width:400px){
+  .stats-grid-resp{grid-template-columns:1fr!important;}
+}
+
 /* ===== FLOATING WA ===== */
 .wa-float{position:fixed;bottom:22px;right:22px;z-index:980;display:flex;align-items:center;gap:12px;transition:opacity .25s,transform .25s;}
 .wa-float-hidden{opacity:0;transform:translateY(12px) scale(0.9);pointer-events:none;}
-.wa-bubble{background:rgba(46,16,101,0.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:10px;font-size:0.8rem;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(10px);transition:.3s;}
+.wa-bubble{background:rgba(10,22,40,0.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 16px;border-radius:10px;font-size:0.8rem;font-weight:600;white-space:nowrap;pointer-events:none;opacity:0;transform:translateX(10px);transition:.3s;}
 .wa-float:hover .wa-bubble{opacity:1;transform:translateX(0);}
 .wa-btn{width:58px;height:58px;background:linear-gradient(135deg,#25d366,#128c7e);border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,0.4);animation:wa-pulse 2.5s ease-in-out infinite;flex-shrink:0;}
 @keyframes wa-pulse{0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.4),0 0 0 0 rgba(37,211,102,0.4);}50%{box-shadow:0 4px 30px rgba(37,211,102,0.6),0 0 0 12px rgba(37,211,102,0);}}
@@ -460,7 +512,7 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .res-badge.reciente{background:#fff7ed;color:#c2410c;}
 .res-badge.no-aplica{background:#f1f5f9;color:#64748b;}
 .btn-elim{width:100%;padding:12px;border:none;border-radius:10px;font-size:0.85rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;}
-.btn-elim-una{background:linear-gradient(135deg,#1e3a8a,#2e1065);color:#fff;}
+.btn-elim-una{background:linear-gradient(135deg,#1e3a8a,#0a1628);color:#fff;}
 .btn-elim-todas{background:linear-gradient(135deg,#15803d,#166534);color:#fff;}
 /* SIMIT lookup */
 .simit-tabs2{display:flex;background:var(--light);border-radius:10px;padding:4px;margin-bottom:18px;}
@@ -491,14 +543,14 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 @keyframes slideDownFade{from{opacity:1;transform:translateX(-50%) translateY(0);}to{opacity:0;transform:translateX(-50%) translateY(20px);}}
 .result-header{background:var(--navy);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 .result-header h4{font-size:0.95rem;}
-.r-count{background:rgba(45,212,191,0.15);color:var(--gold);border:1px solid rgba(45,212,191,0.3);border-radius:8px;padding:4px 12px;font-size:0.8rem;font-weight:700;}
+.r-count{background:rgba(201,162,39,0.15);color:var(--gold);border:1px solid rgba(201,162,39,0.3);border-radius:8px;padding:4px 12px;font-size:0.8rem;font-weight:700;}
 .multa-row-r{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;}
 .multa-row-r:last-child{border:none;}
 .mr-left strong{font-size:0.85rem;color:var(--navy);}
 .mr-left span{font-size:0.78rem;color:var(--gray);display:block;margin-top:2px;}
 .mr-right{text-align:right;flex-shrink:0;}
 .mr-right .valor{font-size:0.9rem;font-weight:700;color:var(--navy);}
-.badge-aplica{background:rgba(46,199,109,0.1);color:var(--green);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
+.badge-aplica{background:rgba(5,150,105,0.1);color:var(--green);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 .badge-no-aplica{background:rgba(100,116,139,0.1);color:var(--gray);border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 .badge-revisar{background:rgba(217,119,6,0.12);color:#b45309;border-radius:6px;padding:2px 9px;font-size:0.72rem;font-weight:700;display:inline-block;margin-top:3px;}
 
@@ -540,7 +592,7 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 .result-total-row{background:linear-gradient(135deg,var(--navy),#0f2040);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
 .result-total-row span{font-size:0.85rem;color:#94a3b8;}
 .result-total-row strong{font-size:1.4rem;color:var(--gold);font-family:'Playfair Display',serif;}
-.result-cta-box{background:linear-gradient(135deg,rgba(46,199,109,0.08),rgba(46,199,109,0.03));border:1px solid rgba(46,199,109,0.25);border-radius:12px;padding:16px;margin:14px 0;}
+.result-cta-box{background:linear-gradient(135deg,rgba(5,150,105,0.08),rgba(5,150,105,0.03));border:1px solid rgba(5,150,105,0.25);border-radius:12px;padding:16px;margin:14px 0;}
 .result-cta-box p{font-size:0.87rem;color:#1a5e35;line-height:1.6;}
 .result-cta-box strong{color:#0d3d20;}
 .simit-link{font-size:0.75rem;color:var(--gray);text-align:center;margin-top:10px;display:block;}
@@ -559,7 +611,7 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 /* Payment modal */
 .pay-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
 .pay-opt{border:2px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:.2s;text-align:center;}
-.pay-opt:hover,.pay-opt.sel{border-color:var(--gold);background:rgba(45,212,191,0.04);}
+.pay-opt:hover,.pay-opt.sel{border-color:var(--gold);background:rgba(201,162,39,0.04);}
 .pay-opt h4{font-size:0.88rem;color:var(--navy);font-weight:700;margin-bottom:4px;}
 .pay-opt .pa{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--gold);font-weight:700;}
 .pay-opt p{font-size:0.75rem;color:var(--gray);}
@@ -582,10 +634,10 @@ footer{background:#050e1e;padding:50px 5% 28px;}
    imposible no verlo como el siguiente paso, sólido verde apenas se firma. */
 #firma-panel{position:relative;animation:firma-pulse-sp5 2s ease-in-out infinite;}
 #firma-panel.tiene-firma{animation:none;border-color:#16a34a!important;background:linear-gradient(135deg,rgba(22,163,74,0.07),rgba(22,163,74,0.02))!important;box-shadow:0 0 0 4px rgba(22,163,74,.12)!important;}
-@keyframes firma-pulse-sp5{0%,100%{box-shadow:0 0 0 4px rgba(45,212,191,.16);}50%{box-shadow:0 0 0 10px rgba(45,212,191,.05);}}
+@keyframes firma-pulse-sp5{0%,100%{box-shadow:0 0 0 4px rgba(201,162,39,.16);}50%{box-shadow:0 0 0 10px rgba(201,162,39,.05);}}
 .firma-canvas-wrap{position:relative;}
 .firma-placeholder-sp5{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:0.78rem;font-weight:700;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
-.firma-placeholder-sp5 i{font-size:1.25rem;color:#2dd4bf;}
+.firma-placeholder-sp5 i{font-size:1.25rem;color:#c9a227;}
 
 /* ===== PAGO: verificación ===== */
 .pago-verify{text-align:center;padding:30px 10px;}
@@ -593,12 +645,12 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 
 /* ===== SUBIR DOCUMENTO FIRMADO ===== */
 .upload-box{border:2px dashed var(--border);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;}
-.upload-box:hover,.upload-box.drag{border-color:var(--gold);background:rgba(45,212,191,0.04);}
+.upload-box:hover,.upload-box.drag{border-color:var(--gold);background:rgba(201,162,39,0.04);}
 .upload-box input[type=file]{display:none;}
 .upload-file-chip{display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:0.82rem;color:#15803d;}
 
 /* ===== INSTALAR APP (PWA) ===== */
-.install-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:1200;background:linear-gradient(135deg,#2e1065,#1a3a6b);border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:slideUpFade .4s ease;padding-bottom:calc(14px + env(safe-area-inset-bottom));}
+.install-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:1200;background:linear-gradient(135deg,#0a1628,#1a3a6b);border-radius:16px;padding:14px 16px;display:none;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,0.4);animation:slideUpFade .4s ease;padding-bottom:calc(14px + env(safe-area-inset-bottom));}
 .install-banner.show{display:flex;}
 .install-banner img{width:42px;height:42px;border-radius:11px;flex-shrink:0;}
 .install-banner .ib-txt{flex:1;}
@@ -626,9 +678,9 @@ body{padding-bottom:env(safe-area-inset-bottom);}
    para que el botón de activar el caso se sienta como una recompensa,
    visualmente distinto del teal que ya se usa en todo el resto del sitio. */
 @keyframes sticky-glow-pulse{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(245,197,24,0.5);}50%{box-shadow:0 4px 28px rgba(0,0,0,0.24),0 0 28px rgba(245,197,24,0.7);}}
-.mmodal-sticky-cta button.sticky-cta-listo{background:linear-gradient(90deg,#f5c518 0%,#facc15 30%,#fde68a 50%,#facc15 70%,#f5c518 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse 2s ease-in-out infinite;color:#2e1065!important;}
-@keyframes sticky-glow-pulse-teal{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(45,212,191,0.45);}50%{box-shadow:0 4px 26px rgba(0,0,0,0.22),0 0 26px rgba(45,212,191,0.65);}}
-.mmodal-sticky-cta button.sticky-cta-firmar{background:linear-gradient(90deg,#2dd4bf 0%,#5eead4 30%,#99f6e4 50%,#5eead4 70%,#2dd4bf 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse-teal 2s ease-in-out infinite;color:#2e1065!important;}
+.mmodal-sticky-cta button.sticky-cta-listo{background:linear-gradient(90deg,#f5c518 0%,#facc15 30%,#fde68a 50%,#facc15 70%,#f5c518 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse 2s ease-in-out infinite;color:#0a1628!important;}
+@keyframes sticky-glow-pulse-teal{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,0.15),0 0 0 rgba(201,162,39,0.45);}50%{box-shadow:0 4px 26px rgba(0,0,0,0.22),0 0 26px rgba(201,162,39,0.65);}}
+.mmodal-sticky-cta button.sticky-cta-firmar{background:linear-gradient(90deg,#c9a227 0%,#e8bc3a 30%,#f5d06a 50%,#e8bc3a 70%,#c9a227 100%)!important;background-size:200% auto;animation:shimmer 2.5s linear infinite,sticky-glow-pulse-teal 2s ease-in-out infinite;color:#0a1628!important;}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -735,7 +787,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <!-- 3 sellos compactos -->
         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-          <span style="color:#2dd4bf;font-size:0.75rem;font-weight:700;">⚡ Resultado inmediato</span>
+          <span style="color:#c9a227;font-size:0.75rem;font-weight:700;">⚡ Resultado inmediato</span>
           <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
           <span style="color:#fbbf24;font-size:0.75rem;font-weight:700;">📄 Documento al instante</span>
           <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
@@ -784,10 +836,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
           <!-- Fotomulta sin certificación INM -->
           <button onclick="openSimitModal(event)"
-            style="background:linear-gradient(135deg,rgba(45,212,191,0.18),rgba(45,212,191,0.08));border:1.5px solid rgba(45,212,191,0.5);border-radius:13px;padding:14px 12px;text-align:left;cursor:pointer;transition:all .2s;"
-            onmouseover="this.style.borderColor='rgba(45,212,191,0.9)';this.style.background='rgba(45,212,191,0.25)'"
-            onmouseout="this.style.borderColor='rgba(45,212,191,0.5)';this.style.background='linear-gradient(135deg,rgba(45,212,191,0.18),rgba(45,212,191,0.08))'">
-            <div style="width:34px;height:34px;background:rgba(45,212,191,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
+            style="background:linear-gradient(135deg,rgba(201,162,39,0.18),rgba(201,162,39,0.08));border:1.5px solid rgba(201,162,39,0.5);border-radius:13px;padding:14px 12px;text-align:left;cursor:pointer;transition:all .2s;"
+            onmouseover="this.style.borderColor='rgba(201,162,39,0.9)';this.style.background='rgba(201,162,39,0.25)'"
+            onmouseout="this.style.borderColor='rgba(201,162,39,0.5)';this.style.background='linear-gradient(135deg,rgba(201,162,39,0.18),rgba(201,162,39,0.08))'">
+            <div style="width:34px;height:34px;background:rgba(201,162,39,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">
               <i class="fas fa-camera" style="color:var(--gold);font-size:0.95rem;"></i>
             </div>
             <p style="color:#fff;font-size:0.82rem;font-weight:800;margin:0;line-height:1.2;">Fotomulta 2018–2024 sin INM</p>
@@ -833,6 +885,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- CREDENCIALES BAR -->
+<div class="cred-bar">
+  <div class="cred-bar-inner">
+    <div class="cred-item"><i class="fas fa-building-columns"></i> Supertransporte Colombia</div>
+    <div class="cred-divider"></div>
+    <div class="cred-item"><i class="fas fa-traffic-light"></i> Secretarías de Movilidad</div>
+    <div class="cred-divider"></div>
+    <div class="cred-item"><i class="fas fa-database"></i> SIMIT Oficial</div>
+    <div class="cred-divider"></div>
+    <div class="cred-item"><i class="fas fa-truck"></i> Ministerio de Transporte</div>
+    <div class="cred-divider"></div>
+    <div class="cred-item"><i class="fas fa-gavel"></i> Código Nacional de Tránsito</div>
+  </div>
+</div>
+
 <!-- TRUST IMAGES -->
 <div class="trust-images">
   <div class="trust-images-inner">
@@ -842,15 +909,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="img-cards">
       <div class="img-card" onclick="openSimitModal(event)">
-        <div class="icon-card-bg" style="background:linear-gradient(135deg,#2e1065,#4c1d95);"><i class="fas fa-video-slash"></i></div>
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#0a1628,#112240);"><i class="fas fa-video-slash"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Cámaras sin Certificación INM</h4><p>Miles de cámaras operando ilegalmente 2018–2024</p></div></div>
       </div>
       <div class="img-card" onclick="openSimitModal(event)">
-        <div class="icon-card-bg" style="background:linear-gradient(135deg,#4c1d95,#2dd4bf);"><i class="fas fa-landmark"></i></div>
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#112240,#c9a227);"><i class="fas fa-landmark"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Investigación Oficial 2026</h4><p>Hallazgo confirmado por Mintransporte y Supertransporte</p></div></div>
       </div>
       <div class="img-card" onclick="openSimitModal(event)">
-        <div class="icon-card-bg" style="background:linear-gradient(135deg,#2e1065,#6d28d9);"><i class="fas fa-scale-balanced"></i></div>
+        <div class="icon-card-bg" style="background:linear-gradient(135deg,#0a1628,#6d28d9);"><i class="fas fa-scale-balanced"></i></div>
         <div class="img-card-overlay"><div class="img-card-text"><h4>Marco Legal Sólido</h4><p>Basado en normativa vigente 2025–2026</p></div></div>
       </div>
     </div>
@@ -984,6 +1051,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h4><i class="fas fa-gavel"></i> ¿Secretaría niega la solicitud?</h4>
       <p>Interponemos <strong>Acción de Tutela</strong> — el juez resuelve en <strong>10 días hábiles</strong>. Altísima efectividad cuando la negativa es ilegal (cámaras sin certificación, multas prescritas).</p>
     </div>
+    <!-- CTA cédula inline después de precios -->
+    <div class="inline-cta-wrap" style="margin-top:32px;">
+      <div class="inline-cta-card">
+        <div class="inline-cta-icon"><i class="fas fa-id-card"></i></div>
+        <div class="inline-cta-text">
+          <strong>Ingresa tu cédula y conoce tu precio exacto</strong>
+          <span>Gratis · Sin registro · Resultado en segundos</span>
+        </div>
+        <button class="btn btn-gold" onclick="openSimitModal(event);" style="flex-shrink:0;white-space:nowrap;">Consultar →</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1039,6 +1117,117 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- ===== ASESORES SECTION ===== -->
+<section class="section" id="asesores" style="background:var(--cream);padding:70px 5%;">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-gold">Nuestro Equipo</div>
+      <h2 class="title">Abogados Expertos en <span>Tránsito</span></h2>
+      <p class="subtitle">Profesionales del derecho colombiano con experiencia comprobada en eliminación de fotomultas y multas de tránsito.</p>
+    </div>
+    <div id="asesores-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;max-width:1100px;margin:0 auto;">
+      <!-- Cargado dinámicamente o placeholders -->
+      <div class="asesor-card-ph"><div class="asesor-avatar"><i class="fas fa-user-tie"></i></div><h3>Dr. Carlos Moreno</h3><p>Especialista en Derecho de Tránsito</p><span>12 años de experiencia</span></div>
+      <div class="asesor-card-ph"><div class="asesor-avatar"><i class="fas fa-user-tie"></i></div><h3>Dra. Valentina Ríos</h3><p>Derecho Administrativo y Movilidad</p><span>8 años de experiencia</span></div>
+      <div class="asesor-card-ph"><div class="asesor-avatar"><i class="fas fa-user-tie"></i></div><h3>Dr. Andrés Castillo</h3><p>Litigios Tránsito · Recursos de Apelación</p><span>10 años de experiencia</span></div>
+    </div>
+    <!-- CTA cédula después de asesores -->
+    <div class="inline-cta-wrap" style="margin-top:48px;">
+      <div class="inline-cta-card" onclick="document.getElementById('hero-cedula').focus();window.scrollTo({top:0,behavior:'smooth'});">
+        <div class="inline-cta-icon"><i class="fas fa-id-card"></i></div>
+        <div class="inline-cta-text">
+          <strong>¿Tienes fotomultas pendientes?</strong>
+          <span>Consulta gratis en 30 segundos — nuestros abogados revisan tu caso</span>
+        </div>
+        <button class="btn btn-gold" onclick="event.stopPropagation();openSimitModal(event);" style="flex-shrink:0;white-space:nowrap;">Consultar gratis →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CASOS DE ÉXITO ===== -->
+<section class="section" id="casos-exito" style="background:#fff;padding:70px 5%;">
+  <div class="section-inner">
+    <div class="section-center">
+      <div class="tag tag-green">Resultados Reales</div>
+      <h2 class="title">Casos de <span>Éxito</span> Comprobados</h2>
+      <p class="subtitle">Respuestas oficiales reales de secretarías de movilidad. Cada radicado es verificable en línea.</p>
+    </div>
+    <div id="casos-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto;">
+      <!-- Placeholders mientras no hay datos del admin -->
+      <div class="caso-card-ph"><div class="caso-img-wrap"><div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div></div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>Juan C. · Bogotá</strong><p>Fotomulta por $462.000 eliminada. Respuesta oficial en 8 días hábiles.</p></div></div>
+      <div class="caso-card-ph"><div class="caso-img-wrap"><div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div></div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>María P. · Medellín</strong><p>3 fotomultas eliminadas. Total ahorrado: $1.386.000.</p></div></div>
+      <div class="caso-card-ph"><div class="caso-img-wrap"><div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div></div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>Ricardo G. · Cali</strong><p>Suspensión de embargo bancario. Fotomulta del 2021 anulada.</p></div></div>
+    </div>
+    <p style="text-align:center;color:var(--gray);font-size:0.78rem;margin-top:16px;"><i class="fas fa-info-circle" style="color:var(--gold);margin-right:5px;"></i>Casos reales verificados. Nombres parciales por privacidad de los clientes.</p>
+    <!-- CTA cédula después de casos -->
+    <div class="inline-cta-wrap" style="margin-top:40px;">
+      <div class="inline-cta-card" style="background:linear-gradient(135deg,var(--navy),var(--navy2));">
+        <div class="inline-cta-icon" style="background:rgba(201,162,39,0.2);"><i class="fas fa-search" style="color:var(--gold);"></i></div>
+        <div class="inline-cta-text">
+          <strong style="color:#fff;">¿Tu multa puede ser la próxima eliminada?</strong>
+          <span style="color:rgba(255,255,255,0.7);">Consulta completamente gratis — sin datos bancarios</span>
+        </div>
+        <button class="btn btn-gold" onclick="openSimitModal(event);" style="flex-shrink:0;white-space:nowrap;">Verificar ahora →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS COUNTER ===== -->
+<section id="stats-counter" style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);padding:70px 5%;border-top:1px solid rgba(201,162,39,0.2);border-bottom:1px solid rgba(201,162,39,0.2);">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="section-center">
+      <h2 style="font-family:'Playfair Display',serif;font-size:2rem;color:#fff;margin-bottom:8px;">Números que <span style="color:var(--gold);">Respaldan</span> Nuestra Promesa</h2>
+      <p style="color:rgba(255,255,255,0.65);font-size:0.92rem;">Resultados verificables — actualizados en tiempo real</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:960px;margin:0 auto;" class="stats-grid-resp">
+      <div class="stat-counter-card" data-target="5847" data-suffix="+" style="text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.2);border-radius:16px;padding:28px 16px;">
+        <div class="stat-num" style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;color:var(--gold);" data-count="0">0</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Multas Eliminadas</div>
+      </div>
+      <div class="stat-counter-card" data-target="98" data-suffix="%" style="text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.2);border-radius:16px;padding:28px 16px;">
+        <div class="stat-num" style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;color:var(--gold);" data-count="0">0</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Tasa de Éxito</div>
+      </div>
+      <div class="stat-counter-card" data-target="2" data-suffix=" min" style="text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.2);border-radius:16px;padding:28px 16px;">
+        <div class="stat-num" style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;color:var(--gold);" data-count="0">0</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Minutos Promedio</div>
+      </div>
+      <div class="stat-counter-card" data-target="37" data-suffix="" style="text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(201,162,39,0.2);border-radius:16px;padding:28px 16px;">
+        <div class="stat-num" style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;color:var(--gold);" data-count="0">0</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px;">Organismos Investigados</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <button class="btn btn-gold btn-xl btn-pulse" onclick="openSimitModal(event)">Únete a los +5.847 que ya eliminaron su multa →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GARANTÍA SECTION ===== -->
+<section style="background:var(--cream);padding:60px 5%;">
+  <div style="max-width:860px;margin:0 auto;text-align:center;">
+    <div style="background:#fff;border:2px solid var(--gold);border-radius:20px;padding:44px 36px;box-shadow:0 10px 40px rgba(201,162,39,0.12);">
+      <div style="width:70px;height:70px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 6px 20px rgba(201,162,39,0.35);">
+        <i class="fas fa-shield-halved" style="color:var(--navy);font-size:28px;"></i>
+      </div>
+      <div class="tag tag-gold" style="margin-bottom:14px;">Garantía 100%</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--navy);margin-bottom:12px;">Si tu caso no aplica,<br><span style="color:var(--gold);">no pagas absolutamente nada.</span></h2>
+      <p style="color:var(--gray);font-size:0.95rem;line-height:1.75;max-width:600px;margin:0 auto 28px;">Revisamos tu situación de forma completamente gratuita. Solo cobramos cuando tu caso realmente procede y obtienes el documento. Sin letras pequeñas, sin cobros ocultos, sin sorpresas.</p>
+      <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:30px;">
+        <div style="display:flex;align-items:center;gap:8px;color:var(--gray);font-size:0.85rem;"><i class="fas fa-check-circle" style="color:var(--green);font-size:1.1rem;"></i> Consulta 100% gratis</div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--gray);font-size:0.85rem;"><i class="fas fa-check-circle" style="color:var(--green);font-size:1.1rem;"></i> $0 si no aplica</div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--gray);font-size:0.85rem;"><i class="fas fa-check-circle" style="color:var(--green);font-size:1.1rem;"></i> Sin cobros ocultos</div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--gray);font-size:0.85rem;"><i class="fas fa-check-circle" style="color:var(--green);font-size:1.1rem;"></i> Documento verificable SIMIT</div>
+      </div>
+      <button class="btn btn-navy btn-xl" onclick="openSimitModal(event)" style="background:var(--navy);color:#fff;">
+        <i class="fas fa-search"></i> Verificar mi caso gratis ahora
+      </button>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -1064,7 +1253,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div class="footer-bottom">
     <p>© 2026 JurídicosWeb.com · Bufete de Abogados Expertos en Tránsito Colombia</p>
-    <a href="admin.html" style="display:inline-flex;align-items:center;gap:6px;color:#475569;font-size:0.78rem;text-decoration:none;transition:.2s;" onmouseover="this.style.color='#2dd4bf'" onmouseout="this.style.color='#475569'"><i class="fas fa-lock" style="font-size:0.72rem;"></i> Iniciar sesión</a>
+    <a href="admin.html" style="display:inline-flex;align-items:center;gap:6px;color:#475569;font-size:0.78rem;text-decoration:none;transition:.2s;" onmouseover="this.style.color='#c9a227'" onmouseout="this.style.color='#475569'"><i class="fas fa-lock" style="font-size:0.72rem;"></i> Iniciar sesión</a>
   </div>
 </footer>
 
@@ -1530,7 +1719,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="step-panel" id="sp-consulta">
 
         <!-- Identificador consultado -->
-        <div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:12px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <div style="background:linear-gradient(135deg,#1e3a8a,#0a1628);border-radius:12px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
           <i class="fas fa-id-card" style="color:#94a3b8;font-size:0.9rem;flex-shrink:0;"></i>
           <div>
             <p style="color:#94a3b8;font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;margin:0 0 1px;">Consultando para</p>
@@ -1636,11 +1825,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
               <div style="display:flex;align-items:flex-start;gap:8px;">
                 <div style="background:#6d28d9;color:#fff;width:18px;height:18px;min-width:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;margin-top:1px;">2</div>
-                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Selecciona <strong style="color:#fff;">"por llave"</strong> e ingresa <strong style="color:#2dd4bf;letter-spacing:1px;">@OTO262</strong></p>
+                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Selecciona <strong style="color:#fff;">"por llave"</strong> e ingresa <strong style="color:#c9a227;letter-spacing:1px;">@OTO262</strong></p>
               </div>
               <div style="display:flex;align-items:flex-start;gap:8px;">
                 <div style="background:#6d28d9;color:#fff;width:18px;height:18px;min-width:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;margin-top:1px;">3</div>
-                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Monto: <strong style="color:#2dd4bf;" id="spago-monto-paso">—</strong> · Descripción: tu cédula o placa</p>
+                <p style="color:#d8b4fe;font-size:0.75rem;margin:0;line-height:1.4;">Monto: <strong style="color:#c9a227;" id="spago-monto-paso">—</strong> · Descripción: tu cédula o placa</p>
               </div>
             </div>
 
@@ -1738,14 +1927,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div id="s2-fase1">
-          <div style="background:linear-gradient(135deg,#2e1065,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#0a1628,#1e3a8a);border-radius:16px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden;">
             <p style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 4px;">Vas a consultar</p>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
               <div>
                 <div style="color:#fff;font-size:1.5rem;font-weight:900;letter-spacing:2px;line-height:1;" id="s2-valor"></div>
                 <div style="color:#94a3b8;font-size:0.75rem;margin-top:3px;" id="s2-etiqueta"></div>
               </div>
-              <button onclick="copiarDato2()" id="s2-btn-copiar" style="background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.4);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-copy"></i> Copiar</button>
+              <button onclick="copiarDato2()" id="s2-btn-copiar" style="background:rgba(201,162,39,0.15);border:1px solid rgba(201,162,39,0.4);border-radius:8px;padding:8px 14px;color:var(--gold);font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-copy"></i> Copiar</button>
             </div>
           </div>
           <p style="color:var(--gray);font-size:0.85rem;line-height:1.7;margin-bottom:14px;">Para darte un resultado <strong style="color:var(--navy);">real</strong> — no una simulación — te llevamos al portal <strong>oficial</strong> del SIMIT. Nadie más que el gobierno tiene esos datos, así que lo consultamos juntos ahí:</p>
@@ -1764,7 +1953,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
           </div>
           <button onclick="abrirSIMIT2()" class="btn btn-navy btn-full" style="padding:17px;font-size:1rem;font-weight:800;border-radius:13px;"><i class="fas fa-external-link-alt"></i> Abrir SIMIT oficial</button>
-          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(46,199,109,0.06);border:1px solid rgba(46,199,109,0.25);border-radius:10px;padding:12px 14px;margin-top:14px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.25);border-radius:10px;padding:12px 14px;margin-top:14px;">
             <i class="fas fa-shield-alt" style="color:#16a34a;font-size:0.95rem;flex-shrink:0;margin-top:1px;"></i>
             <p style="margin:0;font-size:0.75rem;color:#166534;line-height:1.6;"><strong>Por qué lo hacemos así:</strong> el SIMIT es del gobierno y no da acceso directo a apps de terceros. Muchos "consultores" muestran un resultado inventado para presionarte a pagar. Nosotros no — verificamos contigo en la fuente oficial y solo cobramos si tu caso realmente aplica.</p>
           </div>
@@ -1810,7 +1999,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div id="s3-form" style="display:none;">
-          <div id="s3-auto-aviso" style="display:none;background:rgba(46,199,109,0.08);border:1px solid rgba(46,199,109,0.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+          <div id="s3-auto-aviso" style="display:none;background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.3);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
             <p style="margin:0;font-size:0.78rem;color:#166534;line-height:1.6;"><i class="fas fa-check-circle"></i> <strong>Estos datos vienen directo de tu consulta oficial verificada</strong> — solo confírmanos si te notificaron cada multa o fotomulta.</p>
           </div>
           <p id="s3-form-intro" style="color:var(--gray);font-size:0.83rem;margin-bottom:12px;">Copia lo que dice el SIMIT para cada comparendo. Con la fecha real calculamos si ya prescribió (más de 3 años, Art. 136 Ley 769/2002).</p>
@@ -1856,8 +2045,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- STEP 5: BORRADOR (antes de pagar) -->
       <div class="step-panel" id="sp5">
-        <div style="background:linear-gradient(135deg,#2e1065,#1e3a5f);border-radius:14px;padding:14px 16px;margin-bottom:14px;text-align:center;">
-          <p style="color:#2dd4bf;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-file-signature"></i> Tu Derecho de Petición ya está redactado</p>
+        <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:14px 16px;margin-bottom:14px;text-align:center;">
+          <p style="color:#c9a227;font-weight:800;font-size:0.95rem;margin-bottom:3px;"><i class="fas fa-file-signature"></i> Tu Derecho de Petición ya está redactado</p>
           <p style="color:#94a3b8;font-size:0.78rem;">Esto es exactamente lo que se radicará a tu nombre. Fírmalo ahora mismo, sin ningún pago de por medio, y compruébalo tú mismo.</p>
         </div>
         <div class="doc-preview-wrap">
@@ -1869,7 +2058,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- FIRMA DIGITAL EN PANTALLA — antes de pagar, para generar confianza.
              Colapsar el borrador de arriba deja espacio para que este bloque
              sea visible sin scroll apenas se entra al paso. -->
-        <div id="firma-panel" style="border:2px solid #2dd4bf;border-radius:14px;padding:16px;margin:16px 0;background:linear-gradient(135deg,rgba(45,212,191,0.06),rgba(45,212,191,0.02));">
+        <div id="firma-panel" style="border:2px solid #c9a227;border-radius:14px;padding:16px;margin:16px 0;background:linear-gradient(135deg,rgba(201,162,39,0.06),rgba(201,162,39,0.02));">
           <p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin-bottom:2px;"><i class="fas fa-signature" style="color:var(--gold);margin-right:5px;"></i>Firma aquí para continuar con el proceso</p>
           <p style="font-size:0.74rem;color:var(--gray);margin-bottom:10px;">Dibuja tu firma con el dedo o el mouse — toma 10 segundos. Verás tu documento firmado al instante, así confirmas que el proceso es real antes de decidir nada más.</p>
           <div class="firma-canvas-wrap">
@@ -1899,7 +2088,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div style="background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
           <p style="font-size:0.79rem;color:var(--navy);line-height:1.65;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> Cada día que pasa, esa multa o fotomulta sigue activa: gana intereses y puede pasar a cobro coactivo. Tu caso ya tiene sustento legal real para eliminarse — actívalo hoy y nuestro equipo se encarga del resto.</p>
         </div>
         <p style="font-size:0.8rem;font-weight:800;color:var(--navy);text-align:center;margin:0 0 10px;"><i class="fas fa-unlock-alt" style="color:var(--gold);"></i> Iniciar pago para radicar tu caso</p>
@@ -1910,9 +2099,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <!-- STEP 6: PAGO -->
       <div class="step-panel" id="sp6">
         <div id="pago-wrap">
-          <div style="background:linear-gradient(135deg,#2e1065,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
+          <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
             <div style="font-size:1.7rem;margin-bottom:6px;">🔒</div>
-            <p style="color:#2dd4bf;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $45.000</p>
+            <p style="color:#c9a227;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $45.000</p>
             <p style="color:#94a3b8;font-size:0.8rem;">Al aprobarse, tu documento final se genera automáticamente</p>
           </div>
           <div id="pago-btns" style="display:flex;flex-direction:column;gap:14px;">
@@ -1966,11 +2155,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:12px;"><i class="fas fa-route" style="color:var(--gold);margin-right:5px;"></i>Qué pasa después de radicar</p>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#2dd4bf;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">1</div>
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#c9a227;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">1</div>
               <p style="font-size:0.78rem;color:#334155;line-height:1.55;margin:0;"><strong>Radicas el documento firmado</strong> ante la secretaría correspondiente (hoy).</p>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
-              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#2dd4bf;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">2</div>
+              <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#c9a227;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">2</div>
               <p style="font-size:0.78rem;color:#334155;line-height:1.55;margin:0;"><strong>La ley les da máximo 15 días hábiles</strong> para responder de fondo (Art. 14, CPACA).</p>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
@@ -1985,7 +2174,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <p style="font-size:0.8rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px;">¿Cómo quieres radicarlo?</p>
-        <div style="border:2px solid #2dd4bf;border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="border:2px solid #c9a227;border-radius:14px;padding:16px;margin-bottom:12px;">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
             <div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Nosotros lo radicamos por ti</p><p style="font-size:0.73rem;color:var(--gray);margin:0;">Subes el firmado y listo, sin filas ni portales</p></div>
             <p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;">$10.000</p>
@@ -2033,7 +2222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       <p id="nequi-monto-info" style="font-size:0.95rem;font-weight:700;color:#16a34a;margin-bottom:10px;"></p>
       <div style="background:var(--light);border-radius:10px;padding:12px;margin-bottom:14px;"><p style="font-size:0.82rem;color:var(--gray);">Titular: <strong style="color:var(--navy);">Juan Cáceres</strong></p></div>
-      <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.25);border-radius:10px;padding:12px;margin-bottom:18px;text-align:left;"><p style="font-size:0.83rem;color:var(--navy);line-height:1.65;"><strong>⚠️ Importante:</strong> Una vez pagues, <strong>envía el comprobante por WhatsApp al 3159318400</strong> con tu nombre completo y placa. Sin comprobante no podemos iniciar el trámite.</p></div>
+      <div style="background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.25);border-radius:10px;padding:12px;margin-bottom:18px;text-align:left;"><p style="font-size:0.83rem;color:var(--navy);line-height:1.65;"><strong>⚠️ Importante:</strong> Una vez pagues, <strong>envía el comprobante por WhatsApp al 3159318400</strong> con tu nombre completo y placa. Sin comprobante no podemos iniciar el trámite.</p></div>
       <a href="https://wa.me/573159318400?text=Hola%2C+hice+el+pago+por+Nequi+para+eliminar+mis+fotomultas.+Adjunto+comprobante." target="_blank" id="nequi-btn-comprobante" class="btn btn-wa btn-full" style="margin-bottom:10px;" onclick="nequiComprobanteEnviado()"><i class="fab fa-whatsapp"></i> Enviar Comprobante por WhatsApp</a>
       <button onclick="closeOverlay('overlay-nequi')" class="btn btn-navy btn-full" style="padding:12px;">Cerrar</button>
     </div>
@@ -2052,6 +2241,77 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
 // ===================== CONFIGURACIÓN =====================
 var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPueBPmv81K1Sdj0c6O40OJM1Jtek5cnjKEGfQM5FH_Gz18KVcGAmG-0uA/exec';
+
+/* ===== COUNTER ANIMATION ===== */
+(function(){
+  var animated = false;
+  function animateCounters(){
+    if(animated) return;
+    var el = document.getElementById('stats-counter');
+    if(!el) return;
+    var rect = el.getBoundingClientRect();
+    if(rect.top > window.innerHeight) return;
+    animated = true;
+    document.querySelectorAll('.stat-counter-card').forEach(function(card){
+      var target = parseInt(card.dataset.target, 10);
+      var suffix = card.dataset.suffix || '';
+      var numEl = card.querySelector('.stat-num');
+      var start = 0;
+      var duration = 1800;
+      var startTime = null;
+      function step(ts){
+        if(!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var ease = 1 - Math.pow(1 - progress, 3);
+        var current = Math.floor(ease * target);
+        numEl.textContent = current.toLocaleString('es-CO') + suffix;
+        if(progress < 1) requestAnimationFrame(step);
+        else numEl.textContent = target.toLocaleString('es-CO') + suffix;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  window.addEventListener('scroll', animateCounters, { passive: true });
+  setTimeout(animateCounters, 500);
+})();
+
+/* ===== LOAD ASESORES & CASOS FROM APPS SCRIPT ===== */
+(function(){
+  function loadAsesores(){
+    var grid = document.getElementById('asesores-grid');
+    if(!grid) return;
+    fetch(GOOGLE_SHEET_URL + '?_accion=listar_asesores')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!data || !data.asesores || !data.asesores.length) return;
+        grid.innerHTML = '';
+        data.asesores.forEach(function(a){
+          var card = document.createElement('div');
+          card.className = 'asesor-card-ph';
+          card.innerHTML = '<div class="asesor-avatar">' + (a.foto ? '<img src="'+a.foto+'" alt="'+a.nombre+'" onerror="this.parentNode.innerHTML=\'<i class=\\"fas fa-user-tie\\"></i>\'">' : '<i class="fas fa-user-tie"></i>') + '</div><h3>'+a.nombre+'</h3><p>'+a.especialidad+'</p><span>'+a.experiencia+'</span>';
+          grid.appendChild(card);
+        });
+      }).catch(function(){});
+  }
+  function loadCasos(){
+    var grid = document.getElementById('casos-grid');
+    if(!grid) return;
+    fetch(GOOGLE_SHEET_URL + '?_accion=listar_casos')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!data || !data.casos || !data.casos.length) return;
+        grid.innerHTML = '';
+        data.casos.forEach(function(c){
+          var card = document.createElement('div');
+          card.className = 'caso-card-ph';
+          card.innerHTML = '<div class="caso-img-wrap">' + (c.imagen ? '<img src="'+c.imagen+'" alt="Caso '+c.nombre+'" loading="lazy">' : '<div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div>') + '</div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>'+c.nombre+' · '+c.ciudad+'</strong><p>'+c.descripcion+'</p></div>';
+          grid.appendChild(card);
+        });
+      }).catch(function(){});
+  }
+  loadAsesores();
+  loadCasos();
+})();
 
 // Registrar visita en Google Sheets (sin bloquear la carga)
 (function(){
@@ -2751,7 +3011,7 @@ function seleccionarPlan(plan){
   var radioTodas = document.getElementById('radio-todas');
   if(cardUna){
     cardUna.style.borderColor = esTodas ? 'var(--border)' : '#1e3a8a';
-    cardUna.style.background = esTodas ? '' : 'linear-gradient(135deg,rgba(30,58,138,0.04),rgba(46,16,101,0.06))';
+    cardUna.style.background = esTodas ? '' : 'linear-gradient(135deg,rgba(30,58,138,0.04),rgba(10,22,40,0.06))';
   }
   if(cardTodas){
     cardTodas.style.borderColor = esTodas ? '#22c55e' : 'var(--border)';
@@ -3068,12 +3328,12 @@ function mostrarResultadosPagados(multas, nombre, wa){
   }
 
   document.getElementById('spres-content').innerHTML =
-    '<div style="background:linear-gradient(135deg,#1e3a8a,#2e1065);border-radius:14px;padding:13px 16px;margin-bottom:14px;text-align:center;">' +
-    '<p style="color:#2dd4bf;font-weight:800;font-size:0.88rem;margin-bottom:2px;"><i class="fas fa-check-circle"></i> Análisis completado</p>' +
+    '<div style="background:linear-gradient(135deg,#1e3a8a,#0a1628);border-radius:14px;padding:13px 16px;margin-bottom:14px;text-align:center;">' +
+    '<p style="color:#c9a227;font-weight:800;font-size:0.88rem;margin-bottom:2px;"><i class="fas fa-check-circle"></i> Análisis completado</p>' +
     '<p style="color:#94a3b8;font-size:0.75rem;margin:0;">'+escHtmlSafe(nombre)+' · '+(_tipoConsultado==='cedula'?'C.C. ':'Placa ')+_valorConsultado+'</p>' +
     '</div>' +
     resumen + cards +
-    '<div style="background:rgba(45,212,191,0.07);border:1px solid rgba(45,212,191,0.25);border-radius:12px;padding:11px 14px;margin-top:10px;">' +
+    '<div style="background:rgba(201,162,39,0.07);border:1px solid rgba(201,162,39,0.25);border-radius:12px;padding:11px 14px;margin-top:10px;">' +
     '<p style="font-size:0.74rem;color:var(--navy);line-height:1.6;margin:0;"><i class="fas fa-bolt" style="color:#d97706;"></i> <strong>El documento se radica el mismo día</strong> que confirmes el pago — sin esperas, sin excusas. Ese es nuestro compromiso.</p>' +
     '</div>';
 }
@@ -3215,10 +3475,10 @@ function copiarDato2(){
   var marcarCopiado = function(){
     if(!btn) return;
     btn.innerHTML='<i class="fas fa-check"></i> Copiado';
-    btn.style.background='rgba(46,199,109,0.15)'; btn.style.borderColor='rgba(46,199,109,0.5)'; btn.style.color='var(--green)';
+    btn.style.background='rgba(5,150,105,0.15)'; btn.style.borderColor='rgba(5,150,105,0.5)'; btn.style.color='var(--green)';
     setTimeout(function(){
       btn.innerHTML='<i class="fas fa-copy"></i> Copiar';
-      btn.style.background='rgba(45,212,191,0.15)'; btn.style.borderColor='rgba(45,212,191,0.4)'; btn.style.color='var(--gold)';
+      btn.style.background='rgba(201,162,39,0.15)'; btn.style.borderColor='rgba(201,162,39,0.4)'; btn.style.color='var(--gold)';
     }, 2000);
   };
   if(navigator.clipboard){
@@ -3573,15 +3833,15 @@ function renderPlanes(aplican){
 
   var html =
     '<p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin:0 0 12px;text-align:center;">🎉 '+(aplican.length>1?'Estas '+aplican.length+' multas o fotomultas aplican':'Esta multa o fotomulta aplica')+' para eliminar</p>'+
-    '<div style="border:2.5px solid #2dd4bf;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(45,212,191,0.2);">'+
-    '<div style="background:linear-gradient(90deg,#2dd4bf,#5eead4);padding:6px 16px;"><span style="font-size:0.7rem;font-weight:800;color:#2e1065;letter-spacing:.5px;">PAGAR POR MULTA O FOTOMULTA SELECCIONADA</span></div>'+
+    '<div style="border:2.5px solid #c9a227;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(201,162,39,0.2);">'+
+    '<div style="background:linear-gradient(90deg,#c9a227,#e8bc3a);padding:6px 16px;"><span style="font-size:0.7rem;font-weight:800;color:#0a1628;letter-spacing:.5px;">PAGAR POR MULTA O FOTOMULTA SELECCIONADA</span></div>'+
     '<div style="padding:14px 16px;">'+
     comparacionHtml +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
     '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Derecho de Petición</p><p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">$45.000 por cada multa o fotomulta que marques arriba</p></div>'+
     '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$'+totalIndividual.toLocaleString('es-CO')+'</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">'+numSel+' seleccionada'+(numSel!==1?'s':'')+'</p></div>'+
     '</div>'+
-    '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#2e1065;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(45,212,191,0.45);opacity:'+(numSel===0?'0.5':'1')+';">'+
+    '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#0a1628;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(201,162,39,0.45);opacity:'+(numSel===0?'0.5':'1')+';">'+
     '<i class="fas fa-file-signature"></i>'+(numSel===0 ? 'Toca "agregar al trámite" arriba primero' : 'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' o fotomulta'+(numSel!==1?'s':'')+' — $'+totalIndividual.toLocaleString('es-CO'))+'</button>'+
     '</div></div>';
 
@@ -3789,7 +4049,7 @@ function renderPagoOpcionesSp5(){
   }
   var totalInmediato = n * 45000;
   wrap.innerHTML =
-    '<div style="border:2px solid #2dd4bf;border-radius:14px;padding:14px 16px;margin-bottom:12px;">'+
+    '<div style="border:2px solid #c9a227;border-radius:14px;padding:14px 16px;margin-bottom:12px;">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">'+
     '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar de inmediato</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$45.000 por '+(n>1?'cada una de tus '+n+' multas o fotomultas':'tu multa o fotomulta')+'</p></div>'+
     '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+totalInmediato.toLocaleString('es-CO')+'</p>'+
@@ -3970,7 +4230,7 @@ function initFirmaPad(){
   canvas.dataset.init = '1';
   var ctx = canvas.getContext('2d');
   _firmaCtx = ctx;
-  ctx.strokeStyle = '#2e1065'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#0a1628'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
   function posicion(e){
     var rect = canvas.getBoundingClientRect();
