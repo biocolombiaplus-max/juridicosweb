@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pago confirmado — JurídicosWeb</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#052e16,#14532d);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{background:#fff;border-radius:24px;padding:36px 28px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.3);}
+  .check{width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 32px rgba(22,163,74,0.45);}
+  .check svg{width:40px;height:40px;}
+  h1{font-size:1.5rem;font-weight:900;color:#052e16;margin-bottom:8px;}
+  p{color:#64748b;font-size:0.9rem;line-height:1.6;margin-bottom:20px;}
+  .info-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px;margin-bottom:20px;text-align:left;}
+  .info-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #dcfce7;font-size:0.85rem;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .label{color:#15803d;font-weight:600;}
+  .info-row .val{color:#052e16;font-weight:800;}
+  .btn-wa{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;box-shadow:0 6px 24px rgba(22,163,74,0.5);margin-bottom:12px;transition:.2s;}
+  .btn-wa:active{transform:scale(.97);}
+  .wa-icon{width:24px;height:24px;fill:#fff;}
+  .note{font-size:0.72rem;color:#94a3b8;margin:0;}
+  .spinner{display:none;width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  .card{animation:fadeIn .5s ease;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="check">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h1>¡Pago recibido!</h1>
+  <p>Tu pago fue procesado correctamente.<br>Ahora envíanos la confirmación por WhatsApp para activar tu trámite.</p>
+
+  <div class="info-box" id="info-box">
+    <div class="info-row"><span class="label">Nombre</span><span class="val" id="ok-nombre">—</span></div>
+    <div class="info-row"><span class="label">Monto pagado</span><span class="val" id="ok-monto">—</span></div>
+    <div class="info-row"><span class="label">Plan</span><span class="val" id="ok-plan">—</span></div>
+    <div class="info-row"><span class="label">Estado</span><span class="val" style="color:#16a34a;">✅ Confirmado</span></div>
+  </div>
+
+  <a class="btn-wa" id="btn-wa" href="#" onclick="abrirWA(event)">
+    <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L0 24l6.302-1.51A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.359-.213-3.721.892.934-3.626-.233-.372A9.818 9.818 0 1112 21.818z" fill="#fff"/></svg>
+    Confirmar pago por WhatsApp
+  </a>
+  <p class="note">Se abrirá WhatsApp con el mensaje listo — solo toca Enviar.</p>
+</div>
+
+<script>
+var WA_NUMBER = '573159318400';
+var datos = {};
+
+try {
+  datos.nombre = localStorage.getItem('jw_pago_nombre') || '';
+  datos.wa     = localStorage.getItem('jw_pago_wa')     || '';
+  datos.cedula = localStorage.getItem('jw_pago_cedula') || '';
+  datos.monto  = localStorage.getItem('jw_pago_monto')  || '';
+  datos.plan   = localStorage.getItem('jw_pago_plan')   || '';
+} catch(e){}
+
+// También leer desde params de URL (ePayco los manda)
+var params = new URLSearchParams(window.location.search);
+var ref = params.get('ref_payco') || params.get('x_ref_payco') || ('JW-'+Date.now());
+
+document.getElementById('ok-nombre').textContent = datos.nombre || 'Cliente';
+document.getElementById('ok-monto').textContent  = datos.monto  || '—';
+document.getElementById('ok-plan').textContent   = datos.plan   || '—';
+
+function buildMsg(){
+  return '*¡Pago confirmado! ✅*\n\n' +
+    '🎉 Hola, acabo de realizar el pago en *JurídicosWeb* y quiero activar mi trámite.\n\n' +
+    '📋 *Mis datos:*\n' +
+    '👤 Nombre: ' + (datos.nombre||'—') + '\n' +
+    '🪪 Cédula / Placa: ' + (datos.cedula||'—') + '\n' +
+    '💳 Plan: ' + (datos.plan||'—') + '\n' +
+    '💰 Monto: ' + (datos.monto||'—') + '\n' +
+    '🔖 Referencia: ' + ref + '\n\n' +
+    'Por favor confirmenme que el pago fue recibido y cuándo radican el documento. ✅\n\n' +
+    '_JurídicosWeb — Trámite digital_';
+}
+
+function abrirWA(e){
+  e.preventDefault();
+  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(buildMsg()), '_blank');
+}
+
+// Auto-abrir WA después de 2 segundos
+setTimeout(function(){
+  try{ window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(buildMsg()), '_blank'); }catch(e){}
+}, 2000);
+
+// Limpiar localStorage
+setTimeout(function(){
+  try{
+    ['jw_pago_nombre','jw_pago_wa','jw_pago_cedula','jw_pago_monto','jw_pago_plan']
+      .forEach(function(k){ localStorage.removeItem(k); });
+  }catch(e){}
+}, 5000);
+</script>
+</body>
+</html>
