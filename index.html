@@ -1276,6 +1276,76 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <!-- ══════════════════════════════════════
+           PASO: Vista previa PDF firmado
+           ══════════════════════════════════════ -->
+      <div class="step-panel" id="sp-pdf-firmado">
+        <!-- Barra tipo visor PDF -->
+        <div style="background:#3c3c3c;border-radius:10px 10px 0 0;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.75rem;color:#e5e7eb;font-weight:600;">📄 DerechoPeticion_Firmado.pdf</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#22c55e;color:#fff;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:999px;">✅ FIRMADO</span>
+            <span style="color:#9ca3af;font-size:0.72rem;">1 / 1</span>
+          </div>
+        </div>
+
+        <!-- Página del PDF -->
+        <div style="background:#525659;padding:10px 10px 14px;margin-bottom:12px;border-radius:0 0 10px 10px;">
+          <div style="background:#fff;border-radius:4px;padding:18px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.4);position:relative;font-family:'Times New Roman',Times,serif;">
+            <!-- Watermark sutil -->
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0.04;z-index:0;">
+              <p style="font-size:3rem;font-weight:900;color:#1e3a8a;transform:rotate(-30deg);white-space:nowrap;">JurídicosWeb</p>
+            </div>
+            <!-- Contenido doc -->
+            <div style="position:relative;z-index:1;">
+              <div style="text-align:center;margin-bottom:10px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;">
+                <p style="font-size:0.6rem;color:#64748b;margin:0;letter-spacing:1px;text-transform:uppercase;">República de Colombia</p>
+                <p style="font-size:0.85rem;font-weight:900;color:#1e3a8a;margin:2px 0;">DERECHO DE PETICIÓN</p>
+                <p style="font-size:0.62rem;color:#475569;margin:0;">Artículo 23 de la Constitución Política</p>
+              </div>
+              <div style="font-size:0.72rem;color:#1e293b;line-height:1.65;margin-bottom:8px;">
+                <p style="margin:0 0 4px;"><strong>Señores:</strong> <span id="pdf-secretaria" style="color:#1d4ed8;">Secretaría de Tránsito y Movilidad</span></p>
+                <p style="margin:0 0 4px;"><strong>Peticionario:</strong> <span id="pdf-nombre"></span></p>
+                <p style="margin:0 0 6px;"><strong>C.C./Placa:</strong> <span id="pdf-cedula"></span></p>
+                <p style="margin:0 0 4px;font-size:0.68rem;color:#475569;"><strong>Asunto:</strong> Solicitud de eliminación de comparendo por falla en el proceso de notificación, de conformidad con la Ley 769 de 2002.</p>
+              </div>
+              <!-- Datos multa bloqueados -->
+              <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:6px;padding:6px 10px;margin-bottom:8px;position:relative;">
+                <div style="filter:blur(3.5px);font-size:0.68rem;color:#475569;user-select:none;">
+                  <p style="margin:0;">Multa No.: COM-2024-XXXXXX · Infracción: Art. XX C.N.T. · Valor: $XXX.XXX · Fecha: XX/XX/XXXX</p>
+                </div>
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                  <span style="background:rgba(30,58,138,0.9);color:#fff;font-size:0.68rem;font-weight:800;padding:2px 10px;border-radius:5px;">🔒 Se activa al radicar</span>
+                </div>
+              </div>
+              <p style="font-size:0.65rem;color:#475569;margin:0 0 10px;line-height:1.6;">Por lo anterior, solicito dar trámite en el término legal de <strong>15 días hábiles</strong>, so pena de Acción de Tutela por vulneración del derecho fundamental de petición consagrado en el Art. 23 C.P.</p>
+              <!-- Firma -->
+              <div style="display:flex;align-items:flex-end;gap:14px;border-top:1px solid #f1f5f9;padding-top:10px;">
+                <div style="flex:1;">
+                  <canvas id="pdf-firma-canvas" width="240" height="55" style="display:block;width:100%;max-width:200px;border-bottom:1px solid #334155;"></canvas>
+                  <p style="font-size:0.62rem;color:#64748b;margin:2px 0 0;" id="pdf-nombre-firma-label">Firma del peticionario</p>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                  <div style="background:#f0fdf4;border:1px solid #22c55e;border-radius:6px;padding:4px 8px;">
+                    <p style="font-size:0.6rem;color:#15803d;font-weight:700;margin:0;">✅ FIRMADO</p>
+                    <p style="font-size:0.58rem;color:#64748b;margin:0;" id="pdf-fecha-firma">—</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA radicar -->
+        <button onclick="goToStepNombre('sp-post-firma')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;margin-bottom:8px;">
+          <span style="position:relative;z-index:1;">🚀 RADICAR ESTE DOCUMENTO →</span>
+          <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
+        </button>
+        <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">El documento no se puede descargar hasta que esté radicado · Proceso 100% legal</p>
+      </div>
+
+      <!-- ══════════════════════════════════════
            PASO: Post-firma → activar y radicar
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-post-firma">
@@ -2337,7 +2407,37 @@ function confirmarFirmaLanding(){
   guardarLeadFirma();
   jwTrack('documento_firmado', {});
   seleccionarPlanFinal('todas');
-  goToStepNombre('sp-post-firma');
+  mostrarPDFFirmado();
+  goToStepNombre('sp-pdf-firmado');
+}
+
+function mostrarPDFFirmado(){
+  // Rellenar datos del PDF
+  var elNombre  = document.getElementById('pdf-nombre');
+  var elCedula  = document.getElementById('pdf-cedula');
+  var elFecha   = document.getElementById('pdf-fecha-firma');
+  var elFirmaLbl= document.getElementById('pdf-nombre-firma-label');
+  if(elNombre)   elNombre.textContent   = _nombreConsultante || '—';
+  if(elCedula)   elCedula.textContent   = (_tipoConsultado==='cedula'?'C.C. ':'')+(_valorConsultado||'—');
+  if(elFirmaLbl) elFirmaLbl.textContent = _nombreConsultante || 'Peticionario';
+  // Fecha actual
+  var hoy = new Date();
+  var fechaStr = hoy.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  if(elFecha) elFecha.textContent = fechaStr;
+  // Renderizar firma en el PDF
+  if(_firmaDataUrl){
+    setTimeout(function(){
+      var cv = document.getElementById('pdf-firma-canvas');
+      if(!cv) return;
+      var ctx = cv.getContext('2d');
+      var img = new Image();
+      img.onload = function(){
+        ctx.clearRect(0,0,cv.width,cv.height);
+        ctx.drawImage(img,0,0,cv.width,cv.height);
+      };
+      img.src = _firmaDataUrl;
+    }, 80);
+  }
 }
 
 function guardarLeadFirma(){
@@ -2528,7 +2628,7 @@ function goToStepNombre(id){
   _pasoActual = id;
   // Ocultar todos los steps del flujo nuevo + viejo
   ['sp1','sp2','sp3','sp4','sp5','sp6','sp7',
-   'sp-simulacion','sp-datos-doc','sp-doc-preview','sp-firma-canvas','sp-post-firma','sp-pago-radicar',
+   'sp-simulacion','sp-datos-doc','sp-doc-preview','sp-firma-canvas','sp-pdf-firmado','sp-post-firma','sp-pago-radicar',
    'sp-consulta','sp-analizando','sp-resultados'].forEach(function(sid){
     var el=document.getElementById(sid);
     if(el) el.classList.remove('active');
@@ -2541,6 +2641,7 @@ function goToStepNombre(id){
     'sp-datos-doc':'📄 Generar tu documento',
     'sp-doc-preview':'📄 Tu Derecho de Petición',
     'sp-firma-canvas':'✍️ Firma tu documento',
+    'sp-pdf-firmado':'📄 Tu documento firmado',
     'sp-post-firma':'✅ Documento firmado',
     'sp-pago-radicar':'💳 Activar y radicar',
     'sp-consulta':'⚖️ Elige tu plan — Todo incluido',
