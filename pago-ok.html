@@ -41,6 +41,7 @@
     <div class="info-row"><span class="label">Plan</span><span class="val" id="ok-plan">—</span></div>
     <div class="info-row"><span class="label">Estado</span><span class="val" style="color:#16a34a;">✅ Confirmado</span></div>
   </div>
+  <div id="bloque-multas" style="margin-top:0;margin-bottom:16px;text-align:left;"></div>
 
   <a class="btn-wa" id="btn-wa" href="#" onclick="abrirWA(event)">
     <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L0 24l6.302-1.51A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.359-.213-3.721.892.934-3.626-.233-.372A9.818 9.818 0 1112 21.818z" fill="#fff"/></svg>
@@ -69,17 +70,48 @@ document.getElementById('ok-nombre').textContent = datos.nombre || 'Cliente';
 document.getElementById('ok-monto').textContent  = datos.monto  || '—';
 document.getElementById('ok-plan').textContent   = datos.plan   || '—';
 
+// Mostrar multas a radicar
+try {
+  var multasJson = localStorage.getItem('jw_multas_json');
+  if(multasJson){
+    var multas = JSON.parse(multasJson);
+    if(multas && multas.length > 0){
+      var bloqueMultas = document.getElementById('bloque-multas');
+      if(bloqueMultas){
+        var mHtml = '<p style="color:#15803d;font-size:0.78rem;font-weight:700;margin-bottom:8px;">📋 Multas a radicar ('+multas.length+'):</p>';
+        multas.forEach(function(m){
+          mHtml += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:0.78rem;color:#166534;">' +
+            '📌 <strong>' + (m.infraccion || '—') + '</strong> → ' + (m.secretaria || 'Secretaría pendiente') + '</div>';
+        });
+        bloqueMultas.innerHTML = mHtml;
+      }
+    }
+  }
+} catch(e){}
+
 function buildMsg(){
-  return '*¡Pago confirmado! ✅*\n\n' +
+  var msg = '*¡Pago confirmado! ✅*\n\n' +
     '🎉 Hola, acabo de realizar el pago en *JurídicosWeb* y quiero activar mi trámite.\n\n' +
     '📋 *Mis datos:*\n' +
     '👤 Nombre: ' + (datos.nombre||'—') + '\n' +
     '🪪 Cédula / Placa: ' + (datos.cedula||'—') + '\n' +
     '💳 Plan: ' + (datos.plan||'—') + '\n' +
     '💰 Monto: ' + (datos.monto||'—') + '\n' +
-    '🔖 Referencia: ' + ref + '\n\n' +
-    'Por favor confirmenme que el pago fue recibido y cuándo radican el documento. ✅\n\n' +
+    '🔖 Referencia: ' + ref + '\n\n';
+  try {
+    var mj = localStorage.getItem('jw_multas_json');
+    if(mj){
+      var ml = JSON.parse(mj);
+      if(ml && ml.length){
+        msg += '📑 Multas a radicar (' + ml.length + '):\n';
+        ml.forEach(function(m,i){ msg += '  '+(i+1)+'. '+m.infraccion+' → '+m.secretaria+'\n'; });
+        msg += '\n';
+      }
+    }
+  }catch(e){}
+  msg += 'Por favor confirmenme que el pago fue recibido y cuándo radican los documentos. ✅\n\n' +
     '_JurídicosWeb — Trámite digital_';
+  return msg;
 }
 
 function abrirWA(e){
@@ -95,7 +127,7 @@ setTimeout(function(){
 // Limpiar localStorage
 setTimeout(function(){
   try{
-    ['jw_pago_nombre','jw_pago_wa','jw_pago_cedula','jw_pago_monto','jw_pago_plan']
+    ['jw_pago_nombre','jw_pago_wa','jw_pago_cedula','jw_pago_monto','jw_pago_plan','jw_multas_json','jw_num_multas']
       .forEach(function(k){ localStorage.removeItem(k); });
   }catch(e){}
 }, 5000);

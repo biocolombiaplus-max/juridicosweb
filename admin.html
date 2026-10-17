@@ -792,10 +792,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <p style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin:0 0 7px;">Plan del cliente</p>
         <div style="display:flex;gap:8px;">
           <label style="flex:1;display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #cbd5e1;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray800);" id="lbl-plan-una">
-            <input type="radio" name="mm-plan" value="una" id="mm-plan-una" style="accent-color:#1e3a8a;"> $25.000 — Una multa
+            <input type="radio" name="mm-plan" value="una" id="mm-plan-una" style="accent-color:#1e3a8a;"> $49.000 — Una multa
           </label>
           <label style="flex:1;display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #22c55e;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;color:#15803d;" id="lbl-plan-todas">
-            <input type="radio" name="mm-plan" value="todas" id="mm-plan-todas" checked style="accent-color:#16a34a;"> $49.000 — Todas las que apliquen
+            <input type="radio" name="mm-plan" value="todas" id="mm-plan-todas" checked style="accent-color:#16a34a;"> $79.000 — Todas las que apliquen
           </label>
         </div>
       </div>
@@ -2040,8 +2040,8 @@ function guardarMultasAdmin(){
       var plan      = planEl ? planEl.value : 'todas';
       var numMultas = document.querySelectorAll('#mm-lista .mm-row').length;
       var planTexto = plan === 'una'
-        ? 'la multa seleccionada ($25.000)'
-        : numMultas > 1 ? 'tus ' + numMultas + ' multas ($49.000)' : 'tu multa ($25.000)';
+        ? 'la multa seleccionada ($49.000)'
+        : numMultas > 1 ? 'tus ' + numMultas + ' multas ($79.000)' : 'tu multa ($49.000)';
 
       var msg = '¡Hola ' + nombre + '! 👋 Soy de *JurídicosWeb*.\n\n' +
         '✅ *Tu documento legal está listo.*\n\n' +
@@ -2730,7 +2730,7 @@ function renderRemarketing(filtro){
     return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);
   }).length;
   var conWA = all.filter(function(r){ return r['WhatsApp']||r['Celular']||r['Teléfono']; }).length;
-  var valorPerdido = all.length * 49000;
+  var valorPerdido = all.length * 79000;
 
   // Render stats
   var statsHtml = [
