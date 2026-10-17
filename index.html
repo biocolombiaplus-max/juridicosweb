@@ -2903,10 +2903,19 @@ function copiarLlave(btn){
 }
 
 // ── Selector método de pago ─────────────────────────────────────────────────
+function _precargarEpayco(){
+  if(window.ePayco || document.getElementById('epayco-script')) return;
+  var s=document.createElement('script');
+  s.id='epayco-script';
+  s.src='https://checkout.epayco.co/checkout.js';
+  document.head.appendChild(s);
+}
+
 function seleccionarMetodoPago(metodo){
   var esLlave = metodo==='llave';
   document.getElementById('panel-llave').style.display  = esLlave ? 'block' : 'none';
   document.getElementById('panel-epayco').style.display = esLlave ? 'none'  : 'block';
+  if(!esLlave) _precargarEpayco();
   document.getElementById('badge-llave-sel').style.display  = esLlave ? 'block' : 'none';
   document.getElementById('badge-epayco-sel').style.display = esLlave ? 'none'  : 'block';
   var btnL = document.getElementById('btn-metodo-llave');
@@ -2946,10 +2955,28 @@ function abrirEpayco(){
     localStorage.setItem('jw_num_multas',  md.length);
   }catch(e){}
   if(!window.ePayco){
-    var s=document.createElement('script');
-    s.src='https://checkout.epayco.co/checkout.js';
-    s.onload=function(){ _lanzarEpayco(monto,planDesc); };
-    document.head.appendChild(s);
+    // Script ya se intentó precargar — esperar máx 5s
+    var existing = document.getElementById('epayco-script');
+    var _btn = document.querySelector('[onclick="abrirEpayco()"]');
+    if(_btn){ _btn.disabled=true; _btn.style.opacity='0.7'; _btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Preparando pasarela...</span>'; }
+    var _tries=0;
+    var _wait=setInterval(function(){
+      _tries++;
+      if(window.ePayco){
+        clearInterval(_wait);
+        if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+        _lanzarEpayco(monto,planDesc);
+      } else if(_tries>=50){
+        clearInterval(_wait);
+        if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+        // Cargar de nuevo si falló el preload
+        var s=document.createElement('script');
+        s.src='https://checkout.epayco.co/checkout.js';
+        s.onload=function(){ _lanzarEpayco(monto,planDesc); };
+        document.head.appendChild(s);
+      }
+    },100);
+    if(!existing){ _precargarEpayco(); }
   } else {
     _lanzarEpayco(monto,planDesc);
   }
