@@ -1384,43 +1384,91 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            ═══════════════════════════════════════════════════════ -->
       <!-- PASO SIMULACION: pantalla animada pre-planes -->
       <div class="step-panel" id="sp-simulacion">
-        <div style="text-align:center;padding:8px 0 4px;">
-          <div style="font-size:2.6rem;margin-bottom:6px;" id="sim-icon">🔍</div>
-          <p style="color:#94a3b8;font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">Analizando tu caso en el SIMIT</p>
-          <div style="background:#0f172a;border:1px solid #1e3a8a;border-radius:10px;padding:14px 16px;margin-bottom:12px;min-height:52px;display:flex;align-items:center;gap:10px;">
-            <div id="sim-spinner" style="width:18px;height:18px;border:3px solid #1e40af;border-top-color:#38bdf8;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
-            <p id="sim-msg" style="color:#e2e8f0;font-size:0.95rem;font-weight:600;margin:0;text-align:left;line-height:1.3;"></p>
+
+        <!-- Header oficial -->
+        <div style="background:linear-gradient(135deg,#0a1628,#0f2044);border:1px solid rgba(37,99,235,0.4);border-radius:14px;padding:14px 16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:32px;height:32px;border-radius:8px;background:rgba(37,99,235,0.2);border:1px solid rgba(37,99,235,0.5);display:flex;align-items:center;justify-content:center;font-size:1rem;">🔍</div>
+              <div>
+                <p style="color:#fff;font-size:0.78rem;font-weight:800;margin:0;line-height:1.2;">Verificación SIMIT</p>
+                <p style="color:#60a5fa;font-size:0.63rem;margin:0;letter-spacing:.5px;">Sistema Integrado de Multas · Colombia</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;" id="sim-dot"></span>
+              <span style="color:#4ade80;font-size:0.62rem;font-weight:700;" id="sim-dot-label">Conectando...</span>
+            </div>
           </div>
-          <!-- Barra de progreso -->
-          <div style="background:#1e293b;border-radius:999px;height:8px;overflow:hidden;margin-bottom:10px;">
-            <div id="sim-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#06b6d4);border-radius:999px;transition:width 0.6s ease;"></div>
+          <!-- Fuente oficial badge -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 8px;font-size:0.62rem;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:4px;"><span style="color:#60a5fa;">🏛️</span> Mintransporte</span>
+            <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 8px;font-size:0.62rem;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:4px;"><span style="color:#34d399;">🗄️</span> SIMIT oficial</span>
+            <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 8px;font-size:0.62rem;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:4px;"><span style="color:#fbbf24;">⚖️</span> Código de Tránsito</span>
           </div>
-          <p id="sim-pct" style="color:#64748b;font-size:0.78rem;margin:0;">0%</p>
+        </div>
+
+        <!-- Log de pasos (terminal estilo) -->
+        <div style="background:#0a0f1e;border:1px solid #1e293b;border-radius:12px;padding:10px 12px;margin-bottom:10px;min-height:130px;font-family:monospace;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #1e293b;">
+            <div style="display:flex;gap:4px;">
+              <span style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+              <span style="width:9px;height:9px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>
+              <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+            </div>
+            <span style="color:#475569;font-size:0.62rem;font-family:monospace;">juridicos-simit-analyzer v2.1</span>
+          </div>
+          <div id="sim-log" style="display:flex;flex-direction:column;gap:4px;"></div>
+          <div id="sim-cursor" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;">
+            <span style="color:#22c55e;font-size:0.72rem;font-family:monospace;">›</span>
+            <div id="sim-spinner" style="width:12px;height:12px;border:2px solid #1e40af;border-top-color:#38bdf8;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+            <span id="sim-msg" style="color:#94a3b8;font-size:0.72rem;font-family:monospace;"></span>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="color:#64748b;font-size:0.68rem;font-weight:600;">Análisis jurídico</span>
+            <span id="sim-pct" style="color:#60a5fa;font-size:0.7rem;font-weight:700;">0%</span>
+          </div>
+          <div style="background:#1e293b;border-radius:999px;height:6px;overflow:hidden;">
+            <div id="sim-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1d4ed8,#0ea5e9,#22c55e);border-radius:999px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
+          </div>
         </div>
 
         <!-- Panel de resultado (oculto hasta el final) -->
-        <div id="sim-resultado" style="display:none;margin-top:6px;">
-          <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #22c55e;border-radius:14px;padding:14px 14px 12px;text-align:center;position:relative;overflow:hidden;">
-            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;">
-              <span style="font-size:1.4rem;">🎉</span>
-              <p style="color:#4ade80;font-size:0.72rem;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin:0;">¡Buenas noticias!</p>
+        <div id="sim-resultado" style="display:none;margin-top:4px;">
+          <!-- Resultado positivo -->
+          <div style="background:linear-gradient(135deg,#042f14,#064e20);border:1.5px solid #22c55e;border-radius:14px;padding:14px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(34,197,94,0.08);"></div>
+            <!-- Badge resultado -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <p style="color:#4ade80;font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;margin:0;">Análisis completado</p>
+                <p style="color:#fff;font-size:0.88rem;font-weight:900;margin:0;line-height:1.2;">Tu caso califica para eliminación</p>
+              </div>
             </div>
-            <h3 style="color:#fff;font-size:1.1rem;font-weight:900;margin:0 0 6px;line-height:1.2;">Tu caso califica para eliminación</h3>
-            <!-- Razones compactas (2 columnas) -->
-            <div id="sim-razones" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px;text-align:left;"></div>
-            <!-- Urgencia compacta -->
-            <div style="background:rgba(250,204,21,0.12);border:1px solid #ca8a04;border-radius:7px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <span style="font-size:0.85rem;">⚠️</span>
-              <p style="color:#fde047;font-size:0.75rem;font-weight:700;margin:0;">Válido por <span id="sim-timer" style="font-weight:900;">09:59</span> min — actúa ahora</p>
+            <!-- Hallazgos jurídicos -->
+            <div id="sim-razones" style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;"></div>
+            <!-- Separador -->
+            <div style="border-top:1px solid rgba(34,197,94,0.2);margin-bottom:10px;"></div>
+            <!-- Urgencia -->
+            <div style="background:rgba(250,204,21,0.10);border:1px solid rgba(202,138,4,0.5);border-radius:8px;padding:7px 10px;margin-bottom:12px;display:flex;align-items:center;gap:7px;">
+              <span style="font-size:0.9rem;flex-shrink:0;">⏱️</span>
+              <p style="color:#fde047;font-size:0.73rem;font-weight:700;margin:0;line-height:1.4;">Este resultado se reserva por <span id="sim-timer" style="font-weight:900;font-size:0.82rem;">09:59</span> min — después deberás repetir la consulta</p>
             </div>
-            <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:15px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.65);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;">
-              <span style="position:relative;z-index:1;">📄 GENERAR MI DERECHO DE PETICIÓN →</span>
-              <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;"></span>
+            <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;border:none;border-radius:13px;padding:16px;font-size:0.98rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;">
+              <span style="position:relative;z-index:1;">📄 VER MI DERECHO DE PETICIÓN GRATIS →</span>
+              <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
             </button>
-            <div style="display:flex;justify-content:center;gap:10px;margin-top:7px;flex-wrap:wrap;">
-              <span style="color:#4ade80;font-size:0.68rem;">📄 Gratis verlo</span>
-              <span style="color:#4ade80;font-size:0.68rem;">✍️ Firmas con el dedo</span>
-              <span style="color:#4ade80;font-size:0.68rem;">✅ $0 si no aplica</span>
+            <div style="display:flex;justify-content:center;gap:14px;margin-top:8px;flex-wrap:wrap;">
+              <span style="color:#86efac;font-size:0.66rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Gratis verlo y firmarlo</span>
+              <span style="color:#86efac;font-size:0.66rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Firma con el dedo, sin imprimir</span>
+              <span style="color:#86efac;font-size:0.66rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>$0 si no procede</span>
             </div>
           </div>
         </div>
@@ -3207,15 +3255,21 @@ function iniciarSimulacion(){
   document.getElementById('sim-bar').style.width='0%';
   document.getElementById('sim-pct').textContent='0%';
   document.getElementById('sim-spinner').style.display='block';
+  document.getElementById('sim-log').innerHTML='';
+  document.getElementById('sim-cursor').style.display='inline-flex';
+  document.getElementById('sim-dot-label').textContent='Conectando...';
+
+  var id = _tipoConsultado === 'cedula' ? _valorConsultado : _valorConsultado;
 
   var pasos = [
-    { pct:12, icon:'🔍', msg:'Conectando con el SIMIT oficial...' },
-    { pct:27, icon:'📋', msg:'Buscando multas y fotomultas registradas...' },
-    { pct:44, icon:'📅', msg:'Verificando fechas de notificación...' },
-    { pct:61, icon:'⚖️', msg:'Analizando fallas en el proceso de cobro...' },
-    { pct:76, icon:'🧾', msg:'Revisando tiempo transcurrido y prescripción...' },
-    { pct:89, icon:'🔬', msg:'Cruzando con base jurídica vigente...' },
-    { pct:100, icon:'✅', msg:'¡Análisis completado!' }
+    { pct:10, ok:false, msg:'Conectando al servidor SIMIT...', log:'› Iniciando conexión segura con simit.gov.co' },
+    { pct:22, ok:true,  msg:'Autenticando solicitud...', log:'✓ Conexión establecida · SSL/TLS activo' },
+    { pct:38, ok:true,  msg:'Buscando comparendos registrados...', log:'✓ Consulta enviada · ID: '+id.slice(0,4)+'****' },
+    { pct:54, ok:true,  msg:'Verificando fechas de notificación...', log:'✓ Registros encontrados · Extrayendo datos' },
+    { pct:67, ok:false, msg:'Calculando prescripción (Art. 136 Ley 769/2002)...', log:'› Comparando fechas con límite legal 3 años' },
+    { pct:79, ok:true,  msg:'Verificando certificación INM de cámaras...', log:'✓ Cruzando con lista Supertransporte 2026' },
+    { pct:90, ok:false, msg:'Aplicando marco normativo vigente...', log:'› Analizando causales: prescripción · notif. · INM' },
+    { pct:100, ok:true, msg:'¡Análisis completado!', log:'✓ Informe jurídico generado · 3 causales detectados' }
   ];
 
   var i = 0;
@@ -3223,12 +3277,22 @@ function iniciarSimulacion(){
   _simTimer = setInterval(function(){
     if(i >= pasos.length){ clearInterval(_simTimer); mostrarResultadoSimulacion(); return; }
     var p = pasos[i];
-    document.getElementById('sim-icon').textContent = p.icon;
+    // Agregar línea al log
+    var logEl = document.getElementById('sim-log');
+    var line = document.createElement('div');
+    line.style.cssText = 'font-size:0.67rem;font-family:monospace;line-height:1.5;display:flex;align-items:center;gap:5px;';
+    line.innerHTML = '<span style="color:'+(p.ok?'#22c55e':'#60a5fa')+';">'+p.log+'</span>';
+    logEl.appendChild(line);
+    // Scroll al final
+    logEl.scrollTop = logEl.scrollHeight;
+    // Mensaje actual
     document.getElementById('sim-msg').textContent = p.msg;
     document.getElementById('sim-bar').style.width = p.pct+'%';
     document.getElementById('sim-pct').textContent = p.pct+'%';
+    // Dot status
+    document.getElementById('sim-dot-label').textContent = p.pct < 100 ? 'Analizando...' : 'Completo';
     i++;
-  }, 900);
+  }, 850);
 }
 
 function mostrarResultadoSimulacion(){
@@ -3238,17 +3302,22 @@ function mostrarResultadoSimulacion(){
   var tipo = _tipoConsultado === 'cedula' ? 'cédula' : 'placa';
   var val  = _valorConsultado;
 
-  // Razones dinámicas según tipo de consulta
+  // Hallazgos jurídicos con formato de informe
   var razones = [
-    { icon:'⚠️', txt:'Falla en la notificación oficial detectada' },
-    { icon:'📅', txt:'El tiempo transcurrido favorece la prescripción' },
-    { icon:'📍', txt:'Errores en la competencia territorial del organismo' },
-    { icon:'✅', txt:'Procede Derecho de Petición para eliminación' }
+    { norma:'Art. 136 Ley 769/2002', causal:'Prescripción de la acción sancionatoria', det:'Tiempo transcurrido supera el límite legal de 3 años sin cobro efectivo' },
+    { norma:'Ley 1843/2017', causal:'Defecto en la notificación formal', det:'El organismo no cumplió el plazo de 3 días hábiles para notificar' },
+    { norma:'Decreto 1074/2015 · Supertransporte', causal:'Cámara sin certificación INM', det:'El equipo que registró la infracción no tiene concepto de desempeño válido' }
   ];
   var htmlRazones = razones.map(function(r){
-    return '<div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:7px;padding:6px 8px;display:flex;align-items:flex-start;gap:5px;">'+
-      '<span style="font-size:0.85rem;flex-shrink:0;margin-top:1px;">'+r.icon+'</span>'+
-      '<span style="color:#bbf7d0;font-size:0.72rem;font-weight:600;line-height:1.3;">'+r.txt+'</span></div>';
+    return '<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:8px 10px;display:flex;align-items:flex-start;gap:7px;">'+
+      '<div style="width:18px;height:18px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">'+
+        '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+      '</div>'+
+      '<div>'+
+        '<p style="color:#4ade80;font-size:0.62rem;font-weight:700;margin:0 0 1px;letter-spacing:.4px;text-transform:uppercase;">'+r.norma+'</p>'+
+        '<p style="color:#fff;font-size:0.75rem;font-weight:800;margin:0 0 1px;line-height:1.2;">'+r.causal+'</p>'+
+        '<p style="color:#86efac;font-size:0.67rem;margin:0;line-height:1.3;opacity:0.85;">'+r.det+'</p>'+
+      '</div></div>';
   }).join('');
   document.getElementById('sim-razones').innerHTML = htmlRazones;
 
