@@ -2918,7 +2918,7 @@ function postJSON(payload){
   return fetch(SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'text/plain' }
   }).then(function(r){ return r.json(); });
 }
 

@@ -2415,7 +2415,7 @@ var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPu
     fetch(GOOGLE_SHEET_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       keepalive: true
     }).catch(function(){});
   } catch(e){}
@@ -3089,7 +3089,7 @@ function yaHiceElPago(){
   jwTrack('pago_comprobante_enviado', { plan: _planFinal });
   try {
     var _bp = { _accion:'registrar_paso', paso:'pago_iniciado', cedula: _valorConsultado||'' };
-    fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_bp), headers:{'Content-Type':'application/json'}, keepalive:true }).catch(function(){});
+    fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_bp), headers:{'Content-Type':'text/plain'}, keepalive:true }).catch(function(){});
   } catch(e){}
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
@@ -3112,7 +3112,7 @@ goToStepNombre = function(id){
   if(_pasosTracks.indexOf(id) !== -1){
     try {
       var _tp = { _accion:'registrar_paso', paso: id, cedula: (typeof _valorConsultado !== 'undefined' ? _valorConsultado : '') };
-      fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_tp), headers:{'Content-Type':'application/json'}, keepalive:true }).catch(function(){});
+      fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_tp), headers:{'Content-Type':'text/plain'}, keepalive:true }).catch(function(){});
     } catch(e){}
   }
 };
