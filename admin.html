@@ -366,7 +366,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <button class="btn-hamburger" onclick="toggleSidebar(true)" aria-label="Abrir menú">☰</button>
       <h1 id="topbar-title">Dashboard</h1>
     </div>
-    <div class="topbar-actions">
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span id="conexion-status"></span>
       <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 <span>Actualizar</span></button>
       <button class="btn btn-primary btn-sm" onclick="openNuevoCaso()">➕ Nuevo Caso</button>
     </div>
@@ -1020,6 +1021,7 @@ function toggleSidebar(forzar){
 // ══════════════════════════════════════════════════
 function loadVisitas(){
   var url = SCRIPT_URL + '?accion=listar_visitas&_t=' + Date.now();
+  setAllRefreshBtns(true);
   fetch(url, { cache:'no-store' })
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -1065,35 +1067,62 @@ function loadVisitas(){
       });
       html += '</table>';
       document.getElementById('vis-tabla').innerHTML = html;
+      setAllRefreshBtns(false);
+      showToast('✅ Visitas actualizadas','success');
     })
     .catch(function(e){
-      document.getElementById('vis-tabla').innerHTML = '<p style="color:#ef4444;padding:8px 0;">⚠️ No se pudo cargar. El Apps Script necesita manejar la acción "listar_visitas".</p>';
+      setAllRefreshBtns(false);
+      document.getElementById('vis-tabla').innerHTML = '<p style="color:#ef4444;padding:8px 0;">⚠️ El Apps Script no reconoce "listar_visitas". Asegúrate de haber pegado el código nuevo y desplegado <strong>Nueva versión</strong>.</p>';
+      showToast('⚠️ Apps Script sin conexión — actualiza el código y redespliega','error');
     });
 }
 
+function setAllRefreshBtns(loading){
+  document.querySelectorAll('[onclick*="loadData"], [onclick*="loadVisitas"], [onclick*="loadDocumentos"]').forEach(function(btn){
+    if(loading){
+      btn.dataset._orig = btn.innerHTML;
+      btn.innerHTML = '⏳ Cargando...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+    } else {
+      if(btn.dataset._orig){ btn.innerHTML = btn.dataset._orig; delete btn.dataset._orig; }
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }
+  });
+}
+
+function setConexionStatus(ok, msg){
+  var el = document.getElementById('conexion-status');
+  if(!el) return;
+  el.innerHTML = ok
+    ? '<span style="display:inline-flex;align-items:center;gap:5px;background:#14532d;color:#4ade80;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;"></span>' + msg + '</span>'
+    : '<span style="display:inline-flex;align-items:center;gap:5px;background:#450a0a;color:#f87171;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><span style="width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;"></span>' + msg + '</span>';
+}
+
 function loadData(){
-  // Lee los casos a través del propio Apps Script (acción "listar_casos" en
-  // doGet) en vez de leer el Sheet directamente — así no depende en nada de
-  // la configuración de "Compartir" de la hoja, que venía fallando sin
-  // razón clara. El script ya está desplegado como "Cualquiera puede
-  // acceder", que es lo que permite que los formularios guarden datos hoy.
   var url = SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now();
-  document.getElementById('last-sync').textContent='Actualizando...';
+  var sync = document.getElementById('last-sync');
+  if(sync) sync.textContent = 'Actualizando...';
+  setAllRefreshBtns(true);
+  setConexionStatus(null, 'Conectando...');
   fetch(url, { cache: 'no-store' })
     .then(function(r){ return r.json(); })
     .then(function(data){
+      setAllRefreshBtns(false);
       if(!data.ok) throw new Error(data.error || 'Respuesta inesperada del servidor');
       allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']; });
       renderAll();
-      document.getElementById('last-sync').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CO');
+      var hora = new Date().toLocaleTimeString('es-CO');
+      if(sync) sync.textContent = 'Actualizado: ' + hora;
+      setConexionStatus(true, '✅ Conectado — ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' · ' + hora);
+      showToast('✅ Datos actualizados — ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' en el sistema', 'success');
     })
     .catch(function(err){
-      showToast('⚠️ Error cargando datos: '+err.message,'error');
-      document.getElementById('last-sync').textContent='Error de carga — mostrando datos de ejemplo';
-      // Datos demo si el script no responde, para que el panel nunca se
-      // quede vacío mientras se soluciona el problema.
-      allRows = getDemoRows();
-      renderAll();
+      setAllRefreshBtns(false);
+      setConexionStatus(false, '⚠️ Sin conexión con el Apps Script');
+      showToast('⚠️ Error: ' + err.message + ' — verifica que el Apps Script esté desplegado', 'error');
+      if(sync) sync.textContent = '⚠️ Error — ' + err.message.slice(0,60);
     });
 }
 
