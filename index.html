@@ -2402,22 +2402,22 @@ var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPu
     var payload = {
       _accion: 'registrar_visita',
       fuente:       fuente,
-      utm_source:   utmSrc,
-      utm_medium:   utmMed,
-      utm_campaign: utmCamp,
-      utm_content:  utmCont,
+      utm_source:   utmSrc || '',
+      utm_medium:   utmMed || '',
+      utm_campaign: utmCamp || '',
+      utm_content:  utmCont || '',
       referrer:     document.referrer || '',
       dispositivo:  /Mobi|Android/i.test(navigator.userAgent) ? 'movil' : 'escritorio',
       pagina:       window.location.pathname || '/'
     };
-    var fd = new FormData();
-    Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
-    // sendBeacon is fire-and-forget — not cancelled on page navigation
-    if(navigator.sendBeacon) {
-      navigator.sendBeacon(GOOGLE_SHEET_URL, fd);
-    } else {
-      fetch(GOOGLE_SHEET_URL, { method:'POST', body: fd }).catch(function(){});
-    }
+    // sendBeacon no sigue redirecciones (Apps Script siempre redirige) → usar fetch con keepalive
+    // keepalive permite que la petición complete aunque el usuario navegue
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true
+    }).catch(function(){});
   } catch(e){}
 })();
 var SIMIT_PROXY_URL    = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';
@@ -3089,9 +3089,7 @@ function yaHiceElPago(){
   jwTrack('pago_comprobante_enviado', { plan: _planFinal });
   try {
     var _bp = { _accion:'registrar_paso', paso:'pago_iniciado', cedula: _valorConsultado||'' };
-    var _bfd = new FormData(); Object.keys(_bp).forEach(function(k){ _bfd.append(k, _bp[k]); });
-    navigator.sendBeacon ? navigator.sendBeacon(GOOGLE_SHEET_URL, _bfd)
-      : fetch(GOOGLE_SHEET_URL, { method:'POST', body:_bfd, keepalive:true }).catch(function(){});
+    fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_bp), headers:{'Content-Type':'application/json'}, keepalive:true }).catch(function(){});
   } catch(e){}
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
@@ -3114,9 +3112,7 @@ goToStepNombre = function(id){
   if(_pasosTracks.indexOf(id) !== -1){
     try {
       var _tp = { _accion:'registrar_paso', paso: id, cedula: (typeof _valorConsultado !== 'undefined' ? _valorConsultado : '') };
-      var _tfd = new FormData(); Object.keys(_tp).forEach(function(k){ _tfd.append(k, _tp[k]); });
-      navigator.sendBeacon ? navigator.sendBeacon(GOOGLE_SHEET_URL, _tfd)
-        : fetch(GOOGLE_SHEET_URL, { method:'POST', body:_tfd, keepalive:true }).catch(function(){});
+      fetch(GOOGLE_SHEET_URL, { method:'POST', body:JSON.stringify(_tp), headers:{'Content-Type':'application/json'}, keepalive:true }).catch(function(){});
     } catch(e){}
   }
 };
