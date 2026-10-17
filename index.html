@@ -128,37 +128,89 @@ body{font-family:'Inter',sans-serif;background:var(--cream);color:#1a1a2e;overfl
 .btn-shimmer{background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 30%,var(--gold3) 50%,var(--gold2) 70%,var(--gold) 100%);background-size:200% auto;animation:shimmer 2.5s linear infinite;color:var(--navy);}
 
 /* ===== NAV ===== */
-nav{position:fixed;top:0;width:100%;z-index:990;transition:.3s;}
-nav.scrolled{background:rgba(10,22,40,0.97);backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,0.3);}
-.nav-inner{display:flex;justify-content:space-between;align-items:center;padding:14px 5%;}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:9px;display:flex;align-items:center;justify-content:center;}
-.logo-mark i{color:var(--navy);font-size:18px;}
-.logo-name{color:#fff;font-family:'Playfair Display',serif;font-size:1.2rem;line-height:1;}
-.logo-name small{display:block;color:var(--gold);font-family:'Inter',sans-serif;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-weight:500;}
-.nav-right{display:flex;align-items:center;gap:12px;}
-@media(max-width:600px){.nav-cta-text{display:none;}}
+nav{position:fixed;top:0;width:100%;z-index:990;transition:background .3s,box-shadow .3s;}
+nav.scrolled{background:rgba(8,16,32,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(201,162,39,0.2),0 4px 24px rgba(0,0,0,0.4);}
+.nav-inner{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:66px;}
+.logo{display:flex;align-items:center;gap:11px;text-decoration:none;flex-shrink:0;}
+.logo-mark{
+  width:38px;height:38px;
+  background:linear-gradient(145deg,var(--gold) 0%,var(--gold2) 50%,#a8840e 100%);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 12px rgba(201,162,39,0.45),inset 0 1px 0 rgba(255,255,255,0.25);
+  flex-shrink:0;
+}
+.logo-mark i{color:#0a1628;font-size:17px;}
+.logo-name{display:flex;flex-direction:column;gap:1px;}
+.logo-name-main{
+  color:#ffffff;
+  font-family:'Playfair Display',serif;
+  font-size:1.18rem;
+  font-weight:700;
+  line-height:1;
+  letter-spacing:-0.3px;
+  white-space:nowrap;
+}
+.logo-name-main span{color:var(--gold);}
+.logo-name-sub{
+  color:rgba(201,162,39,0.75);
+  font-family:'Inter',sans-serif;
+  font-size:0.56rem;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  font-weight:600;
+  white-space:nowrap;
+  line-height:1;
+}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-cta-btn{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);
+  font-family:'Inter',sans-serif;
+  font-size:0.78rem;
+  font-weight:800;
+  padding:9px 16px;
+  border-radius:10px;
+  text-decoration:none;
+  border:none;cursor:pointer;
+  white-space:nowrap;
+  box-shadow:0 2px 12px rgba(201,162,39,0.35);
+  letter-spacing:0.2px;
+  transition:transform .15s,box-shadow .15s;
+}
+.nav-cta-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,162,39,0.5);}
+.nav-cta-btn i{font-size:0.85rem;}
+@media(max-width:520px){
+  .nav-inner{height:60px;padding:0 4%;}
+  .logo-mark{width:34px;height:34px;border-radius:9px;}
+  .logo-mark i{font-size:15px;}
+  .logo{gap:9px;}
+  .logo-name-main{font-size:1.05rem;}
+  .logo-name-sub{display:none;}
+  .nav-cta-btn .nav-cta-label{display:none;}
+  .nav-cta-btn{padding:9px 12px;border-radius:9px;}
+}
 
 /* ===== ALERT BAR ===== */
-.alert-bar{background:linear-gradient(90deg,var(--navy),var(--navy2));padding:0;margin-top:68px;border-bottom:1px solid rgba(201,162,39,0.25);overflow:hidden;cursor:pointer;}
-.alert-bar-inner{display:flex;align-items:stretch;min-height:46px;}
-.alert-bar-badge{background:rgba(201,162,39,0.14);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;border-right:1px solid rgba(201,162,39,0.2);}
-.alert-bar-badge span{color:var(--gold3);font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap;}
-.alert-bar-badge i{color:var(--gold);font-size:0.7rem;animation:ping 1.6s ease-in-out infinite;}
-.alert-bar-scroll{flex:1;overflow:hidden;display:flex;align-items:center;padding:0 16px;}
-.alert-bar-scroll p{color:#fff;font-size:0.78rem;font-weight:500;line-height:1.5;white-space:nowrap;}
+.alert-bar{background:linear-gradient(90deg,#070f1e,#0d1f3c,#070f1e);padding:0;margin-top:66px;border-bottom:1px solid rgba(201,162,39,0.2);overflow:hidden;cursor:pointer;}
+.alert-bar-inner{display:flex;align-items:stretch;min-height:44px;}
+.alert-bar-badge{background:rgba(201,162,39,0.12);display:flex;align-items:center;gap:7px;padding:0 14px;flex-shrink:0;border-right:1px solid rgba(201,162,39,0.18);}
+.alert-bar-badge span{color:var(--gold3);font-size:0.63rem;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;white-space:nowrap;}
+.alert-bar-badge i{color:var(--gold);font-size:0.68rem;animation:ping 1.6s ease-in-out infinite;}
+.alert-bar-scroll{flex:1;overflow:hidden;display:flex;align-items:center;padding:0 14px;}
+.alert-bar-scroll p{color:rgba(255,255,255,0.88);font-size:0.76rem;font-weight:500;line-height:1.5;white-space:nowrap;}
 .alert-bar-scroll strong{color:var(--gold3);font-weight:800;}
-.alert-bar-cta{background:rgba(201,162,39,0.16);display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-left:1px solid rgba(201,162,39,0.2);cursor:pointer;transition:.2s;}
-.alert-bar-cta:hover{background:rgba(201,162,39,0.28);}
-.alert-bar-cta span{color:var(--gold3);font-size:0.72rem;font-weight:800;white-space:nowrap;}
+.alert-bar-cta{background:rgba(201,162,39,0.14);display:flex;align-items:center;padding:0 16px;flex-shrink:0;border-left:1px solid rgba(201,162,39,0.18);cursor:pointer;transition:.2s;}
+.alert-bar-cta:hover{background:rgba(201,162,39,0.26);}
+.alert-bar-cta span{color:var(--gold3);font-size:0.7rem;font-weight:800;white-space:nowrap;}
 @media(max-width:600px){
-  .logo-name small{display:none;}
-  .logo-name{font-size:1.05rem;}
+  .alert-bar{margin-top:60px;}
   .alert-bar-badge{padding:0 10px;}
   .alert-bar-badge span{display:none;}
   .alert-bar-cta{display:none;}
   .alert-bar-scroll{padding:0 10px;}
-  .alert-bar-scroll p{font-size:0.72rem;animation:marquee 18s linear infinite;}
+  .alert-bar-scroll p{font-size:0.7rem;animation:marquee 18s linear infinite;}
   @keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 }
 
@@ -732,10 +784,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="nav-inner">
     <a href="#" class="logo">
       <div class="logo-mark"><i class="fas fa-balance-scale"></i></div>
-      <div class="logo-name">JurídicosWeb<small>Expertos en Tránsito · Colombia</small></div>
+      <div class="logo-name">
+        <span class="logo-name-main">Jurídicos<span>Web</span></span>
+        <span class="logo-name-sub">Expertos en Tránsito · Colombia</span>
+      </div>
     </a>
     <div class="nav-right">
-      <a href="#" class="btn btn-gold btn-sm" onclick="openSimitModal(event)"><i class="fas fa-search"></i> <span class="nav-cta-text">Consultar mis multas o fotomultas</span></a>
+      <button class="nav-cta-btn" onclick="openSimitModal(event)">
+        <i class="fas fa-search"></i>
+        <span class="nav-cta-label">Consultar mis multas o fotomultas</span>
+      </button>
     </div>
   </div>
 </nav>
@@ -1232,7 +1290,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
-      <a href="#" class="logo"><div class="logo-mark"><i class="fas fa-balance-scale"></i></div><div class="logo-name" style="color:#fff;">JurídicosWeb<small>Expertos en Tránsito · Colombia</small></div></a>
+      <a href="#" class="logo"><div class="logo-mark"><i class="fas fa-balance-scale"></i></div><div class="logo-name"><span class="logo-name-main">Jurídicos<span>Web</span></span><span class="logo-name-sub">Expertos en Tránsito · Colombia</span></div></a>
       <p>Bufete jurídico colombiano especializado en derecho de tránsito y movilidad. Usamos todos los mecanismos legales para proteger tus derechos.</p>
       <a href="https://wa.me/573159318400?text=Hola%2C+quiero+eliminar+mis+fotomultas+en+juridicosweb.com" target="_blank" class="btn btn-wa" style="font-size:0.82rem;padding:11px 18px;"><i class="fab fa-whatsapp"></i> +57 315 931 8400</a>
     </div>
