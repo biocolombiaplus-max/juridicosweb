@@ -1429,7 +1429,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- Pasos de verificación estilo portal gov.co -->
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;">
+        <div id="sim-log-panel" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;">
           <p style="color:#374151;font-size:0.72rem;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#003087;"></span>Consultando base de datos oficial SIMIT...</p>
           <div id="sim-log" style="display:flex;flex-direction:column;gap:6px;"></div>
           <!-- Spinner activo -->
@@ -1440,7 +1440,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- Barra de progreso estilo oficial -->
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+        <div id="sim-bar-panel" style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
             <span style="color:#374151;font-size:0.7rem;font-weight:700;">Progreso de verificación</span>
             <span id="sim-pct" style="color:#003087;font-size:0.7rem;font-weight:800;">0%</span>
@@ -1451,50 +1451,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p style="color:#9ca3af;font-size:0.6rem;margin:5px 0 0;text-align:center;">Consulta 100% gratuita · Sin registro · Sin costo</p>
         </div>
 
-        <!-- Panel de resultado (oculto hasta el final) -->
-        <div id="sim-resultado" style="display:none;margin-top:4px;">
-          <!-- Resultado positivo estilo SIMIT -->
-          <div style="background:#fff;border:2px solid #16a34a;border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(22,163,74,0.2);">
-            <!-- Franja verde resultado -->
-            <div style="background:linear-gradient(90deg,#15803d,#16a34a);padding:12px 16px;display:flex;align-items:center;gap:10px;">
-              <div style="width:32px;height:32px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <!-- Panel de resultado: reemplaza los paneles de arriba al completar -->
+        <div id="sim-resultado" style="display:none;">
+          <!-- Tarjeta compacta resultado -->
+          <div style="background:#fff;border:2px solid #16a34a;border-radius:16px;overflow:hidden;box-shadow:0 6px 28px rgba(22,163,74,0.22);">
+            <!-- Franja verde header -->
+            <div style="background:linear-gradient(90deg,#15803d,#16a34a);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+              <div style="width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <div>
-                <p style="color:rgba(255,255,255,0.85);font-size:0.65rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin:0;">Consulta SIMIT completada</p>
-                <p style="color:#fff;font-size:0.92rem;font-weight:900;margin:0;line-height:1.2;">Tu caso CALIFICA para eliminación</p>
+              <div style="flex:1;min-width:0;">
+                <p style="color:rgba(255,255,255,0.85);font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin:0;">Consulta SIMIT completada</p>
+                <p style="color:#fff;font-size:0.95rem;font-weight:900;margin:0;line-height:1.2;">Tu caso CALIFICA para eliminación</p>
+              </div>
+              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:4px 8px;text-align:center;flex-shrink:0;">
+                <p style="color:#fff;font-size:0.6rem;margin:0;opacity:0.85;">Cédula</p>
+                <p id="sim-cedula-display" style="color:#fff;font-size:0.75rem;font-weight:800;margin:0;font-family:monospace;">—</p>
               </div>
             </div>
             <div style="padding:14px;">
-              <!-- Numero ID consultado -->
-              <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
-                <div>
-                  <p style="color:#6b7280;font-size:0.62rem;margin:0;">Cédula consultada</p>
-                  <p id="sim-cedula-display" style="color:#15803d;font-size:0.88rem;font-weight:800;margin:0;font-family:monospace;">— — —</p>
-                </div>
-                <div style="text-align:right;">
-                  <p style="color:#6b7280;font-size:0.62rem;margin:0;">Infracciones encontradas</p>
-                  <p style="color:#dc2626;font-size:0.88rem;font-weight:800;margin:0;" id="sim-num-multas">1</p>
-                </div>
-              </div>
-              <!-- Hallazgos jurídicos -->
-              <p style="color:#374151;font-size:0.72rem;font-weight:700;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.5px;">Causales de eliminación encontradas:</p>
-              <div id="sim-razones" style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;"></div>
-              <!-- Separador -->
-              <div style="border-top:1px solid #e5e7eb;margin-bottom:10px;"></div>
-              <!-- Urgencia -->
-              <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;margin-bottom:12px;display:flex;align-items:center;gap:7px;">
-                <span style="font-size:0.9rem;flex-shrink:0;">⏱️</span>
-                <p style="color:#92400e;font-size:0.72rem;font-weight:700;margin:0;line-height:1.4;">Resultado reservado por <span id="sim-timer" style="font-weight:900;color:#dc2626;">09:59</span> min — luego deberás repetir la consulta gratuita</p>
-              </div>
-              <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;border:none;border-radius:13px;padding:16px;font-size:0.98rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.5);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;">
+              <!-- Hallazgos jurídicos compactos -->
+              <p style="color:#374151;font-size:0.68rem;font-weight:700;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.5px;">Causales de eliminación encontradas:</p>
+              <div id="sim-razones" style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;"></div>
+              <!-- CTA principal — visible sin scroll -->
+              <button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.5);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:10px;">
                 <span style="position:relative;z-index:1;">📄 GENERAR MI DERECHO DE PETICIÓN GRATIS →</span>
                 <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
               </button>
-              <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;flex-wrap:wrap;">
-                <span style="color:#16a34a;font-size:0.65rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Ver y firmar el documento es gratis</span>
-                <span style="color:#16a34a;font-size:0.65rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Firma digital desde tu celular</span>
-                <span style="color:#16a34a;font-size:0.65rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>$0 si no procede tu caso</span>
+              <!-- Urgencia debajo del botón -->
+              <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:7px 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                <span style="font-size:0.85rem;flex-shrink:0;">⏱️</span>
+                <p style="color:#92400e;font-size:0.7rem;font-weight:700;margin:0;line-height:1.3;">Resultado reservado por <span id="sim-timer" style="font-weight:900;color:#dc2626;">09:59</span> min</p>
+              </div>
+              <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+                <span style="color:#16a34a;font-size:0.64rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Ver y firmar gratis</span>
+                <span style="color:#16a34a;font-size:0.64rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Firma digital en tu celular</span>
+                <span style="color:#16a34a;font-size:0.64rem;display:flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>$0 si no procede</span>
               </div>
             </div>
           </div>
@@ -3279,6 +3271,8 @@ var _simCountdown = null;
 function iniciarSimulacion(){
   goToStepNombre('sp-simulacion');
   document.getElementById('sim-resultado').style.display='none';
+  document.getElementById('sim-log-panel').style.display='block';
+  document.getElementById('sim-bar-panel').style.display='block';
   document.getElementById('sim-bar').style.width='0%';
   document.getElementById('sim-pct').textContent='0%';
   document.getElementById('sim-spinner').style.display='block';
@@ -3324,8 +3318,13 @@ function iniciarSimulacion(){
 }
 
 function mostrarResultadoSimulacion(){
-  document.getElementById('sim-spinner').style.display='none';
+  // Ocultar paneles de análisis, mostrar resultado arriba sin scroll
+  document.getElementById('sim-log-panel').style.display='none';
+  document.getElementById('sim-bar-panel').style.display='none';
   document.getElementById('sim-resultado').style.display='block';
+  // Scroll al inicio del modal para que el CTA sea visible de inmediato
+  var mb = document.querySelector('.mmodal-body');
+  if(mb) mb.scrollTop = 0;
 
   var tipo = _tipoConsultado === 'cedula' ? 'cédula' : 'placa';
   var val  = _valorConsultado;
