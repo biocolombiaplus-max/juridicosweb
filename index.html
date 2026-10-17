@@ -2381,20 +2381,43 @@ var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPu
 (function(){
   try {
     var p = new URLSearchParams(window.location.search);
+    var utmSrc = p.get('utm_source') || '';
+    var utmMed = p.get('utm_medium') || '';
+    var utmCamp = p.get('utm_campaign') || '';
+    var utmCont = p.get('utm_content') || '';
+    var hasFbclid = !!p.get('fbclid');
+    // Fix: operator precedence — parentheses needed for correct ternary evaluation
+    var fuente = (utmSrc || hasFbclid) ? (utmSrc || 'meta_ads') : (document.referrer ? 'referral' : 'directo');
+    // Persist UTMs in sessionStorage for later steps in the funnel
+    if(utmSrc || hasFbclid) {
+      try {
+        sessionStorage.setItem('jw_utm_source', utmSrc);
+        sessionStorage.setItem('jw_utm_medium', utmMed);
+        sessionStorage.setItem('jw_utm_campaign', utmCamp);
+        sessionStorage.setItem('jw_utm_content', utmCont);
+        sessionStorage.setItem('jw_fuente', fuente);
+        if(hasFbclid) sessionStorage.setItem('jw_fbclid', p.get('fbclid'));
+      } catch(e){}
+    }
     var payload = {
       _accion: 'registrar_visita',
-      fuente:  p.get('utm_source') || p.get('fbclid') ? 'meta_ads' : (document.referrer ? 'referral' : 'directo'),
-      utm_source:   p.get('utm_source')  || '',
-      utm_medium:   p.get('utm_medium')  || '',
-      utm_campaign: p.get('utm_campaign')|| '',
-      utm_content:  p.get('utm_content') || '',
-      referrer:     document.referrer    || '',
+      fuente:       fuente,
+      utm_source:   utmSrc,
+      utm_medium:   utmMed,
+      utm_campaign: utmCamp,
+      utm_content:  utmCont,
+      referrer:     document.referrer || '',
       dispositivo:  /Mobi|Android/i.test(navigator.userAgent) ? 'movil' : 'escritorio',
       pagina:       window.location.pathname || '/'
     };
     var fd = new FormData();
     Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
-    fetch(GOOGLE_SHEET_URL, { method:'POST', body: fd }).catch(function(){});
+    // sendBeacon is fire-and-forget — not cancelled on page navigation
+    if(navigator.sendBeacon) {
+      navigator.sendBeacon(GOOGLE_SHEET_URL, fd);
+    } else {
+      fetch(GOOGLE_SHEET_URL, { method:'POST', body: fd }).catch(function(){});
+    }
   } catch(e){}
 })();
 var SIMIT_PROXY_URL    = 'https://simit-proxy-juridicosweb.biocolombiaplus.workers.dev';

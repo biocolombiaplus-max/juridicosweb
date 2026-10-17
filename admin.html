@@ -455,6 +455,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
               <div class="stat-sub">% desde celular</div>
             </div>
           </div>
+          <!-- Gráfica últimos 7 días -->
+          <div id="vis-chart" style="padding:0 14px 10px;"></div>
           <!-- Últimas visitas -->
           <div id="vis-tabla" style="padding:0 14px 14px;font-size:0.82rem;color:#94a3b8;text-align:center;">
             Cargando visitas...
@@ -1050,21 +1052,58 @@ function loadVisitas(evtBtn){
       document.getElementById('vis-meta').textContent   = cMeta;
       document.getElementById('vis-movil').textContent  = cMes > 0 ? Math.round(cMovil/cMes*100)+'%' : '—';
 
-      // Tabla de últimas 10 visitas
-      var ultimas = v.slice(-10).reverse();
+      // Gráfica barras últimos 7 días
+      var dias7 = [];
+      for(var i=6;i>=0;i--){
+        var d = new Date(ahora - i*864e5);
+        dias7.push(d.toISOString().slice(0,10));
+      }
+      var porDia = {};
+      dias7.forEach(function(d){ porDia[d]=0; });
+      v.forEach(function(r){
+        var f=(r['Fecha']||'').slice(0,10);
+        if(porDia[f]!==undefined) porDia[f]++;
+      });
+      var maxVal = Math.max.apply(null, dias7.map(function(d){ return porDia[d]; }))||1;
+      var chartHtml = '<div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:4px;">';
+      dias7.forEach(function(d){
+        var pct = Math.round(porDia[d]/maxVal*100);
+        var label = d.slice(5); // MM-DD
+        var isToday = d===hoy;
+        chartHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">'+
+          '<span style="font-size:0.62rem;color:'+(isToday?'#f59e0b':'#64748b')+';">'+(porDia[d]||'')+'</span>'+
+          '<div style="width:100%;background:'+(isToday?'#f59e0b':'#3b82f6')+';height:'+Math.max(pct*0.5,2)+'px;border-radius:3px 3px 0 0;transition:height .3s;"></div>'+
+          '<span style="font-size:0.6rem;color:#64748b;">'+label+'</span>'+
+          '</div>';
+      });
+      chartHtml += '</div>';
+      document.getElementById('vis-chart').innerHTML = chartHtml;
+
+      // Tabla de últimas 15 visitas
+      var ultimas = v.slice(-15).reverse();
       if(ultimas.length === 0){
         setBtnLoading(btn, false);
         document.getElementById('vis-tabla').innerHTML = '<p style="color:#64748b;padding:8px 0;">Aún no hay visitas registradas. Se empiezan a registrar desde que alguien visite juridicosweb.com.</p>';
         return;
       }
-      var html = '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;">';
-      html += '<tr style="color:#64748b;border-bottom:1px solid #1e293b;"><th style="text-align:left;padding:6px 4px;">Fecha/Hora</th><th style="text-align:left;padding:6px 4px;">Fuente</th><th style="text-align:left;padding:6px 4px;">Dispositivo</th><th style="text-align:left;padding:6px 4px;">Campaña</th></tr>';
+      var fuenteColor = { meta_ads:'#1e40af', referral:'#166534', directo:'#374151' };
+      var fuenteIcon  = { meta_ads:'📘', referral:'🔗', directo:'🏠' };
+      var html = '<table style="width:100%;border-collapse:collapse;font-size:0.78rem;">';
+      html += '<tr style="color:#64748b;border-bottom:1px solid #1e293b;">'+
+        '<th style="text-align:left;padding:5px 4px;">Fecha/Hora</th>'+
+        '<th style="text-align:left;padding:5px 4px;">Fuente</th>'+
+        '<th style="text-align:left;padding:5px 4px;">Dispositivo</th>'+
+        '<th style="text-align:left;padding:5px 4px;">Campaña</th>'+
+        '</tr>';
       ultimas.forEach(function(r){
+        var src = (r['Fuente']||'directo').toLowerCase().replace(/ /g,'_');
+        var bg = fuenteColor[src] || '#374151';
+        var ic = fuenteIcon[src] || '🌐';
         html += '<tr style="border-bottom:1px solid #0f172a;">'+
-          '<td style="padding:5px 4px;color:#e2e8f0;">'+(r['Fecha']||'—')+'</td>'+
-          '<td style="padding:5px 4px;"><span style="background:'+(r['Fuente']==='meta_ads'?'#1e40af':'#1e293b')+';color:#fff;padding:2px 6px;border-radius:4px;font-size:0.72rem;">'+(r['Fuente']||'directo')+'</span></td>'+
-          '<td style="padding:5px 4px;color:#94a3b8;">'+(r['Dispositivo']||'—')+'</td>'+
-          '<td style="padding:5px 4px;color:#94a3b8;font-size:0.72rem;">'+(r['Campaña']||'—')+'</td>'+
+          '<td style="padding:5px 4px;color:#e2e8f0;white-space:nowrap;">'+(r['Fecha']||'—')+'</td>'+
+          '<td style="padding:5px 4px;"><span style="background:'+bg+';color:#fff;padding:2px 7px;border-radius:4px;font-size:0.7rem;">'+ic+' '+(r['Fuente']||'directo')+'</span></td>'+
+          '<td style="padding:5px 4px;color:#94a3b8;">'+(/movil/i.test(r['Dispositivo']||'')?'📱 Móvil':'🖥 PC')+'</td>'+
+          '<td style="padding:5px 4px;color:#94a3b8;font-size:0.7rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r['UTM Campaign']||r['Campaña']||'—')+'</td>'+
           '</tr>';
       });
       html += '</table>';
