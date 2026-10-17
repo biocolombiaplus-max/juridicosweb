@@ -1237,7 +1237,8 @@ function loadVisitas(evtBtn){
       document.getElementById('vis-movil').textContent  = cMes > 0 ? Math.round(cMovil/cMes*100)+'%' : '—';
 
       // Tasa de conversión: leads / visitas del mes
-      var totalLeads = (allRows||[]).length;
+      var totalLeads = (allRows||[]).filter(function(r){ return r['Nombres']||r['Email']; }).length; // solo los que dejaron datos
+      var totalConsultas = (allRows||[]).length; // incluye los que solo consultaron
       var totalPagados = (allRows||[]).filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true; }).length;
       var totalSinPagar = totalLeads - totalPagados;
       var convRate = cMes > 0 ? (totalLeads / cMes * 100).toFixed(1) : 0;
@@ -1406,12 +1407,14 @@ function loadData(evtBtn){
     .then(function(data){
       setBtnLoading(btn, false);
       if(!data.ok) throw new Error(data.error || 'Respuesta inesperada');
-      allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']; });
+      // Incluir todos los leads: los que solo consultaron (sin nombre) también cuentan en el pipeline
+      allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']||r['Cédula']||r['Placa']||r['valor']||r['Valor']; });
       renderAll();
       var hora = new Date().toLocaleTimeString('es-CO');
       if(sync) sync.textContent = 'Actualizado: ' + hora;
-      setConexionStatus(true, '✅ Conectado — ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' · ' + hora);
-      showToast('✅ ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' cargado' + (allRows.length===1?'':'s'), 'success');
+      var casosConDatos = allRows.filter(function(r){ return r['Nombres']||r['Email']; }).length;
+      setConexionStatus(true, '✅ Conectado — ' + allRows.length + ' lead' + (allRows.length===1?'':'s') + ' · ' + casosConDatos + ' con datos · ' + hora);
+      showToast('✅ ' + allRows.length + ' lead' + (allRows.length===1?'':'s') + ' cargado' + (allRows.length===1?'':'s'), 'success');
     })
     .catch(function(err){
       setBtnLoading(btn, false);
@@ -3230,7 +3233,8 @@ function getRemarketingFiltered(filtro){
 
 function renderRemarketing(filtro){
   filtro = filtro || _rmFilter || 'todos';
-  var all = (allRows||[]).filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true); });
+  // Remarketing = no pagaron Y tienen nombre/WA (se puede contactar)
+  var all = (allRows||[]).filter(function(r){ return !(r['Pago OK']==='TRUE'||r['Pago OK']===true) && (r['Nombres']||r['WhatsApp']||r['Celular']||r['Email']); });
   var filtered = getRemarketingFiltered(filtro);
   var conFirma = all.filter(function(r){
     return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);

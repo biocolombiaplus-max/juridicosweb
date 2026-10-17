@@ -2878,6 +2878,8 @@ function iniciarConsulta(){
   // Preseleccionar plan "todas" por ser la mejor opción
   seleccionarPlan('todas');
   iniciarSimulacion();
+  // Registrar lead en etapa consulta (solo cédula/placa)
+  setTimeout(guardarLeadConsulta, 1200);
 }
 
 // ══════════════════════════════════════════════════
@@ -2925,6 +2927,8 @@ function generarDocPreview(){
   _firmaDataUrl = null;
   document.getElementById('dp-firma-preview').innerHTML = '';
   jwTrack('doc_preview_generado', {});
+  // Registrar lead en etapa datos (nombre + WA capturados)
+  guardarLeadDatos();
   goToStepNombre('sp-doc-preview');
 }
 
@@ -3027,27 +3031,63 @@ function mostrarPDFFirmado(){
   }
 }
 
-function guardarLeadFirma(){
-  // Guardar el lead en Google Sheets para que aparezca en el admin
+function _postLead(payload){
+  // Siempre Content-Type: text/plain para evitar CORS preflight con Apps Script
   try {
-    var payload = {
-      _accion:   'guardar_lead',
-      nombres:   _nombreConsultante,
-      whatsapp:  _waConsultante,
-      correo:    _correoConsultante,
-      tipo:      _tipoConsultado,
-      valor:     _valorConsultado,
-      plan:      'pendiente_pago',
-      monto:     '',
-      ciudad:    _ciudadConsultante || '',
-      direccion: _direccionConsultante || '',
-      notas:     'Documento firmado digitalmente — pendiente de pago para activar datos',
-    ultimo_paso: 'firma_completada'
-    };
-    var fd = new FormData();
-    Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
-    fetch(GOOGLE_SHEET_URL, { method:'POST', body:fd }).catch(function(){});
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' },
+      keepalive: true
+    }).catch(function(){});
   } catch(e){}
+}
+
+function guardarLeadConsulta(){
+  // Etapa 1: solo ingresó cédula/placa — registrar para que aparezca en pipeline CRM
+  if(!_valorConsultado) return;
+  _postLead({
+    _accion:    'guardar_lead',
+    tipo:       _tipoConsultado || 'cedula',
+    valor:      _valorConsultado,
+    ultimo_paso:'consulta_simit',
+    notas:      'Consultó en SIMIT — pendiente de dejar datos'
+  });
+}
+
+function guardarLeadDatos(){
+  // Etapa 2: dejó nombre + WA/correo
+  if(!_nombreConsultante || !_valorConsultado) return;
+  _postLead({
+    _accion:    'guardar_lead',
+    nombres:    _nombreConsultante,
+    whatsapp:   _waConsultante,
+    correo:     _correoConsultante,
+    tipo:       _tipoConsultado || 'cedula',
+    valor:      _valorConsultado,
+    ciudad:     _ciudadConsultante || '',
+    direccion:  _direccionConsultante || '',
+    ultimo_paso:'datos_ingresados',
+    notas:      'Completó formulario — pendiente de firma'
+  });
+}
+
+function guardarLeadFirma(){
+  // Etapa 3: firmó — lead más completo
+  _postLead({
+    _accion:    'guardar_lead',
+    nombres:    _nombreConsultante,
+    whatsapp:   _waConsultante,
+    correo:     _correoConsultante,
+    tipo:       _tipoConsultado || 'cedula',
+    valor:      _valorConsultado,
+    plan:       'pendiente_pago',
+    monto:      '',
+    ciudad:     _ciudadConsultante || '',
+    direccion:  _direccionConsultante || '',
+    notas:      'Documento firmado digitalmente — pendiente de pago para activar datos',
+    ultimo_paso:'firma_completada'
+  });
 }
 
 function seleccionarPlanFinal(plan){
