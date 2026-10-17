@@ -1431,79 +1431,139 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Datos básicos para el documento
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-datos-doc">
-        <div style="text-align:center;margin-bottom:14px;">
-          <div style="font-size:2rem;margin-bottom:6px;">📄</div>
-          <h3 style="color:#1e3a8a;font-size:1.1rem;font-weight:900;margin:0 0 4px;">Tu Derecho de Petición está listo</h3>
-          <p style="color:#475569;font-size:0.83rem;margin:0;">Ingresa tus datos para generar el documento oficial — es gratis verlo y firmarlo.</p>
+        <!-- Header con badge de progreso -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#1e40af);border-radius:14px;padding:16px 16px 14px;margin-bottom:14px;text-align:center;">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border-radius:20px;padding:4px 12px;margin-bottom:10px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;box-shadow:0 0 6px #4ade80;"></span>
+            <span style="color:rgba(255,255,255,0.9);font-size:0.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Sistema listo · Generando tu documento</span>
+          </div>
+          <h3 style="color:#fff;font-size:1.05rem;font-weight:900;margin:0 0 5px;line-height:1.2;">Falta un paso para ver tu Derecho de Petición</h3>
+          <p style="color:rgba(255,255,255,0.75);font-size:0.78rem;margin:0;line-height:1.4;">El documento se construye con tu información — es gratis verlo y firmarlo antes de pagar.</p>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-          <div>
-            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Nombre completo *</label>
-            <input id="dd-nombre" type="text" placeholder="Ej: Carlos Andrés Gómez" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+
+        <!-- Explicación visual para qué sirve cada dato -->
+        <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:14px;">
+
+          <!-- Nombre -->
+          <div style="position:relative;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:20px;height:20px;border-radius:50%;background:#1e3a8a;color:#fff;font-size:0.65rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+              <label for="dd-nombre" style="font-size:0.75rem;font-weight:700;color:#1e3a8a;">Nombre completo *</label>
+              <span style="margin-left:auto;font-size:0.65rem;color:#64748b;background:#f1f5f9;padding:2px 7px;border-radius:10px;">Aparece en el documento oficial</span>
+            </div>
+            <input id="dd-nombre" type="text" placeholder="Ej: Carlos Andrés Gómez" autocomplete="name" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#1e40af';this.style.boxShadow='0 0 0 3px rgba(30,64,175,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
           </div>
-          <div>
-            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">WhatsApp (10 dígitos) *</label>
-            <input id="dd-whatsapp" type="tel" placeholder="Ej: 3001234567" maxlength="10" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+
+          <!-- WhatsApp -->
+          <div style="position:relative;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:0.65rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+              <label for="dd-whatsapp" style="font-size:0.75rem;font-weight:700;color:#374151;">WhatsApp (10 dígitos) *</label>
+              <span style="margin-left:auto;font-size:0.65rem;color:#15803d;background:#f0fdf4;padding:2px 7px;border-radius:10px;">Te enviamos el doc aquí</span>
+            </div>
+            <input id="dd-whatsapp" type="tel" placeholder="Ej: 3001234567" maxlength="10" inputmode="numeric" autocomplete="tel" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#16a34a';this.style.boxShadow='0 0 0 3px rgba(22,163,74,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
           </div>
-          <div>
-            <label style="font-size:0.75rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Correo electrónico *</label>
-            <input id="dd-correo" type="email" placeholder="tu@correo.com" style="width:100%;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'">
+
+          <!-- Correo -->
+          <div style="position:relative;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="width:20px;height:20px;border-radius:50%;background:#7c3aed;color:#fff;font-size:0.65rem;font-weight:900;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+              <label for="dd-correo" style="font-size:0.75rem;font-weight:700;color:#374151;">Correo electrónico *</label>
+              <span style="margin-left:auto;font-size:0.65rem;color:#5b21b6;background:#f5f3ff;padding:2px 7px;border-radius:10px;">Respuesta de la Secretaría</span>
+            </div>
+            <input id="dd-correo" type="email" placeholder="tu@correo.com" autocomplete="email" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed';this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
           </div>
         </div>
-        <button onclick="generarDocPreview()" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:12px;padding:15px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;box-shadow:0 4px 20px rgba(30,64,175,0.4);">
-          📄 Generar mi Derecho de Petición →
+
+        <!-- Aviso: para qué sirve el correo -->
+        <div style="background:#fef9ec;border:1px solid #fbbf24;border-radius:10px;padding:10px 12px;display:flex;gap:9px;align-items:flex-start;margin-bottom:14px;">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">📬</span>
+          <p style="font-size:0.72rem;color:#78350f;margin:0;line-height:1.5;"><strong>¿Para qué el correo?</strong> La Secretaría de Tránsito responde el Derecho de Petición en 15 días hábiles. Esa respuesta llega a tu correo y te la notificamos también por WhatsApp.</p>
+        </div>
+
+        <button onclick="generarDocPreview()" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:13px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 22px rgba(30,64,175,0.45);letter-spacing:0.2px;">
+          📄 Ver mi Derecho de Petición →
         </button>
-        <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin:10px 0 0;">🔒 Tus datos están protegidos · No compartimos información</p>
+        <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:10px 0 0;">🔒 Tus datos son solo para el documento · No los compartimos · Puedes eliminarnos de la base en cualquier momento</p>
       </div>
 
       <!-- ══════════════════════════════════════
            PASO: Previsualización del documento
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-doc-preview">
-        <!-- Badge documento listo -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.7rem;font-weight:700;color:#15803d;">✅ DOCUMENTO LISTO</div>
-          <div style="background:#fef3c7;border:1.5px solid #d97706;border-radius:8px;padding:4px 10px;font-size:0.7rem;font-weight:700;color:#92400e;">OFICIAL · Art. 23 C.P.</div>
+        <!-- Badges -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.68rem;font-weight:800;color:#15803d;display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>DOCUMENTO LISTO</div>
+          <div style="background:#fef3c7;border:1.5px solid #d97706;border-radius:8px;padding:4px 10px;font-size:0.68rem;font-weight:800;color:#92400e;">OFICIAL · Art. 23 C.P.</div>
+          <div style="margin-left:auto;font-size:0.68rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Gratis verlo</div>
         </div>
 
-        <!-- Documento compacto -->
-        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(30,58,138,0.15);">
-          <div style="background:#1e3a8a;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <!-- Documento compacto mejorado con más datos -->
+        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(30,58,138,0.18);">
+          <!-- Header azul -->
+          <div style="background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
             <div>
-              <p style="font-size:0.6rem;opacity:0.7;margin:0;letter-spacing:1.5px;text-transform:uppercase;">República de Colombia</p>
-              <p style="font-size:0.82rem;font-weight:900;margin:0;">DERECHO DE PETICIÓN</p>
+              <p style="font-size:0.58rem;opacity:0.65;margin:0 0 1px;letter-spacing:1.8px;text-transform:uppercase;">República de Colombia</p>
+              <p style="font-size:0.86rem;font-weight:900;margin:0;letter-spacing:.3px;">DERECHO DE PETICIÓN</p>
+              <p style="font-size:0.6rem;opacity:0.7;margin:2px 0 0;">Ley 1755/2015 · Art. 23 Constitución Política</p>
             </div>
-            <div style="font-size:1.4rem;">📜</div>
+            <div style="font-size:1.6rem;opacity:0.9;">📜</div>
           </div>
-          <div style="padding:8px 14px;font-size:0.76rem;color:#1e293b;">
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-bottom:7px;line-height:1.4;">
-              <span style="color:#64748b;font-size:0.7rem;">Para:</span><span style="color:#2563eb;font-weight:700;font-size:0.75rem;" id="dp-secretaria-nombre">Sec. Tránsito y Movilidad</span>
-              <span style="color:#64748b;font-size:0.7rem;">Nombre:</span><span id="dp-nombre-cliente" style="font-weight:700;">—</span>
-              <span style="color:#64748b;font-size:0.7rem;">C.C./Placa:</span><span id="dp-cedula-cliente">—</span>
+
+          <!-- Cuerpo del documento con datos del usuario -->
+          <div style="padding:10px 14px 8px;font-size:0.74rem;color:#1e293b;">
+            <!-- Destinatario -->
+            <div style="background:#eff6ff;border-radius:8px;padding:7px 10px;margin-bottom:8px;border-left:3px solid #2563eb;">
+              <p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Dirigido a:</p>
+              <p style="color:#1e40af;font-weight:800;margin:0;font-size:0.78rem;" id="dp-secretaria-nombre">Secretaría de Tránsito y Movilidad</p>
             </div>
-            <!-- Sección bloqueada UNA sola línea -->
-            <div style="position:relative;margin-bottom:0;">
-              <div style="filter:blur(3px);user-select:none;pointer-events:none;background:#f1f5f9;border-radius:6px;padding:5px 8px;font-size:0.68rem;color:#475569;white-space:nowrap;overflow:hidden;">
-                Multa COM-XXXX · $XXX.XXX · XX/XX/XXXX · Art. XX Ley XXXX de XXXX...
+            <!-- Datos del solicitante -->
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-bottom:8px;line-height:1.5;">
+              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">Peticionario:</span>
+              <span id="dp-nombre-cliente" style="font-weight:800;color:#0f172a;font-size:0.76rem;">—</span>
+              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">C.C. / Placa:</span>
+              <span id="dp-cedula-cliente" style="font-weight:700;color:#1e40af;font-size:0.74rem;">—</span>
+              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">WhatsApp:</span>
+              <span id="dp-wa-preview" style="font-weight:600;color:#15803d;font-size:0.74rem;">—</span>
+              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">Referencia:</span>
+              <span id="dp-causal-preview" style="font-weight:700;color:#7c3aed;font-size:0.7rem;">Análisis jurídico aplicado</span>
+            </div>
+            <!-- Causal (bloqueado) -->
+            <div style="position:relative;margin-bottom:2px;">
+              <div style="filter:blur(3.5px);user-select:none;pointer-events:none;background:#f8fafc;border-radius:7px;padding:7px 10px;font-size:0.67rem;color:#475569;line-height:1.5;">
+                PRIMERO: Que se declare la prescripción de la acción sancionatoria derivada del comparendo de la referencia conforme al Art. 136 Ley 769/2002...
               </div>
               <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                <span style="background:rgba(30,58,138,0.93);color:#fff;font-size:0.72rem;font-weight:800;padding:3px 12px;border-radius:6px;">🔒 Se completa al activar</span>
+                <span style="background:rgba(30,58,138,0.95);color:#fff;font-size:0.7rem;font-weight:800;padding:5px 14px;border-radius:8px;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🔒 Contenido completo al activar el caso</span>
               </div>
             </div>
           </div>
           <!-- Línea de firma -->
-          <div style="border-top:1px solid #f1f5f9;padding:8px 14px;background:#f8fafc;display:flex;align-items:center;gap:10px;">
-            <div style="flex:1;border-bottom:1.5px solid #334155;height:22px;" id="dp-firma-preview"></div>
-            <p style="font-size:0.68rem;color:#64748b;margin:0;white-space:nowrap;" id="dp-nombre-firma">Firma pendiente</p>
+          <div style="border-top:1px solid #e2e8f0;padding:8px 14px;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="flex:1;">
+              <div style="border-bottom:1.5px solid #1e3a8a;height:20px;" id="dp-firma-preview"></div>
+              <p style="font-size:0.6rem;color:#94a3b8;margin:2px 0 0;">Firma del peticionario</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="font-size:0.68rem;font-weight:700;color:#1e293b;margin:0;" id="dp-nombre-firma">Pendiente</p>
+              <p style="font-size:0.6rem;color:#94a3b8;margin:1px 0 0;" id="dp-fecha-doc">—</p>
+            </div>
           </div>
         </div>
 
-        <!-- CTA firmar - GRANDE Y LLAMATIVO -->
-        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px;font-size:1.05rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:8px;">
-          <span style="position:relative;z-index:1;">✍️ DAR CLIC AQUÍ PARA FIRMAR EL DOCUMENTO →</span>
+        <!-- Mini trust bar bajo el documento -->
+        <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
+          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Gratis firmarlo</span>
+          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Sin compromisos</span>
+          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Firma en 10 seg</span>
+        </div>
+
+        <!-- CTA firmar -->
+        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:8px;">
+          <span style="position:relative;z-index:1;">✍️ FIRMAR MI DOCUMENTO CON EL DEDO →</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">✅ Gratis · Sin compromisos · Firma con el dedo en segundos</p>
+        <p style="text-align:center;color:#64748b;font-size:0.7rem;margin:0;">✅ Gratis · Sin compromisos · 10 segundos con el dedo</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -2770,6 +2830,10 @@ function generarDocPreview(){
   document.getElementById('dp-cedula-cliente').textContent  = (_tipoConsultado==='cedula'?'C.C. ':'')+_valorConsultado;
   document.getElementById('dp-nombre-firma').textContent    = nombre;
   document.getElementById('dp-secretaria-nombre').textContent = 'Secretaría de Tránsito y Movilidad';
+  var waEl = document.getElementById('dp-wa-preview');
+  if(waEl){ waEl.textContent = wa ? '(+57) '+wa : '—'; }
+  var fechaEl = document.getElementById('dp-fecha-doc');
+  if(fechaEl){ var hoyDP=new Date(); fechaEl.textContent = hoyDP.toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'}); }
   // Limpiar firma previa
   _firmaDataUrl = null;
   document.getElementById('dp-firma-preview').innerHTML = '';

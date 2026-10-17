@@ -1194,15 +1194,24 @@ function loadVisitas(evtBtn){
       if(!d.ok) throw new Error(d.error||'Error');
       var v = d.visitas || [];
       var ahora   = new Date();
-      var hoy     = ahora.toISOString().slice(0,10);
-      var semana  = new Date(ahora - 7*864e5).toISOString().slice(0,10);
-      var mes     = new Date(ahora - 30*864e5).toISOString().slice(0,10);
+      // Colombia es UTC-5; ajustamos para que "hoy" sea el día correcto en Bogotá
+      function fechaColombia(d){
+        var bogota = new Date(d.getTime() - 5*3600000);
+        return bogota.toISOString().slice(0,10);
+      }
+      var hoy    = fechaColombia(ahora);
+      var semana = fechaColombia(new Date(ahora - 7*864e5));
+      var mes    = fechaColombia(new Date(ahora - 30*864e5));
 
-      // Normaliza fecha de Sheets a ISO yyyy-mm-dd (Sheets puede devolver "Fri Oct 17 2026..." o ISO)
+      // Normaliza fecha de Sheets a ISO yyyy-mm-dd en hora Colombia
       function normFecha(str){
         if(!str) return '';
         var d = new Date(str);
-        if(!isNaN(d)) return d.toISOString().slice(0,10);
+        if(!isNaN(d)){
+          // Normalizar a hora Colombia (UTC-5) para comparar con fechaColombia()
+          var bogota = new Date(d.getTime() - 5*3600000);
+          return bogota.toISOString().slice(0,10);
+        }
         return String(str).slice(0,10); // fallback
       }
       var cHoy=0, cSemana=0, cMes=0, cMeta=0, cMovil=0;
@@ -1274,7 +1283,7 @@ function loadVisitas(evtBtn){
       var dias30 = [];
       for(var i=29;i>=0;i--){
         var dObj = new Date(ahora - i*864e5);
-        dias30.push(dObj.toISOString().slice(0,10));
+        dias30.push(fechaColombia(dObj));
       }
       var porDia = {};
       dias30.forEach(function(d){ porDia[d]=0; });
