@@ -241,7 +241,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
   .topbar-actions .btn-primary{display:none} /* "Nuevo Caso" ya lo cubre el botón flotante (+) */
   .topbar-actions .btn-outline{padding:8px 10px}
   .topbar-actions .btn-outline span{display:none} /* deja solo el ícono 🔄 para ahorrar espacio */
-  .content{padding:14px 12px 90px} /* deja espacio para la bottom-nav */
+  .content{padding:0 0 90px} /* bottom-nav space; sections handle their own padding */
+  .section.active:not(#section-remarketing){padding:14px 12px 0;}
   .sidebar{width:var(--sidebar);max-width:82vw;position:fixed;z-index:100;height:100vh;top:0;left:0;transform:translateX(-100%);transition:transform .28s ease;box-shadow:6px 0 24px rgba(0,0,0,.25)}
   .sidebar.open{transform:translateX(0)}
   .bottom-nav{display:block}
@@ -270,6 +271,28 @@ tr:hover td{background:#f8faff;cursor:pointer}
 
   .kanban-wrap{padding:12px 12px}
   .modal-actions .btn{flex:1;min-width:calc(50% - 5px)}
+
+  /* ── Remarketing mobile redesign ── */
+  .rmk-header{position:sticky;top:0;z-index:10;background:var(--gray50);padding:16px 16px 0;}
+  .rmk-header-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--gray200);}
+  .rmk-header-title{font-size:1rem;font-weight:900;color:var(--navy);margin:0;}
+  .rmk-header-sub{font-size:0.72rem;color:var(--gray400);margin:2px 0 0;}
+  .rmk-refresh-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--gray200);background:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .rmk-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 0;}
+  .rmk-kpi{background:#fff;border-radius:14px;padding:16px 14px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:3px solid transparent;position:relative;overflow:hidden;}
+  .rmk-kpi.navy{border-color:var(--navy);}
+  .rmk-kpi.blue{border-color:#3b82f6;}
+  .rmk-kpi.green{border-color:#16a34a;}
+  .rmk-kpi.gold{border-color:var(--gold);}
+  .rmk-kpi-label{font-size:0.65rem;font-weight:700;color:var(--gray400);text-transform:uppercase;letter-spacing:.6px;}
+  .rmk-kpi-val{font-size:1.7rem;font-weight:900;color:var(--navy);line-height:1.1;margin-top:4px;}
+  .rmk-chips-wrap{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .rmk-chips-wrap::-webkit-scrollbar{display:none;}
+  .rmk-chip{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:0.75rem;font-weight:700;cursor:pointer;border:1.5px solid var(--gray200);background:#fff;color:var(--gray600);transition:all .15s;white-space:nowrap;}
+  .rmk-chip.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .rmk-body{padding:14px 16px 100px;}
+  .rmk-mass-btn{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:50;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:16px;padding:16px 20px;font-size:0.88rem;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,.45);display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.2px;}
+  .rmk-mass-btn:active{transform:scale(.97);}
 }
 </style>
 </head>
@@ -625,33 +648,34 @@ tr:hover td{background:#f8faff;cursor:pointer}
 
     <!-- REMARKETING (NO PAGARON) -->
     <div class="section" id="section-remarketing">
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <div>
-          <h2 style="font-size:1.1rem;font-weight:900;color:#f1f5f9;margin:0 0 2px;">🎯 Leads sin convertir — Recuperación</h2>
-          <p style="font-size:0.75rem;color:#64748b;margin:0;">Personas que llegaron pero no pagaron. Contáctalas con un mensaje personalizado.</p>
+      <!-- Header sticky — app style -->
+      <div class="rmk-header">
+        <div class="rmk-header-row">
+          <div>
+            <h2 class="rmk-header-title">🎯 Recuperación de Leads</h2>
+            <p class="rmk-header-sub">Llegaron pero no pagaron · Contáctalos ahora</p>
+          </div>
+          <button class="rmk-refresh-btn" onclick="loadData(this)" title="Actualizar">🔄</button>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="loadData(this)">🔄 Actualizar</button>
       </div>
-      <!-- KPI Grid -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;" id="remarketing-stats-grid"></div>
-      <!-- Filters + Enviar a todos -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;" id="remarketing-filters">
-        <button class="btn btn-primary btn-sm" onclick="filtrarRemarketing('todos')">Todos</button>
-        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('cedula')">Solo cédula</button>
-        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('firma')">Llegaron a firma</button>
-        <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('precio')">Vieron precio</button>
-        <span id="campana-remarketing-status" style="font-size:12px;color:var(--gray500,#64748b);align-self:center;"></span>
+      <!-- KPI 2×2 -->
+      <div class="rmk-kpi-row" id="remarketing-stats-grid"></div>
+      <!-- Chips de filtro scroll horizontal -->
+      <div class="rmk-chips-wrap" id="remarketing-filters">
+        <button class="rmk-chip active" onclick="filtrarRemarketing('todos')">Todos</button>
+        <button class="rmk-chip" onclick="filtrarRemarketing('cedula')">Solo cédula</button>
+        <button class="rmk-chip" onclick="filtrarRemarketing('firma')">Llegaron a firma</button>
+        <button class="rmk-chip" onclick="filtrarRemarketing('precio')">Vieron precio</button>
+        <span id="campana-remarketing-status" style="font-size:11px;color:var(--gray400);align-self:center;flex-shrink:0;padding-right:4px;"></span>
       </div>
-      <!-- Tabla -->
-      <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
-      <!-- Botón masivo -->
-      <div style="margin-top:16px;text-align:center;">
-        <button onclick="enviarATodos()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,0.4);letter-spacing:.3px;">
-          📲 Enviar mensaje WA a todos con número
-        </button>
-        <p style="font-size:0.7rem;color:#475569;margin:6px 0 0;">Se abrirá una ventana por cada lead — el navegador puede pedir permiso</p>
+      <!-- Lista de leads -->
+      <div class="rmk-body">
+        <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
+      <!-- Botón masivo fijo sobre bottom-nav -->
+      <button class="rmk-mass-btn" onclick="enviarATodos()">
+        <span>📲</span> Enviar WA a todos con número
+      </button>
     </div>
 
     <!-- AUTORIZADOS / POR RADICAR -->
@@ -3167,12 +3191,6 @@ function recuperarLead(nombre, waNum, paso){
 
 function filtrarRemarketing(filtro){
   _rmFilter = filtro;
-  // Update button styles
-  var btns = document.querySelectorAll('#remarketing-filters .btn');
-  btns.forEach(function(b){
-    var f = b.getAttribute('onclick') && b.getAttribute('onclick').match(/filtrarRemarketing\('([^']+)'\)/);
-    if(f) { b.className = f[1]===filtro ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm'; }
-  });
   renderRemarketing(filtro);
 }
 
@@ -3211,16 +3229,24 @@ function renderRemarketing(filtro){
   var conWA = all.filter(function(r){ return r['WhatsApp']||r['Celular']||r['Teléfono']; }).length;
   var valorPerdido = all.length * 79000;
 
-  // Render stats
-  var statsHtml = [
+  // Render stats — usa rmk-kpi en móvil, stat-card en desktop
+  var statsData = [
     { label:'Total abandonados', value:all.length, color:'navy' },
     { label:'Llegaron a firma', value:conFirma+' ('+Math.round(conFirma/(all.length||1)*100)+'%)', color:'blue' },
     { label:'Con WhatsApp', value:conWA, color:'green' },
     { label:'Valor potencial', value:'$'+(valorPerdido/1000).toFixed(0)+'K', color:'gold' }
-  ].map(function(s){
-    return '<div class="stat-card '+s.color+'" style="margin:0;"><div class="stat-label">'+s.label+'</div><div class="stat-value">'+s.value+'</div></div>';
+  ];
+  var statsHtml = statsData.map(function(s){
+    return '<div class="rmk-kpi '+s.color+'"><div class="rmk-kpi-label">'+s.label+'</div><div class="rmk-kpi-val">'+s.value+'</div></div>';
   }).join('');
   document.getElementById('remarketing-stats-grid').innerHTML = statsHtml;
+
+  // Actualizar chips activo
+  document.querySelectorAll('#remarketing-filters .rmk-chip').forEach(function(b){
+    var onclick = b.getAttribute('onclick')||'';
+    var m = onclick.match(/filtrarRemarketing\('([^']+)'\)/);
+    b.classList.toggle('active', m && m[1]===filtro);
+  });
 
   // Render table
   if(!filtered.length){
