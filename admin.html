@@ -368,7 +368,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
     </div>
     <div class="topbar-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <span id="conexion-status"></span>
-      <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 <span>Actualizar</span></button>
+      <button class="btn btn-outline btn-sm" onclick="loadData(this)">🔄 <span>Actualizar</span></button>
       <button class="btn btn-primary btn-sm" onclick="openNuevoCaso()">➕ Nuevo Caso</button>
     </div>
   </div>
@@ -425,7 +425,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <div class="table-wrap" style="margin-bottom:16px;" id="panel-visitas">
         <div class="table-header">
           <h3>📊 Visitas a juridicosweb.com</h3>
-          <button class="btn btn-outline btn-sm" onclick="loadVisitas()">🔄 Actualizar</button>
+          <button class="btn btn-outline btn-sm" onclick="loadVisitas(this)">🔄 Actualizar</button>
         </div>
         <div id="visitas-wrap">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px;">
@@ -1019,10 +1019,11 @@ function toggleSidebar(forzar){
 // ══════════════════════════════════════════════════
 // CARGA DE DATOS desde Google Sheets (GViz)
 // ══════════════════════════════════════════════════
-function loadVisitas(){
+function loadVisitas(evtBtn){
+  var btn = evtBtn || document.querySelector('[onclick*="loadVisitas"]');
   var url = SCRIPT_URL + '?accion=listar_visitas&_t=' + Date.now();
-  setAllRefreshBtns(true);
-  fetch(url, { cache:'no-store' })
+  setBtnLoading(btn, true);
+  fetchConTimeout(url, 12000)
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(!d.ok) throw new Error(d.error||'Error');
@@ -1052,7 +1053,7 @@ function loadVisitas(){
       // Tabla de últimas 10 visitas
       var ultimas = v.slice(-10).reverse();
       if(ultimas.length === 0){
-        setAllRefreshBtns(false);
+        setBtnLoading(btn, false);
         document.getElementById('vis-tabla').innerHTML = '<p style="color:#64748b;padding:8px 0;">Aún no hay visitas registradas. Se empiezan a registrar desde que alguien visite juridicosweb.com.</p>';
         return;
       }
@@ -1068,30 +1069,33 @@ function loadVisitas(){
       });
       html += '</table>';
       document.getElementById('vis-tabla').innerHTML = html;
-      setAllRefreshBtns(false);
+      setBtnLoading(btn, false);
       showToast('✅ Visitas actualizadas','success');
     })
     .catch(function(e){
-      setAllRefreshBtns(false);
-      document.getElementById('vis-tabla').innerHTML = '<p style="color:#ef4444;padding:8px 0;">⚠️ El Apps Script no reconoce "listar_visitas". Asegúrate de haber pegado el código nuevo y desplegado <strong>Nueva versión</strong>.</p>';
-      showToast('⚠️ Apps Script sin conexión — actualiza el código y redespliega','error');
+      setBtnLoading(btn, false);
+      var msg = e.name==='AbortError' ? 'Tiempo agotado — el Apps Script tardó más de 12s' : e.message;
+      document.getElementById('vis-tabla').innerHTML = '<p style="color:#ef4444;padding:8px 0;">⚠️ ' + msg + '</p>';
+      showToast('⚠️ ' + msg, 'error');
     });
 }
 
-function setAllRefreshBtns(loading){
-  document.querySelectorAll('[onclick*="loadData"], [onclick*="loadVisitas"], [onclick*="loadDocumentos"]').forEach(function(btn){
-    if(loading){
-      btn.dataset._orig = btn.innerHTML;
-      btn.innerHTML = '⏳ Cargando...';
-      btn.disabled = true;
-      btn.style.opacity = '0.7';
-    } else {
-      if(btn.dataset._orig){ btn.innerHTML = btn.dataset._orig; delete btn.dataset._orig; }
-      btn.disabled = false;
-      btn.style.opacity = '';
-    }
-  });
+// Manejo individual de estado de botón — cada función pasa su propio btn
+function setBtnLoading(btn, loading){
+  if(!btn) return;
+  if(loading){
+    btn.dataset._orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Actualizando...';
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+  } else {
+    if(btn.dataset._orig){ btn.innerHTML = btn.dataset._orig; delete btn.dataset._orig; }
+    btn.disabled = false;
+    btn.style.opacity = '';
+  }
 }
+// Compatibilidad — llamadas antiguas no rompen nada
+function setAllRefreshBtns(loading){ /* no-op — reemplazado por setBtnLoading */ }
 
 function setConexionStatus(ok, msg){
   var el = document.getElementById('conexion-status');
@@ -1101,29 +1105,39 @@ function setConexionStatus(ok, msg){
     : '<span style="display:inline-flex;align-items:center;gap:5px;background:#450a0a;color:#f87171;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><span style="width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;"></span>' + msg + '</span>';
 }
 
-function loadData(){
+function fetchConTimeout(url, ms){
+  var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, ms) : null;
+  var opts = { cache:'no-store' };
+  if(ctrl) opts.signal = ctrl.signal;
+  return fetch(url, opts).then(function(r){ if(timer) clearTimeout(timer); return r; });
+}
+
+function loadData(evtBtn){
+  var btn = evtBtn || document.querySelector('[onclick*="loadData"]');
   var url = SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now();
   var sync = document.getElementById('last-sync');
   if(sync) sync.textContent = 'Actualizando...';
-  setAllRefreshBtns(true);
+  setBtnLoading(btn, true);
   setConexionStatus(null, 'Conectando...');
-  fetch(url, { cache: 'no-store' })
+  fetchConTimeout(url, 12000)
     .then(function(r){ return r.json(); })
     .then(function(data){
-      setAllRefreshBtns(false);
-      if(!data.ok) throw new Error(data.error || 'Respuesta inesperada del servidor');
+      setBtnLoading(btn, false);
+      if(!data.ok) throw new Error(data.error || 'Respuesta inesperada');
       allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']; });
       renderAll();
       var hora = new Date().toLocaleTimeString('es-CO');
       if(sync) sync.textContent = 'Actualizado: ' + hora;
       setConexionStatus(true, '✅ Conectado — ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' · ' + hora);
-      showToast('✅ Datos actualizados — ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' en el sistema', 'success');
+      showToast('✅ ' + allRows.length + ' caso' + (allRows.length===1?'':'s') + ' cargado' + (allRows.length===1?'':'s'), 'success');
     })
     .catch(function(err){
-      setAllRefreshBtns(false);
-      setConexionStatus(false, '⚠️ Sin conexión con el Apps Script');
-      showToast('⚠️ Error: ' + err.message + ' — verifica que el Apps Script esté desplegado', 'error');
-      if(sync) sync.textContent = '⚠️ Error — ' + err.message.slice(0,60);
+      setBtnLoading(btn, false);
+      var msg = err.name === 'AbortError' ? 'Tiempo de espera agotado (12s)' : err.message;
+      setConexionStatus(false, '⚠️ Error de conexión');
+      showToast('⚠️ ' + msg, 'error');
+      if(sync) sync.textContent = '⚠️ ' + msg.slice(0,60);
     });
 }
 
