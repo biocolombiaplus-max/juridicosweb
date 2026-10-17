@@ -3201,10 +3201,15 @@ function loadAsesoresAdmin(){
       if(count) count.textContent = items.length + ' asesor(es)';
       if(!items.length){ list.innerHTML = '<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">No hay asesores aún. Agrega el primero arriba.</div>'; return; }
       list.innerHTML = items.map(function(a){
+        var nombre = a.Nombre || a.nombre || '—';
+        var esp    = a.Especialidad || a.especialidad || '';
+        var exp    = a.Experiencia || a.experiencia || '';
+        var foto   = a.Foto || a.foto || '';
+        var id     = a.ID || a.id || '';
         return '<div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #e0ddd5;border-radius:8px;margin-bottom:8px;background:#fafaf8;">' +
-          (a.foto ? '<img src="'+a.foto+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:40px;height:40px;border-radius:50%;background:#0a1628;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#c9a227;font-size:1.2rem;">👤</span></div>') +
-          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+a.nombre+'</strong><br><span style="font-size:12px;color:#6b7280;">'+a.especialidad+'</span></div>' +
-          '<button onclick="eliminarAsesor(\''+a.id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">✕ Eliminar</button>' +
+          (foto ? '<img src="'+foto+'" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:48px;height:48px;border-radius:50%;background:#0a1628;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#c9a227;font-size:1.3rem;">👤</span></div>') +
+          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+nombre+'</strong><br><span style="font-size:12px;color:#6b7280;">'+esp+(exp?' · '+exp:'')+'</span></div>' +
+          '<button onclick="eliminarAsesor(\''+id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;">✕ Eliminar</button>' +
           '</div>';
       }).join('');
     }).catch(function(){ list.innerHTML = '<div style="color:#dc2626;font-size:13px;text-align:center;padding:12px;">Error al cargar. Verifica el Apps Script.</div>'; });
@@ -3214,17 +3219,22 @@ function loadCasosAdmin(){
   var list = document.getElementById('casos-admin-list');
   var count = document.getElementById('casos-admin-count');
   if(!list) return;
-  fetch(SCRIPT_URL + '?_accion=listar_casos')
+  fetch(SCRIPT_URL + '?_accion=listar_casos_exito')
     .then(function(r){ return r.json(); })
     .then(function(data){
       var items = (data && data.casos) ? data.casos : [];
       if(count) count.textContent = items.length + ' caso(s)';
       if(!items.length){ list.innerHTML = '<div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">No hay casos aún. Agrega el primero arriba.</div>'; return; }
       list.innerHTML = items.map(function(c){
+        var nombre = c.Nombre || c.nombre || '—';
+        var ciudad = c.Ciudad || c.ciudad || '';
+        var desc   = c.Descripcion || c.descripcion || '';
+        var imagen = c.Imagen || c.imagen || '';
+        var id     = c.ID || c.id || '';
         return '<div style="display:flex;align-items:flex-start;gap:12px;padding:10px;border:1px solid #e0ddd5;border-radius:8px;margin-bottom:8px;background:#fafaf8;">' +
-          (c.imagen ? '<img src="'+c.imagen+'" style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:56px;height:56px;border-radius:8px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem;">💬</div>') +
-          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+c.nombre+' · '+c.ciudad+'</strong><br><span style="font-size:12px;color:#6b7280;">'+c.descripcion+'</span></div>' +
-          '<button onclick="eliminarCaso(\''+c.id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>' +
+          (imagen ? '<img src="'+imagen+'" style="width:72px;height:72px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\'">' : '<div style="width:72px;height:72px;border-radius:8px;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.8rem;">💬</div>') +
+          '<div style="flex:1;min-width:0;"><strong style="font-size:13px;color:#0a1628;">'+nombre+(ciudad?' · '+ciudad:'')+'</strong><br><span style="font-size:12px;color:#6b7280;">'+desc+'</span></div>' +
+          '<button onclick="eliminarCaso(\''+id+'\')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;flex-shrink:0;">✕</button>' +
           '</div>';
       }).join('');
     }).catch(function(){ list.innerHTML = '<div style="color:#dc2626;font-size:13px;text-align:center;padding:12px;">Error al cargar. Verifica el Apps Script.</div>'; });

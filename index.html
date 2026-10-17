@@ -2350,9 +2350,13 @@ var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPu
         if(!data || !data.asesores || !data.asesores.length) return;
         grid.innerHTML = '';
         data.asesores.forEach(function(a){
+          var nombre = a.Nombre || a.nombre || '';
+          var esp    = a.Especialidad || a.especialidad || '';
+          var exp    = a.Experiencia || a.experiencia || '';
+          var foto   = a.Foto || a.foto || '';
           var card = document.createElement('div');
           card.className = 'asesor-card-ph';
-          card.innerHTML = '<div class="asesor-avatar">' + (a.foto ? '<img src="'+a.foto+'" alt="'+a.nombre+'" onerror="this.parentNode.innerHTML=\'<i class=\\"fas fa-user-tie\\"></i>\'">' : '<i class="fas fa-user-tie"></i>') + '</div><h3>'+a.nombre+'</h3><p>'+a.especialidad+'</p><span>'+a.experiencia+'</span>';
+          card.innerHTML = '<div class="asesor-avatar">' + (foto ? '<img src="'+foto+'" alt="'+nombre+'" onerror="this.parentNode.innerHTML=\'<i class=\\"fas fa-user-tie\\"></i>\'">' : '<i class="fas fa-user-tie"></i>') + '</div><h3>'+nombre+'</h3><p>'+esp+'</p><span>'+exp+'</span>';
           grid.appendChild(card);
         });
       }).catch(function(){});
@@ -2360,15 +2364,19 @@ var GOOGLE_SHEET_URL   = 'https://script.google.com/macros/s/AKfycbw8x9mtNm42bPu
   function loadCasos(){
     var grid = document.getElementById('casos-grid');
     if(!grid) return;
-    fetch(GOOGLE_SHEET_URL + '?_accion=listar_casos')
+    fetch(GOOGLE_SHEET_URL + '?_accion=listar_casos_exito')
       .then(function(r){ return r.json(); })
       .then(function(data){
         if(!data || !data.casos || !data.casos.length) return;
         grid.innerHTML = '';
         data.casos.forEach(function(c){
+          var nombre = c.Nombre || c.nombre || '';
+          var ciudad = c.Ciudad || c.ciudad || '';
+          var desc   = c.Descripcion || c.descripcion || '';
+          var imagen = c.Imagen || c.imagen || '';
           var card = document.createElement('div');
           card.className = 'caso-card-ph';
-          card.innerHTML = '<div class="caso-img-wrap">' + (c.imagen ? '<img src="'+c.imagen+'" alt="Caso '+c.nombre+'" loading="lazy">' : '<div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div>') + '</div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>'+c.nombre+' · '+c.ciudad+'</strong><p>'+c.descripcion+'</p></div>';
+          card.innerHTML = '<div class="caso-img-wrap">' + (imagen ? '<img src="'+imagen+'" alt="Caso '+nombre+'" loading="lazy">' : '<div class="caso-img-placeholder"><i class="fab fa-whatsapp" style="font-size:2.5rem;color:#25d366;"></i><span>Pantallazo WhatsApp</span></div>') + '</div><div class="caso-info"><span class="caso-badge aplica">✅ Multa Eliminada</span><strong>'+nombre+(ciudad?' · '+ciudad:'')+'</strong><p>'+desc+'</p></div>';
           grid.appendChild(card);
         });
       }).catch(function(){});
