@@ -215,21 +215,23 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 }
 
 /* ===== HERO ===== */
-.hero{min-height:100vh;background:linear-gradient(160deg,#020a14 0%,#0a1628 40%,#112240 70%,#05101e 100%);display:flex;align-items:center;padding:60px 5% 80px;position:relative;overflow:hidden;}
-.hero-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=70') center/cover no-repeat;opacity:0.12;}
-.hero-orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,0.12) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;}
-.hero-orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(5,150,105,0.07) 0%,transparent 70%);bottom:-50px;left:-50px;pointer-events:none;}
+.hero{min-height:100vh;background:linear-gradient(170deg,#020c1b 0%,#091526 35%,#0e1f3d 65%,#040d1a 100%);display:flex;align-items:center;padding:70px 5% 80px;position:relative;overflow:hidden;}
+.hero-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=70') center/cover no-repeat;opacity:0.07;}
+.hero-orb1{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,0.10) 0%,transparent 65%);top:-150px;right:-150px;pointer-events:none;}
+.hero-orb2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,0.06) 0%,transparent 65%);bottom:-100px;left:-100px;pointer-events:none;}
+.hero-line-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,0.6) 40%,rgba(201,162,39,0.8) 50%,rgba(201,162,39,0.6) 60%,transparent 100%);}
 .hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;position:relative;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.4);color:var(--gold);padding:7px 16px;border-radius:30px;font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,162,39,0.08);border:1px solid rgba(201,162,39,0.35);color:rgba(201,162,39,0.9);padding:6px 14px;border-radius:6px;font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;}
 .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:ping 1.5s ease-in-out infinite;}
 @keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.6;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulseGreen{0%,100%{box-shadow:0 4px 24px rgba(34,197,94,0.4);}50%{box-shadow:0 4px 40px rgba(34,197,94,0.75);}}
 @keyframes pulseOrange{0%,100%{box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);transform:scale(1);}50%{box-shadow:0 8px 48px rgba(249,115,22,0.85),0 2px 12px rgba(0,0,0,0.35);transform:scale(1.02);}}
 @keyframes shimmerBtn{0%{left:-100%;}100%{left:200%;}}
-.hero h1{font-family:'Playfair Display',serif;font-size:3rem;color:#fff;line-height:1.12;margin-bottom:18px;}
-.hero h1 .hl{color:var(--gold);position:relative;}
-.hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.hero h1{font-family:'Playfair Display',serif;font-size:3.1rem;color:#fff;line-height:1.08;margin-bottom:10px;letter-spacing:-0.5px;}
+.hero-h1-sub{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:400;color:rgba(255,255,255,0.55);margin-bottom:26px;line-height:1.5;letter-spacing:0;}
+.hero h1 .hl{color:var(--gold2);position:relative;display:inline-block;}
+.hero h1 .hl::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:1.5px;background:linear-gradient(90deg,var(--gold),rgba(201,162,39,0.3));}
 .hero-price-anchor{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;color:rgba(226,248,245,0.8);font-size:0.8rem;font-weight:600;margin-bottom:10px;}
 .hero-price-anchor i{color:#c9a227;}
 .hero-price-anchor strong{color:var(--gold);font-size:0.86rem;}
@@ -237,19 +239,22 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 /* Módulo de consulta rápida — la cédula se escribe directo en el hero, sin
    tocar ningún botón para siquiera verlo, así nadie se pierde antes de
    consultar. */
-.hero-consult-wrap{position:relative;margin-bottom:6px;}
-.hero-consult-glow{position:absolute;inset:-16px;background:radial-gradient(ellipse at center,rgba(201,162,39,0.5),transparent 72%);filter:blur(20px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.4s ease-in-out infinite;}
-.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.07);backdrop-filter:blur(10px);border:1.5px solid rgba(201,162,39,0.45);border-radius:18px;padding:20px 18px 16px;}
-.hero-consult-ribbon{position:absolute;top:-12px;right:14px;background:linear-gradient(135deg,#f5c518,#facc15);color:#0a1628;font-size:0.66rem;font-weight:900;padding:5px 13px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.4);z-index:2;letter-spacing:.3px;}
-.hero-consult-label{display:flex;align-items:center;gap:7px;color:#fff;font-size:0.88rem;font-weight:800;margin-bottom:11px;line-height:1.3;}
-.hero-consult-label i{color:#c9a227;}
-.hero-consult-row{display:flex;gap:8px;}
-.hero-consult-input{flex:1;min-width:0;padding:15px 16px;border-radius:12px;border:2px solid transparent;font-size:1.05rem;font-weight:700;font-family:'Inter',sans-serif;background:#fff;color:var(--navy);letter-spacing:.5px;transition:border-color .2s;}
-.hero-consult-input:focus{outline:none;border-color:#c9a227;}
-.hero-consult-input::placeholder{color:#94a3b8;font-weight:500;letter-spacing:normal;}
-.hero-consult-btn{flex-shrink:0;width:58px;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(201,162,39,0.5);animation:glow-pulse 2.2s ease-in-out infinite;}
-.hero-consult-hint{color:rgba(255,255,255,0.6);font-size:0.72rem;text-align:center;margin-top:10px;}
-.hero-consult-alt{display:block;width:100%;text-align:center;color:rgba(255,255,255,0.55);font-size:0.75rem;margin-top:4px;text-decoration:underline;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:4px 0;}
+.hero-consult-wrap{position:relative;margin-bottom:8px;}
+.hero-consult-glow{position:absolute;inset:-20px;background:radial-gradient(ellipse at center,rgba(201,162,39,0.35),transparent 70%);filter:blur(28px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.8s ease-in-out infinite;}
+.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.055);backdrop-filter:blur(16px);border:1px solid rgba(201,162,39,0.38);border-radius:20px;padding:24px 22px 18px;box-shadow:0 8px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.07);}
+.hero-consult-ribbon{position:absolute;top:-13px;right:18px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:0.64rem;font-weight:900;padding:5px 14px;border-radius:4px;box-shadow:0 4px 14px rgba(201,162,39,0.5);z-index:2;letter-spacing:.8px;text-transform:uppercase;}
+.hero-consult-label{display:flex;align-items:flex-start;gap:9px;color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:600;margin-bottom:14px;line-height:1.4;}
+.hero-consult-label i{color:#c9a227;margin-top:2px;flex-shrink:0;}
+.hero-consult-row{display:flex;gap:10px;}
+.hero-consult-input{flex:1;min-width:0;padding:16px 18px;border-radius:12px;border:2px solid rgba(201,162,39,0.2);font-size:1.2rem;font-weight:700;font-family:'Inter',sans-serif;background:rgba(255,255,255,0.95);color:var(--navy);letter-spacing:3px;transition:border-color .2s,box-shadow .2s;}
+.hero-consult-input:focus{outline:none;border-color:#c9a227;box-shadow:0 0 0 3px rgba(201,162,39,0.15);}
+.hero-consult-input::placeholder{color:#94a3b8;font-weight:400;letter-spacing:normal;}
+.hero-consult-btn{flex-shrink:0;width:60px;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1.25rem;cursor:pointer;box-shadow:0 4px 20px rgba(201,162,39,0.55);transition:transform .15s,box-shadow .15s;}
+.hero-consult-btn:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(201,162,39,0.7);}
+.hero-consult-btn:active{transform:scale(0.96);}
+.hero-consult-hint{color:rgba(255,255,255,0.45);font-size:0.7rem;text-align:center;margin-top:12px;letter-spacing:.3px;}
+.hero-consult-alt{display:block;width:100%;text-align:center;color:rgba(201,162,39,0.7);font-size:0.72rem;margin-top:5px;text-decoration:none;border-bottom:1px dotted rgba(201,162,39,0.4);background:none;border-top:none;border-left:none;border-right:none;cursor:pointer;font-family:'Inter',sans-serif;padding:4px 0;transition:color .2s;}
+.hero-consult-alt:hover{color:var(--gold2);}
 .hero-ctas{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;}
 .hero-ctas-row{display:flex;gap:12px;flex-wrap:wrap;}
 .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
@@ -755,11 +760,15 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .pay-opts{grid-template-columns:1fr;}
 }
 @media(max-width:600px){
-  .hero h1{font-size:1.75rem;line-height:1.15;}
-  .hero{padding:50px 4% 60px;}
+  .hero h1{font-size:2rem;line-height:1.1;letter-spacing:-.3px;}
+  .hero-h1-sub{font-size:0.92rem;}
+  .hero{padding:60px 5% 70px;}
   .hero-ctas-row{flex-direction:column;}
   .hero-ctas-row .btn{width:100%;}
-  .hero-badge{font-size:0.65rem;padding:5px 12px;}
+  .hero-badge{font-size:0.63rem;padding:5px 11px;letter-spacing:1.8px;}
+  .hero-consult-card{padding:22px 16px 16px;border-radius:16px;}
+  .hero-consult-input{font-size:1.1rem;padding:15px 14px;letter-spacing:2px;}
+  .hero-consult-btn{width:54px;font-size:1.1rem;}
   .hero-stats{grid-template-columns:1fr 1fr 1fr;}
   .norma-grid{grid-template-columns:1fr;}
   h2.title{font-size:1.9rem;}
@@ -816,13 +825,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
+  <div class="hero-line-accent"></div>
   <div class="hero-bg-img"></div>
   <div class="hero-orb1"></div>
   <div class="hero-orb2"></div>
   <div class="hero-inner">
     <div>
-      <div class="hero-badge"><span class="dot"></span> Bufete · Tránsito · Colombia · 2026</div>
+      <div class="hero-badge"><span class="dot"></span> Bufete de Tránsito · Colombia · 2026</div>
       <h1>Deja de Pagar<br><span class="hl">Multas</span> y <span class="hl">Fotomultas</span><br>que Ya No Debes</h1>
+      <p class="hero-h1-sub">Verificamos si tu multa aplica para eliminación legal — gratis, sin registro y en segundos.</p>
       <div class="hero-ctas">
 
         <!-- Módulo de consulta rápida: la cédula se escribe directo aquí,
@@ -844,12 +855,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- 3 sellos compactos -->
-        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-          <span style="color:#c9a227;font-size:0.75rem;font-weight:700;">⚡ Resultado inmediato</span>
-          <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
-          <span style="color:#fbbf24;font-size:0.75rem;font-weight:700;">📄 Documento al instante</span>
-          <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">·</span>
-          <span style="color:#4ade80;font-size:0.75rem;font-weight:700;">✅ $0 si no aplica</span>
+        <div style="display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;margin-top:14px;padding:0 4px;">
+          <span style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,0.5);font-size:0.72rem;font-weight:500;letter-spacing:.2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Resultado inmediato</span>
+          <span style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,0.5);font-size:0.72rem;font-weight:500;letter-spacing:.2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documento al instante</span>
+          <span style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,0.5);font-size:0.72rem;font-weight:500;letter-spacing:.2px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>$0 si no aplica</span>
         </div>
 
         <!-- Subtítulo separador -->
