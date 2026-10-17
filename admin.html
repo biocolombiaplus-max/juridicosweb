@@ -1052,6 +1052,7 @@ function loadVisitas(){
       // Tabla de últimas 10 visitas
       var ultimas = v.slice(-10).reverse();
       if(ultimas.length === 0){
+        setAllRefreshBtns(false);
         document.getElementById('vis-tabla').innerHTML = '<p style="color:#64748b;padding:8px 0;">Aún no hay visitas registradas. Se empiezan a registrar desde que alguien visite juridicosweb.com.</p>';
         return;
       }
