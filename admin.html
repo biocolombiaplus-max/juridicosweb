@@ -631,7 +631,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
               <input id="asesor-foto-file" type="file" accept="image/*" style="display:none;" onchange="procesarImagen(this,'asesor-foto','asesor-foto-preview','asesor-foto-img','asesor-foto-label')">
             </div>
           </div>
-          <button onclick="guardarAsesor()" style="background:linear-gradient(135deg,#0a1628,#112240);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Asesor</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button onclick="guardarAsesor()" style="background:linear-gradient(135deg,#0a1628,#112240);color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Asesor</button>
+            <button onclick="loadAsesoresAdmin()" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;cursor:pointer;">🔄 Verificar lista</button>
+          </div>
         </div>
         <div id="asesores-admin-list" style="padding:0 18px 18px;"><div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">Cargando asesores...</div></div>
       </div>
@@ -655,7 +658,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
               <input id="caso-imagen-file" type="file" accept="image/*" style="display:none;" onchange="procesarImagen(this,'caso-imagen','caso-imagen-preview','caso-imagen-img','caso-imagen-label')">
             </div>
           </div>
-          <button onclick="guardarCaso()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Caso de Éxito</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <button onclick="guardarCaso()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Caso de Éxito</button>
+            <button onclick="loadCasosAdmin()" style="background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;cursor:pointer;">🔄 Verificar lista</button>
+          </div>
         </div>
         <div id="casos-admin-list" style="padding:0 18px 18px;"><div style="color:#6b7280;font-size:13px;text-align:center;padding:20px;">Cargando casos...</div></div>
       </div>
@@ -2907,31 +2913,45 @@ setInterval(function(){ if(currentUser) loadData(); }, 2*60*1000);
 
 /* ===== CONTENIDO WEB: ASESORES & CASOS ===== */
 
-// Procesa imagen seleccionada: redimensiona a max 400px y guarda base64 en campo hidden
+// Envía JSON a Apps Script (más confiable que FormData para payloads grandes)
+function postJSON(payload){
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
+  }).then(function(r){ return r.json(); });
+}
+
+// Procesa imagen: redimensiona y comprime agresivamente para que quepa en Sheets (<30KB)
 function procesarImagen(input, hiddenId, previewDivId, previewImgId, labelId){
   var file = input.files && input.files[0];
   if(!file) return;
-  var maxPx = 400;
+  // Fotos asesor: 160px · Pantallazos: 280px
+  var maxPx = hiddenId === 'asesor-foto' ? 160 : 280;
   var reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = function(ev){
     var img = new Image();
     img.onload = function(){
       var w = img.width, h = img.height;
-      if(w > maxPx || h > maxPx){
-        var ratio = Math.min(maxPx/w, maxPx/h);
-        w = Math.round(w*ratio); h = Math.round(h*ratio);
-      }
+      var ratio = Math.min(maxPx/w, maxPx/h, 1);
+      w = Math.round(w*ratio); h = Math.round(h*ratio);
       var canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      var b64 = canvas.toDataURL('image/jpeg', 0.82);
+      // Calidad baja para mantener <30KB (caben en Sheets con margen)
+      var b64 = canvas.toDataURL('image/jpeg', 0.60);
+      var kb = Math.round(b64.length * 0.75 / 1024);
+      // Si aún es grande, reducir más
+      if(kb > 28){
+        b64 = canvas.toDataURL('image/jpeg', 0.40);
+        kb = Math.round(b64.length * 0.75 / 1024);
+      }
       document.getElementById(hiddenId).value = b64;
       document.getElementById(previewImgId).src = b64;
       document.getElementById(previewDivId).style.display = 'block';
-      var kb = Math.round(b64.length * 0.75 / 1024);
       document.getElementById(labelId).textContent = '✅ ' + file.name + ' (' + kb + ' KB) — toca para cambiar';
     };
-    img.src = e.target.result;
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -2941,23 +2961,23 @@ function guardarAsesor(){
   var especialidad = document.getElementById('asesor-especialidad').value.trim();
   var experiencia = document.getElementById('asesor-experiencia').value.trim();
   var foto = document.getElementById('asesor-foto').value.trim();
-  if(!nombre || !especialidad){ alert('Nombre y especialidad son requeridos.'); return; }
-  var fd = new FormData();
-  fd.append('_accion', 'guardar_asesor');
-  fd.append('nombre', nombre);
-  fd.append('especialidad', especialidad);
-  fd.append('experiencia', experiencia || '');
-  fd.append('foto', foto || '');
-  fetch(SCRIPT_URL, { method:'POST', body: fd })
-    .then(function(r){ return r.json(); })
-    .then(function(){
+  if(!nombre || !especialidad){ showToast('Nombre y especialidad son requeridos','error'); return; }
+  var btnGuardar = document.querySelector('[onclick="guardarAsesor()"]');
+  if(btnGuardar){ btnGuardar.disabled=true; btnGuardar.textContent='⏳ Guardando...'; }
+  postJSON({ _accion:'guardar_asesor', nombre:nombre, especialidad:especialidad, experiencia:experiencia, foto:foto })
+    .then(function(data){
+      if(!data.ok) throw new Error(data.error || 'Error desconocido');
       ['asesor-nombre','asesor-especialidad','asesor-experiencia','asesor-foto'].forEach(function(id){ document.getElementById(id).value=''; });
       document.getElementById('asesor-foto-file').value='';
       document.getElementById('asesor-foto-preview').style.display='none';
       document.getElementById('asesor-foto-label').textContent='Subir foto desde celular o PC';
+      showToast('✅ Asesor guardado correctamente','success');
       loadAsesoresAdmin();
     })
-    .catch(function(e){ alert('Error al guardar: ' + e.message); });
+    .catch(function(e){ showToast('❌ Error al guardar: ' + e.message,'error'); })
+    .finally(function(){
+      if(btnGuardar){ btnGuardar.disabled=false; btnGuardar.textContent='➕ Agregar Asesor'; }
+    });
 }
 
 function guardarCaso(){
@@ -2965,23 +2985,23 @@ function guardarCaso(){
   var ciudad = document.getElementById('caso-ciudad').value.trim();
   var descripcion = document.getElementById('caso-descripcion').value.trim();
   var imagen = document.getElementById('caso-imagen').value.trim();
-  if(!nombre || !descripcion){ alert('Nombre y descripción son requeridos.'); return; }
-  var fd = new FormData();
-  fd.append('_accion', 'guardar_caso');
-  fd.append('nombre', nombre);
-  fd.append('ciudad', ciudad || '');
-  fd.append('descripcion', descripcion);
-  fd.append('imagen', imagen || '');
-  fetch(SCRIPT_URL, { method:'POST', body: fd })
-    .then(function(r){ return r.json(); })
-    .then(function(){
+  if(!nombre || !descripcion){ showToast('Nombre y descripción son requeridos','error'); return; }
+  var btnGuardar = document.querySelector('[onclick="guardarCaso()"]');
+  if(btnGuardar){ btnGuardar.disabled=true; btnGuardar.textContent='⏳ Guardando...'; }
+  postJSON({ _accion:'guardar_caso', nombre:nombre, ciudad:ciudad, descripcion:descripcion, imagen:imagen })
+    .then(function(data){
+      if(!data.ok) throw new Error(data.error || 'Error desconocido');
       ['caso-nombre','caso-ciudad','caso-descripcion','caso-imagen'].forEach(function(id){ document.getElementById(id).value=''; });
       document.getElementById('caso-imagen-file').value='';
       document.getElementById('caso-imagen-preview').style.display='none';
       document.getElementById('caso-imagen-label').textContent='Subir pantallazo desde celular o PC';
+      showToast('✅ Caso de éxito guardado','success');
       loadCasosAdmin();
     })
-    .catch(function(e){ alert('Error al guardar: ' + e.message); });
+    .catch(function(e){ showToast('❌ Error al guardar: ' + e.message,'error'); })
+    .finally(function(){
+      if(btnGuardar){ btnGuardar.disabled=false; btnGuardar.textContent='➕ Agregar Caso de Éxito'; }
+    });
 }
 
 function eliminarAsesor(id){
