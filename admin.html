@@ -421,43 +421,85 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div id="funnel-steps" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
       </div>
 
-      <!-- PANEL VISITAS WEB -->
+      <!-- PANEL ANALÍTICA PREMIUM -->
       <div class="table-wrap" style="margin-bottom:16px;" id="panel-visitas">
-        <div class="table-header">
-          <h3>📊 Visitas a juridicosweb.com</h3>
+        <div class="table-header" style="align-items:center;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <h3 style="margin:0;">📊 Analítica de campaña</h3>
+            <span style="background:#16a34a;color:#fff;font-size:0.62rem;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.8px;animation:pulse 2s infinite;">TIEMPO REAL</span>
+          </div>
           <button class="btn btn-outline btn-sm" onclick="loadVisitas(this)">🔄 Actualizar</button>
         </div>
         <div id="visitas-wrap">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:14px;">
-            <div class="stat-card navy" style="margin:0;">
-              <div class="stat-label">Hoy</div>
-              <div class="stat-value" id="vis-hoy">—</div>
-              <div class="stat-sub">visitantes únicos</div>
+          <!-- KPI: Tráfico -->
+          <div style="padding:14px 14px 0;">
+            <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Tráfico</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px;">
+              <div class="stat-card navy" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Hoy</div>
+                <div class="stat-value" id="vis-hoy" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">visitantes</div>
+              </div>
+              <div class="stat-card blue" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Esta semana</div>
+                <div class="stat-value" id="vis-semana" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">últimos 7 días</div>
+              </div>
+              <div class="stat-card green" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Este mes</div>
+                <div class="stat-value" id="vis-mes" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">últimos 30 días</div>
+              </div>
+              <div class="stat-card gold" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Meta Ads</div>
+                <div class="stat-value" id="vis-meta" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">campaña este mes</div>
+              </div>
+              <div class="stat-card navy" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Tasa conv.</div>
+                <div class="stat-value" id="vis-conv-rate" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">visitas → leads</div>
+              </div>
+              <div class="stat-card blue" style="margin:0;padding:12px 14px;">
+                <div class="stat-label" style="font-size:0.65rem;">Móvil</div>
+                <div class="stat-value" id="vis-movil" style="font-size:1.6rem;">—</div>
+                <div class="stat-sub">% desde celular</div>
+              </div>
             </div>
-            <div class="stat-card blue" style="margin:0;">
-              <div class="stat-label">Esta semana</div>
-              <div class="stat-value" id="vis-semana">—</div>
-              <div class="stat-sub">últimos 7 días</div>
+            <!-- KPI: Ingresos -->
+            <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Ingresos & Pipeline</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;">
+              <div style="background:linear-gradient(135deg,#14532d,#166534);border-radius:10px;padding:14px;border:1px solid #15803d;">
+                <div style="font-size:0.65rem;font-weight:700;color:#86efac;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Ingresos este mes</div>
+                <div id="vis-ingresos-mes" style="font-size:1.5rem;font-weight:900;color:#4ade80;">—</div>
+                <div style="font-size:0.65rem;color:#86efac;margin-top:2px;">clientes pagados × $79k</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#1c1007,#292005);border-radius:10px;padding:14px;border:1px solid #854d0e;">
+                <div style="font-size:0.65rem;font-weight:700;color:#fde68a;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Ticket promedio</div>
+                <div id="vis-ticket-prom" style="font-size:1.5rem;font-weight:900;color:#fbbf24;">—</div>
+                <div style="font-size:0.65rem;color:#fde68a;margin-top:2px;">por cliente</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:10px;padding:14px;border:1px solid #4338ca;">
+                <div style="font-size:0.65rem;font-weight:700;color:#c7d2fe;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">Valor potencial</div>
+                <div id="vis-potencial" style="font-size:1.5rem;font-weight:900;color:#a5b4fc;">—</div>
+                <div style="font-size:0.65rem;color:#c7d2fe;margin-top:2px;">leads sin convertir</div>
+              </div>
             </div>
-            <div class="stat-card green" style="margin:0;">
-              <div class="stat-label">Este mes</div>
-              <div class="stat-value" id="vis-mes">—</div>
-              <div class="stat-sub">últimos 30 días</div>
-            </div>
-            <div class="stat-card gold" style="margin:0;">
-              <div class="stat-label">Meta Ads</div>
-              <div class="stat-value" id="vis-meta">—</div>
-              <div class="stat-sub">de campaña este mes</div>
-            </div>
-            <div class="stat-card navy" style="margin:0;">
-              <div class="stat-label">Móvil</div>
-              <div class="stat-value" id="vis-movil">—</div>
-              <div class="stat-sub">% desde celular</div>
+            <!-- Breakdown de fuentes -->
+            <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Fuentes de tráfico</div>
+            <div id="vis-fuentes-bar" style="margin-bottom:14px;">
+              <div style="color:#475569;font-size:0.75rem;">Cargando fuentes...</div>
             </div>
           </div>
-          <!-- Gráfica últimos 7 días -->
+          <!-- Gráfica 30 días -->
+          <div style="padding:0 14px 4px;">
+            <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Visitas últimos 30 días</div>
+          </div>
           <div id="vis-chart" style="padding:0 14px 10px;"></div>
           <!-- Últimas visitas -->
+          <div style="padding:0 14px 4px;">
+            <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Últimas 20 visitas</div>
+          </div>
           <div id="vis-tabla" style="padding:0 14px 14px;font-size:0.82rem;color:#94a3b8;text-align:center;">
             Cargando visitas...
           </div>
@@ -525,18 +567,33 @@ tr:hover td{background:#f8faff;cursor:pointer}
 
     <!-- REMARKETING (NO PAGARON) -->
     <div class="section" id="section-remarketing">
-      <!-- Stats header -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;" id="remarketing-stats-grid"></div>
-      <!-- Filters -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;" id="remarketing-filters">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2 style="font-size:1.1rem;font-weight:900;color:#f1f5f9;margin:0 0 2px;">🎯 Leads sin convertir — Recuperación</h2>
+          <p style="font-size:0.75rem;color:#64748b;margin:0;">Personas que llegaron pero no pagaron. Contáctalas con un mensaje personalizado.</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="loadData(this)">🔄 Actualizar</button>
+      </div>
+      <!-- KPI Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;" id="remarketing-stats-grid"></div>
+      <!-- Filters + Enviar a todos -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;" id="remarketing-filters">
         <button class="btn btn-primary btn-sm" onclick="filtrarRemarketing('todos')">Todos</button>
         <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('cedula')">Solo cédula</button>
         <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('firma')">Llegaron a firma</button>
         <button class="btn btn-outline btn-sm" onclick="filtrarRemarketing('precio')">Vieron precio</button>
-        <button class="btn btn-sm" style="background:#16a34a;color:#fff;border:none;" onclick="enviarATodos()">📲 Enviar a todos por WA</button>
         <span id="campana-remarketing-status" style="font-size:12px;color:var(--gray500,#64748b);align-self:center;"></span>
       </div>
+      <!-- Tabla -->
       <div id="table-remarketing-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      <!-- Botón masivo -->
+      <div style="margin-top:16px;text-align:center;">
+        <button onclick="enviarATodos()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,0.4);letter-spacing:.3px;">
+          📲 Enviar mensaje WA a todos con número
+        </button>
+        <p style="font-size:0.7rem;color:#475569;margin:6px 0 0;">Se abrirá una ventana por cada lead — el navegador puede pedir permiso</p>
+      </div>
     </div>
 
     <!-- AUTORIZADOS / POR RADICAR -->
@@ -1060,80 +1117,143 @@ function loadVisitas(evtBtn){
       var mes     = new Date(ahora - 30*864e5).toISOString().slice(0,10);
 
       var cHoy=0, cSemana=0, cMes=0, cMeta=0, cMovil=0;
+      var fuenteCount = {};
       v.forEach(function(r){
         var f = (r['Fecha']||'').slice(0,10);
         if(f === hoy)    cHoy++;
         if(f >= semana)  cSemana++;
         if(f >= mes){
           cMes++;
-          if((r['Fuente']||'').includes('meta')) cMeta++;
-          if((r['Dispositivo']||'').includes('movil')) cMovil++;
+          var src = (r['Fuente']||'directo').toLowerCase().replace(/ /g,'_');
+          if(src.indexOf('meta')!==-1) cMeta++;
+          if((r['Dispositivo']||'').toLowerCase().indexOf('movil')!==-1) cMovil++;
+          fuenteCount[src] = (fuenteCount[src]||0) + 1;
         }
       });
+
+      // KPI Tráfico
       document.getElementById('vis-hoy').textContent    = cHoy;
       document.getElementById('vis-semana').textContent = cSemana;
       document.getElementById('vis-mes').textContent    = cMes;
       document.getElementById('vis-meta').textContent   = cMeta;
       document.getElementById('vis-movil').textContent  = cMes > 0 ? Math.round(cMovil/cMes*100)+'%' : '—';
 
-      // Gráfica barras últimos 7 días
-      var dias7 = [];
-      for(var i=6;i>=0;i--){
-        var d = new Date(ahora - i*864e5);
-        dias7.push(d.toISOString().slice(0,10));
+      // Tasa de conversión: leads / visitas del mes
+      var totalLeads = (allRows||[]).length;
+      var totalPagados = (allRows||[]).filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true; }).length;
+      var totalSinPagar = totalLeads - totalPagados;
+      var convRate = cMes > 0 ? (totalLeads / cMes * 100).toFixed(1) : 0;
+      var elConv = document.getElementById('vis-conv-rate');
+      if(elConv) elConv.textContent = convRate + '%';
+
+      // KPI Ingresos
+      var ingresosMes = totalPagados * 79000;
+      var ticketProm  = totalPagados > 0 ? Math.round(ingresosMes / totalPagados) : 0;
+      var potencial   = totalSinPagar * 79000;
+      var fmtCOP = function(n){ return '$'+(n>=1000000?(n/1000000).toFixed(1)+'M':(n/1000).toFixed(0)+'K'); };
+      var elIng = document.getElementById('vis-ingresos-mes');
+      var elTick = document.getElementById('vis-ticket-prom');
+      var elPot  = document.getElementById('vis-potencial');
+      if(elIng)  elIng.textContent  = fmtCOP(ingresosMes);
+      if(elTick) elTick.textContent = ticketProm > 0 ? fmtCOP(ticketProm) : '—';
+      if(elPot)  elPot.textContent  = fmtCOP(potencial);
+
+      // Breakdown de fuentes
+      var fuenteColors = { meta_ads:'#1d4ed8', facebook:'#1d4ed8', directo:'#334155', referral:'#15803d', google:'#dc2626', organic:'#059669' };
+      var fuenteNames  = { meta_ads:'📘 Meta Ads', facebook:'📘 Facebook', directo:'🏠 Directo', referral:'🔗 Referral', google:'🔍 Google', organic:'🌿 Orgánico' };
+      var totalFuente = Object.values(fuenteCount).reduce(function(a,b){ return a+b; }, 0) || 1;
+      var fuentesSorted = Object.keys(fuenteCount).sort(function(a,b){ return fuenteCount[b]-fuenteCount[a]; });
+      var fuentesHtml = '<div style="display:flex;flex-direction:column;gap:6px;">';
+      fuentesSorted.forEach(function(src){
+        var pct = Math.round(fuenteCount[src]/totalFuente*100);
+        var color = fuenteColors[src] || '#475569';
+        var name  = fuenteNames[src]  || ('🌐 '+src);
+        fuentesHtml += '<div style="display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:0.72rem;color:#94a3b8;min-width:110px;">'+name+'</div>'+
+          '<div style="flex:1;background:#1e293b;border-radius:4px;height:8px;overflow:hidden;">'+
+            '<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:4px;transition:width .6s;"></div>'+
+          '</div>'+
+          '<div style="font-size:0.72rem;color:#e2e8f0;min-width:40px;text-align:right;">'+pct+'% ('+fuenteCount[src]+')</div>'+
+          '</div>';
+      });
+      if(!fuentesSorted.length) fuentesHtml += '<div style="font-size:0.75rem;color:#475569;">Sin datos aún</div>';
+      fuentesHtml += '</div>';
+      var elFuentes = document.getElementById('vis-fuentes-bar');
+      if(elFuentes) elFuentes.innerHTML = fuentesHtml;
+
+      // Gráfica barras últimos 30 días
+      var dias30 = [];
+      for(var i=29;i>=0;i--){
+        var dObj = new Date(ahora - i*864e5);
+        dias30.push(dObj.toISOString().slice(0,10));
       }
       var porDia = {};
-      dias7.forEach(function(d){ porDia[d]=0; });
+      dias30.forEach(function(d){ porDia[d]=0; });
       v.forEach(function(r){
         var f=(r['Fecha']||'').slice(0,10);
         if(porDia[f]!==undefined) porDia[f]++;
       });
-      var maxVal = Math.max.apply(null, dias7.map(function(d){ return porDia[d]; }))||1;
-      var chartHtml = '<div style="display:flex;align-items:flex-end;gap:6px;height:60px;margin-bottom:4px;">';
-      dias7.forEach(function(d){
+      var maxVal = Math.max.apply(null, dias30.map(function(d){ return porDia[d]; }))||1;
+      var chartHtml = '<div style="display:flex;align-items:flex-end;gap:2px;height:70px;margin-bottom:4px;">';
+      dias30.forEach(function(d){
         var pct = Math.round(porDia[d]/maxVal*100);
-        var label = d.slice(5); // MM-DD
         var isToday = d===hoy;
-        chartHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">'+
-          '<span style="font-size:0.62rem;color:'+(isToday?'#f59e0b':'#64748b')+';">'+(porDia[d]||'')+'</span>'+
-          '<div style="width:100%;background:'+(isToday?'#f59e0b':'#3b82f6')+';height:'+Math.max(pct*0.5,2)+'px;border-radius:3px 3px 0 0;transition:height .3s;"></div>'+
-          '<span style="font-size:0.6rem;color:#64748b;">'+label+'</span>'+
+        var isWeekend = [0,6].indexOf(new Date(d).getDay())!==-1;
+        var barColor = isToday?'#f59e0b':(isWeekend?'#6d28d9':'#3b82f6');
+        chartHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;" title="'+d+': '+porDia[d]+' visitas">'+
+          '<div style="width:100%;background:'+barColor+';opacity:'+(porDia[d]?1:0.15)+';height:'+Math.max(pct*0.65,2)+'px;border-radius:2px 2px 0 0;transition:height .3s;"></div>'+
           '</div>';
+      });
+      chartHtml += '</div>';
+      // Leyenda fechas (solo los lunes y hoy)
+      chartHtml += '<div style="display:flex;align-items:center;gap:2px;">';
+      dias30.forEach(function(d){
+        var isToday = d===hoy;
+        var isMonday = new Date(d).getDay()===1;
+        chartHtml += '<div style="flex:1;text-align:center;font-size:0.55rem;color:'+(isToday?'#f59e0b':'#475569')+';">'+
+          (isToday||isMonday?d.slice(5):'')+'</div>';
       });
       chartHtml += '</div>';
       document.getElementById('vis-chart').innerHTML = chartHtml;
 
-      // Tabla de últimas 15 visitas
-      var ultimas = v.slice(-15).reverse();
+      // Tabla de últimas 20 visitas
+      var ultimas = v.slice(-20).reverse();
       if(ultimas.length === 0){
         setBtnLoading(btn, false);
-        document.getElementById('vis-tabla').innerHTML = '<p style="color:#64748b;padding:8px 0;">Aún no hay visitas registradas. Se empiezan a registrar desde que alguien visite juridicosweb.com.</p>';
+        document.getElementById('vis-tabla').innerHTML = '<p style="color:#64748b;padding:8px 0;text-align:center;">Aún no hay visitas registradas.</p>';
         return;
       }
-      var fuenteColor = { meta_ads:'#1e40af', referral:'#166534', directo:'#374151' };
-      var fuenteIcon  = { meta_ads:'📘', referral:'🔗', directo:'🏠' };
-      var html = '<table style="width:100%;border-collapse:collapse;font-size:0.78rem;">';
-      html += '<tr style="color:#64748b;border-bottom:1px solid #1e293b;">'+
-        '<th style="text-align:left;padding:5px 4px;">Fecha/Hora</th>'+
-        '<th style="text-align:left;padding:5px 4px;">Fuente</th>'+
-        '<th style="text-align:left;padding:5px 4px;">Dispositivo</th>'+
-        '<th style="text-align:left;padding:5px 4px;">Campaña</th>'+
-        '</tr>';
-      ultimas.forEach(function(r){
+      var fuenteColor = { meta_ads:'#1e40af', facebook:'#1e40af', referral:'#166534', directo:'#334155', google:'#991b1b', organic:'#065f46' };
+      var fuenteIcon  = { meta_ads:'📘', facebook:'📘', referral:'🔗', directo:'🏠', google:'🔍', organic:'🌿' };
+      var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.78rem;min-width:400px;">';
+      html += '<thead><tr style="color:#64748b;border-bottom:1px solid #1e293b;background:#0f172a;">'+
+        '<th style="text-align:left;padding:7px 8px;">Hora</th>'+
+        '<th style="text-align:left;padding:7px 8px;">Fuente</th>'+
+        '<th style="text-align:left;padding:7px 8px;">Dispositivo</th>'+
+        '<th style="text-align:left;padding:7px 8px;">Campaña</th>'+
+        '</tr></thead><tbody>';
+      ultimas.forEach(function(r, idx){
         var src = (r['Fuente']||'directo').toLowerCase().replace(/ /g,'_');
-        var bg = fuenteColor[src] || '#374151';
+        var bg = idx%2===0?'#1e293b':'#162032';
+        var badgeBg = fuenteColor[src] || '#334155';
         var ic = fuenteIcon[src] || '🌐';
-        html += '<tr style="border-bottom:1px solid #0f172a;">'+
-          '<td style="padding:5px 4px;color:#e2e8f0;white-space:nowrap;">'+(r['Fecha']||'—')+'</td>'+
-          '<td style="padding:5px 4px;"><span style="background:'+bg+';color:#fff;padding:2px 7px;border-radius:4px;font-size:0.7rem;">'+ic+' '+(r['Fuente']||'directo')+'</span></td>'+
-          '<td style="padding:5px 4px;color:#94a3b8;">'+(/movil/i.test(r['Dispositivo']||'')?'📱 Móvil':'🖥 PC')+'</td>'+
-          '<td style="padding:5px 4px;color:#94a3b8;font-size:0.7rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r['UTM Campaign']||r['Campaña']||'—')+'</td>'+
+        var fechaStr = (r['Fecha']||'—');
+        var hora = fechaStr.length > 10 ? fechaStr.slice(11,16) : fechaStr.slice(0,10);
+        var fecha = fechaStr.slice(0,10);
+        html += '<tr style="background:'+bg+';border-bottom:1px solid #0f172a;">'+
+          '<td style="padding:7px 8px;color:#e2e8f0;white-space:nowrap;">'+
+            '<div style="font-size:0.82rem;font-weight:700;">'+hora+'</div>'+
+            '<div style="font-size:0.65rem;color:#64748b;">'+fecha+'</div>'+
+          '</td>'+
+          '<td style="padding:7px 8px;"><span style="background:'+badgeBg+';color:#fff;padding:3px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;white-space:nowrap;">'+ic+' '+(r['Fuente']||'directo')+'</span></td>'+
+          '<td style="padding:7px 8px;color:#94a3b8;font-size:0.8rem;">'+(/movil/i.test(r['Dispositivo']||'')?'📱 Móvil':'🖥️ PC')+'</td>'+
+          '<td style="padding:7px 8px;color:#94a3b8;font-size:0.7rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r['UTM Campaign']||r['Campaña']||'—')+'</td>'+
           '</tr>';
       });
-      html += '</table>';
+      html += '</tbody></table></div>';
       document.getElementById('vis-tabla').innerHTML = html;
       setBtnLoading(btn, false);
-      showToast('✅ Visitas actualizadas','success');
+      showToast('✅ Analítica actualizada','success');
     })
     .catch(function(e){
       setBtnLoading(btn, false);
@@ -2783,13 +2903,42 @@ function limpiarWA(num){
   return '57'+n;
 }
 
-function recuperarLead(nombre, waNum){
+function recuperarLead(nombre, waNum, paso){
   var wa = limpiarWA(waNum);
   if(!wa || wa.length < 10){ alert('No hay número de WhatsApp disponible para este lead.'); return; }
-  var msg = 'Hola '+nombre+', vi que estás en proceso de eliminar tu(s) fotomulta(s) en JurídicosWeb 🚨\n\n'+
-    'Tu documento ya está generado y firmado — solo falta activarlo para radicarlo ante la secretaría.\n\n'+
-    '¿Te ayudo a terminar el trámite ahora? Te toma menos de 2 minutos 🎯\n\n'+
-    '— Equipo JurídicosWeb';
+  nombre = nombre || 'cliente';
+  paso   = (paso||'').toLowerCase();
+  var msg;
+  if(paso.indexOf('firma')!==-1){
+    msg = 'Hola '+nombre+' 👋\n\n'+
+      '⚖️ *JurídicosWeb — Derecho de Petición de Tránsito*\n\n'+
+      'Tu documento ya está redactado y firmado digitalmente. *Solo falta activarlo para radicarlo ante la secretaría.*\n\n'+
+      '📋 ¿Qué sigue?\n'+
+      '→ Confirmas el pago ($79.000 o $49.000)\n'+
+      '→ Radicamos ese mismo día\n'+
+      '→ Recibes el número de radicado\n\n'+
+      '⏳ Tienes 24 horas antes de que el documento expire. No dejes que tu multa siga vigente.\n\n'+
+      '👉 https://juridicosweb.com/\n\n'+
+      '— Equipo JurídicosWeb';
+  } else if(paso.indexOf('precio')!==-1 || paso.indexOf('pago')!==-1){
+    msg = 'Hola '+nombre+' 👋\n\n'+
+      '⚖️ *JurídicosWeb — Eliminación de Fotomultas*\n\n'+
+      'Guardamos tu caso con el precio garantizado: *$79.000 para eliminar TODAS tus multas.*\n\n'+
+      '💡 Muchos clientes en tu misma situación ya radicaron su Derecho de Petición esta semana con resultado positivo.\n\n'+
+      '¿Terminamos el proceso ahora? Son solo 2 minutos más.\n\n'+
+      '👉 https://juridicosweb.com/\n\n'+
+      '— Equipo JurídicosWeb';
+  } else {
+    msg = 'Hola '+nombre+' 👋\n\n'+
+      '⚖️ *JurídicosWeb — Fotomultas y Multas de Tránsito*\n\n'+
+      'Revisamos tu consulta y confirmamos que *tienes multas o fotomultas con causal legal para eliminar.*\n\n'+
+      'El proceso es 100% digital, en 2 minutos tienes el documento listo para radicar:\n'+
+      '✅ Una multa: $49.000\n'+
+      '✅ Todas las multas: $79.000\n\n'+
+      '¿Continuamos ahora?\n'+
+      '👉 https://juridicosweb.com/\n\n'+
+      '— Equipo JurídicosWeb';
+  }
   window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
 }
 
@@ -2856,29 +3005,50 @@ function renderRemarketing(filtro){
     return;
   }
 
-  var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
-  html += '<thead><tr style="background:#0f172a;color:#94a3b8;">';
-  ['Nombre','Cédula/Placa','WhatsApp','Ciudad','Último paso','Fecha','Recuperar'].forEach(function(h){
-    html += '<th style="padding:10px 12px;text-align:left;font-weight:600;border-bottom:1px solid #334155;">'+h+'</th>';
+  // Badge color por etapa
+  function etapaBadge(paso){
+    var p = (paso||'').toLowerCase();
+    if(p.indexOf('firma')!==-1)  return '<span style="background:#1d4ed8;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;">✍️ Firma</span>';
+    if(p.indexOf('pago')!==-1||p.indexOf('precio')!==-1)  return '<span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;">💳 Precio</span>';
+    if(p.indexOf('datos')!==-1||p.indexOf('nombre')!==-1) return '<span style="background:#15803d;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;">📝 Datos</span>';
+    if(p.indexOf('cedula')!==-1||p.indexOf('simit')!==-1) return '<span style="background:#b45309;color:#fff;padding:2px 8px;border-radius:20px;font-size:0.65rem;font-weight:700;">🔍 Consultó</span>';
+    return '<span style="background:#334155;color:#94a3b8;padding:2px 8px;border-radius:20px;font-size:0.65rem;">—</span>';
+  }
+  function tiempoRelativo(fechaStr){
+    if(!fechaStr||fechaStr==='—') return '—';
+    var ts = new Date(fechaStr.replace(' ','T'));
+    if(isNaN(ts)) return fechaStr.slice(0,10);
+    var diff = Math.floor((Date.now()-ts)/60000);
+    if(diff<60)   return diff+'m';
+    if(diff<1440) return Math.floor(diff/60)+'h';
+    return Math.floor(diff/1440)+'d';
+  }
+
+  var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:500px;">';
+  html += '<thead><tr style="background:#0f172a;color:#64748b;font-size:0.72rem;text-transform:uppercase;letter-spacing:.4px;">';
+  ['Persona','Etapa','Hace','WhatsApp','Mensaje'].forEach(function(h){
+    html += '<th style="padding:10px 12px;text-align:left;font-weight:700;border-bottom:1px solid #334155;">'+h+'</th>';
   });
   html += '</tr></thead><tbody>';
 
   filtered.forEach(function(r, idx){
     var nombre = ((r['Nombres']||'')+(r['Apellidos']?' '+r['Apellidos']:'')).trim() || 'Sin nombre';
-    var id = r['Cédula']||r['Placa']||'—';
+    var cedula = r['Cédula']||r['Placa']||'';
     var wa = r['WhatsApp']||r['Celular']||r['Teléfono']||'';
-    var ciudad = r['Ciudad']||'—';
-    var paso = r['Ultimo Paso']||r['Notas']||'—';
+    var paso = r['Ultimo Paso']||r['Notas']||'';
     var fecha = r['Timestamp']||r['Fecha']||'—';
     var bg = idx%2===0?'#1e293b':'#162032';
+    var pasoEscape = paso.replace(/'/g,"\\'").slice(0,40);
+    var nombreEscape = nombre.replace(/'/g,"\\'");
     var waBtn = wa
-      ? '<button class="btn btn-sm" style="background:#16a34a;color:#fff;border:none;" onclick="recuperarLead(\''+nombre.replace(/'/g,"\\'")+'\',' +'\''+wa+'\')">📲 Recuperar</button>'
-      : '<span style="color:#475569;font-size:11px;">Sin WA</span>';
-    html += '<tr style="background:'+bg+';cursor:pointer;" onclick="abrirCaso(\''+encodeURIComponent(JSON.stringify(r))+'\')" onmouseover="this.style.background=\'#1a2d44\'" onmouseout="this.style.background=\''+bg+'\'">';
-    [nombre, id, wa||'—', ciudad, paso.slice(0,40), fecha.slice(0,16)].forEach(function(v){
-      html += '<td style="padding:9px 12px;border-bottom:1px solid #334155;color:#cbd5e1;">'+v+'</td>';
-    });
-    html += '<td style="padding:9px 12px;border-bottom:1px solid #334155;" onclick="event.stopPropagation()">'+waBtn+'</td>';
+      ? '<button style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;" onclick="recuperarLead(\''+nombreEscape+'\',\''+wa+'\',\''+pasoEscape+'\')">💬 Enviar WA</button>'
+      : '<span style="color:#475569;font-size:0.7rem;font-style:italic;">Sin número</span>';
+    html += '<tr style="background:'+bg+';border-bottom:1px solid #0f172a;" onmouseover="this.style.background=\'#1a2d44\'" onmouseout="this.style.background=\''+bg+'\'">';
+    html += '<td style="padding:10px 12px;"><div style="font-weight:700;color:#f1f5f9;font-size:0.85rem;">'+escHtml(nombre)+'</div>'+(cedula?'<div style="font-size:0.68rem;color:#64748b;">'+cedula+'</div>':'')+'</td>';
+    html += '<td style="padding:10px 12px;">'+etapaBadge(paso)+'</td>';
+    html += '<td style="padding:10px 12px;color:#94a3b8;font-size:0.8rem;">'+tiempoRelativo(fecha)+'</td>';
+    html += '<td style="padding:10px 12px;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">'+(wa||'—')+'</td>';
+    html += '<td style="padding:10px 12px;" onclick="event.stopPropagation()">'+waBtn+'</td>';
     html += '</tr>';
   });
   html += '</tbody></table></div>';
