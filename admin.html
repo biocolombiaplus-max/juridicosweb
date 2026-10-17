@@ -620,7 +620,16 @@ tr:hover td{background:#f8faff;cursor:pointer}
             <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Nombre completo</label><input id="asesor-nombre" type="text" placeholder="Dr. Carlos Moreno" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
             <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Especialidad</label><input id="asesor-especialidad" type="text" placeholder="Derecho de Tránsito" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
             <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Años de experiencia</label><input id="asesor-experiencia" type="text" placeholder="10 años de experiencia" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
-            <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">URL foto (opcional)</label><input id="asesor-foto" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Foto del asesor (opcional)</label>
+              <input type="hidden" id="asesor-foto">
+              <div id="asesor-foto-preview" style="display:none;margin-bottom:6px;"><img id="asesor-foto-img" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #c9a227;"></div>
+              <label for="asesor-foto-file" style="display:flex;align-items:center;gap:8px;background:#f3f4f6;border:1.5px dashed #c9a227;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;">
+                <span style="font-size:18px;">📷</span>
+                <span id="asesor-foto-label">Subir foto desde celular o PC</span>
+              </label>
+              <input id="asesor-foto-file" type="file" accept="image/*" style="display:none;" onchange="procesarImagen(this,'asesor-foto','asesor-foto-preview','asesor-foto-img','asesor-foto-label')">
+            </div>
           </div>
           <button onclick="guardarAsesor()" style="background:linear-gradient(135deg,#0a1628,#112240);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Asesor</button>
         </div>
@@ -635,7 +644,16 @@ tr:hover td{background:#f8faff;cursor:pointer}
             <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Nombre (solo primero)</label><input id="caso-nombre" type="text" placeholder="Juan C." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
             <div><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Ciudad</label><input id="caso-ciudad" type="text" placeholder="Bogotá" style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
             <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Descripción del resultado</label><input id="caso-descripcion" type="text" placeholder="Fotomulta de $462.000 eliminada en 8 días hábiles." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
-            <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">URL imagen / pantallazo WhatsApp (opcional)</label><input id="caso-imagen" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1px solid #e0ddd5;border-radius:8px;font-size:14px;"></div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;">Pantallazo WhatsApp (opcional)</label>
+              <input type="hidden" id="caso-imagen">
+              <div id="caso-imagen-preview" style="display:none;margin-bottom:6px;"><img id="caso-imagen-img" style="max-width:180px;max-height:120px;border-radius:8px;object-fit:cover;border:2px solid #059669;"></div>
+              <label for="caso-imagen-file" style="display:flex;align-items:center;gap:8px;background:#f3f4f6;border:1.5px dashed #059669;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;">
+                <span style="font-size:18px;">🖼️</span>
+                <span id="caso-imagen-label">Subir pantallazo desde celular o PC</span>
+              </label>
+              <input id="caso-imagen-file" type="file" accept="image/*" style="display:none;" onchange="procesarImagen(this,'caso-imagen','caso-imagen-preview','caso-imagen-img','caso-imagen-label')">
+            </div>
           </div>
           <button onclick="guardarCaso()" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;">➕ Agregar Caso de Éxito</button>
         </div>
@@ -2888,6 +2906,36 @@ document.querySelectorAll('.modal-overlay').forEach(function(m){
 setInterval(function(){ if(currentUser) loadData(); }, 2*60*1000);
 
 /* ===== CONTENIDO WEB: ASESORES & CASOS ===== */
+
+// Procesa imagen seleccionada: redimensiona a max 400px y guarda base64 en campo hidden
+function procesarImagen(input, hiddenId, previewDivId, previewImgId, labelId){
+  var file = input.files && input.files[0];
+  if(!file) return;
+  var maxPx = 400;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var w = img.width, h = img.height;
+      if(w > maxPx || h > maxPx){
+        var ratio = Math.min(maxPx/w, maxPx/h);
+        w = Math.round(w*ratio); h = Math.round(h*ratio);
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var b64 = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById(hiddenId).value = b64;
+      document.getElementById(previewImgId).src = b64;
+      document.getElementById(previewDivId).style.display = 'block';
+      var kb = Math.round(b64.length * 0.75 / 1024);
+      document.getElementById(labelId).textContent = '✅ ' + file.name + ' (' + kb + ' KB) — toca para cambiar';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function guardarAsesor(){
   var nombre = document.getElementById('asesor-nombre').value.trim();
   var especialidad = document.getElementById('asesor-especialidad').value.trim();
@@ -2904,6 +2952,9 @@ function guardarAsesor(){
     .then(function(r){ return r.json(); })
     .then(function(){
       ['asesor-nombre','asesor-especialidad','asesor-experiencia','asesor-foto'].forEach(function(id){ document.getElementById(id).value=''; });
+      document.getElementById('asesor-foto-file').value='';
+      document.getElementById('asesor-foto-preview').style.display='none';
+      document.getElementById('asesor-foto-label').textContent='Subir foto desde celular o PC';
       loadAsesoresAdmin();
     })
     .catch(function(e){ alert('Error al guardar: ' + e.message); });
@@ -2925,6 +2976,9 @@ function guardarCaso(){
     .then(function(r){ return r.json(); })
     .then(function(){
       ['caso-nombre','caso-ciudad','caso-descripcion','caso-imagen'].forEach(function(id){ document.getElementById(id).value=''; });
+      document.getElementById('caso-imagen-file').value='';
+      document.getElementById('caso-imagen-preview').style.display='none';
+      document.getElementById('caso-imagen-label').textContent='Subir pantallazo desde celular o PC';
       loadCasosAdmin();
     })
     .catch(function(e){ alert('Error al guardar: ' + e.message); });
