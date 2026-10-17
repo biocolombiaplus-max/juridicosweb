@@ -1174,10 +1174,17 @@ function loadVisitas(evtBtn){
       var semana  = new Date(ahora - 7*864e5).toISOString().slice(0,10);
       var mes     = new Date(ahora - 30*864e5).toISOString().slice(0,10);
 
+      // Normaliza fecha de Sheets a ISO yyyy-mm-dd (Sheets puede devolver "Fri Oct 17 2026..." o ISO)
+      function normFecha(str){
+        if(!str) return '';
+        var d = new Date(str);
+        if(!isNaN(d)) return d.toISOString().slice(0,10);
+        return String(str).slice(0,10); // fallback
+      }
       var cHoy=0, cSemana=0, cMes=0, cMeta=0, cMovil=0;
       var fuenteCount = {};
       v.forEach(function(r){
-        var f = (r['Fecha']||'').slice(0,10);
+        var f = normFecha(r['Fecha']);
         if(f === hoy)    cHoy++;
         if(f >= semana)  cSemana++;
         if(f >= mes){
@@ -1248,7 +1255,7 @@ function loadVisitas(evtBtn){
       var porDia = {};
       dias30.forEach(function(d){ porDia[d]=0; });
       v.forEach(function(r){
-        var f=(r['Fecha']||'').slice(0,10);
+        var f=normFecha(r['Fecha']);
         if(porDia[f]!==undefined) porDia[f]++;
       });
       var maxVal = Math.max.apply(null, dias30.map(function(d){ return porDia[d]; }))||1;
