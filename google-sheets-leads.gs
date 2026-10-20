@@ -40,6 +40,7 @@ var CARPETA_DRIVE_FIRMAS = 'JuridicosWeb - Documentos Firmados'; // se crea sola
 // cada ciudad/organismo de tránsito. Debe tener una columna con "Ciudad" (o
 // "Municipio"/"Organismo") y otra con "Correo" (o "Email") — el nombre exacto
 // no importa, esta función busca por lo que contenga esas palabras.
+var SHEET_ID = '1Daz4jD6npJ1TYa4g4CrfFWWdoxEmCwV48r7wZREAV8g'; // Hoja principal de casos
 var CORREOS_RADICACION_SHEET_ID = '1RB8EfYBtsn3zZ2BayYxJjD8p7w3M7ElGGqFazcnhObU';
 
 var VALOR_SALDO_DIFERIDO = 95500; // lo que falta pagar por multa en el Plan Pago al Eliminar
@@ -128,6 +129,39 @@ function doGet(e) {
         .reverse(); // los más recientes primero
       return respuestaJson({ ok: true, documentos: documentos, carpeta: CARPETA_DRIVE_FIRMAS });
     }
+    // ── Listar asesores del bufete ──────────────────────────────────────
+    if (accion === 'listar_asesores') {
+      var sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Asesores');
+      if (!sh || sh.getLastRow() < 2) return respuestaJson({ ok: true, asesores: [] });
+      var vals = sh.getDataRange().getValues();
+      var enc  = vals[0];
+      var asesores = vals.slice(1).filter(function(r){ return r[0]; }).map(function(r){
+        var o = {}; enc.forEach(function(h,i){ o[h] = r[i]; }); return o;
+      });
+      return respuestaJson({ ok: true, asesores: asesores });
+    }
+    // ── Listar casos de éxito ───────────────────────────────────────────
+    if (accion === 'listar_casos_exito') {
+      var sh2 = SpreadsheetApp.openById(SHEET_ID).getSheetByName('CasosExito');
+      if (!sh2 || sh2.getLastRow() < 2) return respuestaJson({ ok: true, casos: [] });
+      var vals2 = sh2.getDataRange().getValues();
+      var enc2  = vals2[0];
+      var casos2 = vals2.slice(1).filter(function(r){ return r[0]; }).map(function(r){
+        var o = {}; enc2.forEach(function(h,i){ o[h] = r[i]; }); return o;
+      });
+      return respuestaJson({ ok: true, casos: casos2 });
+    }
+    // ── Listar visitas (para remarketing) ──────────────────────────────
+    if (accion === 'listar_visitas') {
+      var hv = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+      if (!hv || hv.getLastRow() < 2) return respuestaJson({ ok: true, visitas: [] });
+      var valsV = hv.getDataRange().getValues();
+      var encV  = valsV[0];
+      var visitas = valsV.slice(1).filter(function(r){ return r[0]; }).map(function(r){
+        var o = {}; encV.forEach(function(h,i){ o[h] = r[i]; }); return o;
+      });
+      return respuestaJson({ ok: true, visitas: visitas });
+    }
     return respuestaJson({ ok: false, error: 'Acción GET no reconocida: ' + accion });
   } catch (err) {
     return respuestaJson({ ok: false, error: String(err) });
@@ -162,6 +196,17 @@ function doPost(e) {
       case 'buscar_caso_telefono': return buscarCasoPorTelefono(datos);
       case 'guardar_mensaje_ia':  return guardarMensajeIA(datos);
       case 'obtener_historial_ia': return obtenerHistorialIA(datos);
+      // ── Contenido Web: Asesores ──────────────────────────────────────
+      case 'guardar_asesor':      return guardarAsesorEnSheet(datos);
+      case 'eliminar_asesor':     return eliminarFilaPorId('Asesores', datos.id);
+      // ── Contenido Web: Casos de Éxito ────────────────────────────────
+      case 'guardar_caso':        return guardarCasoExitoEnSheet(datos);
+      case 'eliminar_caso':       return eliminarFilaPorId('CasosExito', datos.id);
+      // ── Envío de correo campaña ──────────────────────────────────────
+      case 'enviar_correo':       return enviarCorreoCampana(datos);
+      // ── Sync campaña entre dispositivos ─────────────────────────────
+      case 'sync_campana_save':   return syncCampanaSave(datos);
+      case 'sync_campana_load':   return syncCampanaLoad();
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -1422,4 +1467,94 @@ function aplicarFormatoCondicional(hoja) {
 
 function respuestaJson(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  CONTENIDO WEB — Asesores & Casos de Éxito
+// ════════════════════════════════════════════════════════════════════════
+
+function guardarAsesorEnSheet(datos) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName('Asesores');
+  if (!sh) {
+    sh = ss.insertSheet('Asesores');
+    sh.appendRow(['ID', 'Nombre', 'Especialidad', 'Experiencia', 'Foto', 'Fecha']);
+    sh.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#e8f0fe');
+  }
+  var id = 'A_' + Date.now();
+  sh.appendRow([id, datos.nombre || '', datos.especialidad || '', datos.experiencia || '', datos.foto || '', new Date().toISOString()]);
+  return respuestaJson({ ok: true, id: id });
+}
+
+function guardarCasoExitoEnSheet(datos) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName('CasosExito');
+  if (!sh) {
+    sh = ss.insertSheet('CasosExito');
+    sh.appendRow(['ID', 'Nombre', 'Ciudad', 'Descripcion', 'Imagen', 'Fecha']);
+    sh.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#e8f0fe');
+  }
+  var id = 'C_' + Date.now();
+  sh.appendRow([id, datos.nombre || '', datos.ciudad || '', datos.descripcion || '', datos.imagen || '', new Date().toISOString()]);
+  return respuestaJson({ ok: true, id: id });
+}
+
+function eliminarFilaPorId(nombreHoja, id) {
+  if (!id) return respuestaJson({ ok: false, error: 'ID requerido' });
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(nombreHoja);
+  if (!sh) return respuestaJson({ ok: false, error: 'Hoja no encontrada: ' + nombreHoja });
+  var vals = sh.getDataRange().getValues();
+  for (var i = 1; i < vals.length; i++) {
+    if (String(vals[i][0]) === String(id)) {
+      sh.deleteRow(i + 1);
+      return respuestaJson({ ok: true });
+    }
+  }
+  return respuestaJson({ ok: false, error: 'ID no encontrado: ' + id });
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  CAMPAÑA EMAIL — Envío y Sync entre dispositivos
+// ════════════════════════════════════════════════════════════════════════
+
+function enviarCorreoCampana(datos) {
+  var email  = datos.email  || '';
+  var nombre = datos.nombre || 'Estimado conductor';
+  var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
+  var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
+  if (!email || !email.includes('@')) return respuestaJson({ ok: false, msg: 'Email invalido' });
+  try {
+    GmailApp.sendEmail(email, asunto,
+      'Para ver este correo correctamente activa HTML en tu cliente de correo.',
+      {
+        htmlBody: datos.html || '',
+        name: datos.nombreRemitente || 'JuridicosWeb',
+        from: cuenta,
+        replyTo: 'juridicoswebcasos@gmail.com'
+      }
+    );
+    return respuestaJson({ ok: true });
+  } catch (e) {
+    return respuestaJson({ ok: false, msg: e.message });
+  }
+}
+
+var SYNC_SHEET_NAME = 'CampanSync';
+
+function syncCampanaSave(datos) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(SYNC_SHEET_NAME) || ss.insertSheet(SYNC_SHEET_NAME);
+  sh.clearContents();
+  sh.getRange(1, 1).setValue(datos.data || '{}');
+  sh.getRange(1, 2).setValue(new Date().toISOString());
+  return respuestaJson({ ok: true });
+}
+
+function syncCampanaLoad() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(SYNC_SHEET_NAME);
+  if (!sh || sh.getLastRow() < 1) return respuestaJson({ ok: true, data: null });
+  var raw = sh.getRange(1, 1).getValue();
+  return respuestaJson({ ok: true, data: raw || null });
 }
