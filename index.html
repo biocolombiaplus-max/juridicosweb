@@ -10,6 +10,8 @@
 <meta name="build" content="v2.8">
 <title>JurídicosWeb | Elimina tus Fotomultas – Gratis Consultar</title>
 <meta name="description" content="5.8 millones de fotomultas serán anuladas en Colombia. Derecho de petición desde $49.000 — documento en tu WhatsApp al instante, radicado el mismo día.">
+<!-- ePayco checkout (carga estática para garantizar disponibilidad) -->
+<script src="https://checkout.epayco.co/checkout.js"></script>
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0a1628">
@@ -3136,8 +3138,6 @@ function irAPagoFinal(){
   document.getElementById('pr-monto').textContent    = esUna ? '$49.000' : '$79.000';
   document.getElementById('pr-plan-desc').textContent = esUna ? 'Activación + radicación de una multa' : 'Activación + radicación de TODAS las multas que apliquen';
   goToStepNombre('sp-pago-radicar');
-  // Precargar ePayco ahora para que el clic del botón sea sincrónico
-  _precargarEpayco();
 }
 
 function copiarLlave(btn){
@@ -3163,14 +3163,6 @@ function seleccionarMetodoPago(metodo){
     btnE.style.boxShadow='0 6px 28px rgba(249,115,22,0.5)'; btnE.style.transform='scale(1.01)'; btnE.style.border='2px solid #f97316';
     btnL.style.boxShadow='0 4px 16px rgba(3,105,161,0.2)'; btnL.style.transform='scale(1)';
   }
-}
-
-function _precargarEpayco(){
-  if(window.ePayco || document.getElementById('epayco-script')) return;
-  var s = document.createElement('script');
-  s.id = 'epayco-script';
-  s.src = 'https://checkout.epayco.co/checkout.js';
-  document.head.appendChild(s);
 }
 
 function _lanzarEpayco(monto, desc){
@@ -3217,36 +3209,25 @@ function abrirEpayco(){
     localStorage.setItem('jw_num_multas',  md.length);
   }catch(e){}
 
-  var _btn = document.querySelector('[onclick="abrirEpayco()"]');
-
   if(window.ePayco){
     _lanzarEpayco(monto, planDesc);
     return;
   }
 
-  // Script aún no cargado — mostrar estado de carga y esperar
-  if(_btn){ _btn.disabled=true; _btn.style.opacity='0.7'; _btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Cargando pasarela...</span>'; }
-  function _restoreBtn(){ if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; } }
-
-  var _tries = 0;
-  var _wait = setInterval(function(){
-    _tries++;
-    if(window.ePayco){
-      clearInterval(_wait);
-      _restoreBtn();
-      _lanzarEpayco(monto, planDesc);
-    } else if(_tries >= 60){ // 6 segundos
-      clearInterval(_wait);
-      // Forzar carga del script directamente
-      var s = document.createElement('script');
-      s.src = 'https://checkout.epayco.co/checkout.js';
-      s.onload = function(){ _restoreBtn(); _lanzarEpayco(monto, planDesc); };
-      s.onerror = function(){ _restoreBtn(); showToast('No se pudo cargar la pasarela de pago. Intenta de nuevo.','error'); };
-      document.head.appendChild(s);
-    }
-  }, 100);
-
-  _precargarEpayco();
+  // Fallback: script no cargó (bloqueador de anuncios, red lenta)
+  var _btn = document.querySelector('[onclick="abrirEpayco()"]');
+  if(_btn){ _btn.disabled=true; _btn.style.opacity='0.7'; _btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Cargando...</span>'; }
+  var s = document.createElement('script');
+  s.src = 'https://checkout.epayco.co/checkout.js';
+  s.onload = function(){
+    if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+    _lanzarEpayco(monto, planDesc);
+  };
+  s.onerror = function(){
+    if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+    showToast('No se pudo cargar la pasarela de pago. Intenta de nuevo.','error');
+  };
+  document.head.appendChild(s);
 }
 
 var _multasEncontradas = []; // populated from _multasReportadas when entering pago step

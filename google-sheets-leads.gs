@@ -83,10 +83,11 @@ var COLUMNAS_FIRMADOS = [
 function doGet(e) {
   try {
     var accion = e.parameter.accion;
+    var cb = e.parameter.callback || '';
     if (accion === 'listar_casos') {
       var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
       var valores = hoja.getDataRange().getValues();
-      if (valores.length < 2) return respuestaJson({ ok: true, casos: [] });
+      if (valores.length < 2) return respuestaJsonp({ ok: true, casos: [] }, cb);
       var encabezados = valores[0];
       var casos = valores.slice(1)
         .filter(function (fila) { return fila.some(function (v) { return v !== ''; }); })
@@ -104,14 +105,14 @@ function doGet(e) {
           });
           return obj;
         });
-      return respuestaJson({ ok: true, casos: casos });
+      return respuestaJsonp({ ok: true, casos: casos }, cb);
     }
     // Un solo lugar para ver TODOS los PDF firmados y dónde quedaron
     // guardados (carpeta de Drive), sin tener que abrir caso por caso.
     if (accion === 'listar_firmados') {
       var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
       var valoresF = hojaFirmados.getDataRange().getValues();
-      if (valoresF.length < 2) return respuestaJson({ ok: true, documentos: [] });
+      if (valoresF.length < 2) return respuestaJsonp({ ok: true, documentos: [] }, cb);
       var encabezadosF = valoresF[0];
       var documentos = valoresF.slice(1)
         .filter(function (fila) { return fila.some(function (v) { return v !== ''; }); })
@@ -127,44 +128,44 @@ function doGet(e) {
           return obj;
         })
         .reverse(); // los más recientes primero
-      return respuestaJson({ ok: true, documentos: documentos, carpeta: CARPETA_DRIVE_FIRMAS });
+      return respuestaJsonp({ ok: true, documentos: documentos, carpeta: CARPETA_DRIVE_FIRMAS }, cb);
     }
     // ── Listar asesores del bufete ──────────────────────────────────────
     if (accion === 'listar_asesores') {
       var sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Asesores');
-      if (!sh || sh.getLastRow() < 2) return respuestaJson({ ok: true, asesores: [] });
+      if (!sh || sh.getLastRow() < 2) return respuestaJsonp({ ok: true, asesores: [] }, cb);
       var vals = sh.getDataRange().getValues();
       var enc  = vals[0];
       var asesores = vals.slice(1).filter(function(r){ return r[0]; }).map(function(r){
         var o = {}; enc.forEach(function(h,i){ o[h] = r[i]; }); return o;
       });
-      return respuestaJson({ ok: true, asesores: asesores });
+      return respuestaJsonp({ ok: true, asesores: asesores }, cb);
     }
     // ── Listar casos de éxito ───────────────────────────────────────────
     if (accion === 'listar_casos_exito') {
       var sh2 = SpreadsheetApp.openById(SHEET_ID).getSheetByName('CasosExito');
-      if (!sh2 || sh2.getLastRow() < 2) return respuestaJson({ ok: true, casos: [] });
+      if (!sh2 || sh2.getLastRow() < 2) return respuestaJsonp({ ok: true, casos: [] }, cb);
       var vals2 = sh2.getDataRange().getValues();
       var enc2  = vals2[0];
       var casos2 = vals2.slice(1).filter(function(r){ return r[0]; }).map(function(r){
         var o = {}; enc2.forEach(function(h,i){ o[h] = r[i]; }); return o;
       });
-      return respuestaJson({ ok: true, casos: casos2 });
+      return respuestaJsonp({ ok: true, casos: casos2 }, cb);
     }
     // ── Listar visitas (para remarketing) ──────────────────────────────
     if (accion === 'listar_visitas') {
       var hv = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-      if (!hv || hv.getLastRow() < 2) return respuestaJson({ ok: true, visitas: [] });
+      if (!hv || hv.getLastRow() < 2) return respuestaJsonp({ ok: true, visitas: [] }, cb);
       var valsV = hv.getDataRange().getValues();
       var encV  = valsV[0];
       var visitas = valsV.slice(1).filter(function(r){ return r[0]; }).map(function(r){
         var o = {}; encV.forEach(function(h,i){ o[h] = r[i]; }); return o;
       });
-      return respuestaJson({ ok: true, visitas: visitas });
+      return respuestaJsonp({ ok: true, visitas: visitas }, cb);
     }
-    return respuestaJson({ ok: false, error: 'Acción GET no reconocida: ' + accion });
+    return respuestaJsonp({ ok: false, error: 'Acción GET no reconocida: ' + accion }, cb);
   } catch (err) {
-    return respuestaJson({ ok: false, error: String(err) });
+    return respuestaJsonp({ ok: false, error: String(err) }, cb);
   }
 }
 
@@ -1469,6 +1470,12 @@ function aplicarFormatoCondicional(hoja) {
 
 function respuestaJson(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function respuestaJsonp(obj, callback) {
+  if (!callback) return respuestaJson(obj);
+  return ContentService.createTextOutput(callback + '(' + JSON.stringify(obj) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 // ════════════════════════════════════════════════════════════════════════
