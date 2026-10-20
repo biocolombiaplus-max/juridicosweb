@@ -3193,7 +3193,7 @@ function abrirEpayco(){
         country:'CO', lang:'ES', external:'false',
         p_cust_id_cliente:'1595409',
         response:'https://juridicosweb.com/?pago=ok',
-        confirmation:SCRIPT_URL,
+        confirmation:GOOGLE_SHEET_URL,
         name_billing:_nombreConsultante||'',
         extra1:_valorConsultado||'', extra2:esUna?'una':'todas'
       });
@@ -3219,7 +3219,7 @@ function abrirEpayco(){
     document.head.appendChild(s);
   }, 8000);
 
-  fetch(SCRIPT_URL, {
+  fetch(GOOGLE_SHEET_URL, {
     method:'POST',
     body:JSON.stringify({ _accion:'epayco_sesion', monto:monto, descripcion:planDesc,
       nombre:_nombreConsultante||'', cedula:_valorConsultado||'',
