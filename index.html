@@ -540,6 +540,8 @@ footer{background:#050e1e;padding:50px 5% 28px;}
 
 /* ===== MEGA MODAL (SIMIT FLOW) ===== */
 .overlay{display:none;position:fixed;inset:0;background:rgba(5,14,30,0.88);z-index:1100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;backdrop-filter:blur(4px);}
+/* ePayco checkout siempre por encima de cualquier overlay */
+[id*="epayco"],[class*="epayco"],#ep-modal,.epayco-modal,#lightbox,#lightbox-epayco{z-index:99999!important;}
 .overlay.show{display:flex;}
 .mmodal{background:#fff;border-radius:20px;width:100%;max-width:640px;margin:auto;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);}
 .mmodal-head{padding:22px 28px;display:flex;align-items:center;justify-content:space-between;}
@@ -3235,7 +3237,14 @@ function abrirEpayco(){
   if(btn){ btn.dataset.cargando='1'; btn.style.opacity='0.75'; btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Preparando pago seguro...</span>'; }
 
   // Seguro de 20s: si algo falla silenciosamente, el botón se recupera solo
-  var safety = setTimeout(function(){ _resetBtn(btn); }, 20000);
+  var safety = setTimeout(function(){
+    _resetBtn(btn);
+    openOverlay('overlay-main');
+    showToast('Tiempo de espera agotado. Intenta de nuevo.', 'error');
+  }, 20000);
+
+  // Cerrar el overlay de juridicosweb para que ePayco no quede debajo
+  closeOverlay('overlay-main');
 
   // Pedir sessionId al servidor
   fetch(SCRIPT_URL, {
@@ -3279,6 +3288,7 @@ function abrirEpayco(){
     clearTimeout(safety);
     console.error('ePayco', e);
     _resetBtn(btn);
+    openOverlay('overlay-main');
     showToast('No se pudo abrir el pago. Intenta de nuevo o usa Llave breve.', 'error');
   });
 }
