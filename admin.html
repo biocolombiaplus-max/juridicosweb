@@ -347,7 +347,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
       </div>
       <div class="form-group">
         <label>Contraseña</label>
-        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+        <div style="position:relative;">
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" style="padding-right:42px;width:100%;box-sizing:border-box;">
+          <button type="button" onclick="togglePass()" id="btn-eye" title="Mostrar/ocultar contraseña" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:#666;font-size:18px;">👁️</button>
+        </div>
       </div>
       <button class="btn-login" onclick="doLogin()">Ingresar al Panel</button>
     </div>
@@ -1334,6 +1337,12 @@ function mostrarErrorLogin(){
   setTimeout(function(){ document.getElementById('login-error').style.display='none'; }, 3000);
 }
 
+function togglePass(){
+  var inp = document.getElementById('login-pass');
+  var btn = document.getElementById('btn-eye');
+  if(inp.type === 'password'){ inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+}
 function doLogin(){
   var u = document.getElementById('login-user').value.trim().toLowerCase();
   var p = document.getElementById('login-pass').value;
