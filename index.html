@@ -3234,7 +3234,11 @@ function abrirEpayco(){
 }
 
 function _lanzarEpayco(monto,desc){
-  var handler = ePayco.checkout.configure({ key: EPAYCO_KEY, test: false });
+  var handler = ePayco.checkout.configure({
+    key:              '347e56166b7cbd26c7257d8689033fba',
+    test:             false,
+    p_cust_id_cliente:'1595409'
+  });
   handler.open({
     name:          'JurídicosWeb',
     description:   desc,
@@ -3246,9 +3250,9 @@ function _lanzarEpayco(monto,desc){
     country:       'co',
     lang:          'es',
     external:      'false',
-    extra1:        _nombreConsultante,
-    extra2:        _valorConsultado,
-    extra3:        _waConsultante,
+    extra1:        _nombreConsultante||'',
+    extra2:        _valorConsultado||'',
+    extra3:        _waConsultante||'',
     response:      'https://juridicosweb.com/pago-ok.html',
     confirmation:  'https://juridicosweb.com/pago-ok.html',
     email_billing: _correoConsultante||'',
