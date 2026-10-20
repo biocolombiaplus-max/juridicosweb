@@ -913,7 +913,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
                 <h3 style="margin:0 0 4px;font-size:15px;font-weight:800;color:#111827">📂 Cargar base de contactos</h3>
                 <p style="font-size:12px;color:#6b7280;margin:0">Los duplicados se detectan y omiten automáticamente al importar</p>
               </div>
-              <button class="camp-btn" style="background:#fee2e2;color:#dc2626;font-size:12px" onclick="campLimpiarContactos()">🗑️ Limpiar todo</button>
+              <button class="camp-btn" id="btn-limpiar-camp" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(220,38,38,0.35)" onclick="campLimpiarContactos()">🗑️ Limpiar base completa</button>
             </div>
             <!-- Zona de carga -->
             <label style="cursor:pointer;display:block">
@@ -3956,11 +3956,11 @@ var _campInited = false;
 var _campContactos = [];
 var _campCuentas = [];
 var _campAsuntos = [
-  '🚨 Tu multa puede desaparecer — revisa ahora',
-  '⚡ URGENTE: eliminamos tu fotomulta sin ir a juzgados',
-  '🎯 Tienes comparendos? Esto te interesa',
-  '✅ Proceso legal para borrar tu multa — 100% gratis revisarlo',
-  '🔴 Alerta: tu licencia podría estar en riesgo por multas'
+  'Tu multa de transito tiene solucion legal hoy mismo',
+  'Eliminamos tu comparendo en 3 minutos sin filas ni abogados',
+  'El tramite que elimina tu fotomulta ahora se firma desde el celular',
+  'Radicado oficial en la Secretaria de Transito - lo firmas y nosotros lo enviamos',
+  'Tu comparendo del SIMIT puede desaparecer hoy - proceso 100% legal'
 ];
 var _campEnviados = 0;
 var _campErrores = 0;
@@ -4134,6 +4134,8 @@ function campProcesarFilas(rows){
     if(!email.includes('@') || !email.includes('.')){ invalidos++; return; }
     if(existing.includes(email)){ dups++; return; }
     var nombre = nombreKey ? (r[nombreKey]||'').trim() : '';
+    // Descartar seudónombres de CRM (Lead #XXXXX, Contact #XXXXX, #XXXXX, etc.)
+    if(/^(lead|contact|contacto|cliente)\s*#?\d+$/i.test(nombre) || /^#\d+$/.test(nombre)) nombre = '';
     var tel    = telKey    ? (r[telKey]||'').trim()    : '';
     nuevos.push({email:email, nombre:nombre, telefono:tel, enviado:false});
     existing.push(email);
@@ -4258,10 +4260,22 @@ function campEliminarContacto(idx){
 }
 
 function campLimpiarContactos(){
-  if(!confirm('¿Eliminar todos los contactos de la lista?')) return;
+  var total = _campContactos.length;
+  if(total === 0){ showToast('La lista ya está vacía','info'); return; }
+  // Confirmación visual inline — confirm() no funciona en algunos contextos
+  var btn = document.getElementById('btn-limpiar-camp');
+  if(btn && btn.dataset.confirmando !== '1'){
+    btn.dataset.confirmando = '1';
+    btn.textContent = '⚠️ Confirmar: borrar '+total+' contactos';
+    btn.style.background = 'linear-gradient(135deg,#7f1d1d,#450a0a)';
+    setTimeout(function(){ btn.dataset.confirmando='0'; btn.textContent='🗑️ Limpiar base completa'; btn.style.background='linear-gradient(135deg,#dc2626,#b91c1c)'; }, 3500);
+    return;
+  }
+  if(btn){ btn.dataset.confirmando='0'; btn.textContent='🗑️ Limpiar base completa'; btn.style.background='linear-gradient(135deg,#dc2626,#b91c1c)'; }
   _campContactos = []; _campIdx = 0; _campEnviados = 0; _campErrores = 0;
   campGuardar(); campActualizarStats(); campRenderTablaContactos();
-  campLog('🗑️ Lista limpiada','info');
+  campLog('Lista borrada ('+total+' contactos eliminados)','info');
+  showToast('Base de contactos limpiada — '+total+' contactos eliminados','success');
 }
 
 /* ── CUENTAS ── */
@@ -4325,7 +4339,9 @@ function campEliminarAsunto(i){
 
 /* ── EMAIL TEMPLATE ── */
 function campGenerarHTML(nombre){
-  var n = (nombre||'Cliente').split(' ')[0];
+  var n = (nombre||'').split(' ')[0].trim();
+  // Evitar seudónombres: Lead, Contact, #12345, emails, etc.
+  if(!n || n.indexOf('@')>=0 || /^(lead|contact|contacto|cliente)$/i.test(n) || /^#?\d+$/.test(n)) n = 'Estimado conductor';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JurídicosWeb</title></head>'
   +'<body style="margin:0;padding:0;background:#eef2f7;font-family:\'Helvetica Neue\',Arial,sans-serif;">'
   +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:32px 0;">'
@@ -4338,18 +4354,20 @@ function campGenerarHTML(nombre){
   // Header
   +'<tr><td style="background:linear-gradient(135deg,#003087 0%,#1d4ed8 60%,#1e40af 100%);padding:32px 40px 28px;text-align:center;">'
   +'<div style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:8px 20px;margin-bottom:14px;">'
-  +'<span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px;">⚖️ JurídicosWeb</span>'
+  +'<span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px;">JuridicosWeb</span>'
   +'</div>'
-  +'<p style="margin:0;color:rgba(255,255,255,0.8);font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Derecho de Tránsito · Colombia</p>'
+  +'<p style="margin:0;color:rgba(255,255,255,0.8);font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Derecho de Transito · Colombia</p>'
   +'</td></tr>'
 
-  // Alerta roja
+  // Barra de urgencia — CSS puro, sin emojis
   +'<tr><td style="background:linear-gradient(135deg,#dc2626,#991b1b);padding:18px 40px;">'
   +'<table width="100%" cellpadding="0" cellspacing="0"><tr>'
-  +'<td style="width:44px;vertical-align:middle;"><div style="background:rgba(255,255,255,0.2);border-radius:50%;width:40px;height:40px;text-align:center;line-height:40px;font-size:22px;">🚨</div></td>'
+  +'<td style="width:44px;vertical-align:middle;">'
+  +'<div style="background:rgba(255,255,255,0.25);border-radius:50%;width:40px;height:40px;text-align:center;line-height:40px;font-size:20px;font-weight:900;color:#fff;">!</div>'
+  +'</td>'
   +'<td style="padding-left:14px;vertical-align:middle;">'
   +'<div style="color:#fff;font-weight:800;font-size:15px;line-height:1.3;">Tienes multas activas en el SIMIT</div>'
-  +'<div style="color:#fca5a5;font-size:12px;margin-top:3px;">Cada día que pasan generan intereses de mora y cobro coactivo</div>'
+  +'<div style="color:#fca5a5;font-size:12px;margin-top:3px;">Cada dia que pasan generan intereses de mora y riesgo de cobro coactivo</div>'
   +'</td></tr></table>'
   +'</td></tr>'
 
@@ -4358,84 +4376,116 @@ function campGenerarHTML(nombre){
 
   // Saludo
   +'<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;">Mensaje importante</p>'
-  +'<h2 style="margin:0 0 18px;font-size:24px;font-weight:900;color:#111827;line-height:1.2;">Hola <span style="color:#1d4ed8;">'+n+'</span>, te explicamos cómo eliminarlo</h2>'
+  +'<h2 style="margin:0 0 14px;font-size:24px;font-weight:900;color:#111827;line-height:1.2;">Hola <span style="color:#1d4ed8;">'+n+'</span>, tu multa tiene solucion hoy</h2>'
 
-  +'<p style="margin:0 0 14px;font-size:15px;color:#374151;line-height:1.7;">'
-  +'Tu comparendo o fotomulta tiene solución legal. En JurídicosWeb presentamos un <strong>Derecho de Petición ante la Secretaría de Tránsito</strong> para eliminarlo definitivamente del SIMIT — sin filas, sin abogados costosos, sin esperas.'
+  +'<p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.7;">'
+  +'En JuridicosWeb radicamos un <strong>Derecho de Peticin ante la Secretaria de Transito o Movilidad</strong> para eliminar tu comparendo o fotomulta del SIMIT — y lo hacemos de una manera que jamas imaginarias:'
   +'</p>'
 
-  // Cajitas de beneficios
+  // Destacado: la promesa diferenciadora
+  +'<div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3b82f6;border-radius:12px;padding:22px 24px;margin:0 0 20px;">'
+  +'<div style="font-size:13px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Asi funciona el proceso:</div>'
+  +'<table width="100%" cellpadding="0" cellspacing="0">'
+  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
+  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">1</span>'
+  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;">Nosotros redactamos tu Derecho de Peticion</span>'
+  +'</td></tr>'
+  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
+  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">2</span>'
+  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;"><strong>Tu lo firmas con el dedo desde el celular</strong> — en segundos</span>'
+  +'</td></tr>'
+  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
+  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">3</span>'
+  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;"><strong>Nosotros lo radicamos de inmediato</strong> ante la entidad</span>'
+  +'</td></tr>'
+  +'<tr><td style="vertical-align:top;">'
+  +'<span style="display:inline-block;background:#16a34a;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">4</span>'
+  +'<span style="font-size:14px;color:#14532d;font-weight:700;margin-left:8px;"><strong>En menos de 3 minutos recibes tu numero de radicado</strong></span>'
+  +'</td></tr>'
+  +'</table>'
+  +'</div>'
+
+  // Verificabilidad — argumento de confianza
+  +'<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 20px;margin:0 0 20px;">'
+  +'<div style="font-size:13px;font-weight:800;color:#14532d;margin-bottom:6px;">100% Verificable y Oficial</div>'
+  +'<p style="margin:0;font-size:13px;color:#166534;line-height:1.6;">'
+  +'Tu radicado puedes verificarlo directamente en la pagina de la Secretaria de Transito, Secretaria de Movilidad o Alcaldia de tu ciudad. No hay letra menuda — el documento tiene plena validez juridica.'
+  +'</p>'
+  +'</div>'
+
+  // Cajitas de beneficios (sin emojis)
   +'<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">'
   +'<tr>'
   +'<td style="width:50%;padding:0 6px 12px 0;vertical-align:top;">'
   +'<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:14px;">'
-  +'<div style="font-size:20px;margin-bottom:6px;">⚡</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#0c4a6e;margin-bottom:4px;">Entrega en 24 horas</div>'
-  +'<div style="font-size:12px;color:#0369a1;line-height:1.5;">El documento radicado llega a tu correo el mismo día</div>'
+  +'<div style="display:inline-block;background:#0284c7;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">RAPIDO</div>'
+  +'<div style="font-size:13px;font-weight:800;color:#0c4a6e;margin-bottom:4px;">Radicado en 3 minutos</div>'
+  +'<div style="font-size:12px;color:#0369a1;line-height:1.5;">Sin filas, sin turnos, sin ir a ningun lugar</div>'
   +'</div>'
   +'</td>'
   +'<td style="width:50%;padding:0 0 12px 6px;vertical-align:top;">'
   +'<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;">'
-  +'<div style="font-size:20px;margin-bottom:6px;">💰</div>'
+  +'<div style="display:inline-block;background:#16a34a;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">PRECIO</div>'
   +'<div style="font-size:13px;font-weight:800;color:#14532d;margin-bottom:4px;">Desde $45.000</div>'
-  +'<div style="font-size:12px;color:#15803d;line-height:1.5;">Sin cobros ocultos. Precio fijo sin importar el monto de la multa</div>'
+  +'<div style="font-size:12px;color:#15803d;line-height:1.5;">Precio fijo, sin cobros ocultos, sin importar el monto</div>'
   +'</div>'
   +'</td>'
   +'</tr>'
   +'<tr>'
   +'<td style="width:50%;padding:0 6px 0 0;vertical-align:top;">'
   +'<div style="background:#fdf4ff;border:1.5px solid #e9d5ff;border-radius:10px;padding:14px;">'
-  +'<div style="font-size:20px;margin-bottom:6px;">🔒</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#4a1d96;margin-bottom:4px;">100% Legal</div>'
-  +'<div style="font-size:12px;color:#7c3aed;line-height:1.5;">Ley 769/2002 y jurisprudencia del Consejo de Estado</div>'
+  +'<div style="display:inline-block;background:#7c3aed;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">LEGAL</div>'
+  +'<div style="font-size:13px;font-weight:800;color:#4a1d96;margin-bottom:4px;">Ley 769/2002</div>'
+  +'<div style="font-size:12px;color:#7c3aed;line-height:1.5;">Respaldado en jurisprudencia del Consejo de Estado</div>'
   +'</div>'
   +'</td>'
   +'<td style="width:50%;padding:0 0 0 6px;vertical-align:top;">'
   +'<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px;">'
-  +'<div style="font-size:20px;margin-bottom:6px;">🏆</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#7c2d12;margin-bottom:4px;">+850 eliminadas</div>'
+  +'<div style="display:inline-block;background:#ea580c;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">RESULTADO</div>'
+  +'<div style="font-size:13px;font-weight:800;color:#7c2d12;margin-bottom:4px;">+850 casos exitosos</div>'
   +'<div style="font-size:12px;color:#c2410c;line-height:1.5;">Clientes satisfechos en toda Colombia en 2024</div>'
   +'</div>'
   +'</td>'
   +'</tr>'
   +'</table>'
 
-  // Urgencia
+  // Urgencia — sin emojis
   +'<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #f59e0b;border-radius:10px;padding:16px 20px;margin:20px 0;">'
-  +'<p style="margin:0;font-size:14px;font-weight:800;color:#78350f;">⏰ ¿Por qué actuar hoy?</p>'
-  +'<p style="margin:6px 0 0;font-size:13px;color:#92400e;line-height:1.6;">Las multas no pagadas generan intereses de mora del <strong>2% mensual</strong> y pueden derivar en embargo o inmovilización del vehículo. El proceso se hace más difícil con el tiempo.</p>'
+  +'<p style="margin:0;font-size:14px;font-weight:800;color:#78350f;">Por que actuar hoy y no esperar?</p>'
+  +'<p style="margin:6px 0 0;font-size:13px;color:#92400e;line-height:1.6;">Las multas no resueltas acumulan intereses de mora del <strong>2% mensual</strong> y pueden derivar en embargo del vehiculo. Ademas, mientras mas tiempo pasa, mas dificil es actuar sobre algunos tipos de comparendos. La solucion existe hoy.</p>'
   +'</div>'
 
-  // CTA principal
+  // CTA principal — sin emojis en el texto del boton
   +'<div style="text-align:center;margin:28px 0 20px;">'
   +'<a href="https://juridicosweb.com?utm_source=email&utm_medium=campana&utm_campaign=simit_masivo" '
   +'style="display:inline-block;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#ffffff;text-decoration:none;padding:18px 44px;border-radius:50px;font-size:17px;font-weight:800;letter-spacing:0.3px;box-shadow:0 6px 24px rgba(220,38,38,0.45);">'
-  +'🔍 Consultar mi cédula GRATIS →'
+  +'Consultar mi cedula GRATIS ahora'
   +'</a>'
-  +'<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Sin registro. Sin pago previo. Solo tu cédula.</p>'
+  +'<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Sin registro. Sin pago previo. Solo tu cedula.</p>'
   +'</div>'
 
   // Social proof barra
   +'<div style="background:#f8fafc;border-radius:10px;padding:14px 20px;text-align:center;margin-bottom:20px;">'
-  +'<p style="margin:0;font-size:13px;color:#374151;"><strong style="color:#1d4ed8;">⭐ 4.9/5</strong> · Más de <strong>850 multas eliminadas</strong> · Clientes en Bogotá, Medellín, Cali, Barranquilla y toda Colombia</p>'
+  +'<p style="margin:0;font-size:13px;color:#374151;"><strong style="color:#1d4ed8;">4.9 / 5 estrellas</strong> · Mas de <strong>850 multas eliminadas</strong> · Clientes en Bogota, Medellin, Cali, Barranquilla y toda Colombia</p>'
   +'</div>'
 
-  // WhatsApp
+  // WhatsApp — sin emoji en el texto principal
   +'<div style="text-align:center;margin-bottom:8px;">'
   +'<a href="https://wa.me/573159318400?text=Hola%2C+quiero+saber+si+puedo+eliminar+mis+multas" '
   +'style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:700;box-shadow:0 3px 12px rgba(37,211,102,0.4);">'
-  +'💬 Preguntar por WhatsApp'
+  +'Preguntar por WhatsApp'
   +'</a>'
+  +'<p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Respuesta en minutos</p>'
   +'</div>'
 
   +'</td></tr>'
 
   // Footer
   +'<tr><td style="background:#f1f5f9;padding:20px 40px;border-top:1px solid #e2e8f0;text-align:center;">'
-  +'<p style="margin:0 0 6px;font-size:12px;color:#64748b;font-weight:600;">JurídicosWeb · Bogotá, Colombia</p>'
+  +'<p style="margin:0 0 6px;font-size:12px;color:#64748b;font-weight:600;">JuridicosWeb · Bogota, Colombia</p>'
   +'<p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">'
-  +'Recibiste este correo porque consultaste sobre multas de tránsito en Colombia. '
-  +'Si no deseas recibir más información, responde este correo con la palabra <strong>CANCELAR</strong>.'
+  +'Recibiste este correo porque consultaste informacion sobre multas de transito en Colombia. '
+  +'Si no deseas recibir mas informacion, responde este correo con la palabra <strong>CANCELAR</strong>.'
   +'</p>'
   +'</td></tr>'
 
@@ -4539,7 +4589,7 @@ function campEnviarSiguiente(){
   // Personalizar asunto con nombre si está disponible
   var nombreCorto = (contacto.nombre||'').split(' ')[0].trim();
   var asuntoFinal = nombreCorto
-    ? asunto.replace(/^(🚨|⚠️|🔴|❗)\s*/,'$& '+nombreCorto+', ')
+    ? nombreCorto + ', ' + asunto
     : asunto;
 
   var payload = {
