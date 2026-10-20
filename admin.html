@@ -1619,7 +1619,7 @@ function setConexionStatus(ok, msg){
 function fetchConTimeout(url, ms){
   var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, ms) : null;
-  var opts = { cache:'no-store' };
+  var opts = { redirect: 'follow' };
   if(ctrl) opts.signal = ctrl.signal;
   return fetch(url, opts).then(function(r){ if(timer) clearTimeout(timer); return r; });
 }
@@ -3604,7 +3604,8 @@ function postJSON(payload){
   return fetch(SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'text/plain' }
+    headers: { 'Content-Type': 'text/plain' },
+    redirect: 'follow'
   }).then(function(r){ return r.json(); });
 }
 
