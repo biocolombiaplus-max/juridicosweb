@@ -2894,6 +2894,9 @@ var _planFinal = 'todas';
 var _firmaDataUrl = null;
 
 function irADatosDoc(){
+  // Ocultar botón flotante del resultado SIMIT
+  var fb = document.getElementById('sim-fab-cta');
+  if(fb) fb.style.display = 'none';
   // Pre-llenar si ya tenemos datos del flujo anterior
   if(_nombreConsultante) document.getElementById('dd-nombre').value = _nombreConsultante;
   if(_waConsultante)     document.getElementById('dd-whatsapp').value = _waConsultante;
@@ -3463,6 +3466,20 @@ function mostrarResultadoSimulacion(){
 
   jwTrack('simulacion_completada', { tipo: tipo, valor: val });
   document.querySelector('.mmodal-body').scrollTop = 0;
+
+  // Mostrar botón flotante fijo en la parte inferior del modal
+  var fb = document.getElementById('sim-fab-cta');
+  if(!fb){
+    fb = document.createElement('div');
+    fb.id = 'sim-fab-cta';
+    fb.style.cssText = 'position:sticky;bottom:0;left:0;right:0;z-index:999;background:linear-gradient(0deg,#0a1628 60%,transparent);padding:12px 16px 16px;margin:-2px -2px 0;';
+    fb.innerHTML = '<button onclick="irADatosDoc()" style="background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;border:none;border-radius:14px;padding:15px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;letter-spacing:0.3px;">'+
+      '<span>GENERAR MI DERECHO DE PETICION GRATIS →</span>'+
+      '</button>';
+    var mb = document.querySelector('.mmodal-body');
+    if(mb) mb.appendChild(fb);
+  }
+  fb.style.display = 'block';
 }
 
 var _planSeleccionado = 'todas';
