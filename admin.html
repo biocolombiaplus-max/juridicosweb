@@ -4116,7 +4116,7 @@ function campProcesarFilas(rows){
   }
 
   var emailKey  = findKey(rows[0],['email','correo','mail','e-mail','emailaddress','correoelectronico']);
-  var nombreKey = findKey(rows[0],['nombre','name','nombres','cliente','contacto','firstname','primernombre']);
+  var nombreKey = findKey(rows[0],['nombrecompleto','fullname','nombre','name','nombres','cliente','contacto','firstname','primernombre','nombresapellidos','nombreyapellido']);
   var telKey    = findKey(rows[0],['telefono','celular','tel','phone','whatsapp','movil','mobile','cel']);
 
   if(!emailKey){
