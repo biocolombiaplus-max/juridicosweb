@@ -1820,12 +1820,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Panel selección de multas -->
-        <div id="panel-multas-seleccion" style="margin-bottom:14px;">
-          <p style="font-size:0.72rem;color:#94a3b8;margin-bottom:8px;"><strong style="color:#e2e8f0;">Multas a radicar</strong> — confirma las secretarías:</p>
-          <div id="lista-multas-radicar"></div>
-        </div>
-
         <!-- Elige método -->
         <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 10px;text-align:center;">Selecciona tu forma de pago</p>
 
@@ -3213,28 +3207,59 @@ function abrirEpayco(){
     whatsapp: _waConsultante||'',
     email: _correoConsultante||''
   });
+  // Timeout de 12s para no dejar el botón colgado si el servidor no responde
+  var _timerBtn = setTimeout(function(){
+    if(_btn&&_btn.dataset.cargando==='1'){
+      _btn.dataset.cargando='0'; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>';
+      showToast('Demora en el servidor. Intenta de nuevo.','error');
+    }
+  }, 12000);
+
   fetch(SCRIPT_URL, { method:'POST', body: payload, headers:{'Content-Type':'text/plain'} })
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(!d.ok||!d.sessionId) throw new Error(d.error||'Sin sessionId');
-      // 2. Cargar checkout-v2.js (fallback a v1)
-      var fuentes = [
-        'https://checkout.epayco.co/checkout-v2.js',
-        'https://checkout.epayco.co/checkout.js'
-      ];
-      return fuentes.reduce(function(p, src){
-        return p.catch(function(){ return _cargarScriptEpayco(src); });
-      }, Promise.reject(new Error('init'))).then(function(){ return d; });
-    })
-    .then(function(d){
-      // 3. Abrir checkout con sessionId
-      var h = window.ePayco.checkout.configure({ sessionId: d.sessionId, type:'onpage', test:!!d.test, external:false });
-      if(typeof h.open==='function'){ h.open(); }
-      else if(typeof h.openNew==='function'){ h.openNew(); }
-      else { throw new Error('sin-open'); }
-      if(_btn){ _btn.dataset.cargando='0'; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+      clearTimeout(_timerBtn);
+      if(d.ok && d.sessionId){
+        // Ruta v2: sessionId del servidor
+        return _cargarScriptEpayco('https://checkout.epayco.co/checkout-v2.js')
+          .catch(function(){ return _cargarScriptEpayco('https://checkout.epayco.co/checkout.js'); })
+          .then(function(){
+            var h = window.ePayco.checkout.configure({ sessionId: d.sessionId, type:'onpage', test:!!d.test, external:false });
+            if(typeof h.open==='function') h.open();
+            else if(typeof h.openNew==='function') h.openNew();
+            else throw new Error('sin-open');
+            if(_btn){ _btn.dataset.cargando='0'; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+          });
+      }
+      // Fallback v1: checkout clásico con llave pública directa
+      return _cargarScriptEpayco('https://checkout.epayco.co/checkout.js').then(function(){
+        var h = window.ePayco.checkout.configure({
+          key: '347e56166b7cbd26c7257d8689033fba',
+          test: false,
+          name: 'JurídicosWeb',
+          description: planDesc,
+          currency: 'COP',
+          amount: monto,
+          tax_base: '0',
+          tax: '0',
+          country: 'CO',
+          lang: 'ES',
+          external: 'false',
+          confirmation: SCRIPT_URL,
+          response: window.location.origin + '/?pago=ok',
+          p_cust_id_cliente: '1595409',
+          name_billing: _nombreConsultante||'',
+          extra1: _valorConsultado||'',
+          extra2: esUna?'una':'todas'
+        });
+        if(typeof h.open==='function') h.open();
+        else if(typeof h.openNew==='function') h.openNew();
+        else throw new Error('sin-open');
+        if(_btn){ _btn.dataset.cargando='0'; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+      });
     })
     .catch(function(e){
+      clearTimeout(_timerBtn);
       console.error('ePayco',e);
       if(_btn){ _btn.dataset.cargando='0'; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
       showToast('No se pudo abrir el pago. Intenta de nuevo o usa Llave breve.','error');
@@ -3252,12 +3277,7 @@ function renderMultasRadicar(){
   _multasEncontradas = multas;
 
   if(!esTodas || multas.length === 0){
-    contenedor.innerHTML = '<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:12px 14px;">' +
-      '<p style="font-size:0.82rem;color:#cbd5e1;margin:0 0 8px;">📄 Se generará <strong>1 Derecho de Petición</strong></p>' +
-      '<label style="display:block;font-size:0.72rem;color:#94a3b8;margin-bottom:4px;">Secretaría de Movilidad destino:</label>' +
-      '<input id="sec-unica" type="text" placeholder="Ej: Secretaría de Movilidad de Bogotá" ' +
-      'style="width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:0.8rem;">' +
-      '</div>';
+    contenedor.innerHTML = '';
     return;
   }
 
@@ -3271,9 +3291,6 @@ function renderMultasRadicar(){
       '<div style="flex:1;min-width:0;">' +
       '<p style="font-size:0.8rem;color:#e2e8f0;font-weight:700;margin:0 0 2px;">📋 Infracción ' + infraccion + '</p>' +
       '<p style="font-size:0.7rem;color:#94a3b8;margin:0 0 6px;">' + (m.fecha ? 'Fecha: ' + m.fecha + ' · ' : '') + (m.valor ? 'Valor: ' + m.valor : '') + '</p>' +
-      '<label style="display:block;font-size:0.68rem;color:#64748b;margin-bottom:3px;">Secretaría de Movilidad:</label>' +
-      '<input id="sec-multa-' + i + '" type="text" value="' + secretaria + '" placeholder="Secretaría de Movilidad" ' +
-      'style="width:100%;background:#0f172a;border:1px solid #1e293b;color:#e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.75rem;">' +
       '</div></label></div>';
   });
   contenedor.innerHTML = html;
