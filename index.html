@@ -3165,56 +3165,6 @@ function seleccionarMetodoPago(metodo){
   }
 }
 
-// ── ePayco checkout v2 (sesión server-side vía Apps Script) ─────────────────
-// Carga un script externo sin caché — siempre inyecta fresco para evitar
-// promesas rechazadas atrapadas en caché de intentos anteriores.
-function _cargarScriptEpayco(src){
-  return new Promise(function(res, rej){
-    // Si ya está en el DOM y funcionó, resolver de inmediato
-    if(window.ePayco && window.ePayco.checkout){ res(); return; }
-    var s = document.createElement('script');
-    s.src = src; s.async = true;
-    s.onload = function(){
-      // checkout-v2.js puede tardar un tick en registrar window.ePayco.checkout
-      setTimeout(function(){
-        (window.ePayco && window.ePayco.checkout) ? res() : rej(new Error('sin-ePayco'));
-      }, 200);
-    };
-    s.onerror = function(){ rej(new Error('script-error')); };
-    setTimeout(function(){ rej(new Error('timeout')); }, 15000);
-    document.head.appendChild(s);
-  });
-}
-
-function _resetBtn(btn){
-  if(!btn) return;
-  btn.dataset.cargando = '0';
-  btn.style.opacity = '';
-  btn.innerHTML = '<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>';
-}
-
-function _abrirCheckout(opciones){
-  var fuentes = [
-    'https://checkout.epayco.co/checkout-v2.js',
-    'https://checkout.epayco.co/checkout.js'
-  ];
-  var idx = 0;
-  function intentar(){
-    if(idx >= fuentes.length) return Promise.reject(new Error('sin-script'));
-    var src = fuentes[idx++];
-    return _cargarScriptEpayco(src).then(function(){
-      var h = window.ePayco.checkout.configure(opciones);
-      if(typeof h.open === 'function'){ h.open(); return; }
-      if(typeof h.openNew === 'function'){ h.openNew(); return; }
-      throw new Error('sin-open');
-    }).catch(function(e){
-      if(idx < fuentes.length){ return intentar(); }
-      throw e;
-    });
-  }
-  return intentar();
-}
-
 function abrirEpayco(){
   var esUna    = _planFinal === 'una';
   var monto    = esUna ? 49000 : 79000;
@@ -3227,64 +3177,102 @@ function abrirEpayco(){
     localStorage.setItem('jw_pago_cedula', _valorConsultado||'');
     localStorage.setItem('jw_pago_monto',  esUna?'$49.000':'$79.000');
     localStorage.setItem('jw_pago_plan',   esUna?'una multa':'todas las multas');
-    var md = getMultasSeleccionadas();
-    localStorage.setItem('jw_multas_json', JSON.stringify(md));
-    localStorage.setItem('jw_num_multas',  md.length);
   }catch(e){}
 
   var btn = document.querySelector('[onclick="abrirEpayco()"]');
   if(btn && btn.dataset.cargando === '1') return;
-  if(btn){ btn.dataset.cargando='1'; btn.style.opacity='0.75'; btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Preparando pago seguro...</span>'; }
+  if(btn){ btn.dataset.cargando='1'; btn.style.opacity='0.75'; btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Cargando pasarela...</span>'; }
 
-  // Seguro de 20s: si algo falla silenciosamente, el botón se recupera solo
-  var safety = setTimeout(function(){
-    _resetBtn(btn);
-    showToast('Tiempo de espera agotado. Intenta de nuevo.', 'error');
-  }, 20000);
+  function resetBtn(){ if(!btn){ return; } btn.dataset.cargando='0'; btn.style.opacity=''; btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+  function abrirConLlave(){
+    if(window.ePayco && window.ePayco.checkout){
+      var h = window.ePayco.checkout.configure({
+        key:'347e56166b7cbd26c7257d8689033fba', test:false,
+        name:'JurídicosWeb', description:planDesc,
+        currency:'COP', amount:monto, tax_base:'0', tax:'0',
+        country:'CO', lang:'ES', external:'false',
+        p_cust_id_cliente:'1595409',
+        response:'https://juridicosweb.com/?pago=ok',
+        confirmation:SCRIPT_URL,
+        name_billing:_nombreConsultante||'',
+        extra1:_valorConsultado||'', extra2:esUna?'una':'todas'
+      });
+      resetBtn();
+      if(typeof h.open==='function') h.open();
+      else if(typeof h.openNew==='function') h.openNew();
+    } else {
+      resetBtn();
+      showToast('No se pudo cargar la pasarela. Intenta de nuevo.','error');
+    }
+  }
 
-  // Pedir sessionId al servidor
+  // Intentar primero con sesión del servidor (mejor experiencia)
+  // Si el servidor falla o tarda más de 8s, usar checkout.js directo
+  var usarDirecto = false;
+  var timerDirecto = setTimeout(function(){
+    usarDirecto = true;
+    // Cargar checkout.js mientras esperamos o si servidor falló
+    if(window.ePayco && window.ePayco.checkout){ abrirConLlave(); return; }
+    var s = document.createElement('script'); s.src='https://checkout.epayco.co/checkout.js';
+    s.onload = abrirConLlave;
+    s.onerror = function(){ resetBtn(); showToast('Error cargando pasarela. Intenta de nuevo.','error'); };
+    document.head.appendChild(s);
+  }, 8000);
+
   fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ _accion: 'epayco_sesion', monto: monto, descripcion: planDesc,
-      nombre: _nombreConsultante||'', cedula: _valorConsultado||'',
-      whatsapp: _waConsultante||'', email: _correoConsultante||'' }),
-    headers: { 'Content-Type': 'text/plain' }
+    method:'POST',
+    body:JSON.stringify({ _accion:'epayco_sesion', monto:monto, descripcion:planDesc,
+      nombre:_nombreConsultante||'', cedula:_valorConsultado||'',
+      whatsapp:_waConsultante||'', email:_correoConsultante||'' }),
+    headers:{'Content-Type':'text/plain'}
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
+    if(usarDirecto) return; // ya abrió por la ruta directa
+    clearTimeout(timerDirecto);
     if(d.ok && d.sessionId){
-      return _abrirCheckout({ sessionId: d.sessionId, type:'onpage', test:!!d.test, external:false });
+      // Sesión creada → checkout-v2.js
+      if(window.ePayco && window.ePayco.checkout){
+        resetBtn();
+        var h = window.ePayco.checkout.configure({ sessionId:d.sessionId, type:'onpage', test:!!d.test, external:false });
+        if(typeof h.open==='function') h.open(); else if(typeof h.openNew==='function') h.openNew();
+        return;
+      }
+      var s2 = document.createElement('script'); s2.src='https://checkout.epayco.co/checkout-v2.js';
+      s2.onload = function(){
+        setTimeout(function(){
+          resetBtn();
+          if(window.ePayco && window.ePayco.checkout){
+            var h2 = window.ePayco.checkout.configure({ sessionId:d.sessionId, type:'onpage', test:!!d.test, external:false });
+            if(typeof h2.open==='function') h2.open(); else if(typeof h2.openNew==='function') h2.openNew();
+          } else { abrirConLlave(); }
+        }, 300);
+      };
+      s2.onerror = function(){
+        // checkout-v2 falló, usar checkout clásico
+        var s3 = document.createElement('script'); s3.src='https://checkout.epayco.co/checkout.js';
+        s3.onload = abrirConLlave; s3.onerror = function(){ resetBtn(); };
+        document.head.appendChild(s3);
+      };
+      document.head.appendChild(s2);
+    } else {
+      // Servidor no devolvió sessionId → checkout clásico
+      if(window.ePayco && window.ePayco.checkout){ abrirConLlave(); return; }
+      var s4 = document.createElement('script'); s4.src='https://checkout.epayco.co/checkout.js';
+      s4.onload = abrirConLlave;
+      s4.onerror = function(){ resetBtn(); showToast('Error cargando pasarela.','error'); };
+      document.head.appendChild(s4);
     }
-    // Fallback: checkout clásico con llave pública (si el servidor no devolvió sessionId)
-    return _abrirCheckout({
-      key: '347e56166b7cbd26c7257d8689033fba',
-      test: false,
-      name: 'JurídicosWeb',
-      description: planDesc,
-      currency: 'COP',
-      amount: monto,
-      tax_base: '0',
-      tax: '0',
-      country: 'CO',
-      lang: 'ES',
-      external: 'false',
-      confirmation: SCRIPT_URL,
-      response: window.location.href.split('?')[0] + '?pago=ok',
-      p_cust_id_cliente: '1595409',
-      name_billing: _nombreConsultante||'',
-      extra1: _valorConsultado||'',
-      extra2: esUna ? 'una' : 'todas'
-    });
   })
-  .then(function(){
-    clearTimeout(safety);
-    _resetBtn(btn);
-  })
-  .catch(function(e){
-    clearTimeout(safety);
-    console.error('ePayco', e);
-    _resetBtn(btn);
-    showToast('No se pudo abrir el pago. Intenta de nuevo o usa Llave breve.', 'error');
+  .catch(function(){
+    if(usarDirecto) return;
+    clearTimeout(timerDirecto);
+    // Servidor no disponible → checkout clásico directo
+    if(window.ePayco && window.ePayco.checkout){ abrirConLlave(); return; }
+    var s5 = document.createElement('script'); s5.src='https://checkout.epayco.co/checkout.js';
+    s5.onload = abrirConLlave;
+    s5.onerror = function(){ resetBtn(); showToast('Error cargando pasarela. Intenta de nuevo.','error'); };
+    document.head.appendChild(s5);
   });
 }
 
