@@ -294,7 +294,39 @@ tr:hover td{background:#f8faff;cursor:pointer}
   .rmk-mass-btn{position:fixed;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:50;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:16px;padding:16px 20px;font-size:0.88rem;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,.45);display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.2px;}
   .rmk-mass-btn:active{transform:scale(.97);}
 }
+/* ── CAMPAÑAS EMAIL ── */
+.camp-tabs{display:flex;gap:4px;background:var(--gray100);border-radius:9px;padding:4px;margin-bottom:20px;}
+.camp-tab{flex:1;padding:9px 6px;border:none;background:none;border-radius:6px;font-size:12px;font-weight:700;color:var(--gray600);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.camp-tab.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+.camp-panel{display:none;}
+.camp-panel.active{display:block;}
+.camp-drop{border:2px dashed var(--gray200);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray50);}
+.camp-drop:hover,.camp-drop.drag-over{border-color:var(--navy);background:#eff6ff;}
+.camp-drop .icon{font-size:36px;margin-bottom:8px;}
+.camp-drop p{font-size:13px;color:var(--gray600);}
+.camp-map-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;}
+.camp-map-row label{min-width:120px;font-weight:600;color:var(--gray800);}
+.camp-map-row select{flex:1;padding:8px 12px;border:2px solid var(--gray200);border-radius:7px;font-size:13px;background:#fff;}
+.camp-map-row select:focus{outline:none;border-color:var(--navy);}
+.camp-stat-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.camp-stat{flex:1;min-width:120px;background:#fff;border-radius:10px;padding:14px 16px;border-left:4px solid var(--gray200);box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.camp-stat.blue{border-color:var(--blue);}
+.camp-stat.green{border-color:var(--green);}
+.camp-stat.gold{border-color:var(--gold);}
+.camp-stat.red{border-color:var(--red);}
+.camp-stat-val{font-size:26px;font-weight:800;color:var(--navy);line-height:1;}
+.camp-stat-lbl{font-size:11px;font-weight:600;color:var(--gray400);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+.camp-log{background:#0f172a;border-radius:10px;padding:14px;font-family:'Courier New',monospace;font-size:12px;color:#94a3b8;max-height:180px;overflow-y:auto;margin-top:12px;}
+.camp-log-line{margin-bottom:3px;line-height:1.5;}
+.camp-log-ok{color:#4ade80;}
+.camp-log-err{color:#f87171;}
+.camp-log-info{color:#60a5fa;}
+.cuenta-card{background:#fff;border-radius:10px;padding:14px 16px;border:2px solid var(--gray200);margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.cuenta-card .cuenta-email{flex:1;font-size:13px;font-weight:600;color:var(--gray800);}
+.cuenta-card .cuenta-quota{font-size:12px;color:var(--gray400);}
+.camp-preview-wrap{border:2px solid var(--gray200);border-radius:10px;overflow:hidden;max-height:400px;overflow-y:auto;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -398,6 +430,18 @@ tr:hover td{background:#f8faff;cursor:pointer}
     <div class="nav-section-title">Contenido Web</div>
     <div class="nav-item" data-sec="contenido-web" onclick="showSection('contenido-web')">
       <span class="icon">🖼️</span> Asesores & Casos
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Marketing</div>
+    <div class="nav-item" data-sec="campanas" onclick="showSection('campanas')">
+      <span class="icon">📧</span> Campañas Email
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Marketing</div>
+    <div class="nav-item" data-sec="campanas" onclick="showSection('campanas')">
+      <span class="icon">📧</span> Campañas Email
     </div>
   </div>
   <div class="nav-section">
@@ -806,6 +850,190 @@ tr:hover td{background:#f8faff;cursor:pointer}
       </div>
     </div><!-- /section-contenido-web -->
 
+    <!-- ══════════════════════════════════════ -->
+    <!-- SECCIÓN: CAMPAÑAS EMAIL               -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="section" id="section-campanas">
+      <style>
+        .camp-tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+        .camp-tab{padding:7px 16px;border-radius:6px;border:1.5px solid #d1d5db;background:#f9fafb;cursor:pointer;font-size:13px;font-weight:600;color:#374151;transition:all .15s}
+        .camp-tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+        .camp-panel{display:none}.camp-panel.active{display:block}
+        .camp-card{background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+        .camp-stat{font-size:28px;font-weight:800;color:#1d4ed8}
+        .camp-label{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+        .camp-btn{padding:8px 18px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+        .camp-btn-primary{background:#1d4ed8;color:#fff}.camp-btn-primary:hover{background:#1e40af}
+        .camp-btn-danger{background:#dc2626;color:#fff}.camp-btn-danger:hover{background:#b91c1c}
+        .camp-btn-green{background:#16a34a;color:#fff}.camp-btn-green:hover{background:#15803d}
+        .camp-input{width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;margin-bottom:8px}
+        .camp-input:focus{outline:none;border-color:#1d4ed8}
+        .camp-cuenta-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;background:#f9fafb}
+        .camp-log{background:#0f172a;color:#94a3b8;font-family:monospace;font-size:12px;padding:14px;border-radius:8px;height:220px;overflow-y:auto;white-space:pre-wrap;margin-top:12px}
+        .camp-log .ok{color:#4ade80}.camp-log .err{color:#f87171}.camp-log .info{color:#60a5fa}
+        .camp-progress-wrap{background:#e5e7eb;border-radius:99px;height:8px;margin:10px 0}
+        .camp-progress-bar{background:linear-gradient(90deg,#1d4ed8,#2563eb);height:8px;border-radius:99px;transition:width .4s}
+        .asunto-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+        .asunto-row input{flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #d1d5db;font-size:13px}
+        .asunto-row button{padding:4px 10px;border-radius:5px;border:none;background:#fee2e2;color:#dc2626;cursor:pointer;font-size:12px;font-weight:700}
+      </style>
+
+      <div style="max-width:900px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+          <div>
+            <h2 style="margin:0;font-size:20px;font-weight:800;color:#111827">📧 Campañas de Email</h2>
+            <p style="margin:4px 0 0;font-size:13px;color:#6b7280">Envío masivo profesional · 90 correos/día por cuenta · 10s entre envíos</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="text-align:center">
+              <div class="camp-stat" id="camp-stat-total">0</div>
+              <div class="camp-label">Contactos</div>
+            </div>
+            <div style="text-align:center">
+              <div class="camp-stat" style="color:#16a34a" id="camp-stat-enviados">0</div>
+              <div class="camp-label">Enviados hoy</div>
+            </div>
+            <div style="text-align:center">
+              <div class="camp-stat" style="color:#dc2626" id="camp-stat-pendientes">0</div>
+              <div class="camp-label">Pendientes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="camp-tabs">
+          <div class="camp-tab active" onclick="campTab('contactos')">👥 Contactos</div>
+          <div class="camp-tab" onclick="campTab('cuentas')">📬 Cuentas Gmail</div>
+          <div class="camp-tab" onclick="campTab('configurar')">⚙️ Configurar</div>
+          <div class="camp-tab" onclick="campTab('enviar')">🚀 Enviar</div>
+        </div>
+
+        <!-- TAB: CONTACTOS -->
+        <div class="camp-panel active" id="camp-panel-contactos">
+          <div class="camp-card">
+            <h3 style="margin:0 0 12px;font-size:15px;font-weight:700">Cargar base de datos</h3>
+            <p style="font-size:13px;color:#6b7280;margin:0 0 10px">Sube un archivo CSV o Excel con columnas: <code>nombre</code>, <code>email</code>, <code>telefono</code> (opcional)</p>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <label style="cursor:pointer">
+                <input type="file" id="camp-file-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="campCargarArchivo(this)">
+                <div class="camp-btn camp-btn-primary" style="display:inline-block">📂 Cargar CSV / Excel</div>
+              </label>
+              <button class="camp-btn" style="background:#fee2e2;color:#dc2626" onclick="campLimpiarContactos()">🗑️ Limpiar lista</button>
+            </div>
+          </div>
+          <div class="camp-card" id="camp-contactos-preview" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <strong style="font-size:14px" id="camp-contactos-info"></strong>
+              <span id="camp-contactos-dup" style="font-size:12px;color:#6b7280"></span>
+            </div>
+            <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:12px" id="camp-contactos-table"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: CUENTAS -->
+        <div class="camp-panel" id="camp-panel-cuentas">
+          <div class="camp-card">
+            <h3 style="margin:0 0 12px;font-size:15px;font-weight:700">Cuentas de Gmail para envío</h3>
+            <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Cada cuenta puede enviar hasta 90 correos/día. El sistema rota automáticamente entre cuentas disponibles.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+              <input class="camp-input" id="camp-nueva-cuenta-email" placeholder="correo@gmail.com" style="max-width:240px;margin:0">
+              <input class="camp-input" id="camp-nueva-cuenta-nombre" placeholder="Nombre remitente" style="max-width:180px;margin:0">
+              <button class="camp-btn camp-btn-primary" onclick="campAgregarCuenta()">Agregar</button>
+            </div>
+            <div id="camp-cuentas-lista"></div>
+            <div style="margin-top:14px;padding:12px;background:#fefce8;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#854d0e">
+              <strong>⚠️ Importante:</strong> Este sistema genera el enlace mailto: para que tú envíes desde Gmail, O puedes configurar Apps Script con GmailApp para envío automático. Ver la pestaña "Configurar" para el código de Apps Script.
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: CONFIGURAR -->
+        <div class="camp-panel" id="camp-panel-configurar">
+          <div class="camp-card">
+            <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">Asuntos del correo (estilo llamativo)</h3>
+            <p style="font-size:12px;color:#6b7280;margin:0 0 10px">El sistema rota aleatoriamente entre estos asuntos para mayor apertura</p>
+            <div id="camp-asuntos-lista"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input class="camp-input" id="camp-nuevo-asunto" placeholder="Nuevo asunto llamativo..." style="margin:0">
+              <button class="camp-btn camp-btn-primary" onclick="campAgregarAsunto()">Agregar</button>
+            </div>
+          </div>
+          <div class="camp-card">
+            <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">🔧 Código Apps Script (envío automático)</h3>
+            <p style="font-size:12px;color:#6b7280;margin:0 0 10px">Agrega esta función a tu Apps Script para habilitar el envío automático:</p>
+            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">function enviarCorreoCampana(datos) {
+  var email   = datos.email   || '';
+  var nombre  = datos.nombre  || 'Cliente';
+  var asunto  = datos.asunto  || '¡Tu multa puede eliminarse!';
+  var cuenta  = datos.cuenta  || Session.getActiveUser().getEmail();
+
+  if(!email || !email.includes('@')) return {ok:false,msg:'Email inválido'};
+
+  var html = HtmlService.createHtmlOutput(datos.htmlBody || generarHtmlEmail(nombre)).getContent();
+
+  try {
+    GmailApp.sendEmail(email, asunto, '', {
+      htmlBody: datos.htmlBody || generarHtmlEmail(nombre),
+      name: datos.nombreRemitente || 'Jurídicos Web',
+      from: cuenta
+    });
+    return {ok:true};
+  } catch(e) {
+    return {ok:false, msg: e.message};
+  }
+}
+
+// En doPost, agrega este case:
+// case 'enviar_correo_campana': return enviarCorreoCampana(datos); break;</pre>
+            <button class="camp-btn camp-btn-primary" style="margin-top:10px" onclick="campCopiarScript()">📋 Copiar código</button>
+          </div>
+          <div class="camp-card">
+            <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">Vista previa del correo</h3>
+            <div id="camp-email-preview" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;max-height:400px;overflow-y:auto"></div>
+            <button class="camp-btn camp-btn-primary" style="margin-top:10px" onclick="campMostrarPreview()">👁️ Ver preview</button>
+          </div>
+        </div>
+
+        <!-- TAB: ENVIAR -->
+        <div class="camp-panel" id="camp-panel-enviar">
+          <div class="camp-card">
+            <h3 style="margin:0 0 12px;font-size:15px;font-weight:700">Control de envío</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
+              <div style="padding:12px;background:#eff6ff;border-radius:8px;text-align:center">
+                <div style="font-size:22px;font-weight:800;color:#1d4ed8" id="camp-env-total">0</div>
+                <div style="font-size:11px;color:#6b7280">Total contactos</div>
+              </div>
+              <div style="padding:12px;background:#f0fdf4;border-radius:8px;text-align:center">
+                <div style="font-size:22px;font-weight:800;color:#16a34a" id="camp-env-ok">0</div>
+                <div style="font-size:11px;color:#6b7280">Enviados</div>
+              </div>
+              <div style="padding:12px;background:#fef2f2;border-radius:8px;text-align:center">
+                <div style="font-size:22px;font-weight:800;color:#dc2626" id="camp-env-err">0</div>
+                <div style="font-size:11px;color:#6b7280">Errores</div>
+              </div>
+              <div style="padding:12px;background:#fefce8;border-radius:8px;text-align:center">
+                <div style="font-size:22px;font-weight:800;color:#d97706" id="camp-env-resta">0</div>
+                <div style="font-size:11px;color:#6b7280">Pendientes</div>
+              </div>
+            </div>
+            <div class="camp-progress-wrap"><div class="camp-progress-bar" id="camp-progress-bar" style="width:0%"></div></div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:14px" id="camp-progress-label">Listo para enviar</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="camp-btn camp-btn-green" id="camp-btn-iniciar" onclick="campIniciarEnvio()">▶️ Iniciar envío</button>
+              <button class="camp-btn camp-btn-danger" id="camp-btn-pausar" onclick="campPausarEnvio()" style="display:none">⏸️ Pausar</button>
+              <button class="camp-btn" style="background:#f3f4f6;color:#374151" onclick="campResetearEnvio()">🔄 Resetear</button>
+            </div>
+          </div>
+          <div class="camp-card">
+            <h3 style="margin:0 0 6px;font-size:14px;font-weight:700">📋 Log de envíos</h3>
+            <div class="camp-log" id="camp-log">Esperando inicio de campaña...\n</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /section-campanas -->
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1155,6 +1383,7 @@ var sectionTitles = {
   autorizados:'Pagados — Por Radicar', seguimiento:'Esperando Respuesta (15 días)',
   tutelas:'Casos con Tutela', tutelasporradicar:'Tutelas Firmadas — Por Radicar', cerrados:'Casos Cerrados',
   documentos:'PDF Firmados',
+  campanas:'Campañas de Email',
 };
 
 function showSection(sec){
@@ -3507,7 +3736,403 @@ var _origShowSection = showSection;
 showSection = function(sec){
   _origShowSection(sec);
   if(sec === 'contenido-web'){ loadAsesoresAdmin(); loadCasosAdmin(); }
+  if(sec === 'campanas'){ campInit(); }
 };
+
+/* ═══════════════════════════════════════════════
+   MÓDULO CAMPAÑAS EMAIL
+   ═══════════════════════════════════════════════ */
+var _campInited = false;
+var _campContactos = [];
+var _campCuentas = [];
+var _campAsuntos = [
+  '🚨 Tu multa puede desaparecer — revisa ahora',
+  '⚡ URGENTE: eliminamos tu fotomulta sin ir a juzgados',
+  '🎯 Tienes comparendos? Esto te interesa',
+  '✅ Proceso legal para borrar tu multa — 100% gratis revisarlo',
+  '🔴 Alerta: tu licencia podría estar en riesgo por multas'
+];
+var _campEnviados = 0;
+var _campErrores = 0;
+var _campIdx = 0;
+var _campTimer = null;
+var _campPausado = false;
+var _campFechaHoy = '';
+
+function campInit(){
+  if(_campInited) { campActualizarStats(); return; }
+  _campInited = true;
+  try {
+    var s = localStorage.getItem('camp_data');
+    if(s){ var d=JSON.parse(s); _campContactos=d.contactos||[]; _campCuentas=d.cuentas||[]; _campAsuntos=d.asuntos||_campAsuntos; _campEnviados=d.enviados||0; _campIdx=d.idx||0; _campFechaHoy=d.fecha||''; }
+  } catch(e){}
+  var hoy = new Date().toISOString().slice(0,10);
+  if(_campFechaHoy !== hoy){ _campEnviados=0; _campIdx=Math.max(_campIdx,0); _campFechaHoy=hoy; campGuardar(); }
+  campRenderCuentas();
+  campRenderAsuntos();
+  campActualizarStats();
+  campMostrarPreview();
+}
+
+function campGuardar(){
+  try{ localStorage.setItem('camp_data', JSON.stringify({contactos:_campContactos,cuentas:_campCuentas,asuntos:_campAsuntos,enviados:_campEnviados,idx:_campIdx,fecha:_campFechaHoy})); }catch(e){}
+}
+
+function campTab(t){
+  document.querySelectorAll('.camp-tab').forEach(function(el,i){ el.classList.toggle('active', ['contactos','cuentas','configurar','enviar'][i]===t); });
+  document.querySelectorAll('.camp-panel').forEach(function(el){ el.classList.remove('active'); });
+  var p = document.getElementById('camp-panel-'+t);
+  if(p) p.classList.add('active');
+  if(t==='configurar') campMostrarPreview();
+}
+
+function campActualizarStats(){
+  var total = _campContactos.length;
+  var pendientes = Math.max(0, total - _campIdx);
+  var el = function(id){ return document.getElementById(id); };
+  if(el('camp-stat-total')) el('camp-stat-total').textContent = total;
+  if(el('camp-stat-enviados')) el('camp-stat-enviados').textContent = _campEnviados;
+  if(el('camp-stat-pendientes')) el('camp-stat-pendientes').textContent = pendientes;
+  if(el('camp-env-total')) el('camp-env-total').textContent = total;
+  if(el('camp-env-ok')) el('camp-env-ok').textContent = _campEnviados;
+  if(el('camp-env-err')) el('camp-env-err').textContent = _campErrores;
+  if(el('camp-env-resta')) el('camp-env-resta').textContent = pendientes;
+  var pct = total > 0 ? Math.round((_campIdx/total)*100) : 0;
+  if(el('camp-progress-bar')) el('camp-progress-bar').style.width = pct+'%';
+  if(el('camp-progress-label')) el('camp-progress-label').textContent = pct+'% completado — '+_campEnviados+' enviados de '+total;
+}
+
+/* ── CARGAR ARCHIVO ── */
+function campCargarArchivo(inp){
+  var file = inp.files[0];
+  if(!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if(ext === 'csv'){
+    var reader = new FileReader();
+    reader.onload = function(e){ campParsearCSV(e.target.result); };
+    reader.readAsText(file, 'UTF-8');
+  } else if(ext==='xlsx'||ext==='xls'){
+    if(typeof XLSX === 'undefined'){ campLog('❌ SheetJS no disponible. Usa CSV.','err'); return; }
+    var reader2 = new FileReader();
+    reader2.onload = function(e){
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      campProcesarFilas(rows);
+    };
+    reader2.readAsArrayBuffer(file);
+  } else {
+    campLog('❌ Formato no soportado. Usa .csv, .xlsx o .xls','err');
+  }
+}
+
+function campParsearCSV(text){
+  var lines = text.split(/\r?\n/).filter(function(l){ return l.trim(); });
+  if(lines.length < 2){ campLog('❌ CSV vacío o sin datos','err'); return; }
+  var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,'').toLowerCase(); });
+  var rows = [];
+  for(var i=1;i<lines.length;i++){
+    var cols = lines[i].split(',').map(function(c){ return c.trim().replace(/^"|"$/g,''); });
+    var obj = {};
+    headers.forEach(function(h,j){ obj[h] = cols[j]||''; });
+    rows.push(obj);
+  }
+  campProcesarFilas(rows);
+}
+
+function campProcesarFilas(rows){
+  var emailKeys = ['email','correo','e-mail','mail'];
+  var nombreKeys = ['nombre','name','nombres','cliente'];
+  var telKeys = ['telefono','celular','tel','phone','whatsapp'];
+  var emailKey='', nombreKey='', telKey='';
+  if(rows.length > 0){
+    var k = Object.keys(rows[0]).map(function(k){ return k.toLowerCase(); });
+    emailKey  = emailKeys.find(function(e){ return k.includes(e); }) || k.find(function(k){ return k.includes('mail'); }) || '';
+    nombreKey = nombreKeys.find(function(e){ return k.includes(e); }) || '';
+    telKey    = telKeys.find(function(e){ return k.includes(e); }) || '';
+  }
+  var nuevos = [], dups = 0;
+  var existing = _campContactos.map(function(c){ return (c.email||'').toLowerCase(); });
+  rows.forEach(function(r){
+    var keys = Object.keys(r).map(function(k){ return k.toLowerCase(); });
+    var realEmailKey = Object.keys(r).find(function(k){ return k.toLowerCase()===emailKey; }) || Object.keys(r).find(function(k){ return k.toLowerCase().includes('mail'); }) || '';
+    var email = (r[realEmailKey]||'').trim().toLowerCase();
+    if(!email || !email.includes('@') || !email.includes('.')) return;
+    if(existing.includes(email)){ dups++; return; }
+    var realNombreKey = Object.keys(r).find(function(k){ return k.toLowerCase()===nombreKey; }) || '';
+    var realTelKey    = Object.keys(r).find(function(k){ return k.toLowerCase()===telKey; }) || '';
+    nuevos.push({email:email, nombre:(r[realNombreKey]||'').trim(), telefono:(r[realTelKey]||'').trim(), enviado:false});
+    existing.push(email);
+  });
+  _campContactos = _campContactos.concat(nuevos);
+  campGuardar();
+  campRenderTablaContactos();
+  campActualizarStats();
+  var msg = '✅ '+nuevos.length+' contactos importados';
+  if(dups > 0) msg += ' · '+dups+' duplicados omitidos';
+  campLog(msg, 'ok');
+}
+
+function campRenderTablaContactos(){
+  var preview = document.getElementById('camp-contactos-preview');
+  var info    = document.getElementById('camp-contactos-info');
+  var table   = document.getElementById('camp-contactos-table');
+  if(!preview||!info||!table) return;
+  if(_campContactos.length === 0){ preview.style.display='none'; return; }
+  preview.style.display = 'block';
+  info.textContent = _campContactos.length + ' contactos en lista';
+  var html = '<tr style="background:#f9fafb;position:sticky;top:0"><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">#</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Email</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Nombre</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Teléfono</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Estado</th></tr>';
+  var max = Math.min(_campContactos.length, 100);
+  for(var i=0;i<max;i++){
+    var c = _campContactos[i];
+    var estado = i < _campIdx ? '<span style="color:#16a34a;font-weight:700">✓ Enviado</span>' : '<span style="color:#6b7280">Pendiente</span>';
+    html += '<tr style="border-top:1px solid #f3f4f6"><td style="padding:5px 10px;font-size:12px;color:#9ca3af">'+(i+1)+'</td><td style="padding:5px 10px;font-size:12px">'+c.email+'</td><td style="padding:5px 10px;font-size:12px">'+c.nombre+'</td><td style="padding:5px 10px;font-size:12px">'+c.telefono+'</td><td style="padding:5px 10px">'+estado+'</td></tr>';
+  }
+  if(_campContactos.length > 100) html += '<tr><td colspan="5" style="padding:8px 10px;font-size:12px;color:#6b7280;text-align:center">... y '+ (_campContactos.length-100) +' más</td></tr>';
+  table.innerHTML = html;
+}
+
+function campLimpiarContactos(){
+  if(!confirm('¿Eliminar todos los contactos de la lista?')) return;
+  _campContactos = []; _campIdx = 0; _campEnviados = 0; _campErrores = 0;
+  campGuardar(); campActualizarStats(); campRenderTablaContactos();
+  campLog('🗑️ Lista limpiada','info');
+}
+
+/* ── CUENTAS ── */
+function campRenderCuentas(){
+  var el = document.getElementById('camp-cuentas-lista');
+  if(!el) return;
+  if(_campCuentas.length === 0){ el.innerHTML = '<p style="font-size:13px;color:#9ca3af;text-align:center;padding:16px">No hay cuentas agregadas</p>'; return; }
+  el.innerHTML = _campCuentas.map(function(c,i){
+    var hoy = new Date().toISOString().slice(0,10);
+    var usados = c.fecha === hoy ? (c.usados||0) : 0;
+    var pct = Math.round((usados/90)*100);
+    return '<div class="camp-cuenta-row">'+
+      '<div style="flex:1"><strong style="font-size:13px">'+c.email+'</strong>'+
+      (c.nombre?'<span style="font-size:12px;color:#6b7280;margin-left:6px">'+c.nombre+'</span>':'')+
+      '<div style="margin-top:4px;display:flex;align-items:center;gap:8px"><div style="background:#e5e7eb;border-radius:99px;height:5px;width:120px"><div style="background:#1d4ed8;height:5px;border-radius:99px;width:'+pct+'%"></div></div>'+
+      '<span style="font-size:11px;color:#6b7280">'+usados+'/90 hoy</span></div></div>'+
+      '<button onclick="campEliminarCuenta('+i+')" style="padding:4px 10px;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700">✕</button></div>';
+  }).join('');
+}
+
+function campAgregarCuenta(){
+  var emailEl = document.getElementById('camp-nueva-cuenta-email');
+  var nombreEl= document.getElementById('camp-nueva-cuenta-nombre');
+  var email = (emailEl.value||'').trim().toLowerCase();
+  var nombre = (nombreEl.value||'').trim();
+  if(!email||!email.includes('@')){ alert('Ingresa un email válido'); return; }
+  if(_campCuentas.find(function(c){ return c.email===email; })){ alert('Esta cuenta ya está agregada'); return; }
+  _campCuentas.push({email:email,nombre:nombre,usados:0,fecha:''});
+  emailEl.value=''; nombreEl.value='';
+  campGuardar(); campRenderCuentas();
+  campLog('✅ Cuenta agregada: '+email,'ok');
+}
+
+function campEliminarCuenta(i){
+  _campCuentas.splice(i,1);
+  campGuardar(); campRenderCuentas();
+}
+
+/* ── ASUNTOS ── */
+function campRenderAsuntos(){
+  var el = document.getElementById('camp-asuntos-lista');
+  if(!el) return;
+  el.innerHTML = _campAsuntos.map(function(a,i){
+    return '<div class="asunto-row"><input value="'+a.replace(/"/g,'&quot;')+'" onchange="_campAsuntos['+i+']=this.value;campGuardar()"><button onclick="campEliminarAsunto('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function campAgregarAsunto(){
+  var inp = document.getElementById('camp-nuevo-asunto');
+  var v = (inp.value||'').trim();
+  if(!v) return;
+  _campAsuntos.push(v); inp.value='';
+  campGuardar(); campRenderAsuntos();
+}
+
+function campEliminarAsunto(i){
+  if(_campAsuntos.length <= 1){ alert('Debe quedar al menos un asunto'); return; }
+  _campAsuntos.splice(i,1);
+  campGuardar(); campRenderAsuntos();
+}
+
+/* ── EMAIL TEMPLATE ── */
+function campGenerarHTML(nombre){
+  var n = nombre || 'Cliente';
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif">'+
+  '<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;margin-top:20px;box-shadow:0 4px 20px rgba(0,0,0,.1)">'+
+  '<div style="height:6px;background:linear-gradient(90deg,#FCD116 33%,#003087 33%,#003087 66%,#CE1126 66%)"></div>'+
+  '<div style="padding:28px 32px;background:linear-gradient(135deg,#003087,#1d4ed8)">'+
+    '<div style="display:flex;align-items:center;gap:12px">'+
+    '<div style="background:#fff;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:800;color:#003087;letter-spacing:.5px">⚖️ JURÍDICOS WEB</div>'+
+    '<div style="background:rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;font-size:11px;color:#93c5fd;font-weight:600">COLOMBIA · OFICIAL</div>'+
+    '</div>'+
+  '</div>'+
+  '<div style="background:#dc2626;padding:14px 32px;display:flex;align-items:center;gap:10px">'+
+    '<div style="font-size:20px">🚨</div>'+
+    '<div><div style="color:#fff;font-weight:800;font-size:15px">ALERTA: Comparendos detectados en tu cédula</div>'+
+    '<div style="color:#fecaca;font-size:12px;margin-top:2px">El tiempo corre — actúa antes de que sean incobrables</div></div>'+
+  '</div>'+
+  '<div style="padding:28px 32px">'+
+    '<p style="font-size:16px;font-weight:600;color:#111827;margin:0 0 14px">Hola '+n+',</p>'+
+    '<p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 16px">'+
+      'Nuestro sistema detectó que podrías tener <strong>fotomultas o comparendos</strong> registrados en el SIMIT que podrían afectar tu licencia y generar cobros coactivos.'+
+    '</p>'+
+    '<p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 20px">'+
+      'La buena noticia: <strong style="color:#16a34a">existe un proceso legal vigente para eliminarlos</strong>, avalado por la Ley 769 de 2002 y jurisprudencia del Consejo de Estado.'+
+    '</p>'+
+    '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:20px">'+
+      '<p style="margin:0;font-size:13px;font-weight:700;color:#166534;margin-bottom:8px">✅ Lo que incluye nuestro servicio:</p>'+
+      '<ul style="margin:0;padding-left:16px;font-size:13px;color:#166534;line-height:1.8">'+
+        '<li>Consulta gratuita en el SIMIT oficial</li>'+
+        '<li>Análisis jurídico de cada comparendo</li>'+
+        '<li>Proceso legal ante la autoridad de tránsito</li>'+
+        '<li>Sin necesidad de ir a juzgados</li>'+
+      '</ul>'+
+    '</div>'+
+    '<div style="text-align:center;margin:24px 0">'+
+      '<a href="https://juridicosweb.com?utm_source=email&utm_medium=campana&utm_campaign=simit" style="display:inline-block;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;text-decoration:none;padding:16px 36px;border-radius:10px;font-size:16px;font-weight:800;letter-spacing:.3px;box-shadow:0 4px 14px rgba(220,38,38,.4)">'+
+        '🔍 CONSULTAR MI CÉDULA GRATIS →'+
+      '</a>'+
+      '<p style="font-size:11px;color:#9ca3af;margin-top:10px">La consulta es 100% gratuita y sin compromiso</p>'+
+    '</div>'+
+    '<div style="border-top:1px solid #e5e7eb;padding-top:16px;margin-top:8px">'+
+      '<p style="font-size:11px;color:#9ca3af;line-height:1.6;margin:0">'+
+        'Jurídicos Web · Bogotá, Colombia · <a href="https://juridicosweb.com" style="color:#9ca3af">juridicosweb.com</a><br>'+
+        'Este correo fue enviado porque mostraste interés en eliminación de multas. '+
+        '<a href="https://juridicosweb.com" style="color:#9ca3af">Cancelar suscripción</a>'+
+      '</p>'+
+    '</div>'+
+  '</div></div></body></html>';
+}
+
+function campMostrarPreview(){
+  var el = document.getElementById('camp-email-preview');
+  if(!el) return;
+  var html = campGenerarHTML('Juan García');
+  el.innerHTML = '<iframe style="width:100%;height:380px;border:none" srcdoc="'+html.replace(/"/g,'&quot;')+'"></iframe>';
+}
+
+function campCopiarScript(){
+  var code = document.querySelector('#camp-panel-configurar pre');
+  if(!code) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code.textContent).then(function(){
+      campLog('✅ Código copiado al portapapeles','ok');
+    }).catch(function(){
+      campLog('⚠️ Copia manual: selecciona el código y usa Ctrl+C','info');
+    });
+  } else {
+    var r = document.createRange(); r.selectNode(code);
+    window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
+    campLog('✅ Texto seleccionado — presiona Ctrl+C para copiar','ok');
+  }
+}
+
+/* ── ENVÍO ── */
+function campLog(msg, tipo){
+  var el = document.getElementById('camp-log');
+  if(!el) return;
+  var ts = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var cls = tipo==='ok'?'ok':tipo==='err'?'err':'info';
+  el.innerHTML += '<span class="'+cls+'">['+ ts +'] '+msg+'</span>\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function campCuentaDisponible(){
+  var hoy = new Date().toISOString().slice(0,10);
+  for(var i=0;i<_campCuentas.length;i++){
+    var c = _campCuentas[i];
+    if(c.fecha !== hoy){ c.usados=0; c.fecha=hoy; }
+    if((c.usados||0) < 90) return i;
+  }
+  return -1;
+}
+
+function campIniciarEnvio(){
+  if(_campContactos.length === 0){ alert('Carga una lista de contactos primero'); return; }
+  if(_campCuentas.length === 0){ alert('Agrega al menos una cuenta Gmail primero'); return; }
+  if(_campAsuntos.length === 0){ alert('Agrega al menos un asunto'); return; }
+  _campPausado = false;
+  document.getElementById('camp-btn-iniciar').style.display = 'none';
+  document.getElementById('camp-btn-pausar').style.display = 'inline-block';
+  campLog('🚀 Iniciando campaña — '+_campContactos.length+' contactos, desde índice '+_campIdx,'info');
+  campEnviarSiguiente();
+}
+
+function campPausarEnvio(){
+  _campPausado = true;
+  if(_campTimer){ clearTimeout(_campTimer); _campTimer=null; }
+  document.getElementById('camp-btn-iniciar').style.display = 'inline-block';
+  document.getElementById('camp-btn-pausar').style.display = 'none';
+  campLog('⏸️ Campaña pausada en índice '+_campIdx,'info');
+  campGuardar();
+}
+
+function campResetearEnvio(){
+  if(!confirm('¿Resetear el progreso de envío? Los contactos se mantendrán pero se volverá a enviar desde el inicio.')) return;
+  if(_campTimer){ clearTimeout(_campTimer); _campTimer=null; }
+  _campPausado=true; _campIdx=0; _campEnviados=0; _campErrores=0;
+  campGuardar(); campActualizarStats();
+  document.getElementById('camp-btn-iniciar').style.display='inline-block';
+  document.getElementById('camp-btn-pausar').style.display='none';
+  campLog('🔄 Progreso reseteado','info');
+}
+
+function campEnviarSiguiente(){
+  if(_campPausado) return;
+  if(_campIdx >= _campContactos.length){
+    campLog('🎉 ¡Campaña completada! '+_campEnviados+' correos enviados','ok');
+    document.getElementById('camp-btn-iniciar').style.display='inline-block';
+    document.getElementById('camp-btn-pausar').style.display='none';
+    campGuardar(); return;
+  }
+  var cuentaIdx = campCuentaDisponible();
+  if(cuentaIdx < 0){
+    campLog('⚠️ Todas las cuentas alcanzaron el límite diario (90/cuenta). Campaña pausada hasta mañana.','err');
+    campPausarEnvio(); return;
+  }
+  var contacto = _campContactos[_campIdx];
+  var cuenta   = _campCuentas[cuentaIdx];
+  var asunto   = _campAsuntos[Math.floor(Math.random()*_campAsuntos.length)];
+  var htmlBody = campGenerarHTML(contacto.nombre||contacto.email.split('@')[0]);
+
+  var payload = {
+    _accion: 'enviar_correo_campana',
+    email: contacto.email,
+    nombre: contacto.nombre||'',
+    asunto: asunto,
+    cuenta: cuenta.email,
+    nombreRemitente: cuenta.nombre || 'Jurídicos Web',
+    htmlBody: htmlBody
+  };
+
+  campLog('📤 Enviando a '+contacto.email+' desde '+cuenta.email,'info');
+
+  fetch(GOOGLE_SHEET_URL, {
+    method:'POST',
+    body: JSON.stringify(payload),
+    headers:{'Content-Type':'text/plain'},
+    keepalive:true
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.ok !== false){
+      _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
+      campLog('✅ Enviado: '+contacto.email,'ok');
+    } else {
+      _campErrores++;
+      campLog('❌ Error en '+contacto.email+': '+(res&&res.msg||'desconocido'),'err');
+    }
+  }).catch(function(e){
+    _campErrores++;
+    campLog('❌ Error de red: '+e.message,'err');
+  }).finally(function(){
+    _campIdx++;
+    campGuardar(); campActualizarStats();
+    if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
+  });
+}
 </script>
 </body>
 </html>
