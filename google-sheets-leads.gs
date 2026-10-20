@@ -34,6 +34,8 @@
 
 var SHEET_CASOS = '📊 Control de Casos';
 var SHEET_FIRMADOS = 'Documentos Firmados';
+var SHEET_VISITAS = '📈 Visitas';
+var COLUMNAS_VISITAS = ['Fecha', 'Fuente', 'UTM Source', 'UTM Medium', 'UTM Campaign', 'UTM Content', 'Dispositivo', 'Referrer', 'Pagina'];
 var CARPETA_DRIVE_FIRMAS = 'JuridicosWeb - Documentos Firmados'; // se crea sola en tu Drive
 
 // Hoja externa (la que tú administras) con el correo oficial de radicación de
@@ -152,14 +154,17 @@ function doGet(e) {
       });
       return respuestaJsonp({ ok: true, casos: casos2 }, cb);
     }
-    // ── Listar visitas (para remarketing) ──────────────────────────────
+    // ── Listar visitas (para analítica de campaña) ─────────────────────
     if (accion === 'listar_visitas') {
-      var hv = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+      var hv = obtenerOCrearHoja(SHEET_VISITAS, COLUMNAS_VISITAS);
       if (!hv || hv.getLastRow() < 2) return respuestaJsonp({ ok: true, visitas: [] }, cb);
       var valsV = hv.getDataRange().getValues();
       var encV  = valsV[0];
       var visitas = valsV.slice(1).filter(function(r){ return r[0]; }).map(function(r){
-        var o = {}; encV.forEach(function(h,i){ o[h] = r[i]; }); return o;
+        var o = {}; encV.forEach(function(h,i){
+          var v = r[i];
+          o[h] = (v instanceof Date) ? Utilities.formatDate(v, 'GMT-5', 'yyyy-MM-dd HH:mm:ss') : v;
+        }); return o;
       });
       return respuestaJsonp({ ok: true, visitas: visitas }, cb);
     }
@@ -210,10 +215,34 @@ function doPost(e) {
       case 'sync_campana_load':   return syncCampanaLoad();
       // ── ePayco sesión de pago ────────────────────────────────────────
       case 'epayco_sesion':       return crearSesionEpayco(datos);
+      // ── Tracking de visitas al sitio ─────────────────────────────────
+      case 'registrar_visita':    return registrarVisita(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
     return respuestaJson({ ok: false, error: String(err) });
+  }
+}
+
+// ───────────────────────── tracking de visitas ────────────────────────────────
+
+function registrarVisita(datos) {
+  try {
+    var hoja = obtenerOCrearHoja(SHEET_VISITAS, COLUMNAS_VISITAS);
+    hoja.appendRow([
+      new Date(),
+      datos.fuente       || 'directo',
+      datos.utm_source   || '',
+      datos.utm_medium   || '',
+      datos.utm_campaign || '',
+      datos.utm_content  || '',
+      datos.dispositivo  || '',
+      datos.referrer     || '',
+      datos.pagina       || '/'
+    ]);
+    return respuestaJson({ ok: true });
+  } catch(e) {
+    return respuestaJson({ ok: false, error: String(e) });
   }
 }
 
