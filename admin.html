@@ -3974,7 +3974,12 @@ function campInit(){
   _campInited = true;
   try {
     var s = localStorage.getItem('camp_data');
-    if(s){ var d=JSON.parse(s); _campContactos=d.contactos||[]; _campCuentas=d.cuentas||[]; _campAsuntos=d.asuntos||_campAsuntos; _campEnviados=d.enviados||0; _campIdx=d.idx||0; _campFechaHoy=d.fecha||''; }
+    if(s){ var d=JSON.parse(s); _campContactos=d.contactos||[]; _campCuentas=d.cuentas||[]; _campEnviados=d.enviados||0; _campIdx=d.idx||0; _campFechaHoy=d.fecha||'';
+      // Solo restaurar asuntos si NO contienen emojis (evitar cargar asuntos corruptos del cache)
+      var savedAsuntos = d.asuntos||[];
+      var tieneEmojis = savedAsuntos.some(function(a){ return /[\u{1F000}-\u{1FFFF}]|[☀-➿]|[\uD800-\uDBFF]/u.test(a); });
+      if(savedAsuntos.length>0 && !tieneEmojis) _campAsuntos = savedAsuntos;
+    }
   } catch(e){}
   var hoy = new Date().toISOString().slice(0,10);
   if(_campFechaHoy !== hoy){ _campEnviados=0; _campFechaHoy=hoy; campGuardar(); }
