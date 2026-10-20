@@ -1571,13 +1571,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Botón CTA sticky siempre visible -->
-        <div style="position:sticky;bottom:0;background:#fff;padding:10px 0 4px;margin-top:4px;z-index:10;">
-          <button onclick="generarDocPreview()" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:13px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 4px 22px rgba(30,64,175,0.45);letter-spacing:0.2px;">
-            📄 Ver mi Derecho de Petición →
-          </button>
-          <p style="text-align:center;color:#94a3b8;font-size:0.67rem;margin:6px 0 0;">🔒 Datos solo para el documento · No los compartimos</p>
-        </div>
+        <p style="text-align:center;color:#94a3b8;font-size:0.67rem;margin:4px 0 8px;">🔒 Datos solo para el documento · No los compartimos</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -3517,6 +3511,23 @@ function goToStepNombre(id){
   };
   document.getElementById('mmodal-title').textContent = titles[id]||'';
   document.querySelector('.mmodal-body').scrollTop = 0;
+
+  // Barra sticky para el paso de datos del documento
+  var bar = document.getElementById('mmodal-sticky-cta');
+  var btn = document.getElementById('sticky-cta-btn');
+  if(bar && btn){
+    if(id === 'sp-datos-doc'){
+      btn.className = 'sticky-cta-listo';
+      btn.style.background = 'linear-gradient(135deg,#1e40af,#1d4ed8)';
+      btn.style.color = '#fff';
+      btn.style.boxShadow = '0 4px 22px rgba(30,64,175,0.45)';
+      btn.innerHTML = '📄 Ver mi Derecho de Petición →';
+      btn.onclick = function(){ generarDocPreview(); };
+      bar.classList.add('show');
+    } else if(currentStep !== 5){
+      bar.classList.remove('show');
+    }
+  }
 }
 
 function copiarLlaveNequi(){
