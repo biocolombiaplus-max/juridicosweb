@@ -1626,18 +1626,26 @@ function fetchConTimeout(url, ms){
 
 function loadData(evtBtn){
   var btn = evtBtn || document.querySelector('[onclick*="loadData"]');
-  var url = SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now();
   var sync = document.getElementById('last-sync');
   if(sync) sync.textContent = 'Actualizando...';
   setBtnLoading(btn, true);
   setConexionStatus(null, 'Conectando...');
-  fetchConTimeout(url, 12000)
-    .then(function(r){ return r.json(); })
+
+  // Intenta con la acción actual del Apps Script; si falla prueba la alternativa
+  function intentarCarga(accion){
+    var url = SCRIPT_URL + '?accion=' + accion + '&_t=' + Date.now();
+    return fetchConTimeout(url, 18000).then(function(r){ return r.json(); });
+  }
+
+  intentarCarga('listar_casos')
+    .catch(function(){ return intentarCarga('get_casos'); })
     .then(function(data){
       setBtnLoading(btn, false);
-      if(!data.ok) throw new Error(data.error || 'Respuesta inesperada');
-      // Incluir todos los leads: los que solo consultaron (sin nombre) también cuentan en el pipeline
-      allRows = (data.casos||[]).filter(function(r){ return r['Nombres']||r['Email']||r['Cédula']||r['Placa']||r['valor']||r['Valor']; });
+      var casos = data.casos || data.data || [];
+      if(!Array.isArray(casos)) throw new Error('Formato de respuesta inesperado');
+      allRows = casos.filter(function(r){
+        return r['Nombres']||r['Email']||r['Cédula']||r['Placa']||r['valor']||r['Valor'];
+      });
       renderAll();
       var hora = new Date().toLocaleTimeString('es-CO');
       if(sync) sync.textContent = 'Actualizado: ' + hora;
@@ -1647,10 +1655,27 @@ function loadData(evtBtn){
     })
     .catch(function(err){
       setBtnLoading(btn, false);
-      var msg = err.name === 'AbortError' ? 'Tiempo de espera agotado (12s)' : err.message;
-      setConexionStatus(false, '⚠️ Error de conexión');
+      var msg = err.name === 'AbortError'
+        ? 'Tiempo agotado — verifica que el Apps Script esté publicado'
+        : err.message;
+      setConexionStatus(false, '⚠️ Sin conexión con el servidor');
       showToast('⚠️ ' + msg, 'error');
-      if(sync) sync.textContent = '⚠️ ' + msg.slice(0,60);
+      if(sync) sync.textContent = '⚠️ Sin conexión';
+      // Mostrar aviso con instrucciones en el dashboard
+      var banner = document.getElementById('conexion-error-banner');
+      if(!banner){
+        banner = document.createElement('div');
+        banner.id = 'conexion-error-banner';
+        banner.style.cssText = 'background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:13px;color:#7f1d1d;line-height:1.7';
+        banner.innerHTML = '<strong>⚠️ No se pudo conectar con el servidor (Apps Script)</strong><br>' +
+          'Posibles causas:<br>' +
+          '1. El Apps Script no está publicado o necesita nueva implementación<br>' +
+          '2. La URL del script cambió al republicarlo<br>' +
+          '3. Google está tardando en responder (intenta en 30 segundos)<br>' +
+          '<button onclick="loadData();document.getElementById(\'conexion-error-banner\').remove()" style="margin-top:10px;padding:7px 16px;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700">🔄 Reintentar ahora</button>';
+        var dash = document.getElementById('section-dashboard');
+        if(dash) dash.insertBefore(banner, dash.firstChild);
+      }
     });
 }
 
@@ -4111,7 +4136,7 @@ function campEnviarSiguiente(){
 
   campLog('📤 Enviando a '+contacto.email+' desde '+cuenta.email,'info');
 
-  fetch(GOOGLE_SHEET_URL, {
+  fetch(SCRIPT_URL, {
     method:'POST',
     body: JSON.stringify(payload),
     headers:{'Content-Type':'text/plain'},
