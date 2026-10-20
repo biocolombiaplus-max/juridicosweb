@@ -973,30 +973,46 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <div class="camp-card">
             <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">🔧 Código Apps Script (envío automático)</h3>
             <p style="font-size:12px;color:#6b7280;margin:0 0 10px">Agrega esta función a tu Apps Script para habilitar el envío automático:</p>
-            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">function enviarCorreoCampana(datos) {
-  var email   = datos.email   || '';
-  var nombre  = datos.nombre  || 'Cliente';
-  var asunto  = datos.asunto  || '¡Tu multa puede eliminarse!';
-  var cuenta  = datos.cuenta  || Session.getActiveUser().getEmail();
+            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">// ── En doPost(), agrega estos cases: ──────────────────────────
+// case 'enviar_correo':      return enviarCorreo(datos);
+// case 'sync_campana_save':  return syncCampanaSave(datos);
+// case 'sync_campana_load':  return syncCampanaLoad();
 
-  if(!email || !email.includes('@')) return {ok:false,msg:'Email inválido'};
-
-  var html = HtmlService.createHtmlOutput(datos.htmlBody || generarHtmlEmail(nombre)).getContent();
-
+function enviarCorreo(datos) {
+  var email  = datos.email  || '';
+  var nombre = datos.nombre || 'Cliente';
+  var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
+  var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
+  if(!email || !email.includes('@')) return {ok:false,msg:'Email invalido'};
   try {
-    GmailApp.sendEmail(email, asunto, '', {
-      htmlBody: datos.htmlBody || generarHtmlEmail(nombre),
-      name: datos.nombreRemitente || 'Jurídicos Web',
+    GmailApp.sendEmail(email, asunto, 'Para ver este correo activa HTML en tu cliente de correo.', {
+      htmlBody: datos.html || '',
+      name: datos.nombreRemitente || 'JuridicosWeb',
       from: cuenta
     });
     return {ok:true};
-  } catch(e) {
-    return {ok:false, msg: e.message};
-  }
+  } catch(e) { return {ok:false, msg: e.message}; }
 }
 
-// En doPost, agrega este case:
-// case 'enviar_correo_campana': return enviarCorreoCampana(datos); break;</pre>
+// ── SYNC entre dispositivos ───────────────────────────────────
+var SYNC_SHEET_NAME = 'CampanSync';
+
+function syncCampanaSave(datos) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(SYNC_SHEET_NAME) || ss.insertSheet(SYNC_SHEET_NAME);
+  sh.clearContents();
+  sh.getRange(1,1).setValue(datos.data || '{}');
+  sh.getRange(1,2).setValue(new Date().toISOString());
+  return {ok:true};
+}
+
+function syncCampanaLoad() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(SYNC_SHEET_NAME);
+  if(!sh || sh.getLastRow() < 1) return {ok:true, data: null};
+  var raw = sh.getRange(1,1).getValue();
+  return {ok:true, data: raw || null};
+}</pre>
             <button class="camp-btn camp-btn-primary" style="margin-top:10px" onclick="campCopiarScript()">📋 Copiar código</button>
           </div>
           <div class="camp-card">
@@ -1034,6 +1050,14 @@ tr:hover td{background:#f8faff;cursor:pointer}
               <button class="camp-btn camp-btn-green" id="camp-btn-iniciar" onclick="campIniciarEnvio()">▶️ Iniciar envío</button>
               <button class="camp-btn camp-btn-danger" id="camp-btn-pausar" onclick="campPausarEnvio()" style="display:none">⏸️ Pausar</button>
               <button class="camp-btn" style="background:#f3f4f6;color:#374151" onclick="campResetearEnvio()">🔄 Resetear</button>
+            </div>
+            <div style="margin-top:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
+              <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:8px;">☁️ Sincronizar entre dispositivos</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="camp-btn" style="background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;font-size:12px" onclick="campSyncGuardar()">☁️ Guardar en nube</button>
+                <button class="camp-btn" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;font-size:12px" onclick="campSyncCargar()">📥 Cargar desde nube</button>
+              </div>
+              <div style="font-size:11px;color:#6b7280;margin-top:6px;">Guarda el progreso en el servidor para acceder desde cualquier dispositivo</div>
             </div>
           </div>
           <div class="camp-card">
@@ -4573,6 +4597,80 @@ function campResetearEnvio(){
   campLog('🔄 Progreso reseteado','info');
 }
 
+/* ── SYNC EN NUBE (Google Sheets via Apps Script) ── */
+var _campSyncTimer = null;
+
+function campSyncGuardar(){
+  campLog('Guardando en nube...','info');
+  var payload = {
+    accion: 'sync_campana_save',
+    data: JSON.stringify({
+      contactos: _campContactos,
+      cuentas: _campCuentas,
+      asuntos: _campAsuntos,
+      enviados: _campEnviados,
+      idx: _campIdx,
+      fecha: _campFechaHoy,
+      ts: Date.now()
+    })
+  };
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: {'Content-Type': 'text/plain'},
+    keepalive: true
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.ok !== false){
+      campLog('Campaña guardada en la nube (' + _campContactos.length + ' contactos, indice ' + _campIdx + ')','ok');
+      showToast('Guardado en nube correctamente','success');
+    } else {
+      campLog('Error al guardar: ' + (res.error||res.msg||'desconocido'),'err');
+    }
+  }).catch(function(e){ campLog('Error de red al guardar: '+e.message,'err'); });
+}
+
+function campSyncCargar(){
+  campLog('Cargando desde nube...','info');
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ accion: 'sync_campana_load' }),
+    headers: {'Content-Type': 'text/plain'},
+    keepalive: true
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.ok !== false && res.data){
+      var d = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+      if(d.contactos && d.contactos.length > 0){
+        _campContactos = d.contactos;
+        _campCuentas   = d.cuentas   || _campCuentas;
+        _campIdx       = d.idx       || 0;
+        _campEnviados  = d.enviados  || 0;
+        _campFechaHoy  = d.fecha     || '';
+        var savedAsuntos = d.asuntos || [];
+        var tieneEmojis = savedAsuntos.some(function(a){ return /[\u{1F000}-\u{1FFFF}]|[☀-➿]/u.test(a); });
+        if(savedAsuntos.length > 0 && !tieneEmojis) _campAsuntos = savedAsuntos;
+        campGuardar();
+        campRenderTablaContactos();
+        campActualizarStats();
+        campLog('Cargados ' + _campContactos.length + ' contactos desde la nube (indice ' + _campIdx + ')','ok');
+        showToast('Base de datos sincronizada: ' + _campContactos.length + ' contactos','success');
+      } else {
+        campLog('No hay datos guardados en la nube todavia','info');
+        showToast('No hay datos en la nube aun — guarda primero desde el PC','info');
+      }
+    } else {
+      campLog('Sin datos en nube o error: ' + (res&&res.error||'sin respuesta'),'err');
+    }
+  }).catch(function(e){ campLog('Error de red al cargar: '+e.message,'err'); });
+}
+
+// Auto-sync cada 10 envíos
+function campAutoSync(){
+  if(_campIdx > 0 && _campIdx % 10 === 0){
+    clearTimeout(_campSyncTimer);
+    _campSyncTimer = setTimeout(campSyncGuardar, 2000);
+  }
+}
+
 function campEnviarSiguiente(){
   if(_campPausado) return;
   if(_campIdx >= _campContactos.length){
@@ -4634,6 +4732,7 @@ function campEnviarSiguiente(){
     _campIdx++;
     campGuardar(); campActualizarStats();
     campRenderTablaContactos(_campFiltroActual);
+    campAutoSync();
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });
 }
