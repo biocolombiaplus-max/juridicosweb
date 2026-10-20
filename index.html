@@ -1558,7 +1558,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <label for="dd-correo" style="font-size:0.75rem;font-weight:700;color:#374151;">Correo electrónico *</label>
               <span style="margin-left:auto;font-size:0.65rem;color:#5b21b6;background:#f5f3ff;padding:2px 7px;border-radius:10px;">Respuesta de la Secretaría</span>
             </div>
-            <input id="dd-correo" type="email" placeholder="tu@correo.com" autocomplete="email" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed';this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+            <input id="dd-correo" type="email" placeholder="tu@correo.com" autocomplete="email" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed';this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.1)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'" oninput="validarConfirmEmail()">
+            <div style="margin-top:8px;">
+              <label style="font-size:0.72rem;color:#6b7280;font-weight:700;display:block;margin-bottom:4px;">✉️ Confirmar correo electrónico</label>
+              <input id="dd-correo-confirm" type="email" placeholder="Repite tu correo aquí" autocomplete="off" style="width:100%;padding:13px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.92rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed';this.style.boxShadow='0 0 0 3px rgba(124,58,237,0.1)'" onblur="validarConfirmEmail()" oninput="validarConfirmEmail()">
+              <div id="dd-correo-confirm-msg" style="font-size:0.72rem;margin-top:5px;display:none;padding:5px 9px;border-radius:7px;font-weight:600;"></div>
+            </div>
           </div>
         </div>
 
@@ -2896,6 +2901,21 @@ function irADatosDoc(){
   goToStepNombre('sp-datos-doc');
 }
 
+function validarConfirmEmail(){
+  var c1 = (document.getElementById('dd-correo')||{}).value || '';
+  var c2 = (document.getElementById('dd-correo-confirm')||{}).value || '';
+  var msgEl = document.getElementById('dd-correo-confirm-msg');
+  var inEl  = document.getElementById('dd-correo-confirm');
+  if(!c2) { if(msgEl) msgEl.style.display='none'; return; }
+  if(c1.trim().toLowerCase() === c2.trim().toLowerCase()){
+    if(msgEl){ msgEl.style.display='block'; msgEl.style.background='#f0fdf4'; msgEl.style.color='#16a34a'; msgEl.textContent='✅ Los correos coinciden'; }
+    if(inEl)  inEl.style.borderColor='#22c55e';
+  } else {
+    if(msgEl){ msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626'; msgEl.textContent='❌ Los correos no coinciden'; }
+    if(inEl)  inEl.style.borderColor='#ef4444';
+  }
+}
+
 function generarDocPreview(){
   var nombre  = document.getElementById('dd-nombre').value.trim();
   var wa      = document.getElementById('dd-whatsapp').value.trim();
@@ -2911,6 +2931,21 @@ function generarDocPreview(){
   if(!nombre){ marcaError('dd-nombre','⚠️ Escribe tu nombre completo'); return; }
   if(!wa || wa.length < 10){ marcaError('dd-whatsapp','⚠️ 10 dígitos, ej: 3001234567'); return; }
   if(!correo || !correo.includes('@')){ marcaError('dd-correo','⚠️ Correo inválido'); return; }
+  var correoConfirm = (document.getElementById('dd-correo-confirm')||{}).value || '';
+  correoConfirm = correoConfirm.trim();
+  if(correoConfirm && correoConfirm.toLowerCase() !== correo.toLowerCase()){
+    marcaError('dd-correo-confirm','⚠️ Los correos no coinciden');
+    var msgEl = document.getElementById('dd-correo-confirm-msg');
+    if(msgEl){ msgEl.style.display='block'; msgEl.style.background='#fef2f2'; msgEl.style.color='#dc2626'; msgEl.textContent='❌ Los correos no coinciden. Revisa y corrige.'; }
+    return;
+  }
+  if(!correoConfirm){
+    var msgEl2 = document.getElementById('dd-correo-confirm-msg');
+    if(msgEl2){ msgEl2.style.display='block'; msgEl2.style.background='#fef2f2'; msgEl2.style.color='#dc2626'; msgEl2.textContent='⚠️ Confirma tu correo antes de continuar.'; }
+    var cfEl = document.getElementById('dd-correo-confirm');
+    if(cfEl){ cfEl.style.borderColor='#ef4444'; cfEl.focus(); setTimeout(function(){ cfEl.style.borderColor='#e2e8f0'; },3000); }
+    return;
+  }
   _nombreConsultante = nombre;
   _waConsultante     = wa;
   _correoConsultante = correo;

@@ -1171,6 +1171,39 @@ tr:hover td{background:#f8faff;cursor:pointer}
 </div>
 
 <!-- ══════════════════════════════════════════════ -->
+<!-- MODAL CORREO REMARKETING PREMIUM -->
+<div id="modal-correo-rmk" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.25);display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:20px 20px 0 0;padding:22px 24px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:1rem;font-weight:900;color:#fff;">📧 Correo de Reenganche Premium</div>
+        <div id="rmk-modal-etapa" style="font-size:0.72rem;color:rgba(255,255,255,0.75);margin-top:3px;"></div>
+      </div>
+      <button onclick="cerrarModalCorreoRmk()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Para (Email):</label>
+        <input id="rmk-modal-email" type="email" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:0.88rem;box-sizing:border-box;outline:none;font-family:inherit;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Asunto:</label>
+        <input id="rmk-modal-asunto" type="text" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:0.88rem;box-sizing:border-box;outline:none;font-family:inherit;">
+      </div>
+      <div>
+        <label style="font-size:0.72rem;font-weight:700;color:#374151;display:block;margin-bottom:4px;">Vista previa del correo:</label>
+        <iframe id="rmk-modal-preview" sandbox="allow-same-origin" style="width:100%;height:340px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;"></iframe>
+      </div>
+      <textarea id="rmk-modal-html" style="display:none;"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
+        <button id="btn-copiar-html-rmk" onclick="rmkCopiarHtml()" style="flex:1;min-width:140px;padding:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;color:#374151;">📋 Copiar HTML</button>
+        <button onclick="rmkAbrirGmail()" style="flex:2;min-width:180px;padding:12px;background:linear-gradient(135deg,#ea4335,#c62828);border:none;border-radius:10px;font-size:0.88rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(234,67,53,0.3);">📨 Abrir en Gmail →</button>
+      </div>
+      <p style="font-size:0.68rem;color:#94a3b8;margin:0;text-align:center;">Al abrir Gmail, el HTML se copia automáticamente al portapapeles. Pégalo en el cuerpo del correo (Ctrl+V).</p>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL COMPLETAR MULTAS (para firma sin llenar nada) -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-multas">
@@ -2306,8 +2339,7 @@ function buildAcciones(row, estado){
     // con la plantilla de remarketing (gatillos de venta + link a WhatsApp).
     // A los demás (ya pagaron, en trámite, etc.) el correo abre en blanco.
     if(estado==='pendiente'){
-      var correoRmk = construirCorreoRemarketing(row);
-      html += '<a href="'+gmailComponerUrl(row['Email'], correoRmk.asunto, correoRmk.cuerpo)+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo de reenganche</a>';
+      html += '<button onclick="abrirModalCorreoRmk(this.dataset.row)" data-row=\''+JSON.stringify(row).replace(/'/g,"&#39;")+'\' class="btn btn-outline btn-sm">📧 Correo de reenganche</button>';
     } else {
       html += '<a href="'+gmailComponerUrl(row['Email'])+'" target="_blank" class="btn btn-outline btn-sm">📧 Correo</a>';
     }
@@ -2489,30 +2521,135 @@ function gmailComponerUrl(email, asunto, cuerpo){
 
 var WHATSAPP_DESPACHO = '573159318400';
 
-// Correo de remarketing para leads que llenaron el formulario pero no
-// pagaron — usa gatillos de psicología de ventas (pérdida, ancla de precio,
-// urgencia, prueba social, honestidad) y termina en un enlace directo a
-// WhatsApp para reenganchar la conversación de inmediato.
+// ── Stage-aware remarketing email ─────────────────────────────────────────
+// Detecta el estado del trámite y adapta asunto, botón CTA y mensaje
+// para máximo impacto emocional y tasa de clic.
+function _rmkEtapa(row){
+  var firmado  = row['Autorizar']==='TRUE'||row['Autorizar']===true;
+  var pagoOk   = row['Pago OK']==='TRUE'||row['Pago OK']===true;
+  var tieneDatos = !!(row['Placa']||row['Cédula']);
+  if(firmado && !pagoOk) return 'pago';    // firmó pero no pagó
+  if(!firmado && tieneDatos) return 'firma'; // tiene datos pero no firmó
+  return 'consulta';                         // solo dejó el correo
+}
+
 function construirCorreoRemarketing(row){
-  var nombre = row['Nombres'] || 'Hola';
-  var placaTxt = row['Placa'] ? ' de tu vehículo placa '+row['Placa'] : '';
-  var msgWa = encodeURIComponent('Hola, soy '+(row['Nombres']||'')+'. Quiero activar mi trámite para eliminar mi multa — vi el correo de JurídicosWeb.');
-  var linkWa = 'https://wa.me/'+WHATSAPP_DESPACHO+'?text='+msgWa;
+  var nombre   = (row['Nombres']||'').trim() || 'Hola';
+  var placa    = (row['Placa']||'').toUpperCase();
+  var etapa    = _rmkEtapa(row);
+  var msgWa    = encodeURIComponent('Hola, soy '+nombre+'. Vi el correo de JurídicosWeb y quiero continuar con mi trámite.');
+  var linkWa   = 'https://wa.me/'+WHATSAPP_DESPACHO+'?text='+msgWa;
+  var linkPago = 'https://juridicosweb.com/#pagar';
+  var linkFirma= 'https://juridicosweb.com/#firmar';
+  var linkMain = 'https://juridicosweb.com/';
 
-  var asunto = '🚨 '+nombre+', tu multa sigue activa — actívala hoy por $45.000';
-  var cuerpo =
-    'Hola '+nombre+',\n\n'+
-    'Vimos que empezaste tu trámite para eliminar tu multa'+placaTxt+' en JurídicosWeb, pero no alcanzaste a completarlo.\n\n'+
-    'Mientras tanto, tu multa sigue activa en el SIMIT — y si ya está en cobro coactivo, sigue generando intereses cada día que pasa.\n\n'+
-    'La buena noticia: según lo que ya revisamos, tu caso SÍ aplica para eliminación. Hoy la puedes activar por solo $45.000, pago único, sin letra pequeña ni sorpresas después.\n\n'+
-    'Ya son cientos los conductores en Colombia que eliminaron sus multas con este mismo proceso — 100% verificado en el SIMIT oficial, con resultado real, no una promesa.\n\n'+
-    'Entre más esperes, más riesgo de que cambien las condiciones de tu caso. Escríbenos ahora mismo y en minutos activamos tu trámite:\n\n'+
-    linkWa+'\n\n'+
-    'Cualquier duda, respóndenos este correo.\n\n'+
-    'JurídicosWeb.com\n'+
-    'Bufete Experto en Derecho de Tránsito';
+  var asunto, btnColor, btnText, btnLink, hero, sub, cuerpo1, cuerpo2;
 
-  return { asunto: asunto, cuerpo: cuerpo };
+  if(etapa==='pago'){
+    asunto   = '⚠️ '+nombre+', quedaste a UN paso — tu trámite ya está listo para pagar';
+    btnColor = '#16a34a'; btnText = '💳 Completar mi pago ahora →'; btnLink = linkPago;
+    hero     = '¡Tu documento ya está firmado!';
+    sub      = 'Solo falta el pago para que tu multa quede eliminada en el SIMIT.';
+    cuerpo1  = 'Hola <strong>'+nombre+'</strong>, completaste la parte más difícil: ya firmaste la autorización para tu trámite'+( placa ? ' (placa <strong>'+placa+'</strong>)':'')+'. <br><br>El documento está listo. Solo necesitas confirmar el pago de <strong>$45.000</strong> para que lo radicamos hoy mismo ante la Secretaría de Tránsito.';
+    cuerpo2  = 'Mientras no lo completes, la multa sigue activa y puede acumular intereses de mora. No pierdas el trabajo que ya hiciste.';
+  } else if(etapa==='firma'){
+    asunto   = '✍️ '+nombre+', tu trámite te espera — firma en 2 minutos y elimina tu multa';
+    btnColor = '#7c3aed'; btnText = '✍️ Firmar mi autorización →'; btnLink = linkFirma;
+    hero     = 'Tu multa ya tiene solución — solo falta tu firma';
+    sub      = 'El proceso está casi listo. Solo necesitas autorizar el trámite.';
+    cuerpo1  = 'Hola <strong>'+nombre+'</strong>, ya verificamos tus datos'+( placa ? ' para la placa <strong>'+placa+'</strong>':'')+' y tu caso <strong>SÍ aplica</strong> para eliminación de multa. <br><br>Solo falta que firmes la autorización digital — tarda menos de 2 minutos, desde tu celular, sin impresoras ni trámites físicos.';
+    cuerpo2  = 'Por solo <strong>$45.000</strong> (pago único, sin sorpresas) radicamos el Derecho de Petición ante la Secretaría y en 15 días hábiles tu multa desaparece del SIMIT.';
+  } else {
+    asunto   = '🚨 '+nombre+', tu multa sigue activa — mírala en el SIMIT ahora';
+    btnColor = '#dc2626'; btnText = '🔍 Ver mi caso y eliminarlo →'; btnLink = linkMain;
+    hero     = 'Tu multa sigue corriendo intereses';
+    sub      = 'Cada día que pasa la multa puede aumentar en cobro coactivo.';
+    cuerpo1  = 'Hola <strong>'+nombre+'</strong>, te escribimos porque consultaste tus multas en JurídicosWeb y notamos que todavía aparecen activas en el SIMIT. <br><br>Las multas en cobro coactivo pueden incrementar su valor y bloquearte trámites como el SOAT o la revisión técnico-mecánica.';
+    cuerpo2  = 'La buena noticia: podemos eliminarlas mediante un Derecho de Petición oficial — <strong>100% legal, $45.000 por multa, resultado verificable en el SIMIT</strong>. Sin promesas vacías.';
+  }
+
+  var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JurídicosWeb</title></head><body style="margin:0;padding:0;background:#f1f5f9;font-family:\'Segoe UI\',Arial,sans-serif;">'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0;">'
+    +'<tr><td align="center">'
+    +'<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,0.10);max-width:96vw;">'
+    // Header
+    +'<tr><td style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 100%);padding:36px 40px 28px;text-align:center;">'
+    +'<div style="font-size:28px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;">⚖️ JurídicosWeb</div>'
+    +'<div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px;font-weight:500;">Derecho de Tránsito · Colombia</div>'
+    +'</td></tr>'
+    // Hero
+    +'<tr><td style="padding:36px 40px 0;">'
+    +'<h1 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#1e3a5f;line-height:1.25;">'+hero+'</h1>'
+    +'<p style="margin:0 0 24px;font-size:15px;color:#64748b;line-height:1.5;">'+sub+'</p>'
+    +'<p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">'+cuerpo1+'</p>'
+    +'<p style="margin:0 0 28px;font-size:15px;color:#334155;line-height:1.7;">'+cuerpo2+'</p>'
+    // CTA button
+    +'<div style="text-align:center;margin:0 0 32px;">'
+    +'<a href="'+btnLink+'" target="_blank" style="display:inline-block;background:'+btnColor+';color:#ffffff;text-decoration:none;font-size:16px;font-weight:800;padding:18px 38px;border-radius:50px;box-shadow:0 6px 24px rgba(0,0,0,0.18);letter-spacing:0.2px;">'+btnText+'</a>'
+    +'</div>'
+    // Social proof bar
+    +'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 22px;margin-bottom:28px;display:flex;align-items:center;gap:16px;">'
+    +'<div style="font-size:30px;">🏆</div>'
+    +'<div><div style="font-size:14px;font-weight:800;color:#1e3a5f;">+850 multas eliminadas en Colombia</div><div style="font-size:12px;color:#64748b;margin-top:2px;">Resultado verificable en el SIMIT oficial · 100% legal · Art. 23 C.P.</div></div>'
+    +'</div>'
+    +'</td></tr>'
+    // Separator + WhatsApp
+    +'<tr><td style="padding:0 40px 36px;">'
+    +'<hr style="border:none;border-top:1px solid #e2e8f0;margin-bottom:24px;">'
+    +'<p style="margin:0 0 12px;font-size:13px;color:#94a3b8;text-align:center;">¿Prefieres hablar con un asesor?</p>'
+    +'<div style="text-align:center;">'
+    +'<a href="'+linkWa+'" target="_blank" style="display:inline-block;background:#25d366;color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 28px;border-radius:50px;box-shadow:0 4px 16px rgba(37,211,102,0.3);">💬 Escribir por WhatsApp</a>'
+    +'</div>'
+    +'</td></tr>'
+    // Footer
+    +'<tr><td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center;">'
+    +'<div style="font-size:12px;color:#94a3b8;line-height:1.7;">JurídicosWeb.com · Bufete Experto en Derecho de Tránsito, Colombia<br>'
+    +'Si no deseas recibir más correos, responde con "no más correos" y te retiramos de inmediato.</div>'
+    +'</td></tr>'
+    +'</table>'
+    +'</td></tr></table>'
+    +'</body></html>';
+
+  return { asunto: asunto, cuerpo: '', html: html };
+}
+
+// Abre modal para previsualizar/editar/copiar el correo antes de abrir Gmail
+function abrirModalCorreoRmk(rowJson){
+  var row;
+  try{ row = JSON.parse(rowJson); }catch(e){ return; }
+  var email = row['Email']||'';
+  var data  = construirCorreoRemarketing(row);
+  document.getElementById('rmk-modal-email').value  = email;
+  document.getElementById('rmk-modal-asunto').value = data.asunto;
+  document.getElementById('rmk-modal-html').value   = data.html;
+  document.getElementById('rmk-modal-preview').srcdoc = data.html;
+  document.getElementById('modal-correo-rmk').style.display = 'flex';
+  document.getElementById('rmk-modal-etapa').textContent = ({pago:'Pendiente de pago',firma:'Pendiente de firma',consulta:'Solo consulta'})[_rmkEtapa(row)]||'';
+}
+
+function cerrarModalCorreoRmk(){
+  document.getElementById('modal-correo-rmk').style.display='none';
+}
+
+function rmkAbrirGmail(){
+  var email  = document.getElementById('rmk-modal-email').value.trim();
+  var asunto = document.getElementById('rmk-modal-asunto').value.trim();
+  var html   = document.getElementById('rmk-modal-html').value;
+  if(!email){ alert('Email vacío'); return; }
+  // Gmail compose con asunto; body HTML se copia al clipboard para pegar
+  navigator.clipboard.writeText(html).then(function(){
+    alert('✅ Cuerpo HTML copiado al portapapeles.\nEn Gmail: pega en el cuerpo del correo (Ctrl+V / Cmd+V).\n\nAbriendo Gmail ahora...');
+  }).catch(function(){});
+  window.open(gmailComponerUrl(email, asunto, ''), '_blank');
+}
+
+function rmkCopiarHtml(){
+  var html = document.getElementById('rmk-modal-html').value;
+  navigator.clipboard.writeText(html).then(function(){
+    var btn = document.getElementById('btn-copiar-html-rmk');
+    var orig = btn.textContent;
+    btn.textContent='✅ Copiado'; setTimeout(function(){ btn.textContent=orig; },2000);
+  }).catch(function(){ alert('No se pudo copiar. Selecciona el texto manualmente.'); });
 }
 
 function copiarEnlace(url, btn){
