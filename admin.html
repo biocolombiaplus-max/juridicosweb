@@ -4542,39 +4542,49 @@ function campEnviarSiguiente(){
   var asunto   = _campAsuntos[Math.floor(Math.random()*_campAsuntos.length)];
   var htmlBody = campGenerarHTML(contacto.nombre||contacto.email.split('@')[0]);
 
+  // Personalizar asunto con nombre si está disponible
+  var nombreCorto = (contacto.nombre||'').split(' ')[0].trim();
+  var asuntoFinal = nombreCorto
+    ? asunto.replace(/^(🚨|⚠️|🔴|❗)\s*/,'$& '+nombreCorto+', ')
+    : asunto;
+
   var payload = {
-    _accion: 'enviar_correo_campana',
+    accion: 'enviar_correo',   // ← corregido: sin guion bajo
     email: contacto.email,
-    nombre: contacto.nombre||'',
-    asunto: asunto,
+    nombre: contacto.nombre || '',
+    asunto: asuntoFinal,
     cuenta: cuenta.email,
     nombreRemitente: cuenta.nombre || 'Jurídicos Web',
-    htmlBody: htmlBody
+    html: htmlBody             // ← Apps Script usa 'html', no 'htmlBody'
   };
 
-  campLog('📤 Enviando a '+contacto.email+' desde '+cuenta.email,'info');
+  campLog('📤 Enviando a '+contacto.email+(nombreCorto?' ('+nombreCorto+')':'')+' desde '+cuenta.email,'info');
 
   fetch(SCRIPT_URL, {
-    method:'POST',
+    method: 'POST',
     body: JSON.stringify(payload),
-    headers:{'Content-Type':'text/plain'},
-    keepalive:true
-  }).then(function(r){ return r.json(); }).then(function(res){
+    headers: {'Content-Type': 'text/plain'},
+    keepalive: true
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(res){
     if(res && res.ok !== false){
       _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
-      contacto.enviado = true; // marcar como enviado
+      contacto.enviado = true;
       campLog('✅ Enviado: '+contacto.email,'ok');
     } else {
       _campErrores++;
-      campLog('❌ Error en '+contacto.email+': '+(res&&res.msg||'desconocido'),'err');
+      var motivo = (res&&res.error) || (res&&res.msg) || JSON.stringify(res);
+      campLog('❌ Error en '+contacto.email+': '+motivo,'err');
     }
   }).catch(function(e){
     _campErrores++;
-    campLog('❌ Error de red: '+e.message,'err');
+    campLog('❌ Error de red ('+contacto.email+'): '+e.message,'err');
   }).finally(function(){
     _campIdx++;
     campGuardar(); campActualizarStats();
-    campRenderTablaContactos(_campFiltroActual); // actualizar tabla en tiempo real
+    campRenderTablaContactos(_campFiltroActual);
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });
 }
