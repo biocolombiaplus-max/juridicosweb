@@ -1199,7 +1199,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <button id="btn-copiar-html-rmk" onclick="rmkCopiarHtml()" style="flex:1;min-width:140px;padding:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;color:#374151;">📋 Copiar HTML</button>
         <button onclick="rmkAbrirGmail()" style="flex:2;min-width:180px;padding:12px;background:linear-gradient(135deg,#ea4335,#c62828);border:none;border-radius:10px;font-size:0.88rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(234,67,53,0.3);">📨 Abrir en Gmail →</button>
       </div>
-      <p style="font-size:0.68rem;color:#94a3b8;margin:0;text-align:center;">Al abrir Gmail, el HTML se copia automáticamente al portapapeles. Pégalo en el cuerpo del correo (Ctrl+V).</p>
+      <p style="font-size:0.68rem;color:#94a3b8;margin:0;text-align:center;">Se abre Gmail listo con email y asunto. En el cuerpo del correo haz clic y pega con <strong>Ctrl+V</strong> — el diseño aparece completo.</p>
     </div>
   </div>
 </div>
@@ -2635,21 +2635,48 @@ function rmkAbrirGmail(){
   var email  = document.getElementById('rmk-modal-email').value.trim();
   var asunto = document.getElementById('rmk-modal-asunto').value.trim();
   var html   = document.getElementById('rmk-modal-html').value;
-  if(!email){ alert('Email vacío'); return; }
-  // Gmail compose con asunto; body HTML se copia al clipboard para pegar
-  navigator.clipboard.writeText(html).then(function(){
-    alert('✅ Cuerpo HTML copiado al portapapeles.\nEn Gmail: pega en el cuerpo del correo (Ctrl+V / Cmd+V).\n\nAbriendo Gmail ahora...');
-  }).catch(function(){});
-  window.open(gmailComponerUrl(email, asunto, ''), '_blank');
+  if(!email){ showToast('⚠️ Escribe el email del destinatario','error'); return; }
+  var btn = document.querySelector('#modal-correo-rmk button[onclick="rmkAbrirGmail()"]');
+  var orig = btn ? btn.innerHTML : '';
+  if(btn){ btn.innerHTML='⏳ Copiando...'; btn.disabled=true; }
+  // Copiar como text/html para que Gmail pegue el correo renderizado (no código)
+  var blob = new Blob([html], {type:'text/html'});
+  var item = new ClipboardItem({'text/html': blob});
+  navigator.clipboard.write([item])
+    .then(function(){
+      if(btn){ btn.innerHTML='✅ ¡Copiado! Abriendo Gmail...'; }
+      setTimeout(function(){
+        window.open(gmailComponerUrl(email, asunto, ''), '_blank');
+        showToast('📋 Pega el cuerpo con Ctrl+V en el correo de Gmail','success');
+        if(btn){ btn.innerHTML=orig; btn.disabled=false; }
+      }, 600);
+    })
+    .catch(function(){
+      // Fallback: copiar como texto plano
+      navigator.clipboard.writeText(html).catch(function(){});
+      window.open(gmailComponerUrl(email, asunto, ''), '_blank');
+      showToast('📋 Pega con Ctrl+V en el cuerpo del correo de Gmail','success');
+      if(btn){ btn.innerHTML=orig; btn.disabled=false; }
+    });
 }
 
 function rmkCopiarHtml(){
   var html = document.getElementById('rmk-modal-html').value;
-  navigator.clipboard.writeText(html).then(function(){
-    var btn = document.getElementById('btn-copiar-html-rmk');
-    var orig = btn.textContent;
-    btn.textContent='✅ Copiado'; setTimeout(function(){ btn.textContent=orig; },2000);
-  }).catch(function(){ alert('No se pudo copiar. Selecciona el texto manualmente.'); });
+  var blob = new Blob([html], {type:'text/html'});
+  var item = new ClipboardItem({'text/html': blob});
+  navigator.clipboard.write([item])
+    .then(function(){
+      var btn = document.getElementById('btn-copiar-html-rmk');
+      var orig = btn.textContent;
+      btn.textContent='✅ Copiado como HTML';
+      setTimeout(function(){ btn.textContent=orig; },2500);
+    })
+    .catch(function(){
+      navigator.clipboard.writeText(html).catch(function(){});
+      var btn = document.getElementById('btn-copiar-html-rmk');
+      btn.textContent='✅ Copiado';
+      setTimeout(function(){ btn.textContent='📋 Copiar HTML'; },2000);
+    });
 }
 
 function copiarEnlace(url, btn){
