@@ -781,6 +781,18 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .footer-inner{gap:24px;}
 }
 </style>
+<!-- ePayco checkout precargado al inicio para que el botón abra sin demora -->
+<script>
+(function(){
+  if(document.getElementById('epayco-script')) return;
+  var s=document.createElement('script');
+  s.id='epayco-script';
+  s.async=true;
+  s.src='https://checkout.epayco.co/checkout.js';
+  s.onload=function(){ window._epaycoListo=true; };
+  document.head.appendChild(s);
+})();
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -3205,32 +3217,33 @@ function abrirEpayco(){
     localStorage.setItem('jw_multas_json', JSON.stringify(md));
     localStorage.setItem('jw_num_multas',  md.length);
   }catch(e){}
-  // Si ePayco ya está cargado → abrir directamente (clic sincrónico, sin popup-blocker)
+  var _btn = document.querySelector('[onclick="abrirEpayco()"]');
+  // Si ePayco ya listo → abrir de inmediato
   if(window.ePayco){
     _lanzarEpayco(monto,planDesc);
     return;
   }
-  // Todavía cargando — asegurarse de que el script esté en vuelo
+  // Asegurar que el script esté en vuelo
   _precargarEpayco();
-  var _btn = document.querySelector('[onclick="abrirEpayco()"]');
-  // Esperar máx 6s en polling; NO llamar _lanzarEpayco desde async para evitar popup-blocker
+  // Esperar máx 20s chequeando cada 300ms
+  if(_btn){ _btn.disabled=true; _btn.style.opacity='0.75'; _btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Conectando con ePayco...</span>'; }
   var _t=0;
   var _iv=setInterval(function(){
-    _t+=200;
+    _t+=300;
     if(window.ePayco){
       clearInterval(_iv);
-      if(_btn){
-        _btn.disabled=false; _btn.style.opacity='';
-        _btn.innerHTML='<span style="position:relative;z-index:1;">💳 HAZ CLIC AQUÍ PARA PAGAR →</span>';
-        _btn.style.background='linear-gradient(135deg,#16a34a,#15803d)';
-      }
-    } else if(_t>=6000){
+      if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 HAZ CLIC AQUÍ PARA PAGAR →</span>'; _btn.style.background='linear-gradient(135deg,#16a34a,#15803d)'; }
+    } else if(_t>=20000){
       clearInterval(_iv);
-      if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
-      alert('La pasarela de pago tardó en cargar. Haz clic en el botón de nuevo para intentarlo.');
+      if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.style.background=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
+      // Intentar cargar el script una vez más
+      var old=document.getElementById('epayco-script'); if(old) old.parentNode.removeChild(old);
+      window._epaycoListo=false;
+      var s=document.createElement('script'); s.id='epayco-script'; s.src='https://checkout.epayco.co/checkout.js';
+      s.onload=function(){ window._epaycoListo=true; if(_btn){ _btn.innerHTML='<span style="position:relative;z-index:1;">💳 HAZ CLIC AQUÍ PARA PAGAR →</span>'; _btn.style.background='linear-gradient(135deg,#16a34a,#15803d)'; } };
+      document.head.appendChild(s);
     }
-  },200);
-  if(_btn){ _btn.disabled=true; _btn.style.opacity='0.7'; _btn.innerHTML='<span style="position:relative;z-index:1;">⏳ Cargando pasarela, espera...</span>'; }
+  },300);
 }
 
 function _lanzarEpayco(monto,desc){
