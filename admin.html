@@ -4022,73 +4022,144 @@ function campActualizarStats(){
 /* ── CARGAR ARCHIVO ── */
 function campCargarArchivo(inp){
   var file = inp.files[0];
-  if(!file) return;
+  if(!file){ return; }
+  inp.value = ''; // reset para permitir subir el mismo archivo dos veces
   var ext = file.name.split('.').pop().toLowerCase();
-  if(ext === 'csv'){
+  campLog('📂 Leyendo archivo: '+file.name+' ('+Math.round(file.size/1024)+'KB)','info');
+  if(ext==='csv'||ext==='txt'){
     var reader = new FileReader();
     reader.onload = function(e){ campParsearCSV(e.target.result); };
+    reader.onerror = function(){ campLog('❌ Error leyendo el archivo','err'); };
     reader.readAsText(file, 'UTF-8');
   } else if(ext==='xlsx'||ext==='xls'){
-    if(typeof XLSX === 'undefined'){ campLog('❌ SheetJS no disponible. Usa CSV.','err'); return; }
+    if(typeof XLSX === 'undefined'){
+      campLog('❌ SheetJS no cargado — recarga la página e intenta de nuevo','err'); return;
+    }
     var reader2 = new FileReader();
     reader2.onload = function(e){
-      var wb = XLSX.read(e.target.result, {type:'array'});
-      var ws = wb.Sheets[wb.SheetNames[0]];
-      var rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-      campProcesarFilas(rows);
+      try {
+        var wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, {defval:'', raw:false});
+        campLog('📊 Excel leído: '+rows.length+' filas en hoja "'+wb.SheetNames[0]+'"','info');
+        campProcesarFilas(rows);
+      } catch(ex){ campLog('❌ Error procesando Excel: '+ex.message,'err'); }
     };
+    reader2.onerror = function(){ campLog('❌ Error leyendo Excel','err'); };
     reader2.readAsArrayBuffer(file);
   } else {
-    campLog('❌ Formato no soportado. Usa .csv, .xlsx o .xls','err');
+    campLog('❌ Formato no soportado: .'+ext+' — usa .csv, .xlsx o .xls','err');
   }
 }
 
 function campParsearCSV(text){
+  // Detectar separador automáticamente: ; o , o tab
   var lines = text.split(/\r?\n/).filter(function(l){ return l.trim(); });
-  if(lines.length < 2){ campLog('❌ CSV vacío o sin datos','err'); return; }
-  var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,'').toLowerCase(); });
+  if(lines.length < 1){ campLog('❌ Archivo vacío','err'); return; }
+  var sep = ',';
+  var primera = lines[0];
+  var cntPuntoComa = (primera.match(/;/g)||[]).length;
+  var cntComa      = (primera.match(/,/g)||[]).length;
+  var cntTab       = (primera.match(/\t/g)||[]).length;
+  if(cntPuntoComa >= cntComa && cntPuntoComa >= cntTab) sep = ';';
+  else if(cntTab > cntComa) sep = '\t';
+  campLog('📋 Separador detectado: "'+sep+'" · '+lines.length+' filas','info');
+
+  function splitLine(line){
+    // Respetar campos entre comillas que pueden contener el separador
+    var result=[], field='', inQuotes=false;
+    for(var i=0;i<line.length;i++){
+      var ch=line[i];
+      if(ch==='"'){ inQuotes=!inQuotes; }
+      else if(ch===sep && !inQuotes){ result.push(field.trim()); field=''; }
+      else { field+=ch; }
+    }
+    result.push(field.trim());
+    return result;
+  }
+
+  // Si solo hay 1 columna por fila, podría ser que el archivo no tiene encabezado
+  // o que la 1ª línea es solo emails — manejarlo como lista de emails directa
+  var headers = splitLine(lines[0]).map(function(h){ return h.replace(/"/g,'').trim().toLowerCase(); });
+  var sinEncabezado = headers.length===1 && headers[0].includes('@');
+  if(sinEncabezado){
+    // Archivo de solo emails, sin encabezado
+    campLog('ℹ️ Detectada lista de emails sin encabezado','info');
+    var rows = lines.map(function(l){ return {email: l.replace(/"/g,'').trim().toLowerCase()}; });
+    return campProcesarFilas(rows);
+  }
+
   var rows = [];
   for(var i=1;i<lines.length;i++){
-    var cols = lines[i].split(',').map(function(c){ return c.trim().replace(/^"|"$/g,''); });
+    if(!lines[i].trim()) continue;
+    var cols = splitLine(lines[i]);
     var obj = {};
-    headers.forEach(function(h,j){ obj[h] = cols[j]||''; });
+    headers.forEach(function(h,j){ obj[h] = (cols[j]||'').replace(/^"|"$/g,'').trim(); });
     rows.push(obj);
   }
   campProcesarFilas(rows);
 }
 
 function campProcesarFilas(rows){
-  var emailKeys = ['email','correo','e-mail','mail'];
-  var nombreKeys = ['nombre','name','nombres','cliente'];
-  var telKeys = ['telefono','celular','tel','phone','whatsapp'];
-  var emailKey='', nombreKey='', telKey='';
-  if(rows.length > 0){
-    var k = Object.keys(rows[0]).map(function(k){ return k.toLowerCase(); });
-    emailKey  = emailKeys.find(function(e){ return k.includes(e); }) || k.find(function(k){ return k.includes('mail'); }) || '';
-    nombreKey = nombreKeys.find(function(e){ return k.includes(e); }) || '';
-    telKey    = telKeys.find(function(e){ return k.includes(e); }) || '';
+  if(!rows||rows.length===0){ campLog('⚠️ No se encontraron filas en el archivo','err'); return; }
+  // Detectar columnas flexiblemente (insensible a mayúsculas, tildes, espacios)
+  function norm(s){ return (s||'').toLowerCase().replace(/[áà]/g,'a').replace(/[é]/g,'e').replace(/[í]/g,'i').replace(/[ó]/g,'o').replace(/[ú]/g,'u').replace(/\s/g,''); }
+  var sampleKeys = Object.keys(rows[0]).map(norm);
+  campLog('📋 Columnas detectadas: '+Object.keys(rows[0]).join(' | '),'info');
+
+  function findKey(arr, aliases){
+    for(var a=0;a<aliases.length;a++){
+      var idx = sampleKeys.indexOf(aliases[a]);
+      if(idx>=0) return Object.keys(rows[0])[idx];
+    }
+    // Búsqueda parcial
+    for(var a=0;a<aliases.length;a++){
+      for(var k=0;k<sampleKeys.length;k++){
+        if(sampleKeys[k].includes(aliases[a])) return Object.keys(rows[0])[k];
+      }
+    }
+    return '';
   }
-  var nuevos = [], dups = 0;
-  var existing = _campContactos.map(function(c){ return (c.email||'').toLowerCase(); });
+
+  var emailKey  = findKey(rows[0],['email','correo','mail','e-mail','emailaddress','correoelectronico']);
+  var nombreKey = findKey(rows[0],['nombre','name','nombres','cliente','contacto','firstname','primernombre']);
+  var telKey    = findKey(rows[0],['telefono','celular','tel','phone','whatsapp','movil','mobile','cel']);
+
+  if(!emailKey){
+    // Último intento: buscar cualquier campo que tenga un @ en la primera fila
+    emailKey = Object.keys(rows[0]).find(function(k){ return (rows[0][k]||'').includes('@'); }) || '';
+  }
+  if(!emailKey){ campLog('❌ No se encontró columna de Email. Columnas: '+Object.keys(rows[0]).join(', '),'err'); return; }
+
+  var nuevos=[], dups=0, invalidos=0;
+  var existing = _campContactos.map(function(c){ return (c.email||'').toLowerCase().trim(); });
+
   rows.forEach(function(r){
-    var keys = Object.keys(r).map(function(k){ return k.toLowerCase(); });
-    var realEmailKey = Object.keys(r).find(function(k){ return k.toLowerCase()===emailKey; }) || Object.keys(r).find(function(k){ return k.toLowerCase().includes('mail'); }) || '';
-    var email = (r[realEmailKey]||'').trim().toLowerCase();
-    if(!email || !email.includes('@') || !email.includes('.')) return;
+    var email = (r[emailKey]||'').trim().toLowerCase().replace(/\s/g,'');
+    if(!email){ invalidos++; return; }
+    if(!email.includes('@') || !email.includes('.')){ invalidos++; return; }
     if(existing.includes(email)){ dups++; return; }
-    var realNombreKey = Object.keys(r).find(function(k){ return k.toLowerCase()===nombreKey; }) || '';
-    var realTelKey    = Object.keys(r).find(function(k){ return k.toLowerCase()===telKey; }) || '';
-    nuevos.push({email:email, nombre:(r[realNombreKey]||'').trim(), telefono:(r[realTelKey]||'').trim(), enviado:false});
+    var nombre = nombreKey ? (r[nombreKey]||'').trim() : '';
+    var tel    = telKey    ? (r[telKey]||'').trim()    : '';
+    nuevos.push({email:email, nombre:nombre, telefono:tel, enviado:false});
     existing.push(email);
   });
+
   _campContactos = _campContactos.concat(nuevos);
   campGuardar();
-  campRenderTablaContactos();
+  campRenderTablaContactos(_campFiltroActual||'todos');
   campActualizarStats();
   var msg = '✅ '+nuevos.length+' contactos importados';
-  if(dups > 0) msg += ' · '+dups+' duplicados omitidos';
-  campLog(msg, 'ok');
+  if(dups>0)      msg += ' · '+dups+' duplicados omitidos';
+  if(invalidos>0) msg += ' · '+invalidos+' emails inválidos omitidos';
+  campLog(msg,'ok');
+  showToast(msg,'success');
+  // Cambiar a pestaña Enviar si hay contactos
+  if(nuevos.length>0) setTimeout(function(){ campTab('contactos'); },300);
 }
+
+var _campFiltroActual = 'todos';
+var _campBusqueda = '';
 
 function campRenderTablaContactos(filtro){
   var preview = document.getElementById('camp-contactos-preview');
@@ -4097,60 +4168,99 @@ function campRenderTablaContactos(filtro){
   if(!preview||!info||!table) return;
   if(_campContactos.length === 0){ preview.style.display='none'; return; }
   preview.style.display = 'block';
+  if(filtro!==undefined) _campFiltroActual = filtro;
 
-  var enviados  = _campContactos.filter(function(c){ return c.enviado; }).length;
+  var enviados   = _campContactos.filter(function(c){ return c.enviado; }).length;
   var pendientes = _campContactos.length - enviados;
   var pct = _campContactos.length ? Math.round(enviados/_campContactos.length*100) : 0;
+  var busq = _campBusqueda.toLowerCase().trim();
 
-  // Barra de progreso + resumen
+  // ── Header: stats + filtros + buscador ──
   info.innerHTML =
+    // Fila 1: stats
     '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">'
-    +'<div><span style="font-size:15px;font-weight:800;color:#111827">'+_campContactos.length+' contactos</span>'
-    +' <span style="font-size:12px;color:#6b7280;margin-left:6px">— '+enviados+' enviados · '+pendientes+' pendientes</span></div>'
-    +'<div style="display:flex;gap:6px">'
-    +'<button onclick="campFiltrarTabla(\'todos\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+((!filtro||filtro==='todos')?'#1d4ed8':'#d1d5db')+';background:'+((!filtro||filtro==='todos')?'#1d4ed8':'#fff')+';color:'+((!filtro||filtro==='todos')?'#fff':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Todos</button>'
-    +'<button onclick="campFiltrarTabla(\'pendientes\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+(filtro==='pendientes'?'#d97706':'#d1d5db')+';background:'+(filtro==='pendientes'?'#fef3c7':'#fff')+';color:'+(filtro==='pendientes'?'#92400e':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Pendientes</button>'
-    +'<button onclick="campFiltrarTabla(\'enviados\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+(filtro==='enviados'?'#16a34a':'#d1d5db')+';background:'+(filtro==='enviados'?'#f0fdf4':'#fff')+';color:'+(filtro==='enviados'?'#15803d':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Enviados</button>'
+    +'<div>'
+    +'<span style="font-size:15px;font-weight:800;color:#111827">'+_campContactos.length.toLocaleString('es')+' contactos</span>'
+    +'<span style="font-size:12px;color:#6b7280;margin-left:10px">✓ '+enviados+' enviados</span>'
+    +'<span style="font-size:12px;color:#d97706;margin-left:8px">⏳ '+pendientes+' pendientes</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +'<button onclick="campFiltrarTabla(\'todos\')" style="padding:5px 14px;border-radius:20px;border:1.5px solid '+(_campFiltroActual==='todos'?'#1d4ed8':'#d1d5db')+';background:'+(_campFiltroActual==='todos'?'#1d4ed8':'#fff')+';color:'+(_campFiltroActual==='todos'?'#fff':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Todos</button>'
+    +'<button onclick="campFiltrarTabla(\'pendientes\')" style="padding:5px 14px;border-radius:20px;border:1.5px solid '+(_campFiltroActual==='pendientes'?'#d97706':'#d1d5db')+';background:'+(_campFiltroActual==='pendientes'?'#fef3c7':'#fff')+';color:'+(_campFiltroActual==='pendientes'?'#92400e':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Pendientes</button>'
+    +'<button onclick="campFiltrarTabla(\'enviados\')" style="padding:5px 14px;border-radius:20px;border:1.5px solid '+(_campFiltroActual==='enviados'?'#16a34a':'#d1d5db')+';background:'+(_campFiltroActual==='enviados'?'#f0fdf4':'#fff')+';color:'+(_campFiltroActual==='enviados'?'#15803d':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Enviados</button>'
     +'</div></div>'
-    +'<div style="background:#e5e7eb;border-radius:99px;height:6px;margin-bottom:10px">'
-    +'<div style="background:linear-gradient(90deg,#16a34a,#22c55e);height:6px;border-radius:99px;width:'+pct+'%;transition:width .4s"></div></div>';
+    // Barra progreso
+    +'<div style="background:#e5e7eb;border-radius:99px;height:5px;margin-bottom:10px">'
+    +'<div style="background:linear-gradient(90deg,#16a34a,#22c55e);height:5px;border-radius:99px;width:'+pct+'%;transition:width .5s"></div></div>'
+    // Buscador
+    +'<div style="position:relative;margin-bottom:8px">'
+    +'<input id="camp-busqueda" type="text" placeholder="🔍 Buscar por email, nombre o teléfono..." value="'+busq.replace(/"/g,'&quot;')+'"'
+    +' oninput="_campBusqueda=this.value;campRenderTablaContactos()"'
+    +' style="width:100%;padding:9px 12px 9px 36px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;box-sizing:border-box;outline:none;font-family:inherit">'
+    +'<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:14px">🔍</span>'
+    +(busq?'<button onclick="_campBusqueda=\'\';campRenderTablaContactos()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:16px">✕</button>':'')
+    +'</div>';
 
-  // Filtrar lista
+  // ── Filtrar lista ──
   var lista = _campContactos;
-  if(filtro==='enviados') lista = lista.filter(function(c){ return c.enviado; });
-  if(filtro==='pendientes') lista = lista.filter(function(c){ return !c.enviado; });
+  if(_campFiltroActual==='enviados')  lista = lista.filter(function(c){ return c.enviado; });
+  if(_campFiltroActual==='pendientes') lista = lista.filter(function(c){ return !c.enviado; });
+  if(busq){
+    lista = lista.filter(function(c){
+      return (c.email||'').toLowerCase().includes(busq)
+          || (c.nombre||'').toLowerCase().includes(busq)
+          || (c.telefono||'').toLowerCase().includes(busq);
+    });
+  }
 
-  var max = Math.min(lista.length, 200);
-  var html = '<thead><tr style="background:#f1f5f9;position:sticky;top:0">'
-    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">#</th>'
-    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Email</th>'
-    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Nombre</th>'
-    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Tel</th>'
-    +'<th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Estado</th>'
+  var max = Math.min(lista.length, 300);
+  var html = '<thead><tr style="background:#f1f5f9;position:sticky;top:0;z-index:1">'
+    +'<th style="padding:8px 8px 8px 12px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">#</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Email</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Nombre</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Teléfono</th>'
+    +'<th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Estado</th>'
+    +'<th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Eliminar</th>'
     +'</tr></thead><tbody>';
+
+  if(lista.length===0){
+    html += '<tr><td colspan="6" style="padding:20px;text-align:center;color:#9ca3af;font-size:13px">'
+      +(busq?'Sin resultados para "'+busq+'"':'Sin contactos en esta vista')+'</td></tr>';
+  }
+
   for(var i=0;i<max;i++){
     var c = lista[i];
-    var bgRow = c.enviado ? 'background:#f0fdf4' : (i%2===0?'background:#fff':'background:#fafafa');
+    var realIdx = _campContactos.indexOf(c);
+    var bgRow = c.enviado ? '#f0fdf4' : (i%2===0?'#fff':'#fafafa');
     var badge = c.enviado
       ? '<span style="display:inline-block;background:#dcfce7;color:#15803d;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #86efac">✓ Enviado</span>'
       : '<span style="display:inline-block;background:#fef9c3;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #fde68a">⏳ Pendiente</span>';
-    html += '<tr style="border-top:1px solid #f1f5f9;'+bgRow+'">'
-      +'<td style="padding:7px 10px;font-size:11px;color:#9ca3af">'+(i+1)+'</td>'
+    html += '<tr style="border-top:1px solid #f1f5f9;background:'+bgRow+'">'
+      +'<td style="padding:7px 8px 7px 12px;font-size:11px;color:#9ca3af">'+(realIdx+1)+'</td>'
       +'<td style="padding:7px 10px;font-size:12px;color:#1e3a8a;font-weight:600">'+c.email+'</td>'
-      +'<td style="padding:7px 10px;font-size:12px;color:#374151">'+(c.nombre||'—')+'</td>'
-      +'<td style="padding:7px 10px;font-size:12px;color:#6b7280">'+(c.telefono||'—')+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:#374151">'+(c.nombre||'<span style="color:#d1d5db">—</span>')+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:#6b7280">'+(c.telefono||'<span style="color:#d1d5db">—</span>')+'</td>'
       +'<td style="padding:7px 10px;text-align:center">'+badge+'</td>'
+      +'<td style="padding:7px 10px;text-align:center"><button onclick="campEliminarContacto('+realIdx+')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:14px;padding:2px 6px;border-radius:4px" title="Eliminar">✕</button></td>'
       +'</tr>';
   }
   html += '</tbody>';
-  if(lista.length > 200) html += '<tr><td colspan="5" style="padding:10px;font-size:12px;color:#6b7280;text-align:center;background:#f9fafb">... y '+(lista.length-200)+' más (mostrando los primeros 200)</td></tr>';
+  if(lista.length > 300){
+    html += '<tr><td colspan="6" style="padding:10px;font-size:12px;color:#6b7280;text-align:center;background:#f9fafb">Mostrando 300 de '+lista.length+' — usa el buscador para filtrar</td></tr>';
+  }
   table.innerHTML = html;
+  // Restaurar foco en el buscador si estaba activo
+  if(busq && document.getElementById('camp-busqueda')) document.getElementById('camp-busqueda').focus();
 }
 
-var _campFiltroActual = 'todos';
 function campFiltrarTabla(f){
   _campFiltroActual = f;
   campRenderTablaContactos(f);
+}
+
+function campEliminarContacto(idx){
+  _campContactos.splice(idx,1);
+  campGuardar(); campActualizarStats(); campRenderTablaContactos();
 }
 
 function campLimpiarContactos(){
