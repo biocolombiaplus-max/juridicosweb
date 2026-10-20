@@ -207,6 +207,8 @@ function doPost(e) {
       // ── Sync campaña entre dispositivos ─────────────────────────────
       case 'sync_campana_save':   return syncCampanaSave(datos);
       case 'sync_campana_load':   return syncCampanaLoad();
+      // ── ePayco sesión de pago ────────────────────────────────────────
+      case 'epayco_sesion':       return crearSesionEpayco(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -1557,4 +1559,82 @@ function syncCampanaLoad() {
   if (!sh || sh.getLastRow() < 1) return respuestaJson({ ok: true, data: null });
   var raw = sh.getRange(1, 1).getValue();
   return respuestaJson({ ok: true, data: raw || null });
+}
+
+// ════════════════════════════════════════════════════════════════════════
+//  EPAYCO — Crear sesión de pago (Smart Checkout v2)
+//  La PRIVATE_KEY solo existe aquí (servidor), nunca en el frontend.
+// ════════════════════════════════════════════════════════════════════════
+
+var EPAYCO_PUBLIC_KEY  = '347e56166b7cbd26c7257d8689033fba';
+var EPAYCO_PRIVATE_KEY = '8e827207ff648af1c6cca6183bfaecdc';
+var EPAYCO_CUST_ID     = '1595409';
+var EPAYCO_TEST        = false; // cambiar a true para pruebas
+
+function crearSesionEpayco(datos) {
+  try {
+    // 1. Login → obtener token
+    var loginResp = UrlFetchApp.fetch('https://apify.epayco.co/login', {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({}),
+      headers: {
+        'Authorization': 'Basic ' + Utilities.base64Encode(EPAYCO_PUBLIC_KEY + ':' + EPAYCO_PRIVATE_KEY)
+      },
+      muteHttpExceptions: true
+    });
+    var loginData = JSON.parse(loginResp.getContentText());
+    var token = loginData.token || '';
+    if (!token) {
+      return respuestaJson({ ok: false, error: 'ePayco login fallido: ' + (loginData.textResponse || loginResp.getResponseCode()) });
+    }
+
+    // 2. Crear sesión de pago
+    var monto = (datos.monto === 49000 || datos.monto === 79000) ? datos.monto : 79000;
+    var body = {
+      test: EPAYCO_TEST,
+      ip: '127.0.0.1',
+      name: 'JurídicosWeb',
+      description: datos.descripcion || 'Activar y radicar multas - JurídicosWeb',
+      invoice: 'JW-' + new Date().getTime(),
+      currency: 'COP',
+      amount: monto,
+      taxBase: 0,
+      tax: 0,
+      taxIco: 0,
+      country: 'CO',
+      lang: 'ES',
+      checkout_version: '2',
+      response: 'https://juridicosweb.com/pago-ok.html',
+      confirmation: 'https://juridicosweb.com/pago-ok.html',
+      extra1: datos.nombre || '',
+      extra2: datos.cedula || '',
+      extra3: datos.whatsapp || '',
+      billing: {
+        email: datos.email || '',
+        name: datos.nombre || '',
+        address: 'Colombia',
+        typeDoc: 'CC',
+        numberDoc: (datos.cedula || '').replace(/\D/g, '')
+      }
+    };
+
+    var sesionResp = UrlFetchApp.fetch('https://apify.epayco.co/payment/session/create', {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(body),
+      headers: { 'Authorization': 'Bearer ' + token },
+      muteHttpExceptions: true
+    });
+    var sesionData = JSON.parse(sesionResp.getContentText());
+    var sessionId = (sesionData.data && sesionData.data.sessionId) ? sesionData.data.sessionId : (sesionData.sessionId || '');
+
+    if (!sessionId) {
+      return respuestaJson({ ok: false, error: 'Sin sessionId: ' + sesionResp.getContentText().slice(0, 200) });
+    }
+    return respuestaJson({ ok: true, sessionId: sessionId, test: EPAYCO_TEST });
+
+  } catch (e) {
+    return respuestaJson({ ok: false, error: 'Error ePayco: ' + e.message });
+  }
 }
