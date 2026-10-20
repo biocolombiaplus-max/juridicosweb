@@ -3239,12 +3239,8 @@ function abrirEpayco(){
   // Seguro de 20s: si algo falla silenciosamente, el botón se recupera solo
   var safety = setTimeout(function(){
     _resetBtn(btn);
-    openOverlay('overlay-main');
     showToast('Tiempo de espera agotado. Intenta de nuevo.', 'error');
   }, 20000);
-
-  // Cerrar el overlay de juridicosweb para que ePayco no quede debajo
-  closeOverlay('overlay-main');
 
   // Pedir sessionId al servidor
   fetch(SCRIPT_URL, {
@@ -3288,7 +3284,6 @@ function abrirEpayco(){
     clearTimeout(safety);
     console.error('ePayco', e);
     _resetBtn(btn);
-    openOverlay('overlay-main');
     showToast('No se pudo abrir el pago. Intenta de nuevo o usa Llave breve.', 'error');
   });
 }
