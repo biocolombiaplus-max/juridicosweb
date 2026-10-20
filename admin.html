@@ -530,6 +530,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div id="visitas-wrap">
           <!-- KPI: Tráfico -->
           <div style="padding:14px 14px 0;">
+            <div id="vis-nota-fallback" style="display:none;background:#fef9ec;border:1px solid #fbbf24;border-radius:8px;padding:8px 12px;font-size:0.72rem;color:#78350f;margin-bottom:10px;">📊 Mostrando actividad de <strong>leads</strong> mientras se acumulan datos de visitas (desde hoy).</div>
             <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Tráfico</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px;">
               <div class="stat-card navy" style="margin:0;padding:12px 14px;">
@@ -1489,10 +1490,19 @@ function toggleSidebar(forzar){
 function loadVisitas(evtBtn){
   var btn = evtBtn || document.querySelector('[onclick*="loadVisitas"]');
   setBtnLoading(btn, true);
-  jsonpGet(SCRIPT_URL + '?accion=listar_visitas', 12000)
+  jsonpGet(SCRIPT_URL + '?accion=listar_visitas', 25000)
     .then(function(d){
       if(!d.ok) throw new Error(d.error||'Error');
       var v = d.visitas || [];
+      // Si la hoja de visitas aún está vacía (tracking recién activado),
+      // complementar con los leads existentes para mostrar datos útiles ya.
+      var usandoLeadsComoFallback = false;
+      if(v.length === 0 && allRows && allRows.length > 0){
+        usandoLeadsComoFallback = true;
+        v = allRows.filter(function(r){ return r['Fecha']; }).map(function(r){
+          return { Fecha: r['Fecha'], Fuente: r['Fuente']||'directo', Dispositivo: r['Dispositivo']||'', 'UTM Campaign': r['UTM Campaign']||'' };
+        });
+      }
       var ahora   = new Date();
       // Colombia es UTC-5; ajustamos para que "hoy" sea el día correcto en Bogotá
       function fechaColombia(d){
@@ -1652,7 +1662,10 @@ function loadVisitas(evtBtn){
       html += '</tbody></table></div>';
       document.getElementById('vis-tabla').innerHTML = html;
       setBtnLoading(btn, false);
-      showToast('✅ Analítica actualizada','success');
+      showToast(usandoLeadsComoFallback ? '📊 Mostrando datos de leads (visitas se acumularán desde hoy)' : '✅ Analítica actualizada','success');
+      // Mostrar nota informativa si estamos usando leads como base
+      var notaEl = document.getElementById('vis-nota-fallback');
+      if(notaEl) notaEl.style.display = usandoLeadsComoFallback ? 'block' : 'none';
     })
     .catch(function(e){
       setBtnLoading(btn, false);
