@@ -914,23 +914,36 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <!-- TAB: CONTACTOS -->
         <div class="camp-panel active" id="camp-panel-contactos">
           <div class="camp-card">
-            <h3 style="margin:0 0 12px;font-size:15px;font-weight:700">Cargar base de datos</h3>
-            <p style="font-size:13px;color:#6b7280;margin:0 0 10px">Sube un archivo CSV o Excel con columnas: <code>nombre</code>, <code>email</code>, <code>telefono</code> (opcional)</p>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-              <label style="cursor:pointer">
-                <input type="file" id="camp-file-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="campCargarArchivo(this)">
-                <div class="camp-btn camp-btn-primary" style="display:inline-block">📂 Cargar CSV / Excel</div>
-              </label>
-              <button class="camp-btn" style="background:#fee2e2;color:#dc2626" onclick="campLimpiarContactos()">🗑️ Limpiar lista</button>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+              <div>
+                <h3 style="margin:0 0 4px;font-size:15px;font-weight:800;color:#111827">📂 Cargar base de contactos</h3>
+                <p style="font-size:12px;color:#6b7280;margin:0">Los duplicados se detectan y omiten automáticamente al importar</p>
+              </div>
+              <button class="camp-btn" style="background:#fee2e2;color:#dc2626;font-size:12px" onclick="campLimpiarContactos()">🗑️ Limpiar todo</button>
+            </div>
+            <!-- Zona de carga -->
+            <label style="cursor:pointer;display:block">
+              <input type="file" id="camp-file-input" accept=".csv,.xlsx,.xls" style="display:none" onchange="campCargarArchivo(this)">
+              <div style="border:2px dashed #93c5fd;border-radius:12px;padding:24px;text-align:center;background:#eff6ff;transition:all .15s" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                <div style="font-size:32px;margin-bottom:8px">📊</div>
+                <div style="font-size:14px;font-weight:700;color:#1d4ed8;margin-bottom:4px">Haz clic para subir CSV o Excel</div>
+                <div style="font-size:12px;color:#6b7280">Formatos: .csv · .xlsx · .xls</div>
+              </div>
+            </label>
+            <!-- Formato esperado -->
+            <div style="margin-top:12px;background:#f8fafc;border-radius:8px;padding:12px 14px;border:1px solid #e2e8f0">
+              <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Formato del archivo</p>
+              <code style="font-size:12px;color:#1e3a8a;background:#e0e7ff;padding:4px 8px;border-radius:5px;display:inline-block">email, nombre, telefono</code>
+              <span style="font-size:11px;color:#9ca3af;margin-left:8px">Solo "email" es obligatorio</span>
+              <div style="margin-top:8px;font-size:11px;color:#64748b;line-height:1.7">
+                Ejemplo: <code style="background:#f1f5f9;padding:1px 5px;border-radius:3px">deyfran@gmail.com, Juan García, 3124170705</code>
+              </div>
             </div>
           </div>
           <div class="camp-card" id="camp-contactos-preview" style="display:none">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <strong style="font-size:14px" id="camp-contactos-info"></strong>
-              <span id="camp-contactos-dup" style="font-size:12px;color:#6b7280"></span>
-            </div>
-            <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:12px" id="camp-contactos-table"></table>
+            <div id="camp-contactos-info"></div>
+            <div style="overflow-x:auto;max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid #e2e8f0">
+              <table style="width:100%;border-collapse:collapse" id="camp-contactos-table"></table>
             </div>
           </div>
         </div>
@@ -3963,18 +3976,19 @@ var _campPausado = false;
 var _campFechaHoy = '';
 
 function campInit(){
-  if(_campInited) { campActualizarStats(); return; }
+  if(_campInited) { campActualizarStats(); campRenderTablaContactos(); return; }
   _campInited = true;
   try {
     var s = localStorage.getItem('camp_data');
     if(s){ var d=JSON.parse(s); _campContactos=d.contactos||[]; _campCuentas=d.cuentas||[]; _campAsuntos=d.asuntos||_campAsuntos; _campEnviados=d.enviados||0; _campIdx=d.idx||0; _campFechaHoy=d.fecha||''; }
   } catch(e){}
   var hoy = new Date().toISOString().slice(0,10);
-  if(_campFechaHoy !== hoy){ _campEnviados=0; _campIdx=Math.max(_campIdx,0); _campFechaHoy=hoy; campGuardar(); }
+  if(_campFechaHoy !== hoy){ _campEnviados=0; _campFechaHoy=hoy; campGuardar(); }
   campRenderCuentas();
   campRenderAsuntos();
   campActualizarStats();
   campMostrarPreview();
+  campRenderTablaContactos(); // ← fix: mostrar contactos guardados al entrar
 }
 
 function campGuardar(){
@@ -4076,23 +4090,67 @@ function campProcesarFilas(rows){
   campLog(msg, 'ok');
 }
 
-function campRenderTablaContactos(){
+function campRenderTablaContactos(filtro){
   var preview = document.getElementById('camp-contactos-preview');
   var info    = document.getElementById('camp-contactos-info');
   var table   = document.getElementById('camp-contactos-table');
   if(!preview||!info||!table) return;
   if(_campContactos.length === 0){ preview.style.display='none'; return; }
   preview.style.display = 'block';
-  info.textContent = _campContactos.length + ' contactos en lista';
-  var html = '<tr style="background:#f9fafb;position:sticky;top:0"><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">#</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Email</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Nombre</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Teléfono</th><th style="padding:6px 10px;text-align:left;font-size:11px;color:#6b7280">Estado</th></tr>';
-  var max = Math.min(_campContactos.length, 100);
+
+  var enviados  = _campContactos.filter(function(c){ return c.enviado; }).length;
+  var pendientes = _campContactos.length - enviados;
+  var pct = _campContactos.length ? Math.round(enviados/_campContactos.length*100) : 0;
+
+  // Barra de progreso + resumen
+  info.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">'
+    +'<div><span style="font-size:15px;font-weight:800;color:#111827">'+_campContactos.length+' contactos</span>'
+    +' <span style="font-size:12px;color:#6b7280;margin-left:6px">— '+enviados+' enviados · '+pendientes+' pendientes</span></div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<button onclick="campFiltrarTabla(\'todos\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+((!filtro||filtro==='todos')?'#1d4ed8':'#d1d5db')+';background:'+((!filtro||filtro==='todos')?'#1d4ed8':'#fff')+';color:'+((!filtro||filtro==='todos')?'#fff':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Todos</button>'
+    +'<button onclick="campFiltrarTabla(\'pendientes\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+(filtro==='pendientes'?'#d97706':'#d1d5db')+';background:'+(filtro==='pendientes'?'#fef3c7':'#fff')+';color:'+(filtro==='pendientes'?'#92400e':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Pendientes</button>'
+    +'<button onclick="campFiltrarTabla(\'enviados\')" style="padding:4px 12px;border-radius:20px;border:1.5px solid '+(filtro==='enviados'?'#16a34a':'#d1d5db')+';background:'+(filtro==='enviados'?'#f0fdf4':'#fff')+';color:'+(filtro==='enviados'?'#15803d':'#374151')+';font-size:11px;font-weight:700;cursor:pointer">Enviados</button>'
+    +'</div></div>'
+    +'<div style="background:#e5e7eb;border-radius:99px;height:6px;margin-bottom:10px">'
+    +'<div style="background:linear-gradient(90deg,#16a34a,#22c55e);height:6px;border-radius:99px;width:'+pct+'%;transition:width .4s"></div></div>';
+
+  // Filtrar lista
+  var lista = _campContactos;
+  if(filtro==='enviados') lista = lista.filter(function(c){ return c.enviado; });
+  if(filtro==='pendientes') lista = lista.filter(function(c){ return !c.enviado; });
+
+  var max = Math.min(lista.length, 200);
+  var html = '<thead><tr style="background:#f1f5f9;position:sticky;top:0">'
+    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">#</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Email</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Nombre</th>'
+    +'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Tel</th>'
+    +'<th style="padding:8px 10px;text-align:center;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">Estado</th>'
+    +'</tr></thead><tbody>';
   for(var i=0;i<max;i++){
-    var c = _campContactos[i];
-    var estado = i < _campIdx ? '<span style="color:#16a34a;font-weight:700">✓ Enviado</span>' : '<span style="color:#6b7280">Pendiente</span>';
-    html += '<tr style="border-top:1px solid #f3f4f6"><td style="padding:5px 10px;font-size:12px;color:#9ca3af">'+(i+1)+'</td><td style="padding:5px 10px;font-size:12px">'+c.email+'</td><td style="padding:5px 10px;font-size:12px">'+c.nombre+'</td><td style="padding:5px 10px;font-size:12px">'+c.telefono+'</td><td style="padding:5px 10px">'+estado+'</td></tr>';
+    var c = lista[i];
+    var bgRow = c.enviado ? 'background:#f0fdf4' : (i%2===0?'background:#fff':'background:#fafafa');
+    var badge = c.enviado
+      ? '<span style="display:inline-block;background:#dcfce7;color:#15803d;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #86efac">✓ Enviado</span>'
+      : '<span style="display:inline-block;background:#fef9c3;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #fde68a">⏳ Pendiente</span>';
+    html += '<tr style="border-top:1px solid #f1f5f9;'+bgRow+'">'
+      +'<td style="padding:7px 10px;font-size:11px;color:#9ca3af">'+(i+1)+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:#1e3a8a;font-weight:600">'+c.email+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:#374151">'+(c.nombre||'—')+'</td>'
+      +'<td style="padding:7px 10px;font-size:12px;color:#6b7280">'+(c.telefono||'—')+'</td>'
+      +'<td style="padding:7px 10px;text-align:center">'+badge+'</td>'
+      +'</tr>';
   }
-  if(_campContactos.length > 100) html += '<tr><td colspan="5" style="padding:8px 10px;font-size:12px;color:#6b7280;text-align:center">... y '+ (_campContactos.length-100) +' más</td></tr>';
+  html += '</tbody>';
+  if(lista.length > 200) html += '<tr><td colspan="5" style="padding:10px;font-size:12px;color:#6b7280;text-align:center;background:#f9fafb">... y '+(lista.length-200)+' más (mostrando los primeros 200)</td></tr>';
   table.innerHTML = html;
+}
+
+var _campFiltroActual = 'todos';
+function campFiltrarTabla(f){
+  _campFiltroActual = f;
+  campRenderTablaContactos(f);
 }
 
 function campLimpiarContactos(){
@@ -4394,6 +4452,7 @@ function campEnviarSiguiente(){
   }).then(function(r){ return r.json(); }).then(function(res){
     if(res && res.ok !== false){
       _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
+      contacto.enviado = true; // marcar como enviado
       campLog('✅ Enviado: '+contacto.email,'ok');
     } else {
       _campErrores++;
@@ -4405,6 +4464,7 @@ function campEnviarSiguiente(){
   }).finally(function(){
     _campIdx++;
     campGuardar(); campActualizarStats();
+    campRenderTablaContactos(_campFiltroActual); // actualizar tabla en tiempo real
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });
 }
