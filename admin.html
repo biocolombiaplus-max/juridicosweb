@@ -1415,10 +1415,8 @@ function toggleSidebar(forzar){
 // ══════════════════════════════════════════════════
 function loadVisitas(evtBtn){
   var btn = evtBtn || document.querySelector('[onclick*="loadVisitas"]');
-  var url = SCRIPT_URL + '?accion=listar_visitas&_t=' + Date.now();
   setBtnLoading(btn, true);
-  fetchConTimeout(url, 12000)
-    .then(function(r){ return r.json(); })
+  jsonpGet(SCRIPT_URL + '?accion=listar_visitas', 12000)
     .then(function(d){
       if(!d.ok) throw new Error(d.error||'Error');
       var v = d.visitas || [];
@@ -1619,9 +1617,25 @@ function setConexionStatus(ok, msg){
 function fetchConTimeout(url, ms){
   var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, ms) : null;
-  var opts = { redirect: 'follow' };
+  var opts = { redirect: 'follow', mode: 'cors' };
   if(ctrl) opts.signal = ctrl.signal;
   return fetch(url, opts).then(function(r){ if(timer) clearTimeout(timer); return r; });
+}
+
+// JSONP — bypasa el problema CORS/redirect de Apps Script en GET
+function jsonpGet(url, timeoutMs){
+  return new Promise(function(resolve, reject){
+    var cbName = '_jcb' + Date.now();
+    var timer = setTimeout(function(){
+      cleanup(); reject(new Error('timeout'));
+    }, timeoutMs || 18000);
+    function cleanup(){ try{ delete window[cbName]; document.head.removeChild(sc); }catch(e){} clearTimeout(timer); }
+    window[cbName] = function(data){ cleanup(); resolve(data); };
+    var sc = document.createElement('script');
+    sc.onerror = function(){ cleanup(); reject(new Error('Error de red')); };
+    sc.src = url + (url.includes('?')?'&':'?') + 'callback=' + cbName + '&_t=' + Date.now();
+    document.head.appendChild(sc);
+  });
 }
 
 function loadData(evtBtn){
@@ -1631,14 +1645,8 @@ function loadData(evtBtn){
   setBtnLoading(btn, true);
   setConexionStatus(null, 'Conectando...');
 
-  // Intenta con la acción actual del Apps Script; si falla prueba la alternativa
-  function intentarCarga(accion){
-    var url = SCRIPT_URL + '?accion=' + accion + '&_t=' + Date.now();
-    return fetchConTimeout(url, 18000).then(function(r){ return r.json(); });
-  }
-
-  intentarCarga('listar_casos')
-    .catch(function(){ return intentarCarga('get_casos'); })
+  // JSONP bypasa el problema CORS/redirect de Apps Script en navegadores
+  jsonpGet(SCRIPT_URL + '?accion=listar_casos', 18000)
     .then(function(data){
       setBtnLoading(btn, false);
       var casos = data.casos || data.data || [];
@@ -1698,10 +1706,8 @@ function getDemoRows(){
 // ══════════════════════════════════════════════════
 var _documentosFirmados = null;
 function loadDocumentosFirmados(){
-  var url = SCRIPT_URL + '?accion=listar_firmados&_t=' + Date.now();
   document.getElementById('table-documentos-wrap').innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div>';
-  fetch(url, { cache:'no-store' })
-    .then(function(r){ return r.json(); })
+  jsonpGet(SCRIPT_URL + '?accion=listar_firmados', 12000)
     .then(function(data){
       if(!data.ok) throw new Error(data.error || 'Respuesta inesperada del servidor');
       _documentosFirmados = data.documentos || [];
@@ -3711,8 +3717,7 @@ function loadAsesoresAdmin(){
   var list = document.getElementById('asesores-admin-list');
   var count = document.getElementById('asesores-admin-count');
   if(!list) return;
-  fetch(SCRIPT_URL + '?_accion=listar_asesores')
-    .then(function(r){ return r.json(); })
+  jsonpGet(SCRIPT_URL + '?accion=listar_asesores', 12000)
     .then(function(data){
       var items = (data && data.asesores) ? data.asesores : [];
       if(count) count.textContent = items.length + ' asesor(es)';
@@ -3736,8 +3741,7 @@ function loadCasosAdmin(){
   var list = document.getElementById('casos-admin-list');
   var count = document.getElementById('casos-admin-count');
   if(!list) return;
-  fetch(SCRIPT_URL + '?_accion=listar_casos_exito')
-    .then(function(r){ return r.json(); })
+  jsonpGet(SCRIPT_URL + '?accion=listar_casos_exito', 12000)
     .then(function(data){
       var items = (data && data.casos) ? data.casos : [];
       if(count) count.textContent = items.length + ' caso(s)';
