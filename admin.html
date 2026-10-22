@@ -2178,7 +2178,19 @@ function renderPipelineCRM(){
   var buckets = {};
   etapas.forEach(function(e){ buckets[e.id] = []; });
 
-  var rows = allRows || [];
+  // Deduplicar: por cada cédula o email, queda solo la fila más reciente
+  var rawRows = allRows || [];
+  var seen = {};
+  var rows = [];
+  rawRows.slice().reverse().forEach(function(r){
+    var key = (r['Cédula']||'').toString().trim();
+    if(!key) key = 'email:' + (r['Email']||'').toLowerCase().trim();
+    if(!key || key === 'email:') key = 'wa:' + (r['WhatsApp']||'').replace(/\D/g,'').slice(-10);
+    if(!key || key === 'wa:') { rows.push(r); return; } // sin identificador, mostrar igual
+    if(!seen[key]){ seen[key]=true; rows.push(r); }
+  });
+  rows.reverse();
+
   rows.forEach(function(r){
     var et = _crmEtapa(r);
     if(buckets[et]) buckets[et].push(r);

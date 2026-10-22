@@ -4388,6 +4388,34 @@ function renderPlanes(aplican){
     '<button onclick="elegirPlan(\'diferido\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;">'+
     '<i class="fas fa-file-signature"></i>Elegir este plan — Continuar</button>'+
     '</div></div>'+
+    '<div style="border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(124,58,237,0.2);">'+
+    '<div style="background:linear-gradient(90deg,#7c3aed,#a855f7);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;">'+
+    '<span style="font-size:0.7rem;font-weight:800;color:#fff;letter-spacing:.5px;">MEJOR OPCIÓN — PAGAS SOLO SI SE ELIMINA</span>'+
+    '<span style="font-size:0.65rem;background:rgba(255,255,255,0.25);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700;">0 riesgo</span>'+
+    '</div>'+
+    '<div style="padding:14px 16px;">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">'+
+    '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Paga Solo al Eliminar</p><p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">$10.000 hoy por trámite · $98.900 por multa <em>solo si se elimina</em></p></div>'+
+    '<div style="text-align:right;flex-shrink:0;"><p id="gar-precio-hoy" style="font-size:1.9rem;font-weight:900;color:#7c3aed;margin:0;line-height:1;">$10.000</p><p style="font-size:0.65rem;color:#7c3aed;font-weight:700;margin:1px 0 0;">hoy para iniciar</p></div>'+
+    '</div>'+
+    '<div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;">'+
+    '<p style="font-size:0.72rem;font-weight:700;color:#6b21a8;margin:0 0 10px;">¿Cuántas multas quieres eliminar con este plan?</p>'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'+
+    '<div style="display:flex;align-items:center;gap:0;border:1.5px solid #d8b4fe;border-radius:9px;overflow:hidden;">'+
+    '<button onclick="garCambiarN(-1)" style="background:#f3e8ff;border:none;padding:8px 14px;font-size:1.1rem;font-weight:700;color:#7c3aed;cursor:pointer;">−</button>'+
+    '<span id="gar-num" style="padding:8px 16px;font-size:1.1rem;font-weight:800;color:#4c1d95;min-width:40px;text-align:center;">1</span>'+
+    '<button onclick="garCambiarN(1)" style="background:#f3e8ff;border:none;padding:8px 14px;font-size:1.1rem;font-weight:700;color:#7c3aed;cursor:pointer;">+</button>'+
+    '</div>'+
+    '<div>'+
+    '<p id="gar-hoy-txt" style="font-size:0.8rem;font-weight:700;color:#16a34a;margin:0;">Pagas hoy: $10.000</p>'+
+    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#64748b;margin:2px 0 0;">Al eliminar: $98.900 por cada una</p>'+
+    '</div></div></div>'+
+    '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
+    '<p style="font-size:0.72rem;color:#166534;font-weight:700;margin:0;line-height:1.6;">✅ Si la multa NO se elimina, <strong>no pagas los $98.900</strong>. Solo los $10.000 del trámite administrativo. Sin promesas vacías — tú decides si vale la pena.</p>'+
+    '</div>'+
+    '<button onclick="elegirPlan(\'garantia\')" id="btn-garantia" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(124,58,237,0.4);">'+
+    '<i class="fas fa-shield-alt"></i>Elegir — Pago hoy: $10.000</button>'+
+    '</div></div>'+
     '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 0 10px;flex-wrap:wrap;">'+
     '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Proceso 100% legal</span>'+
     '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-headset" style="color:#16a34a;"></i>Asesor responde en minutos</span>'+
@@ -4400,6 +4428,7 @@ function renderPlanes(aplican){
 
 // ===================== ELEGIR PLAN → FORMULARIO =====================
 var pagoSel='inmediato';
+var _numMultasGarantia = 1;
 // Multas efectivamente incluidas en el trámite (snapshot al elegir el plan) y el
 // monto total a cobrar — se usan en el borrador, el pago y la generación de documentos.
 var _multasParaTramite = [];
@@ -4409,6 +4438,11 @@ function calcularTotalPago(){
   var aplicanSeleccionadas = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; });
   if(pagoSel==='masivo') return { total:69000, multas:_multasReportadas.filter(function(m){return m.estado==='aplica';}) };
   if(pagoSel==='diferido') return { total:19800, multas:aplicanSeleccionadas };
+  if(pagoSel==='garantia'){
+    var n = _numMultasGarantia||1;
+    var garMultas = _multasReportadas.filter(function(m){return m.estado==='aplica';});
+    return { total: 10000*n, multas: garMultas.slice(0,n) };
+  }
   return { total: 45000 * aplicanSeleccionadas.length, multas: aplicanSeleccionadas };
 }
 
@@ -4431,6 +4465,23 @@ function elegirPlan(plan){
   }
   jwTrack('plan_elegido', { plan: plan, total: _totalPago, multas: _multasParaTramite.length });
   goToStep(4);
+}
+
+function garCambiarN(delta){
+  var aplican = _multasReportadas.filter(function(m){ return m.estado==='aplica'; });
+  var max = Math.max(aplican.length, 1);
+  _numMultasGarantia = Math.min(max, Math.max(1, (_numMultasGarantia||1) + delta));
+  var n = _numMultasGarantia;
+  var el = document.getElementById('gar-num');
+  var precioEl = document.getElementById('gar-precio-hoy');
+  var hoyEl = document.getElementById('gar-hoy-txt');
+  var despEl = document.getElementById('gar-despues-txt');
+  if(el) el.textContent = n;
+  if(precioEl) precioEl.textContent = '$'+(10000*n).toLocaleString('es-CO');
+  if(hoyEl) hoyEl.textContent = 'Pagas hoy: $'+(10000*n).toLocaleString('es-CO');
+  if(despEl) despEl.textContent = 'Al eliminar: $'+(98900*n).toLocaleString('es-CO')+' total ($98.900 c/u)';
+  var btn = document.getElementById('btn-garantia');
+  if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i>Elegir — Pago hoy: $'+(10000*n).toLocaleString('es-CO');
 }
 
 // ===================== FORM VALIDATION =====================
@@ -4474,6 +4525,7 @@ function recogerDatosFormulario(){
 function nombrePlan(sel){
   if(sel==='masivo') return 'Eliminar todas las que apliquen — $69.000';
   if(sel==='diferido') return 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u';
+  if(sel==='garantia') return 'Garantia Pago al Eliminar — Adelanto $'+(10000*(_numMultasGarantia||1)).toLocaleString('es-CO')+' + $98.900 c/u al eliminar';
   return 'Pago individual — $45.000 c/u';
 }
 
