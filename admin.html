@@ -1171,6 +1171,9 @@ function syncCampanaLoad() {
               <button class="camp-btn camp-btn-danger" id="camp-btn-pausar" onclick="campPausarEnvio()" style="display:none">⏸️ Pausar</button>
               <button class="camp-btn" style="background:#f3f4f6;color:#374151" onclick="campResetearEnvio()">🔄 Resetear</button>
             </div>
+            <div style="margin-top:10px;padding:8px 12px;background:#fefce8;border:1px solid #fcd34d;border-radius:8px;font-size:11.5px;color:#78350f">
+              <strong>¿Dónde ver los correos enviados?</strong> Los correos salen desde la cuenta de Google que ejecuta el Apps Script. Ábrela en Gmail y busca en <strong>Enviados</strong>. Si configuraste varias cuentas en "Cuentas Gmail", los correos salen desde esa cuenta — no desde <code>juridicoswebcasos@gmail.com</code> a menos que ESA sea la dueña del script.
+            </div>
             <div style="margin-top:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
               <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:8px;">☁️ Sincronizar entre dispositivos</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -4770,66 +4773,61 @@ function campResetearEnvio(){
 var _campSyncTimer = null;
 
 function campSyncGuardar(){
-  campLog('Guardando en nube...','info');
+  // Solo guarda el progreso mínimo: idx, enviados, fecha, y qué emails ya fueron enviados.
+  // NO se envían nombres/objetos completos — así el payload cabe siempre (evita límite 64KB de keepalive).
+  var enviados = _campContactos.map(function(c){ return c.enviado ? 1 : 0; });
   var payload = {
     _accion: 'sync_campana_save',
     data: JSON.stringify({
-      contactos: _campContactos,
-      cuentas: _campCuentas,
-      asuntos: _campAsuntos,
       enviados: _campEnviados,
       idx: _campIdx,
       fecha: _campFechaHoy,
+      flags: enviados,   // array de 0/1 del mismo tamaño que _campContactos
       ts: Date.now()
     })
   };
   fetch(SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify(payload),
-    headers: {'Content-Type': 'text/plain'},
-    keepalive: true
-  }).then(function(r){ return r.json(); }).then(function(res){
+    headers: {'Content-Type': 'text/plain'}
+    // sin keepalive: true — ese flag tiene límite de 64KB y el payload puede superar ese límite
+  }).then(function(r){ return r.text(); }).then(function(txt){
+    var res; try { res = JSON.parse(txt); } catch(e){ res = null; }
     if(res && res.ok !== false){
-      campLog('Campaña guardada en la nube (' + _campContactos.length + ' contactos, indice ' + _campIdx + ')','ok');
-      showToast('Guardado en nube correctamente','success');
+      campLog('Progreso guardado en nube (índice ' + _campIdx + ', ' + _campEnviados + ' enviados)','ok');
     } else {
-      campLog('Error al guardar: ' + (res.error||res.msg||'desconocido'),'err');
+      campLog('Error al guardar en nube: ' + (res&&(res.error||res.msg)||txt.slice(0,80)),'err');
     }
-  }).catch(function(e){ campLog('Error de red al guardar: '+e.message,'err'); });
+  }).catch(function(e){ campLog('Error de red al guardar en nube: '+e.message,'err'); });
 }
 
 function campSyncCargar(){
-  campLog('Cargando desde nube...','info');
+  campLog('Cargando progreso desde nube...','info');
   fetch(SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({ _accion: 'sync_campana_load' }),
-    headers: {'Content-Type': 'text/plain'},
-    keepalive: true
-  }).then(function(r){ return r.json(); }).then(function(res){
-    if(res && res.ok !== false && res.data){
-      var d = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-      if(d.contactos && d.contactos.length > 0){
-        _campContactos = d.contactos;
-        _campCuentas   = d.cuentas   || _campCuentas;
-        _campIdx       = d.idx       || 0;
-        _campEnviados  = d.enviados  || 0;
-        _campFechaHoy  = d.fecha     || '';
-        var savedAsuntos = d.asuntos || [];
-        var tieneEmojis = savedAsuntos.some(function(a){ return /[\u{1F000}-\u{1FFFF}]|[☀-➿]/u.test(a); });
-        if(savedAsuntos.length > 0 && !tieneEmojis) _campAsuntos = savedAsuntos;
-        campGuardar();
-        campRenderTablaContactos();
-        campActualizarStats();
-        campLog('Cargados ' + _campContactos.length + ' contactos desde la nube (indice ' + _campIdx + ')','ok');
-        showToast('Base de datos sincronizada: ' + _campContactos.length + ' contactos','success');
-      } else {
-        campLog('No hay datos guardados en la nube todavia','info');
-        showToast('No hay datos en la nube aun — guarda primero desde el PC','info');
-      }
-    } else {
-      campLog('Sin datos en nube o error: ' + (res&&res.error||'sin respuesta'),'err');
+    headers: {'Content-Type': 'text/plain'}
+  }).then(function(r){ return r.text(); }).then(function(txt){
+    var res; try { res = JSON.parse(txt); } catch(e){ res = null; }
+    if(!res || res.ok === false || !res.data){
+      campLog('Sin datos en nube o error: ' + (res&&(res.error||res.msg)||'sin respuesta'),'err'); return;
     }
-  }).catch(function(e){ campLog('Error de red al cargar: '+e.message,'err'); });
+    var d = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+    // Restaura el progreso: si hay flags (nuevo formato), aplica sobre los contactos ya cargados
+    if(d.flags && _campContactos.length > 0){
+      d.flags.forEach(function(f, i){
+        if(_campContactos[i]) _campContactos[i].enviado = (f === 1);
+      });
+    }
+    _campIdx      = d.idx      || 0;
+    _campEnviados = d.enviados || 0;
+    _campFechaHoy = d.fecha    || '';
+    campGuardar();
+    campRenderTablaContactos();
+    campActualizarStats();
+    campLog('Progreso cargado desde nube — índice ' + _campIdx + ', ' + _campEnviados + ' ya enviados','ok');
+    showToast('Progreso sincronizado: ' + _campEnviados + ' enviados, índice ' + _campIdx, 'success');
+  }).catch(function(e){ campLog('Error de red al cargar desde nube: '+e.message,'err'); });
 }
 
 // Auto-sync cada 10 envíos
@@ -4881,7 +4879,7 @@ function campEnviarSiguiente(){
     html: htmlBody             // ← Apps Script usa 'html', no 'htmlBody'
   };
 
-  campLog('📤 Enviando a '+contacto.email+(nombreCorto?' ('+nombreCorto+')':'')+' desde '+cuenta.email,'info');
+  campLog('📤 Enviando a '+contacto.email+(nombreCorto?' ('+nombreCorto+')':('')), 'info');
 
   fetch(SCRIPT_URL, {
     method: 'POST',
