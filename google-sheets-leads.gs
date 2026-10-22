@@ -1558,23 +1558,31 @@ function eliminarFilaPorId(nombreHoja, id) {
 
 function enviarCorreoCampana(datos) {
   var email  = datos.email  || '';
-  var nombre = datos.nombre || 'Estimado conductor';
   var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
   var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
   if (!email || !email.includes('@')) return respuestaJson({ ok: false, msg: 'Email invalido' });
+  var opts = {
+    htmlBody: datos.html || '',
+    name: datos.nombreRemitente || 'JuridicosWeb',
+    replyTo: 'juridicoswebcasos@gmail.com'
+  };
+  // Intenta enviar desde el alias configurado; si no está verificado, envía desde la cuenta principal
   try {
     GmailApp.sendEmail(email, asunto,
       'Para ver este correo correctamente activa HTML en tu cliente de correo.',
-      {
-        htmlBody: datos.html || '',
-        name: datos.nombreRemitente || 'JuridicosWeb',
-        from: cuenta,
-        replyTo: 'juridicoswebcasos@gmail.com'
-      }
+      Object.assign({}, opts, { from: cuenta })
     );
     return respuestaJson({ ok: true });
-  } catch (e) {
-    return respuestaJson({ ok: false, msg: e.message });
+  } catch (e1) {
+    try {
+      GmailApp.sendEmail(email, asunto,
+        'Para ver este correo correctamente activa HTML en tu cliente de correo.',
+        opts
+      );
+      return respuestaJson({ ok: true });
+    } catch (e2) {
+      return respuestaJson({ ok: false, msg: e2.message });
+    }
   }
 }
 

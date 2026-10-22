@@ -1061,47 +1061,78 @@ tr:hover td{background:#f8faff;cursor:pointer}
           </div>
           <div class="camp-card">
             <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">🔧 Código Apps Script (envío automático)</h3>
-            <p style="font-size:12px;color:#6b7280;margin:0 0 10px">Agrega esta función a tu Apps Script para habilitar el envío automático:</p>
-            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">// ── En doPost(), agrega estos cases: ──────────────────────────
-// case 'enviar_correo':      return enviarCorreo(datos);
-// case 'sync_campana_save':  return syncCampanaSave(datos);
-// case 'sync_campana_load':  return syncCampanaLoad();
+            <p style="font-size:12px;color:#6b7280;margin:0 0 8px">Copia y pega este código completo en tu Apps Script. Incluye los <code style="background:#1e293b;color:#7dd3fc;padding:1px 4px;border-radius:3px">case</code> dentro del <code style="background:#1e293b;color:#7dd3fc;padding:1px 4px;border-radius:3px">switch</code> de <code style="background:#1e293b;color:#7dd3fc;padding:1px 4px;border-radius:3px">doPost()</code>:</p>
+            <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#92400e">
+              ⚠️ <strong>Importante:</strong> Después de pegar el código, haz clic en <strong>"Implementar → Administrar implementaciones → Nueva versión"</strong> y guarda. Sin esto el script no se actualiza.
+            </div>
+            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">// ── PASO 1: Dentro del switch de doPost(), agrega estos cases ──
+//   case 'enviar_correo':     return enviarCorreoCampana(datos);
+//   case 'sync_campana_save': return syncCampanaSave(datos);
+//   case 'sync_campana_load': return syncCampanaLoad();
 
-function enviarCorreo(datos) {
+// ── PASO 2: Agrega estas funciones fuera del doPost() ──────────
+
+function enviarCorreoCampana(datos) {
   var email  = datos.email  || '';
-  var nombre = datos.nombre || 'Cliente';
   var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
   var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
-  if(!email || !email.includes('@')) return {ok:false,msg:'Email invalido'};
+  if (!email || !email.includes('@'))
+    return respuestaJson({ ok: false, msg: 'Email invalido' });
   try {
-    GmailApp.sendEmail(email, asunto, 'Para ver este correo activa HTML en tu cliente de correo.', {
-      htmlBody: datos.html || '',
-      name: datos.nombreRemitente || 'JuridicosWeb',
-      from: cuenta
-    });
-    return {ok:true};
-  } catch(e) { return {ok:false, msg: e.message}; }
+    // Intenta enviar desde la cuenta alias configurada
+    GmailApp.sendEmail(email, asunto,
+      'Para ver este correo activa HTML en tu cliente de correo.',
+      {
+        htmlBody: datos.html || '',
+        name: datos.nombreRemitente || 'JuridicosWeb',
+        from: cuenta,
+        replyTo: 'juridicoswebcasos@gmail.com'
+      }
+    );
+    return respuestaJson({ ok: true });
+  } catch (e1) {
+    // Si el alias no esta verificado, envia desde la cuenta principal
+    try {
+      GmailApp.sendEmail(email, asunto,
+        'Para ver este correo activa HTML en tu cliente de correo.',
+        {
+          htmlBody: datos.html || '',
+          name: datos.nombreRemitente || 'JuridicosWeb',
+          replyTo: 'juridicoswebcasos@gmail.com'
+        }
+      );
+      return respuestaJson({ ok: true });
+    } catch (e2) {
+      return respuestaJson({ ok: false, msg: e2.message });
+    }
+  }
 }
 
-// ── SYNC entre dispositivos ───────────────────────────────────
+// ── SYNC de campaña entre dispositivos ────────────────────────
 var SYNC_SHEET_NAME = 'CampanSync';
 
 function syncCampanaSave(datos) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sh = ss.getSheetByName(SYNC_SHEET_NAME) || ss.insertSheet(SYNC_SHEET_NAME);
   sh.clearContents();
-  sh.getRange(1,1).setValue(datos.data || '{}');
-  sh.getRange(1,2).setValue(new Date().toISOString());
-  return {ok:true};
+  sh.getRange(1, 1).setValue(datos.data || '{}');
+  sh.getRange(1, 2).setValue(new Date().toISOString());
+  return respuestaJson({ ok: true });
 }
 
 function syncCampanaLoad() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sh = ss.getSheetByName(SYNC_SHEET_NAME);
-  if(!sh || sh.getLastRow() < 1) return {ok:true, data: null};
-  var raw = sh.getRange(1,1).getValue();
-  return {ok:true, data: raw || null};
-}</pre>
+  if (!sh || sh.getLastRow() < 1) return respuestaJson({ ok: true, data: null });
+  var raw = sh.getRange(1, 1).getValue();
+  return respuestaJson({ ok: true, data: raw || null });
+}
+
+// ── Helper (si no lo tienes ya) ────────────────────────────────
+// function respuestaJson(obj) {
+//   return ContentService.createTextOutput(JSON.stringify(obj))
+//     .setMimeType(ContentService.MimeType.JSON);
+// }</pre>
             <button class="camp-btn camp-btn-primary" style="margin-top:10px" onclick="campCopiarScript()">📋 Copiar código</button>
           </div>
           <div class="camp-card">
@@ -4826,16 +4857,26 @@ function campEnviarSiguiente(){
     keepalive: true
   }).then(function(r){
     if(!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }).then(function(res){
+    return r.text();
+  }).then(function(txt){
+    var res;
+    try { res = JSON.parse(txt); } catch(ex) {
+      // Respuesta no-JSON: el GAS probablemente no está actualizado
+      _campErrores++;
+      campLog('❌ '+contacto.email+': GAS devolvió respuesta no-JSON — actualiza el Apps Script y vuelve a implementar. Respuesta: '+txt.slice(0,120),'err');
+      return;
+    }
     if(res && res.ok !== false){
       _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
       contacto.enviado = true;
       campLog('✅ Enviado: '+contacto.email,'ok');
     } else {
       _campErrores++;
-      var motivo = (res&&res.error) || (res&&res.msg) || JSON.stringify(res);
-      campLog('❌ Error en '+contacto.email+': '+motivo,'err');
+      var motivo = (res&&res.msg) || (res&&res.error) || JSON.stringify(res);
+      campLog('❌ '+contacto.email+': '+motivo,'err');
+      if(motivo && motivo.toLowerCase().indexOf('alias') > -1){
+        campLog('   💡 El alias "'+cuenta.email+'" no está verificado en Gmail → Configura en Gmail > Ajustes > Cuentas > "Añadir otra dirección"','info');
+      }
     }
   }).catch(function(e){
     _campErrores++;
