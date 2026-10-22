@@ -766,9 +766,9 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .pay-opts{grid-template-columns:1fr;}
 }
 @media(max-width:600px){
-  .hero h1{font-size:2rem;line-height:1.1;letter-spacing:-.3px;}
-  .hero-h1-sub{font-size:0.92rem;}
-  .hero{padding:60px 5% 70px;}
+  .hero h1{font-size:1.85rem;line-height:1.1;letter-spacing:-.3px;}
+  .hero-h1-sub{font-size:0.88rem;margin-bottom:14px;}
+  .hero{padding:52px 5% 60px;}
   .hero-ctas-row{flex-direction:column;}
   .hero-ctas-row .btn{width:100%;}
   .hero-badge{font-size:0.6rem;padding:4px 10px;letter-spacing:1px;max-width:100%;overflow:hidden;}
@@ -793,6 +793,32 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .hero-badge-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
   /* hero ctas full-width */
   .hero-ctas{width:100%;max-width:100%;}
+}
+
+/* ===== MOBILE COMPACTO: input visible sin scroll ===== */
+@media(max-width:480px){
+  /* Reducir título y esconder subtítulo para ganar espacio vertical */
+  .hero{padding:44px 4% 50px;}
+  .hero h1{font-size:1.65rem;margin-bottom:6px;}
+  .hero-h1-sub{display:none;}
+  .hero-badge{display:none;}
+  /* Card más compacto */
+  .hero-consult-card{padding:12px 12px 10px!important;border-radius:14px!important;}
+  /* Urgencia: reducir altura */
+  .hc-urgency{padding:5px 10px!important;margin-bottom:8px!important;}
+  .hc-urgency p{font-size:0.68rem!important;}
+  /* Social proof: reducir altura */
+  .hc-social{padding:6px 10px!important;margin-bottom:8px!important;}
+  .hc-social span:first-child{width:6px!important;height:6px!important;}
+  /* Pain box: compactar */
+  .hc-pain-box{padding:8px 10px 8px!important;margin-bottom:6px!important;}
+  .hc-pain-box p:first-child{font-size:0.95rem!important;margin-bottom:3px!important;}
+  .hc-pain-sub{font-size:0.72rem!important;margin-bottom:5px!important;line-height:1.3!important;}
+  /* Input más compacto */
+  .hero-consult-input{padding:13px 12px!important;font-size:1rem!important;}
+  .hero-consult-btn{width:50px!important;font-size:1.1rem!important;}
+  /* Microgarantías más compactas */
+  .hero-consult-card > div:nth-child(5){margin-bottom:6px!important;}
 }
 </style>
 </head>
@@ -859,22 +885,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="hero-consult-card" style="border:2px solid rgba(201,162,39,0.35);box-shadow:0 8px 40px rgba(0,0,0,0.35),0 0 0 1px rgba(201,162,39,0.1);">
 
             <!-- Urgencia: banner rojo superior -->
-            <div style="background:linear-gradient(90deg,#dc2626,#b91c1c);border-radius:8px;padding:7px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span style="font-size:0.8rem;">⚠️</span>
+            <div class="hc-urgency" style="background:linear-gradient(90deg,#dc2626,#b91c1c);border-radius:8px;padding:7px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:0.8rem;flex-shrink:0;">⚠️</span>
               <p style="color:#fff;font-size:0.72rem;font-weight:700;margin:0;line-height:1.3;"><strong>+5.8M fotomultas serán anuladas.</strong> Verifica si las tuyas aplican — antes de que pagues de más.</p>
             </div>
 
             <!-- Prueba social con contador -->
-            <div style="display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+            <div class="hc-social" style="display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
               <span style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0;box-shadow:0 0 8px #22c55e;animation:ping 1.5s ease-in-out infinite;display:inline-block;"></span>
               <span style="font-size:0.73rem;color:#14532d;font-weight:800;min-width:0;flex:1;"><span id="hero-contador">4.127</span> colombianos consultaron esta semana</span>
               <span style="font-size:0.65rem;color:#16a34a;font-weight:700;white-space:nowrap;flex-shrink:0;">GRATIS ✓</span>
             </div>
 
             <!-- Label principal — pregunta que activa el dolor -->
-            <div style="margin-bottom:8px;background:linear-gradient(135deg,#0a1628,#0f2347);border-radius:10px;padding:12px 14px 10px;border-left:4px solid #c9a227;">
+            <div class="hc-pain-box" style="margin-bottom:8px;background:linear-gradient(135deg,#0a1628,#0f2347);border-radius:10px;padding:12px 14px 10px;border-left:4px solid #c9a227;">
               <p style="font-size:1.08rem;font-weight:900;color:#ffffff;margin:0 0 4px;line-height:1.25;letter-spacing:-0.2px;">¿Tienes multas o fotomultas sin pagar?</p>
-              <p style="font-size:0.8rem;color:#94a3b8;margin:0 0 8px;font-weight:500;line-height:1.4;">Escribe tu número de cédula abajo y en <strong style="color:#4ade80;">10 segundos</strong> te decimos si ya no las debes — sin pagar nada.</p>
+              <p class="hc-pain-sub" style="font-size:0.8rem;color:#94a3b8;margin:0 0 8px;font-weight:500;line-height:1.4;">Escribe tu número de cédula abajo y en <strong style="color:#4ade80;">10 segundos</strong> te decimos si ya no las debes — sin pagar nada.</p>
               <!-- Flecha animada apuntando al input -->
               <div style="display:flex;align-items:center;gap:6px;animation:bounceDown 1.2s ease-in-out infinite;">
                 <span style="font-size:0.72rem;font-weight:800;color:#c9a227;letter-spacing:.3px;">👇 ESCRIBE TU CÉDULA AQUÍ ABAJO — ES GRATIS</span>
