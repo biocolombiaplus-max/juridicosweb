@@ -325,10 +325,98 @@ tr:hover td{background:#f8faff;cursor:pointer}
 .cuenta-card .cuenta-email{flex:1;font-size:13px;font-weight:600;color:var(--gray800);}
 .cuenta-card .cuenta-quota{font-size:12px;color:var(--gray400);}
 .camp-preview-wrap{border:2px solid var(--gray200);border-radius:10px;overflow:hidden;max-height:400px;overflow-y:auto;}
+
+/* ══════════════════════════════════════════════ */
+/* GENERAR DERECHO DE PETICIÓN — MODAL GEN-DP     */
+/* ══════════════════════════════════════════════ */
+#modal-gen-dp .modal{max-width:920px;width:97%;}
+.dp-topbar{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#0d1b4b,#1a3a8f);border-radius:10px;padding:12px 16px;margin-bottom:14px;color:#fff;}
+.dp-topbar .dp-topbar-icon{font-size:1.6rem;flex-shrink:0;}
+.dp-topbar .dp-topbar-info{flex:1;min-width:0;}
+.dp-topbar .dp-topbar-info strong{display:block;font-size:14px;font-weight:800;margin-bottom:1px;}
+.dp-topbar .dp-topbar-info span{font-size:11px;color:rgba(255,255,255,.7);}
+.dp-topbar .dp-topbar-badges{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.dp-sig-state{display:flex;align-items:center;gap:9px;border-radius:9px;padding:9px 13px;margin-bottom:12px;font-size:12.5px;border:1.5px solid;}
+.dp-sig-state.ok{background:#f0fdf4;border-color:#22c55e;color:#166534;}
+.dp-sig-state.pending{background:#fffbeb;border-color:#f59e0b;color:#92400e;}
+.dp-tabs{display:flex;gap:0;border-bottom:2px solid var(--gray200);margin:0 -20px 16px;}
+.dp-tab-btn{padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray600);background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;}
+.dp-tab-btn.active{color:var(--navy);border-bottom-color:var(--navy);}
+.dp-tab-pane{display:none;}
+.dp-tab-pane.active{display:block;}
+/* Hoja A4 simulada */
+.dp-paper{background:#fff;border:1px solid #d4cfbf;box-shadow:0 2px 16px rgba(0,0,0,.08);border-radius:2px;padding:34px 44px 32px;font-family:'Georgia','Times New Roman',Times,serif;font-size:12.5px;line-height:1.82;color:#111;max-height:56vh;overflow-y:auto;}
+.dp-paper .dp-ciudad-fecha{text-align:right;font-size:12px;margin-bottom:20px;color:#333;}
+.dp-paper .dp-destinatario{margin-bottom:18px;font-size:12.5px;}
+.dp-paper .dp-ref{background:#f5f3ec;border-left:4px solid var(--navy);padding:9px 14px;margin:12px 0 16px;font-size:12px;font-weight:700;line-height:1.5;}
+.dp-paper .dp-body-intro{margin-bottom:14px;}
+.dp-paper .dp-section{font-weight:700;text-transform:uppercase;font-size:12px;letter-spacing:.6px;margin:20px 0 10px;padding-bottom:4px;border-bottom:1.5px solid #e2e2e2;color:#111;}
+.dp-paper .dp-multa-blk{background:#f8f7f0;border-left:3px solid var(--navy);padding:10px 14px;margin:6px 0 12px;font-size:12px;border-radius:0 4px 4px 0;}
+.dp-paper .dp-ley{font-size:11.5px;color:#374151;margin:7px 0;padding-left:16px;border-left:2px solid #cbd5e1;line-height:1.6;}
+.dp-paper .dp-pretension{margin:5px 0;padding-left:20px;position:relative;font-size:12.5px;}
+.dp-paper .dp-pretension::before{content:"•";position:absolute;left:6px;color:var(--navy);}
+.dp-paper .dp-firma-blk{margin-top:32px;padding-top:24px;border-top:1px solid #e2e2e2;}
+.dp-paper .dp-firma-line{width:200px;border-bottom:1.5px solid #374151;display:block;margin:22px auto 3px;}
+.dp-paper .dp-firma-img{max-width:180px;border-bottom:1.5px solid #374151;display:block;margin:0 auto 2px;max-height:60px;object-fit:contain;}
+.dp-paper .dp-firma-pie{text-align:center;font-size:11.5px;color:#555;line-height:1.5;}
+.dp-multas-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+.dp-multa-card{background:#f8fafc;border:1.5px solid var(--gray200);border-radius:9px;padding:12px 14px;font-size:12.5px;}
+.dp-multa-card .dp-mc-num{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.dp-multa-card .dp-mc-field{display:flex;justify-content:space-between;margin:3px 0;font-size:12px;}
+.dp-multa-card .dp-mc-field label{color:var(--gray600);font-weight:600;}
+.dp-multa-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:700;margin-top:4px;}
+.dp-multa-badge.aplica{background:#dcfce7;color:#166534;}
+.dp-multa-badge.revisar{background:#fef9c3;color:#92400e;}
+.dp-multa-badge.no_aplica{background:#f1f5f9;color:#64748b;}
+@media(max-width:640px){
+  .dp-paper{padding:16px 14px;}
+  .dp-multas-grid{grid-template-columns:1fr;}
+  #modal-gen-dp .modal{max-height:98vh;}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- MODAL: GENERAR DERECHO DE PETICIÓN                            -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-gen-dp">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📋 Derecho de Petición</h2>
+      <button class="modal-close" onclick="closeModal('modal-gen-dp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Info del caso -->
+      <div id="dp-topbar"></div>
+      <!-- Estado firma -->
+      <div id="dp-sig-state"></div>
+      <!-- Tabs -->
+      <div class="dp-tabs">
+        <button class="dp-tab-btn active" onclick="dpTab('preview',this)">📄 Vista Previa</button>
+        <button class="dp-tab-btn" onclick="dpTab('multas',this)">📝 Datos Multas</button>
+      </div>
+      <!-- TAB: Vista previa del documento -->
+      <div id="dp-tab-preview" class="dp-tab-pane active">
+        <div class="dp-paper" id="dp-paper-content"><!-- se llena con JS --></div>
+      </div>
+      <!-- TAB: Detalle de multas -->
+      <div id="dp-tab-multas" class="dp-tab-pane">
+        <div id="dp-multas-detalle"><!-- se llena con JS --></div>
+      </div>
+      <!-- Acciones -->
+      <div style="display:flex;gap:9px;flex-wrap:wrap;padding:14px 0 0;border-top:1px solid var(--gray200);margin-top:14px;">
+        <button class="btn btn-primary btn-sm" onclick="dpDescargarPDF()">⬇️ Descargar PDF sin firma</button>
+        <button class="btn btn-success btn-sm" id="dp-btn-firma">🖊️ Enviar para firma por WhatsApp</button>
+        <button class="btn btn-outline btn-sm" id="dp-btn-copiar-link">📋 Copiar link de firma</button>
+        <button class="btn btn-primary btn-sm" id="dp-btn-radicar" style="display:none;">📨 Radicar ahora</button>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-gen-dp')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════ -->
 <!-- LOGIN                                          -->
@@ -1276,6 +1364,7 @@ function syncCampanaLoad() {
           Enviar link de firma por WhatsApp
         </a>
         <button onclick="copiarEnlaceFirmaPost()" id="mm-btn-copiar-link" style="width:100%;background:#fff;border:1.5px solid #22c55e;border-radius:8px;padding:9px;font-size:12px;font-weight:700;color:#15803d;cursor:pointer;">📋 Copiar solo el link de firma</button>
+        <button onclick="abrirGenerarDPdesdeMM()" style="width:100%;background:#0d1b4b;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">📋 Ver Derecho de Petición generado</button>
       </div>
 
       <div id="mm-footer-btns" style="display:flex;gap:10px;">
@@ -2395,6 +2484,7 @@ function buildAcciones(row, estado){
       var tieneMultasPend = false;
       try{ tieneMultasPend = Array.isArray(JSON.parse(row['Multas Reportadas'])) && JSON.parse(row['Multas Reportadas']).length>0; }catch(e){}
       html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultasPend?'Editar':'Completar')+' datos de multas</button>';
+      if(tieneMultasPend) html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="abrirGenerarDP(this)">📋 Ver DP</button>';
     }
   }
 
@@ -2423,6 +2513,7 @@ function buildAcciones(row, estado){
     if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ '+(tieneMultas?'Enviar enlace de firma':'Enviar enlace (sin multas cargadas)')+'</a>';
     html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="openModalMultas(this)">📝 '+(tieneMultas?'Editar':'Completar')+' datos de multas</button>';
+    if(tieneMultas) html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="abrirGenerarDP(this)">📋 Ver Derecho de Petición</button>';
     // Cubre el caso de "el cliente dice que ya firmó pero el sistema no lo
     // muestra" (típicamente una firma que sí se generó en el celular pero
     // no logró avisarle al servidor por mala conexión) — el cliente ya
@@ -2431,6 +2522,7 @@ function buildAcciones(row, estado){
     if(!tieneMultas) html += '<p style="width:100%;font-size:11px;color:#92400e;margin:2px 0 0;">⚠️ Sin datos de multas, el cliente tendrá que llenarlos él mismo al abrir el enlace. Si prefieres que no le toque llenar nada, usa primero "Completar datos de multas".</p>';
   }
   if(firmado){
+    if(row['Multas Reportadas']){ try{ if(JSON.parse(row['Multas Reportadas']).length) html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="abrirGenerarDP(this)">📋 Ver/Generar DP</button>'; }catch(e){} }
     html += '<button class="btn btn-outline btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'reenviar_firmado\',this,null,\'reenviar_firmado\')">📧 Reenviar documento firmado</button>';
     // Si hubo multas en varias secretarías, aquí quedan varios enlaces
     // separados por " | " — uno por cada Derecho de Petición firmado.
@@ -4748,6 +4840,520 @@ function campEnviarSiguiente(){
     campAutoSync();
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// GENERADOR DE DERECHO DE PETICIÓN — LÓGICA COMPLETA
+// ══════════════════════════════════════════════════════════════════════════
+
+var _dpCaso = null;
+var _dpMultas = []; // multas analizadas (con causal calculado)
+
+/* ── Ciudades investigadas por la Supertransporte (INM) ── */
+var DP_CIUDADES_INM = [
+  'bogota','medellin','cali','barranquilla','cartagena','bucaramanga','villavicencio',
+  'valledupar','monteria','sincelejo','soledad','sabaneta','villa del rosario','galapa',
+  'puerto colombia','turbaco','cienaga','popayan','palmira','zipaquira'
+];
+
+function dpNorm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function dpCiudadINM(c){ var n=dpNorm(c); return DP_CIUDADES_INM.some(function(x){return n.indexOf(x)!==-1;}); }
+
+function dpMesesTranscurridos(fechaStr){
+  var d = new Date(fechaStr+'T00:00:00');
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  return (hoy.getFullYear()-d.getFullYear())*12+(hoy.getMonth()-d.getMonth())+
+    (hoy.getDate()<d.getDate()?-1:0);
+}
+
+function dpAnalizarMulta(m){
+  // m viene del JSON guardado en 'Multas Reportadas'
+  var meses = dpMesesTranscurridos(m.fecha);
+  var anio = new Date(m.fecha+'T00:00:00').getFullYear();
+  var foto = m.foto||'nose'; // 'si'|'no'|'nose'
+  var notif = m.notif||'nose'; // 'si'|'no'|'nose'
+  var ciudad = m.ciudad||m.secretaria||'';
+  var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && dpCiudadINM(ciudad);
+  var estado, tipoCausal, causal;
+
+  if(meses>=36){
+    estado='aplica'; tipoCausal='prescripcion';
+    causal='Prescripción total: han transcurrido '+dpFormatoTiempo(meses)+' desde la imposición del comparendo, superando ampliamente el término de tres (3) años establecido en el artículo 136 de la Ley 769 de 2002.';
+  } else if(posibleINM){
+    estado='aplica'; tipoCausal='error_fotomulta_inm';
+    causal='El organismo de tránsito figura entre los investigados por la Superintendencia de Transporte (2026) por operar equipos de fotodetección sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), exigido por el artículo 2 de la Ley 2251 de 2022.';
+  } else if(foto==='si' && notif==='no'){
+    estado='aplica'; tipoCausal='notificacion_tardia';
+    causal='Notificación extemporánea: la Ley 1843 de 2017 (Art. 8) otorga máximo 13 días hábiles desde la infracción para validar y notificar el comparendo a la dirección registrada en el RUNT (10 hábiles para validar + 3 para notificar). El acto administrativo no notificado dentro de este término no produce efectos jurídicos — caducidad de la facultad sancionatoria según los artículos 66 a 69 del CPACA (Ley 1437 de 2011).';
+  } else if(foto==='si' && notif==='nose'){
+    estado='revisar'; tipoCausal='revisar_notificacion';
+    causal='Por confirmar: si la notificación al RUNT fue posterior a los 13 días hábiles (Ley 1843/2017), procede solicitar caducidad de la facultad sancionatoria y nulidad del comparendo.';
+  } else {
+    estado='no_aplica'; tipoCausal='no_aplica';
+    causal='Comparendo sin causal de prescripción confirmada aún — se incluye en la petición con solicitud de verificación de antecedentes y revisión del proceso de notificación.';
+  }
+
+  // Si ya aplica por otra causal pero además hay notificación tardía, se suma
+  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && foto==='si' && notif==='no'){
+    causal += ' Adicionalmente, tampoco se surtió la notificación dentro de los 13 días hábiles exigidos por la Ley 1843 de 2017 — constituye un argumento adicional independiente.';
+  }
+
+  return Object.assign({}, m, { meses:meses, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal });
+}
+
+function dpFormatoTiempo(meses){
+  var a=Math.floor(meses/12), m=meses%12;
+  if(a===0) return m+(m===1?' mes':' meses');
+  if(m===0) return a+(a===1?' año':' años');
+  return a+(a===1?' año':' años')+' y '+m+(m===1?' mes':' meses');
+}
+
+/* ── Función principal: abre el modal ── */
+function abrirGenerarDP(btn){
+  var row = JSON.parse(btn.dataset.row);
+  _dpCaso = row;
+  _dpMultas = [];
+  try{
+    var raw = JSON.parse(row['Multas Reportadas']);
+    if(Array.isArray(raw)) _dpMultas = raw.map(dpAnalizarMulta);
+  }catch(e){}
+
+  if(!_dpMultas.length){
+    showToast('⚠️ Este caso no tiene multas cargadas. Usa "Completar datos de multas" primero.','error');
+    return;
+  }
+  dpRenderModal();
+  document.getElementById('modal-gen-dp').classList.add('show');
+}
+
+/* Variante: abre desde el modal-multas (después de guardar) */
+function abrirGenerarDPdesdeMM(){
+  if(!_mmCaso) return;
+  var row = _mmCaso;
+  _dpCaso = row;
+  _dpMultas = [];
+  try{
+    var filas = document.querySelectorAll('#mm-lista .mm-row');
+    filas.forEach(function(f){
+      var fecha = f.querySelector('.mm-fecha').value;
+      if(!fecha) return;
+      var m = {
+        comparendo: f.querySelector('.mm-comparendo').value.trim(),
+        fecha: fecha,
+        direccion: f.querySelector('.mm-direccion').value.trim(),
+        fechaNotif: f.querySelector('.mm-fechanotif').value,
+        diasNotif: f.querySelector('.mm-diasnotif').value,
+        secretaria: f.querySelector('.mm-secretaria').value.trim(),
+        agente: f.querySelector('.mm-agente').value.trim(),
+        codigo: f.querySelector('.mm-codigo').value.trim(),
+        descripcion: f.querySelector('.mm-descripcion').value.trim(),
+        placa: f.querySelector('.mm-placa').value.trim().toUpperCase(),
+        valor: f.querySelector('.mm-valor').value,
+        numResol: f.querySelector('.mm-numresol').value.trim(),
+        fechaResol: f.querySelector('.mm-fecharesol').value,
+        numCoactivo: f.querySelector('.mm-numcoactivo').value.trim(),
+        fechaCoactivo: f.querySelector('.mm-fechacoactivo').value,
+        ciudad: f.querySelector('.mm-ciudad').value.trim(),
+        tipo: f.querySelector('.mm-tipo').value,
+        foto: f.querySelector('.mm-foto').value,
+        notif: f.querySelector('.mm-notif').value
+      };
+      _dpMultas.push(dpAnalizarMulta(m));
+    });
+  }catch(e){}
+  if(!_dpMultas.length){ showToast('⚠️ Agrega al menos una multa con fecha','error'); return; }
+  closeModal('modal-multas');
+  dpRenderModal();
+  document.getElementById('modal-gen-dp').classList.add('show');
+}
+
+function dpRenderModal(){
+  var row = _dpCaso;
+  var multas = _dpMultas;
+  var nombreCompleto = ((row['Nombres']||'')+(row['Apellidos']?' '+row['Apellidos']:'')).trim()||'—';
+  var firmado = row['Firmado']==='TRUE'||row['Firmado']===true;
+
+  // Topbar
+  document.getElementById('dp-topbar').innerHTML =
+    '<div class="dp-topbar">'+
+    '<div class="dp-topbar-icon">⚖️</div>'+
+    '<div class="dp-topbar-info">'+
+    '<strong>'+escHtml(nombreCompleto)+'</strong>'+
+    '<span>C.C. '+escHtml(row['Cédula']||'—')+' · '+multas.length+' multa(s) · '+dpCiudadesList(multas)+'</span>'+
+    '</div>'+
+    '<div class="dp-topbar-badges">'+
+    '<span class="badge" style="background:rgba(255,255,255,.15);color:#fff;font-size:10px;">'+multas.filter(function(m){return m.estado==='aplica';}).length+' aplican</span>'+
+    (firmado?'<span class="badge" style="background:#22c55e;color:#fff;font-size:10px;">✅ Firmado</span>':'<span class="badge" style="background:#f59e0b;color:#fff;font-size:10px;">⏳ Pendiente firma</span>')+
+    '</div>'+
+    '</div>';
+
+  // Estado firma
+  var sigHtml = firmado
+    ? '<div class="dp-sig-state ok"><span style="font-size:1.2rem;">✅</span><div><strong>El cliente ya firmó.</strong> El PDF firmado está en Google Drive. Puedes radicar o descargar el documento sin firma para revisión.</div>'+(row['Enlace PDF Firmado']?'<a href="'+escHtml(row['Enlace PDF Firmado'].split('|')[0].trim())+'" target="_blank" class="btn btn-success btn-sm" style="flex-shrink:0;">Ver PDF</a>':'')+'</div>'
+    : '<div class="dp-sig-state pending"><span style="font-size:1.2rem;">✍️</span><div><strong>Pendiente de firma.</strong> Envíale el link al cliente para que firme con el dedo — toma 2 minutos. Una vez firme, puedes radicar de inmediato.</div></div>';
+  document.getElementById('dp-sig-state').innerHTML = sigHtml;
+
+  // Documento HTML
+  document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(row, multas);
+
+  // Tab multas
+  document.getElementById('dp-multas-detalle').innerHTML = dpRenderMultasDetalle(multas);
+
+  // Botones
+  var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']||'');
+  var nombre1 = (row['Nombres']||'').split(' ')[0]||'cliente';
+  var msgFirma = encodeURIComponent('¡Hola '+nombre1+'! 👋\n\nTu Derecho de Petición ya está listo ✅\n\nAbre este link desde tu celular, revisa el documento y fírmalo con el dedo — solo toma 2 minutos:\n'+linkFirma+'\n\nUna vez firmes lo radicamos el mismo día ante la secretaría de tránsito. ⚖️\n\n_JurídicosWeb_');
+  var btnFirma = document.getElementById('dp-btn-firma');
+  var btnCopiarLink = document.getElementById('dp-btn-copiar-link');
+  var btnRadicar = document.getElementById('dp-btn-radicar');
+  if(btnFirma){
+    if(row['WhatsApp']) btnFirma.onclick = function(){ window.open('https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma,'_blank'); };
+    else btnFirma.style.display='none';
+  }
+  if(btnCopiarLink) btnCopiarLink.onclick = function(){ copiarEnlace(linkFirma, btnCopiarLink); };
+  if(btnRadicar){
+    if(firmado && !(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true)){
+      btnRadicar.style.display='';
+      btnRadicar.onclick = function(){
+        closeModal('modal-gen-dp');
+        var fakeBtn = {dataset:{row:JSON.stringify(row)}};
+        confirmarAccion('radicar_por_correo',fakeBtn,null,'radicar_por_correo');
+      };
+    } else {
+      btnRadicar.style.display='none';
+    }
+  }
+  // Reset tab
+  dpTab('preview', document.querySelector('#modal-gen-dp .dp-tab-btn'));
+}
+
+function dpCiudadesList(multas){
+  var cs={};
+  multas.forEach(function(m){ var c=(m.ciudad||m.secretaria||'').trim(); if(c) cs[c]=1; });
+  var arr=Object.keys(cs);
+  return arr.length?arr.join(', '):'Ciudad por completar';
+}
+
+function dpTab(name, btnEl){
+  document.querySelectorAll('#modal-gen-dp .dp-tab-pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('#modal-gen-dp .dp-tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('dp-tab-'+name).classList.add('active');
+  if(btnEl) btnEl.classList.add('active');
+  else{ var btn = document.querySelector('#modal-gen-dp .dp-tab-btn[onclick*="\''+name+'\'"]'); if(btn) btn.classList.add('active'); }
+}
+
+/* ── Renderiza el documento como HTML (hoja A4 simulada) ── */
+function dpRenderDocumentoHTML(row, multas){
+  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var nombreCompleto = ((row['Nombres']||'')+(row['Apellidos']?' '+row['Apellidos']:'')).trim();
+  var cedula = row['Cédula']||'';
+  var placa = row['Placa']||'N/A';
+  var email = row['Email']||'(correo no registrado)';
+  var whatsapp = row['WhatsApp']||'(WhatsApp no registrado)';
+  var ciudad = row['Ciudad']||dpCiudadesList(multas)||'Colombia';
+
+  // Agrupar por ciudad/secretaría
+  var grupos = {};
+  multas.forEach(function(m){
+    var k = (m.ciudad||m.secretaria||ciudad).trim();
+    if(!grupos[k]) grupos[k] = [];
+    grupos[k].push(m);
+  });
+
+  var hayPrescritas = multas.some(function(m){return m.tipoCausal==='prescripcion';});
+  var hayNotif     = multas.some(function(m){return m.tipoCausal==='notificacion_tardia';});
+  var hayINM       = multas.some(function(m){return m.tipoCausal==='error_fotomulta_inm';});
+  var hayFotosin   = multas.some(function(m){return m.foto==='si' && (m.notif==='no'||m.posibleINM);});
+
+  var html = '';
+
+  Object.keys(grupos).forEach(function(ciudadKey, gi){
+    var gMultas = grupos[ciudadKey];
+    var secretaria = gMultas.find(function(m){return m.secretaria;});
+    var secretariaNombre = secretaria && secretaria.secretaria
+      ? 'Secretaría de Tránsito y Movilidad — '+secretaria.secretaria
+      : 'Secretaría de Tránsito y Movilidad — '+ciudadKey;
+
+    if(gi>0) html += '<div style="margin:20px 0;border-top:2px dashed #ccc;padding-top:18px;"><p style="text-align:center;font-size:11px;color:#666;font-style:italic;">— Documento para '+ciudadKey+' —</p></div>';
+
+    // Encabezado
+    html += '<div class="dp-ciudad-fecha">'+escHtml(ciudadKey)+', '+hoy+'</div>';
+    html += '<div class="dp-destinatario">'+
+      '<strong>Señores:</strong><br>'+
+      escHtml(secretariaNombre)+'<br>'+
+      escHtml(ciudadKey)+'<br>'+
+      '<strong>E.S.D.</strong>'+
+      '</div>';
+
+    // Referencia
+    html += '<div class="dp-ref">'+
+      'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, CADUCIDAD, NULIDAD Y ELIMINACIÓN DE COMPARENDO(S)<br>'+
+      'PETICIONARIO: '+escHtml(nombreCompleto)+' · C.C. No.: '+escHtml(cedula)+' · PLACA(S): '+escHtml(placa)+
+      '</div>';
+
+    // Intro
+    html += '<div class="dp-body-intro">'+
+      'Respetados señores:<br><br>'+
+      'Yo, <strong>'+escHtml(nombreCompleto)+'</strong>, identificado/a con C.C. No. <strong>'+escHtml(cedula)+'</strong>, mayor de edad y domiciliado/a en '+escHtml(ciudadKey)+', en ejercicio del derecho fundamental consagrado en el artículo 23 de la Constitución Política y en los términos de la <strong>Ley 1755 de 2015</strong>, me dirijo respetuosamente a ustedes para interponer el siguiente:'+
+      '</div>';
+
+    html += '<div style="text-align:center;font-size:14px;font-weight:700;margin:14px 0 18px;text-transform:uppercase;letter-spacing:.5px;">DERECHO DE PETICIÓN EN INTERÉS PARTICULAR</div>';
+
+    // HECHOS
+    html += '<div class="dp-section">I. HECHOS</div>';
+    gMultas.forEach(function(m, i){
+      var fFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '(fecha no registrada)';
+      var val = m.valor ? ', por valor de <strong>$'+Number(m.valor).toLocaleString('es-CO')+'</strong>' : '';
+      var cod = m.codigo ? ', código de infracción <strong>'+escHtml(m.codigo)+'</strong>' : '';
+      var desc = m.descripcion ? ' ('+escHtml(m.descripcion)+')' : '';
+      var dir = m.direccion ? ', ocurrida en '+escHtml(m.direccion) : '';
+      var comp = m.comparendo ? ' Número de comparendo: <strong>'+escHtml(m.comparendo)+'</strong>.' : '';
+      var agente = m.agente && m.agente!=='0 0' && m.agente!=='0' ? ' Funcionario/cámara: '+escHtml(m.agente)+'.' : '';
+      html += '<div class="dp-multa-blk">'+
+        (i+1)+'. Comparendo de fecha <strong>'+fFmt+'</strong>'+val+cod+desc+dir+'.'+comp+agente+
+        ' <em style="color:#555;">'+escHtml(m.causal)+'</em>'+
+        '</div>';
+    });
+
+    // FUNDAMENTOS JURÍDICOS
+    html += '<div class="dp-section">II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO</div>';
+    // 1 - Base constitucional (siempre)
+    html += '<div class="dp-ley"><strong>1. Derecho fundamental de petición y debido proceso —</strong> El artículo 23 de la Constitución Política garantiza el derecho de toda persona a presentar peticiones respetuosas ante las autoridades y obtener respuesta de fondo, pronta y completa. El artículo 29 consagra el derecho fundamental al debido proceso administrativo, que exige que toda sanción sea impuesta con plenas garantías de legalidad, notificación y defensa. La <strong>Ley 1755 de 2015</strong> (modificatoria del CPACA) regula el ejercicio de este derecho y establece el término de quince (15) días hábiles para dar respuesta de fondo (Art. 14 CPACA).</div>';
+    // 2 - Prescripción (si aplica)
+    if(hayPrescritas) html += '<div class="dp-ley"><strong>2. Prescripción de la acción sancionatoria y de la acción de cobro —</strong> El artículo 136 de la <strong>Ley 769 de 2002</strong> (Código Nacional de Tránsito) establece que la acción para imponer sanciones de tránsito prescribe en <strong>tres (3) años</strong> contados desde la comisión de la infracción, sin que se haya iniciado el proceso de cobro coactivo. Adicionalmente, el artículo 90 del CPACA (Ley 1437 de 2011) prevé que la <strong>acción de cobro coactivo</strong> prescribe en cinco (5) años desde la ejecutoria del acto sancionatorio. La <strong>Corte Constitucional</strong>, en sentencia C-530 de 2003, reafirmó que el término de prescripción en materia de infracciones administrativas opera de pleno derecho y la autoridad está en la obligación de declararlo y eliminar el registro correspondiente del SIMIT una vez constatado. El artículo 52 del CPACA reitera este principio para la facultad sancionatoria de las autoridades administrativas.</div>';
+    // 3 - Notificación tardía (si aplica)
+    if(hayNotif) html += '<div class="dp-ley"><strong>3. Caducidad de la facultad sancionatoria por notificación extemporánea —</strong> El artículo 8 de la <strong>Ley 1843 de 2017</strong> (Régimen Sancionatorio para Infracciones de Tránsito Detectadas por Medios Técnicos) establece que la autoridad de tránsito dispone de <strong>diez (10) días hábiles</strong> para validar el comparendo y de <strong>tres (3) días hábiles adicionales</strong> para notificar al infractor a la dirección registrada en el RUNT — <strong>trece (13) días hábiles en total</strong> desde la fecha de la infracción. El incumplimiento de este término produce la <strong>caducidad</strong> de la facultad sancionatoria. Los artículos 66 a 69 del CPACA (Ley 1437 de 2011) establecen que los actos administrativos que no cumplen con los requisitos de notificación válida no producen efectos jurídicos frente al administrado y dan lugar a su nulidad. El Consejo de Estado, Sección Tercera, ha reiterado en múltiples providencias que la notificación es un requisito de eficacia del acto — sin ella, el acto no es oponible al ciudadano.</div>';
+    // 4 - INM (si aplica)
+    if(hayINM) html += '<div class="dp-ley"><strong>4. Nulidad por ausencia de certificación metrológica (INM) —</strong> El artículo 2 de la <strong>Ley 2251 de 2022</strong> exige que todos los equipos de detección automática de infracciones de tránsito cuenten con el <em>"concepto de desempeño"</em> expedido por el <strong>Instituto Nacional de Metrología (INM)</strong>. La <strong>Superintendencia de Transporte</strong>, mediante Circular 001 de 2023, inició investigación formal a 37 organismos de tránsito por haber operado cámaras sin dicha certificación entre los años 2018 y 2024, lo que afecta la validez jurídica de los comparendos impuestos mediante esos equipos durante ese período. Un comparendo impuesto con un equipo no certificado carece de sustento probatorio válido y debe ser declarado nulo.</div>';
+    // 5 - SIMIT
+    html += '<div class="dp-ley"><strong>'+(hayPrescritas||hayNotif||hayINM?5:2)+'. Obligación de actualización del registro SIMIT —</strong> La <strong>Ley 1005 de 2006</strong> y la <strong>Resolución 1384 de 2019</strong> del Ministerio de Transporte regulan el Sistema Integrado de Multas e Infracciones de Tránsito (SIMIT) y establecen que la información registrada debe mantenerse actualizada y corresponder en todo momento a la realidad jurídica de cada comparendo. Mantener activos registros prescritos, caducados o nulos en el SIMIT constituye una vulneración al derecho al buen nombre y al habeas data del ciudadano (Art. 15 C.P.), y puede derivar en responsabilidad disciplinaria para el funcionario que persista en mantener registros ilegales.</div>';
+    // 6 - Respuesta obligatoria
+    html += '<div class="dp-ley"><strong>'+(hayPrescritas||hayNotif||hayINM?6:3)+'. Obligación de resolver de fondo —</strong> El artículo 14 del CPACA obliga a la administración a resolver de fondo toda petición dentro de los <strong>quince (15) días hábiles</strong> siguientes a su radicación, so pena de incurrir en silencio administrativo positivo y vulnerar el derecho fundamental de petición, lo cual habilita al peticionario para acudir a la Acción de Tutela (Art. 86 C.P.) para obtener la respuesta omitida.</div>';
+
+    // PRETENSIONES
+    html += '<div class="dp-section">III. PRETENSIONES</div>';
+    if(hayPrescritas) html += '<div class="dp-pretension">Que se declare la <strong>PRESCRIPCIÓN</strong> de las sanciones relacionadas, conforme al artículo 136 de la Ley 769 de 2002 y al artículo 52 del CPACA.</div>';
+    if(hayNotif) html += '<div class="dp-pretension">Que se declare la <strong>CADUCIDAD de la facultad sancionatoria</strong> y la <strong>NULIDAD</strong> de los comparendos por notificación extemporánea, al no haberse surtido dentro de los trece (13) días hábiles exigidos por el artículo 8 de la Ley 1843 de 2017.</div>';
+    if(hayINM) html += '<div class="dp-pretension">Que se verifique la certificación de desempeño del INM del equipo de fotodetección utilizado y, de no estar vigente al momento de la infracción, se declare la <strong>NULIDAD</strong> del comparendo impuesto con dicho equipo.</div>';
+    html += '<div class="dp-pretension">Que como consecuencia de lo anterior, se <strong>ELIMINEN</strong> del sistema SIMIT todos los registros correspondientes y se certifique la eliminación al peticionario.</div>';
+    html += '<div class="dp-pretension">Que se <strong>RESUELVA DE FONDO</strong> la presente petición dentro del término legal de quince (15) días hábiles establecido en el artículo 14 del CPACA (Ley 1437 de 2011).</div>';
+
+    // NOTIFICACIONES
+    html += '<div class="dp-section">IV. NOTIFICACIONES</div>';
+    html += '<p>Recibiré notificaciones en: <strong>'+escHtml(email)+'</strong> y/o WhatsApp <strong>'+escHtml(whatsapp)+'</strong>.</p>';
+    html += '<p style="margin-top:10px;font-size:12px;color:#555;">De no obtener respuesta de fondo dentro del término legal, me reservo el derecho de acudir a los mecanismos judiciales y constitucionales pertinentes, incluyendo la Acción de Tutela por vulneración al derecho fundamental de petición.</p>';
+
+    // Firma
+    html += '<div class="dp-firma-blk">';
+    html += '<p>Cordialmente,</p>';
+    html += '<div class="dp-firma-line">&nbsp;</div>';
+    html += '<div class="dp-firma-pie"><strong>'+escHtml(nombreCompleto)+'</strong><br>C.C. No. '+escHtml(cedula)+'<br>WhatsApp: '+escHtml(whatsapp)+'</div>';
+    html += '</div>';
+  });
+
+  return html;
+}
+
+/* ── Renderiza tarjetas de detalle de multas ── */
+function dpRenderMultasDetalle(multas){
+  var badges = {
+    aplica:    {txt:'✅ SE PUEDE ELIMINAR',cls:'aplica'},
+    revisar:   {txt:'🔍 REQUIERE REVISIÓN',cls:'revisar'},
+    no_aplica: {txt:'⏱️ AÚN NO APLICA',cls:'no_aplica'}
+  };
+  return '<div class="dp-multas-grid">'+multas.map(function(m,i){
+    var b = badges[m.estado]||badges.no_aplica;
+    var fFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    return '<div class="dp-multa-card">'+
+      '<div class="dp-mc-num">Multa #'+(i+1)+(m.comparendo?' · '+m.comparendo:'')+'</div>'+
+      '<span class="dp-multa-badge '+b.cls+'">'+b.txt+'</span>'+
+      dpMCField('Fecha infracción', fFmt)+
+      dpMCField('Ciudad', m.ciudad||m.secretaria||'—')+
+      dpMCField('Tipo', m.foto==='si'?'Fotomulta':'Comparendo'+(m.foto==='nose'?' (no especificado)':''))+
+      (m.valor?dpMCField('Valor', '$'+Number(m.valor).toLocaleString('es-CO')):'')+
+      (m.descripcion?dpMCField('Infracción', m.descripcion):'')+
+      (m.codigo?dpMCField('Código', m.codigo):'')+
+      dpMCField('Causal', m.causal.substring(0,120)+(m.causal.length>120?'…':''))+
+      '</div>';
+  }).join('')+'</div>';
+}
+function dpMCField(lbl, val){ return '<div class="dp-mc-field"><label>'+escHtml(lbl)+':</label><span>'+escHtml(val||'—')+'</span></div>'; }
+
+/* ── Genera y descarga PDF (sin firma) ── */
+function dpDescargarPDF(){
+  if(!_dpCaso||!_dpMultas.length){ showToast('⚠️ Sin datos para generar el PDF','error'); return; }
+  if(!window.jspdf){ showToast('⚠️ Librería PDF no cargada — recarga la página','error'); return; }
+
+  var jsPDF = window.jspdf.jsPDF;
+  var row = _dpCaso;
+  var multas = _dpMultas;
+  var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var nombreCompleto = ((row['Nombres']||'')+(row['Apellidos']?' '+row['Apellidos']:'')).trim();
+  var cedula = row['Cédula']||'';
+  var placa = row['Placa']||'N/A';
+  var email = row['Email']||'';
+  var whatsapp = row['WhatsApp']||'';
+
+  // Agrupar por ciudad
+  var grupos = {};
+  multas.forEach(function(m){
+    var k = (m.ciudad||m.secretaria||(row['Ciudad'])||'Colombia').trim();
+    if(!grupos[k]) grupos[k]=[];
+    grupos[k].push(m);
+  });
+
+  var ciudades = Object.keys(grupos);
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var ml=18, mr=192, lw=174;
+
+  function addPage(){ doc.addPage(); }
+  function checkY(doc, y, needed){
+    if(y+(needed||14)>275){ addPage(); y=24; }
+    return y;
+  }
+  function encabezado(doc){
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(10);
+    doc.setTextColor(13,27,75);
+    doc.text('JURÍDICOS WEB — BUFETE DE TRÁNSITO · juridicosweb.com',ml,12);
+    doc.setDrawColor(13,27,75);
+    doc.setLineWidth(0.5);
+    doc.line(ml,14,mr,14);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    doc.setTextColor(80);
+    doc.text('Documento generado el '+hoy+' · Este documento tiene plena validez legal cuando va firmado por el peticionario.',ml,19);
+  }
+  function pie(doc){
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120);
+    doc.line(ml,286,mr,286);
+    doc.text('JurídicosWeb · juridicosweb.com · Este documento es de uso exclusivo del peticionario y fue generado por asesoría jurídica especializada.',ml,290);
+  }
+  function addLines(doc, lines, y, size, bold, color){
+    doc.setFontSize(size||11);
+    doc.setFont('helvetica', bold?'bold':'normal');
+    doc.setTextColor(color||0);
+    lines.forEach(function(l){
+      y = checkY(doc, y);
+      doc.text(l,ml,y); y+=5.2;
+    });
+    return y;
+  }
+  function section(doc, title, y){
+    y = checkY(doc,y,10);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(13,27,75);
+    doc.text(title,ml,y); y+=2;
+    doc.setDrawColor(200); doc.setLineWidth(0.3); doc.line(ml,y,mr,y); y+=6;
+    doc.setFont('helvetica','normal'); doc.setTextColor(0);
+    return y;
+  }
+
+  ciudades.forEach(function(ciudadKey, gi){
+    if(gi>0) addPage();
+    var gMultas = grupos[ciudadKey];
+    var sec = gMultas.find(function(m){return m.secretaria;})||{};
+    var secNombre = sec.secretaria
+      ? 'Secretaría de Tránsito y Movilidad — '+sec.secretaria
+      : 'Secretaría de Tránsito y Movilidad — '+ciudadKey;
+
+    var hayPre = gMultas.some(function(m){return m.tipoCausal==='prescripcion';});
+    var hayNot = gMultas.some(function(m){return m.tipoCausal==='notificacion_tardia';});
+    var hayINM = gMultas.some(function(m){return m.tipoCausal==='error_fotomulta_inm';});
+
+    encabezado(doc);
+    var y = 28;
+
+    // Ciudad/fecha
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(0);
+    doc.text(ciudadKey+', '+hoy, mr, y, {align:'right'}); y+=8;
+
+    // Destinatario
+    var destLines = ['Señores:', secNombre, ciudadKey, 'E.S.D.'];
+    destLines.forEach(function(l){ y=checkY(doc,y); doc.setFont('helvetica',l==='E.S.D.'?'bold':'normal'); doc.setFontSize(11); doc.text(l,ml,y); y+=5.5; });
+    y+=4;
+
+    // Referencia
+    doc.setFillColor(245,243,236); doc.setDrawColor(13,27,75); doc.setLineWidth(1);
+    doc.rect(ml-2,y-4,lw+2,18,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(13,27,75);
+    var refLines = doc.splitTextToSize('REFERENCIA: DERECHO DE PETICIÓN — SOLICITUD DE PRESCRIPCIÓN, CADUCIDAD, NULIDAD Y ELIMINACIÓN DE COMPARENDO(S)',lw-4);
+    refLines.forEach(function(l){ doc.text(l,ml+2,y); y+=5; });
+    doc.text('PETICIONARIO: '+nombreCompleto+' · C.C.: '+cedula+' · PLACA(S): '+placa,ml+2,y); y+=12;
+
+    // Intro
+    var intro = 'Yo, '+nombreCompleto+', identificado/a con C.C. No. '+cedula+', en ejercicio del derecho fundamental consagrado en el artículo 23 de la Constitución Política y en los términos de la Ley 1755 de 2015, interpongo el siguiente:';
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(0);
+    var introLines = doc.splitTextToSize(intro, lw);
+    introLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+    y+=4;
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(13,27,75);
+    y=checkY(doc,y); doc.text('DERECHO DE PETICIÓN EN INTERÉS PARTICULAR',105,y,{align:'center'}); y+=8;
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(0);
+
+    // HECHOS
+    y = section(doc,'I. HECHOS',y);
+    gMultas.forEach(function(m,i){
+      var fFmt = m.fecha?new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'';
+      var hechoBase = (i+1)+'. Comparendo del '+fFmt+(m.valor?', por valor de $'+Number(m.valor).toLocaleString('es-CO'):'')+
+        (m.codigo?', código '+m.codigo:'')+(m.descripcion?' ('+m.descripcion+')':'')+
+        (m.direccion?', en '+m.direccion:'')+'.'+(m.comparendo?' Comparendo No.: '+m.comparendo+'.':'');
+      var hLines = doc.splitTextToSize(hechoBase,lw);
+      hLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+      var cLines = doc.splitTextToSize('   Causal: '+m.causal,lw);
+      doc.setTextColor(60,80,120);
+      cLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+      doc.setTextColor(0); y+=2;
+    });
+
+    // FUNDAMENTOS JURÍDICOS
+    y = section(doc,'II. FUNDAMENTOS JURÍDICOS',y);
+    var fundamentos = [
+      '1. Derecho de petición y debido proceso (Art. 23 y 29 C.P. — Ley 1755/2015 — CPACA Art. 14).'
+    ];
+    if(hayPre) fundamentos.push('2. Prescripción: Art. 136 Ley 769/2002 (3 años). CPACA Art. 90 (cobro coactivo: 5 años). Corte Constitucional C-530/2003.');
+    if(hayNot) fundamentos.push((fundamentos.length+1)+'. Caducidad por notificación tardía: Ley 1843/2017 Art. 8 (13 días hábiles). CPACA Arts. 66-69 (actos no oponibles sin notificación válida).');
+    if(hayINM) fundamentos.push((fundamentos.length+1)+'. Nulidad por ausencia de certificación INM: Ley 2251/2022 Art. 2. Circular 001/2023 Supertransporte.');
+    fundamentos.push((fundamentos.length+1)+'. Actualización SIMIT: Ley 1005/2006 — Resolución 1384/2019 Mintransporte.');
+    fundamentos.push((fundamentos.length+1)+'. Respuesta obligatoria dentro de 15 días hábiles: CPACA Art. 14.');
+    fundamentos.forEach(function(f){
+      var fLines = doc.splitTextToSize(f,lw);
+      fLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+      y+=1;
+    });
+
+    // PRETENSIONES
+    y = section(doc,'III. PRETENSIONES',y);
+    var prets = [];
+    if(hayPre) prets.push('1. Que se declare la PRESCRIPCIÓN y se elimine el registro del SIMIT (Art. 136 Ley 769/2002).');
+    if(hayNot) prets.push((prets.length+1)+'. Que se declare la CADUCIDAD y NULIDAD por notificación extemporánea (Ley 1843/2017).');
+    if(hayINM) prets.push((prets.length+1)+'. Que se verifique certificación INM y se declare NULIDAD de comparendos sin ella (Ley 2251/2022).');
+    prets.push((prets.length+1)+'. Que se ELIMINEN los registros del SIMIT y se certifique la eliminación al peticionario.');
+    prets.push((prets.length+1)+'. Que se resuelva DE FONDO dentro de los 15 días hábiles (CPACA Art. 14).');
+    prets.forEach(function(p){
+      var pLines = doc.splitTextToSize(p,lw);
+      pLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+      y+=1;
+    });
+
+    // NOTIFICACIONES
+    y = section(doc,'IV. NOTIFICACIONES',y);
+    var notLines = doc.splitTextToSize('Recibiré notificaciones en: '+email+(whatsapp?' y/o WhatsApp '+whatsapp:'')+'. De no recibir respuesta de fondo dentro del término legal, acudiré a los mecanismos judiciales y constitucionales pertinentes, incluyendo la Acción de Tutela.',lw);
+    notLines.forEach(function(l){ y=checkY(doc,y); doc.text(l,ml,y); y+=5.2; });
+
+    // Firma
+    y = checkY(doc,y,40); y+=8;
+    doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.text('Cordialmente,',ml,y); y+=20;
+    doc.setDrawColor(100); doc.setLineWidth(0.5); doc.line(ml,y,ml+70,y); y+=5;
+    doc.setFont('helvetica','bold'); doc.text(nombreCompleto,ml,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.text('C.C. No. '+cedula,ml,y); y+=5;
+    if(whatsapp){ doc.text('WhatsApp: '+whatsapp,ml,y); }
+
+    pie(doc);
+  });
+
+  var apellido = row['Apellidos']||'cliente';
+  doc.save('DerechoPeticion_'+apellido+'_'+cedula+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  showToast('✅ PDF descargado','success');
 }
 </script>
 </body>
