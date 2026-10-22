@@ -1895,66 +1895,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Elige método -->
-        <p style="font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 10px;text-align:center;">Selecciona tu forma de pago</p>
+        <!-- Instrucción clara -->
+        <div style="background:#fefce8;border:1.5px solid #fcd34d;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">👇</span>
+          <div>
+            <p style="font-size:0.8rem;font-weight:900;color:#92400e;margin:0;line-height:1.2;">Elige cómo quieres pagar</p>
+            <p style="font-size:0.68rem;color:#78350f;margin:2px 0 0;font-weight:600;">Toca uno de los botones de abajo para ver los pasos</p>
+          </div>
+        </div>
 
-        <!-- BOTÓN: Llave breve (PREMIUM) -->
+        <!-- BOTÓN: Llave breve -->
         <button id="btn-metodo-llave" onclick="seleccionarMetodoPago('llave')"
           style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0c4a6e,#0369a1,#0284c7);color:#fff;border:none;border-radius:14px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 6px 28px rgba(3,105,161,0.55);transition:.25s;">
-          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent 60%);pointer-events:none;"></div>
           <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2.5s infinite;pointer-events:none;"></div>
-          <div style="position:relative;display:flex;align-items:center;gap:14px;padding:14px 18px;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:10px;flex-shrink:0;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;">
+            <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:9px;flex-shrink:0;font-size:1.3rem;">📱</div>
+            <div style="text-align:left;flex:1;min-width:0;">
+              <p style="font-size:0.88rem;font-weight:900;margin:0 0 2px;">Nequi · Daviplata · Cualquier banco</p>
+              <p style="font-size:0.65rem;color:#bae6fd;margin:0;font-weight:600;">Transferencia con llave breve · Más rápido</p>
             </div>
-            <div style="text-align:left;flex:1;">
-              <p style="font-size:0.95rem;font-weight:900;margin:0 0 3px;">Pagar con Llave breve</p>
-              <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                <span style="background:rgba(255,255,255,0.15);color:#e0f2fe;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;">Nequi</span>
-                <span style="background:rgba(255,255,255,0.15);color:#e0f2fe;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;">Daviplata</span>
-                <span style="background:rgba(255,255,255,0.15);color:#e0f2fe;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;">Bancolombia</span>
-                <span style="background:rgba(255,255,255,0.15);color:#e0f2fe;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;">Davivienda</span>
-                <span style="background:rgba(255,255,255,0.15);color:#e0f2fe;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:4px;">+ cualquier banco</span>
-              </div>
-            </div>
-            <div style="flex-shrink:0;font-size:1.1rem;opacity:.8;">›</div>
+            <span style="flex-shrink:0;background:rgba(255,255,255,0.2);border-radius:8px;padding:4px 9px;font-size:0.65rem;font-weight:800;white-space:nowrap;">👆 TOCA AQUÍ</span>
           </div>
-          <div id="badge-llave-sel" style="position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.5px;">SELECCIONADO ✅</div>
+          <div id="badge-llave-sel" style="display:none;position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;">SELECCIONADO ✅</div>
         </button>
 
-        <!-- BOTÓN: Tarjeta / PSE (PREMIUM) -->
+        <!-- BOTÓN: Tarjeta / PSE -->
         <button id="btn-metodo-epayco" onclick="seleccionarMetodoPago('epayco')"
           style="width:100%;margin-bottom:12px;background:linear-gradient(135deg,#1c1917,#292524);color:#fff;border:2px solid #44403c;border-radius:14px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:.25s;">
-          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.06),transparent 60%);pointer-events:none;"></div>
-          <div id="badge-epayco-sel" style="position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.5px;display:none;">SELECCIONADO ✅</div>
-          <div style="position:relative;display:flex;align-items:center;gap:14px;padding:14px 18px;">
-            <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:10px;flex-shrink:0;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#fff" stroke-width="2"/><path d="M2 10h20" stroke="#fff" stroke-width="2"/></svg>
+          <div id="badge-epayco-sel" style="display:none;position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;">SELECCIONADO ✅</div>
+          <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;">
+            <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:9px;flex-shrink:0;font-size:1.3rem;">💳</div>
+            <div style="text-align:left;flex:1;min-width:0;">
+              <p style="font-size:0.88rem;font-weight:900;margin:0 0 2px;">Tarjeta débito · Crédito · PSE</p>
+              <p style="font-size:0.65rem;color:#a8a29e;margin:0;font-weight:600;">VISA · Mastercard · PSE · Nequi · Bancolombia</p>
             </div>
-            <div style="text-align:left;flex:1;">
-              <p style="font-size:0.95rem;font-weight:900;margin:0 0 5px;">Pagar con Tarjeta / PSE</p>
-              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                <!-- Visa -->
-                <div style="background:#1a1f71;border-radius:4px;padding:2px 7px;font-size:0.65rem;font-weight:900;color:#fff;font-style:italic;letter-spacing:.5px;">VISA</div>
-                <!-- Mastercard -->
-                <div style="display:flex;align-items:center;border-radius:4px;overflow:hidden;height:20px;">
-                  <div style="width:14px;height:14px;background:#eb001b;border-radius:50%;margin-right:-5px;flex-shrink:0;"></div>
-                  <div style="width:14px;height:14px;background:#f79e1b;border-radius:50%;flex-shrink:0;"></div>
-                </div>
-                <!-- PSE -->
-                <div style="background:linear-gradient(135deg,#006633,#009933);border-radius:4px;padding:2px 7px;font-size:0.65rem;font-weight:900;color:#fff;">PSE</div>
-                <!-- Nequi -->
-                <div style="background:linear-gradient(135deg,#5B21B6,#7C3AED);border-radius:4px;padding:2px 7px;font-size:0.65rem;font-weight:900;color:#fff;">Nequi</div>
-                <!-- Bancolombia -->
-                <div style="background:#FFCC00;border-radius:4px;padding:2px 7px;font-size:0.6rem;font-weight:900;color:#000;">Banc.</div>
-              </div>
-            </div>
-            <div style="flex-shrink:0;font-size:1.1rem;opacity:.5;">›</div>
+            <span style="flex-shrink:0;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;font-size:0.65rem;font-weight:800;white-space:nowrap;color:#d4d4d4;">👆 TOCA AQUÍ</span>
           </div>
         </button>
 
-        <!-- Panel: Llave breve -->
-        <div id="panel-llave" style="display:block;">
+        <!-- Panel: Llave breve (oculto hasta que el usuario toque) -->
+        <div id="panel-llave" style="display:none;">
           <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
               <div style="width:8px;height:8px;background:#0ea5e9;border-radius:50%;animation:pulseGreen 1.5s infinite;flex-shrink:0;"></div>
