@@ -1349,11 +1349,12 @@ function syncCampanaLoad() {
         <iframe id="rmk-modal-preview" sandbox="allow-same-origin" style="width:100%;height:340px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;"></iframe>
       </div>
       <textarea id="rmk-modal-html" style="display:none;"></textarea>
+      <div id="rmk-resultado" style="display:none;padding:12px 16px;border-radius:10px;font-size:0.85rem;font-weight:700;text-align:center;"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
-        <button id="btn-copiar-html-rmk" onclick="rmkCopiarHtml()" style="flex:1;min-width:140px;padding:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;color:#374151;">📋 Copiar HTML</button>
-        <button onclick="rmkAbrirGmail()" style="flex:2;min-width:180px;padding:12px;background:linear-gradient(135deg,#ea4335,#c62828);border:none;border-radius:10px;font-size:0.88rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(234,67,53,0.3);">📨 Abrir en Gmail →</button>
+        <button id="btn-enviar-rmk" onclick="rmkEnviarDirecto()" style="flex:1;padding:14px;background:linear-gradient(135deg,#16a34a,#15803d);border:none;border-radius:10px;font-size:0.95rem;font-weight:800;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(22,163,74,0.35);">✉️ Enviar correo ahora</button>
+        <button onclick="rmkAbrirGmail()" title="Alternativa: abrir en Gmail manualmente" style="padding:14px 16px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.82rem;font-weight:700;cursor:pointer;color:#374151;">📨 Abrir Gmail</button>
       </div>
-      <p style="font-size:0.68rem;color:#94a3b8;margin:0;text-align:center;">Se abre Gmail listo con email y asunto. En el cuerpo del correo haz clic y pega con <strong>Ctrl+V</strong> — el diseño aparece completo.</p>
+      <p style="font-size:0.68rem;color:#94a3b8;margin:0;text-align:center;">El correo sale directo desde el servidor — queda en Enviados de la cuenta de Apps Script.</p>
     </div>
   </div>
 </div>
@@ -2828,6 +2829,58 @@ function rmkAbrirGmail(){
       showToast('📋 Pega con Ctrl+V en el cuerpo del correo de Gmail','success');
       if(btn){ btn.innerHTML=orig; btn.disabled=false; }
     });
+}
+
+function rmkEnviarDirecto(){
+  var email  = document.getElementById('rmk-modal-email').value.trim();
+  var asunto = document.getElementById('rmk-modal-asunto').value.trim();
+  var html   = document.getElementById('rmk-modal-html').value;
+  if(!email){ showToast('⚠️ Escribe el email del destinatario','error'); return; }
+
+  var btn = document.getElementById('btn-enviar-rmk');
+  var res = document.getElementById('rmk-resultado');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Enviando...';
+  res.style.display = 'none';
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({
+      _accion: 'enviar_correo',
+      email: email,
+      asunto: asunto,
+      html: html,
+      nombreRemitente: 'JurídicosWeb'
+    })
+  }).then(function(r){ return r.text(); }).then(function(txt){
+    var resp; try{ resp = JSON.parse(txt); }catch(e){ resp = null; }
+    btn.disabled = false;
+    btn.innerHTML = '✉️ Enviar correo ahora';
+    if(resp && resp.ok){
+      res.style.display = 'block';
+      res.style.background = '#f0fdf4';
+      res.style.color = '#166534';
+      res.style.border = '1.5px solid #bbf7d0';
+      res.innerHTML = '✅ Correo enviado correctamente a <strong>'+email+'</strong>'+(resp.via==='mailapp'?' (vía MailApp)':'');
+      showToast('✅ Correo enviado a '+email,'success');
+    } else {
+      var msg = (resp && (resp.msg||resp.error)) || txt.slice(0,120);
+      res.style.display = 'block';
+      res.style.background = '#fef2f2';
+      res.style.color = '#991b1b';
+      res.style.border = '1.5px solid #fecaca';
+      res.innerHTML = '❌ Error al enviar: '+msg+'<br><small>Asegúrate de que el Apps Script está actualizado (pestaña ⚙️ Campaña → Configurar).</small>';
+    }
+  }).catch(function(e){
+    btn.disabled = false;
+    btn.innerHTML = '✉️ Enviar correo ahora';
+    res.style.display = 'block';
+    res.style.background = '#fef2f2';
+    res.style.color = '#991b1b';
+    res.style.border = '1.5px solid #fecaca';
+    res.innerHTML = '❌ Error de red: '+e.message;
+  });
 }
 
 function rmkCopiarHtml(){
