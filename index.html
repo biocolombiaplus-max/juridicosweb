@@ -746,6 +746,7 @@ body{padding-bottom:env(safe-area-inset-bottom);}
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .hero-inner{grid-template-columns:1fr;}
+  .hero-inner > div{min-width:0;overflow:hidden;}
   .hero-card{display:none;}
   .hero h1{font-size:2.2rem;}
   .hero-stats{grid-template-columns:repeat(3,1fr);}
@@ -769,7 +770,7 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .hero{padding:60px 5% 70px;}
   .hero-ctas-row{flex-direction:column;}
   .hero-ctas-row .btn{width:100%;}
-  .hero-badge{font-size:0.63rem;padding:5px 11px;letter-spacing:1.8px;}
+  .hero-badge{font-size:0.6rem;padding:4px 10px;letter-spacing:1px;max-width:100%;overflow:hidden;}
   .hero-consult-card{padding:22px 16px 16px;border-radius:16px;}
   .hero-consult-input{font-size:1.1rem;padding:15px 14px;letter-spacing:2px;}
   .hero-consult-btn{width:54px;font-size:1.1rem;}
@@ -783,6 +784,14 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .social-proof-bar{gap:16px;}
   .step-item{flex:0 0 100%;}
   .footer-inner{gap:24px;}
+  /* urgency strip button full-width on mobile */
+  .urgency-centered .btn{width:100%;box-sizing:border-box;text-align:center;justify-content:center;padding-left:16px;padding-right:16px;}
+  /* hero badge overflow-safe */
+  .hero-badge{max-width:100%;overflow:hidden;}
+  .hero-badge .dot{flex-shrink:0;}
+  .hero-badge-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  /* hero ctas full-width */
+  .hero-ctas{width:100%;max-width:100%;}
 }
 </style>
 </head>
@@ -835,7 +844,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-orb2"></div>
   <div class="hero-inner">
     <div>
-      <div class="hero-badge"><span class="dot"></span> Bufete de Tránsito · Colombia · 2026</div>
+      <div class="hero-badge"><span class="dot"></span><span class="hero-badge-text"> Bufete de Tránsito · Colombia · 2026</span></div>
       <h1>Deja de Pagar<br><span class="hl">Multas</span> y <span class="hl">Fotomultas</span><br>que Ya No Debes</h1>
       <p class="hero-h1-sub">Hay colombianos pagando deudas que la ley ya canceló. Ingresa tu cédula y en segundos te decimos si tus multas aplican — sin registro, sin costo.</p>
       <div class="hero-ctas">
