@@ -4743,11 +4743,66 @@ function campIniciarEnvio(){
   if(_campContactos.length === 0){ alert('Carga una lista de contactos primero'); return; }
   if(_campCuentas.length === 0){ alert('Agrega al menos una cuenta Gmail primero'); return; }
   if(_campAsuntos.length === 0){ alert('Agrega al menos un asunto'); return; }
-  _campPausado = false;
-  document.getElementById('camp-btn-iniciar').style.display = 'none';
-  document.getElementById('camp-btn-pausar').style.display = 'inline-block';
-  campLog('🚀 Iniciando campaña — '+_campContactos.length+' contactos, desde índice '+_campIdx,'info');
-  campEnviarSiguiente();
+
+  // Verificar GAS antes de arrancar — si no está actualizado los correos no se envían
+  var btnIniciar = document.getElementById('camp-btn-iniciar');
+  btnIniciar.disabled = true;
+  btnIniciar.textContent = '⏳ Verificando servidor...';
+  campLog('⏳ Verificando Apps Script antes de iniciar...','info');
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({ _accion: 'test_campana' })
+  }).then(function(r){ return r.text(); }).then(function(txt){
+    var res; try { res = JSON.parse(txt); } catch(e){ res = null; }
+    btnIniciar.disabled = false;
+    btnIniciar.textContent = '▶️ Iniciar envío';
+
+    if(res && res.gasOk){
+      // GAS OK — arrancar
+      campLog('✅ Apps Script verificado (v'+res.version+') — iniciando envío','ok');
+      _campPausado = false;
+      btnIniciar.style.display = 'none';
+      document.getElementById('camp-btn-pausar').style.display = 'inline-block';
+      campLog('🚀 Iniciando campaña — '+_campContactos.length+' contactos, desde índice '+_campIdx,'info');
+      campEnviarSiguiente();
+    } else {
+      // GAS no actualizado — bloquear y mostrar instrucciones
+      campLog('❌ BLOQUEADO: Apps Script no está actualizado. Los correos NO se enviarán hasta actualizarlo.','err');
+      campLog('👉 Ve a la pestaña ⚙️ Configurar y sigue los pasos para actualizar el script.','info');
+      // Mostrar alerta visible
+      var alerta = document.getElementById('camp-gas-alerta');
+      if(!alerta){
+        alerta = document.createElement('div');
+        alerta.id = 'camp-gas-alerta';
+        alerta.style.cssText = 'background:#fef2f2;border:2px solid #dc2626;border-radius:10px;padding:16px 20px;margin:12px 0;font-size:14px;';
+        var btnEnviar = document.getElementById('camp-btn-iniciar');
+        btnEnviar.parentNode.insertBefore(alerta, btnEnviar);
+      }
+      alerta.innerHTML = '<p style="margin:0 0 8px;font-weight:800;color:#991b1b;font-size:15px;">❌ El Apps Script NO está actualizado</p>'
+        +'<p style="margin:0 0 10px;color:#7f1d1d;">Los correos muestran "enviado" en el panel pero <strong>no llegan a nadie</strong> porque el servidor usa código viejo. Para que funcione:</p>'
+        +'<ol style="margin:0 0 10px;padding-left:20px;color:#7f1d1d;line-height:1.8;">'
+        +'<li>Ve a <a href="https://script.google.com" target="_blank" style="color:#dc2626;font-weight:700;">script.google.com</a> y abre tu proyecto</li>'
+        +'<li>Ve a la pestaña <strong>⚙️ Configurar</strong> en este panel y copia el código</li>'
+        +'<li>Pégalo en el editor de Apps Script (selecciona todo y reemplaza)</li>'
+        +'<li>Guarda con <strong>Ctrl+S</strong></li>'
+        +'<li>Clic en <strong>Implementar → Administrar implementaciones → ✏️ → Nueva versión → Implementar</strong></li>'
+        +'<li>Vuelve aquí y presiona <strong>▶️ Iniciar envío</strong> de nuevo</li>'
+        +'</ol>'
+        +'<button onclick="this.closest(\'#camp-gas-alerta\').remove()" style="background:#dc2626;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;">Entendido, iré a actualizar</button>';
+    }
+  }).catch(function(e){
+    btnIniciar.disabled = false;
+    btnIniciar.textContent = '▶️ Iniciar envío';
+    campLog('⚠️ No se pudo verificar el Apps Script ('+e.message+'). Iniciando de todas formas...','info');
+    // Si no hay conexión, dejar pasar para no bloquear
+    _campPausado = false;
+    btnIniciar.style.display = 'none';
+    document.getElementById('camp-btn-pausar').style.display = 'inline-block';
+    campLog('🚀 Iniciando campaña — '+_campContactos.length+' contactos, desde índice '+_campIdx,'info');
+    campEnviarSiguiente();
+  });
 }
 
 function campPausarEnvio(){
