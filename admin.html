@@ -4708,7 +4708,7 @@ var _campSyncTimer = null;
 function campSyncGuardar(){
   campLog('Guardando en nube...','info');
   var payload = {
-    accion: 'sync_campana_save',
+    _accion: 'sync_campana_save',
     data: JSON.stringify({
       contactos: _campContactos,
       cuentas: _campCuentas,
@@ -4738,7 +4738,7 @@ function campSyncCargar(){
   campLog('Cargando desde nube...','info');
   fetch(SCRIPT_URL, {
     method: 'POST',
-    body: JSON.stringify({ accion: 'sync_campana_load' }),
+    body: JSON.stringify({ _accion: 'sync_campana_load' }),
     headers: {'Content-Type': 'text/plain'},
     keepalive: true
   }).then(function(r){ return r.json(); }).then(function(res){
@@ -4782,14 +4782,21 @@ function campEnviarSiguiente(){
     campLog('🎉 ¡Campaña completada! '+_campEnviados+' correos enviados','ok');
     document.getElementById('camp-btn-iniciar').style.display='inline-block';
     document.getElementById('camp-btn-pausar').style.display='none';
-    campGuardar(); return;
+    campGuardar(); campSyncGuardar(); return;
+  }
+  // Saltar contactos que ya recibieron el correo
+  var contacto = _campContactos[_campIdx];
+  if(contacto && contacto.enviado){
+    _campIdx++;
+    campActualizarStats(); campRenderTablaContactos(_campFiltroActual);
+    setTimeout(campEnviarSiguiente, 50); return;
   }
   var cuentaIdx = campCuentaDisponible();
   if(cuentaIdx < 0){
-    campLog('⚠️ Todas las cuentas alcanzaron el límite diario (90/cuenta). Campaña pausada hasta mañana.','err');
-    campPausarEnvio(); return;
+    campLog('⚠️ Todas las cuentas alcanzaron el límite diario (90/cuenta). Campaña pausada — reanuda mañana con "Iniciar".','err');
+    campPausarEnvio(); campGuardar(); campSyncGuardar(); return;
   }
-  var contacto = _campContactos[_campIdx];
+  contacto = _campContactos[_campIdx];
   var cuenta   = _campCuentas[cuentaIdx];
   var asunto   = _campAsuntos[Math.floor(Math.random()*_campAsuntos.length)];
   var htmlBody = campGenerarHTML(contacto.nombre||contacto.email.split('@')[0]);
@@ -4801,7 +4808,7 @@ function campEnviarSiguiente(){
     : asunto;
 
   var payload = {
-    accion: 'enviar_correo',   // ← corregido: sin guion bajo
+    _accion: 'enviar_correo',
     email: contacto.email,
     nombre: contacto.nombre || '',
     asunto: asuntoFinal,
@@ -4838,6 +4845,8 @@ function campEnviarSiguiente(){
     campGuardar(); campActualizarStats();
     campRenderTablaContactos(_campFiltroActual);
     campAutoSync();
+    // Sync inmediato a nube cada 20 enviados (redundante con campAutoSync que hace cada 10)
+    if(_campEnviados > 0 && _campEnviados % 20 === 0) campSyncGuardar();
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });
 }
