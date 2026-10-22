@@ -1644,79 +1644,93 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Previsualización del documento
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-doc-preview">
-        <!-- Badges -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-          <div style="background:#f0fdf4;border:1.5px solid #22c55e;border-radius:8px;padding:4px 10px;font-size:0.68rem;font-weight:800;color:#15803d;display:flex;align-items:center;gap:5px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>DOCUMENTO LISTO</div>
-          <div style="background:#fef3c7;border:1.5px solid #d97706;border-radius:8px;padding:4px 10px;font-size:0.68rem;font-weight:800;color:#92400e;">OFICIAL · Art. 23 C.P.</div>
-          <div style="margin-left:auto;font-size:0.68rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Gratis verlo</div>
+
+        <!-- Banner: tu doc está listo -->
+        <div style="background:linear-gradient(90deg,#f0fdf4,#dcfce7);border:1.5px solid #4ade80;border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0;box-shadow:0 0 8px #22c55e;animation:ping 1.5s ease-in-out infinite;display:inline-block;"></span>
+          <div style="min-width:0;">
+            <p style="font-size:0.78rem;font-weight:900;color:#15803d;margin:0;line-height:1.2;">✅ Tu Derecho de Petición está listo</p>
+            <p style="font-size:0.66rem;color:#166534;margin:1px 0 0;font-weight:600;">Solo falta tu firma · Es GRATIS · Tarda 10 segundos</p>
+          </div>
+          <span style="margin-left:auto;font-size:0.62rem;font-weight:800;color:#15803d;white-space:nowrap;background:#bbf7d0;padding:2px 7px;border-radius:5px;flex-shrink:0;">OFICIAL</span>
         </div>
 
-        <!-- Documento compacto mejorado con más datos -->
-        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(30,58,138,0.18);">
-          <!-- Header azul -->
-          <div style="background:linear-gradient(135deg,#1e3a8a,#1e40af);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <p style="font-size:0.58rem;opacity:0.65;margin:0 0 1px;letter-spacing:1.8px;text-transform:uppercase;">República de Colombia</p>
-              <p style="font-size:0.86rem;font-weight:900;margin:0;letter-spacing:.3px;">DERECHO DE PETICIÓN</p>
-              <p style="font-size:0.6rem;opacity:0.7;margin:2px 0 0;">Ley 1755/2015 · Art. 23 Constitución Política</p>
+        <!-- Documento oficial premium -->
+        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(30,58,138,0.22);">
+          <!-- Header azul con sello -->
+          <div style="background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 60%,#1d4ed8 100%);color:#fff;padding:9px 14px;position:relative;overflow:hidden;">
+            <!-- Franjas bandera colombia -->
+            <div style="position:absolute;top:0;right:0;width:5px;height:100%;display:flex;flex-direction:column;">
+              <div style="flex:2;background:#FCD116;"></div>
+              <div style="flex:1;background:#003087;"></div>
+              <div style="flex:1;background:#CE1126;"></div>
             </div>
-            <div style="font-size:1.6rem;opacity:0.9;">📜</div>
+            <div style="display:flex;align-items:center;gap:8px;padding-right:16px;">
+              <div style="width:30px;height:30px;background:rgba(255,255,255,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">📜</div>
+              <div>
+                <p style="font-size:0.52rem;opacity:0.7;margin:0;letter-spacing:2px;text-transform:uppercase;">República de Colombia · Ministerio de Transporte</p>
+                <p style="font-size:0.82rem;font-weight:900;margin:1px 0 0;letter-spacing:.4px;">DERECHO DE PETICIÓN</p>
+                <p style="font-size:0.55rem;opacity:0.75;margin:1px 0 0;">Ley 1755/2015 · Art. 23 Constitución Política · SIMIT</p>
+              </div>
+            </div>
           </div>
 
-          <!-- Cuerpo del documento con datos del usuario -->
-          <div style="padding:10px 14px 8px;font-size:0.74rem;color:#1e293b;">
-            <!-- Destinatario -->
-            <div style="background:#eff6ff;border-radius:8px;padding:7px 10px;margin-bottom:8px;border-left:3px solid #2563eb;">
-              <p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Dirigido a:</p>
-              <p style="color:#1e40af;font-weight:800;margin:0;font-size:0.78rem;" id="dp-secretaria-nombre">Secretaría de Tránsito y Movilidad</p>
+          <!-- Cuerpo compacto -->
+          <div style="padding:8px 12px 6px;font-size:0.73rem;color:#1e293b;">
+            <div style="background:#eff6ff;border-radius:7px;padding:5px 9px;margin-bottom:7px;border-left:3px solid #2563eb;">
+              <p style="font-size:0.58rem;color:#64748b;margin:0 0 1px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Dirigido a:</p>
+              <p style="color:#1e40af;font-weight:800;margin:0;font-size:0.75rem;" id="dp-secretaria-nombre">Secretaría de Tránsito y Movilidad</p>
             </div>
-            <!-- Datos del solicitante -->
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-bottom:8px;line-height:1.5;">
-              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">Peticionario:</span>
-              <span id="dp-nombre-cliente" style="font-weight:800;color:#0f172a;font-size:0.76rem;">—</span>
-              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">C.C. / Placa:</span>
-              <span id="dp-cedula-cliente" style="font-weight:700;color:#1e40af;font-size:0.74rem;">—</span>
-              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">WhatsApp:</span>
-              <span id="dp-wa-preview" style="font-weight:600;color:#15803d;font-size:0.74rem;">—</span>
-              <span style="color:#64748b;font-size:0.67rem;font-weight:600;">Referencia:</span>
-              <span id="dp-causal-preview" style="font-weight:700;color:#7c3aed;font-size:0.7rem;">Análisis jurídico aplicado</span>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-bottom:7px;line-height:1.45;">
+              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">Peticionario:</span>
+              <span id="dp-nombre-cliente" style="font-weight:800;color:#0f172a;font-size:0.72rem;">—</span>
+              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">C.C. / Placa:</span>
+              <span id="dp-cedula-cliente" style="font-weight:700;color:#1e40af;font-size:0.72rem;">—</span>
+              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">WhatsApp:</span>
+              <span id="dp-wa-preview" style="font-weight:600;color:#15803d;font-size:0.72rem;">—</span>
             </div>
-            <!-- Causal (bloqueado) -->
-            <div style="position:relative;margin-bottom:2px;">
-              <div style="filter:blur(3.5px);user-select:none;pointer-events:none;background:#f8fafc;border-radius:7px;padding:7px 10px;font-size:0.67rem;color:#475569;line-height:1.5;">
-                PRIMERO: Que se declare la prescripción de la acción sancionatoria derivada del comparendo de la referencia conforme al Art. 136 Ley 769/2002...
+            <!-- Texto del documento (blurred) -->
+            <div style="position:relative;margin-bottom:4px;">
+              <div style="filter:blur(3px);user-select:none;pointer-events:none;background:#f1f5f9;border-radius:6px;padding:6px 9px;font-size:0.64rem;color:#475569;line-height:1.5;font-style:italic;">
+                <strong>ARTÍCULO PRIMERO:</strong> Que se declare la prescripción de la acción sancionatoria conforme al Art. 136 Ley 769/2002 por haber transcurrido más de tres (3) años sin cobro efectivo...
               </div>
               <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                <span style="background:rgba(30,58,138,0.95);color:#fff;font-size:0.7rem;font-weight:800;padding:5px 14px;border-radius:8px;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🔒 Contenido completo al activar el caso</span>
+                <span style="background:rgba(30,58,138,0.93);color:#fff;font-size:0.65rem;font-weight:800;padding:4px 12px;border-radius:7px;display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.25);">🔒 Visible al activar el caso</span>
               </div>
             </div>
           </div>
-          <!-- Línea de firma -->
-          <div style="border-top:1px solid #e2e8f0;padding:8px 14px;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+
+          <!-- Zona de firma dentro del documento -->
+          <div style="border-top:1.5px dashed #cbd5e1;padding:7px 12px;background:linear-gradient(90deg,#f8fafc,#eff6ff);display:flex;align-items:center;justify-content:space-between;gap:8px;">
             <div style="flex:1;">
-              <div style="border-bottom:1.5px solid #1e3a8a;height:20px;" id="dp-firma-preview"></div>
-              <p style="font-size:0.6rem;color:#94a3b8;margin:2px 0 0;">Firma del peticionario</p>
+              <div style="border-bottom:1.5px solid #1e3a8a;height:18px;position:relative;" id="dp-firma-preview">
+                <span style="position:absolute;bottom:2px;left:0;font-size:0.55rem;color:#94a3b8;font-style:italic;">← Aquí va tu firma</span>
+              </div>
+              <p style="font-size:0.58rem;color:#94a3b8;margin:2px 0 0;">Firma del peticionario</p>
             </div>
-            <div style="text-align:right;">
-              <p style="font-size:0.68rem;font-weight:700;color:#1e293b;margin:0;" id="dp-nombre-firma">Pendiente</p>
-              <p style="font-size:0.6rem;color:#94a3b8;margin:1px 0 0;" id="dp-fecha-doc">—</p>
+            <div style="text-align:right;flex-shrink:0;">
+              <p style="font-size:0.65rem;font-weight:700;color:#1e293b;margin:0;" id="dp-nombre-firma">Pendiente</p>
+              <p style="font-size:0.57rem;color:#94a3b8;margin:1px 0 0;" id="dp-fecha-doc">—</p>
             </div>
           </div>
         </div>
 
-        <!-- Mini trust bar bajo el documento -->
-        <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
-          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Gratis firmarlo</span>
-          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Sin compromisos</span>
-          <span style="font-size:0.67rem;color:#64748b;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Firma en 10 seg</span>
+        <!-- Pasos: firma → radicar → multa eliminada -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:10px;padding:7px 10px;background:#fafafa;border-radius:9px;border:1px solid #e2e8f0;">
+          <span style="font-size:0.62rem;font-weight:800;color:#f97316;">✍️ Firmas</span>
+          <span style="color:#cbd5e1;font-size:0.7rem;">→</span>
+          <span style="font-size:0.62rem;font-weight:700;color:#475569;">📤 Radicamos</span>
+          <span style="color:#cbd5e1;font-size:0.7rem;">→</span>
+          <span style="font-size:0.62rem;font-weight:700;color:#475569;">🚫 Multa eliminada</span>
         </div>
 
-        <!-- CTA firmar -->
-        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:18px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:8px;">
-          <span style="position:relative;z-index:1;">✍️ FIRMAR MI DOCUMENTO CON EL DEDO →</span>
+        <!-- CTA firmar — mejorado -->
+        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:16px 18px;font-size:0.98rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span style="position:relative;z-index:1;font-size:1rem;">✍️ FIRMA CON EL DEDO — ES GRATIS</span>
+          <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.92;">Tu documento queda listo para radicar en 30 segundos</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <p style="text-align:center;color:#64748b;font-size:0.7rem;margin:0;">✅ Gratis · Sin compromisos · 10 segundos con el dedo</p>
+        <p style="text-align:center;color:#94a3b8;font-size:0.65rem;margin:0;">🔒 Sin costo · Sin compromisos · Solo si tu caso procede pagas</p>
       </div>
 
       <!-- ══════════════════════════════════════
