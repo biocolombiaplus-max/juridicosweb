@@ -241,9 +241,9 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 /* Módulo de consulta rápida — la cédula se escribe directo en el hero, sin
    tocar ningún botón para siquiera verlo, así nadie se pierde antes de
    consultar. */
-.hero-consult-wrap{position:relative;margin-bottom:8px;}
+.hero-consult-wrap{position:relative;margin-bottom:8px;width:100%;max-width:100%;box-sizing:border-box;}
 .hero-consult-glow{position:absolute;inset:-20px;background:radial-gradient(ellipse at center,rgba(201,162,39,0.35),transparent 70%);filter:blur(28px);z-index:0;pointer-events:none;animation:hero-glow-pulse 2.8s ease-in-out infinite;}
-.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.055);backdrop-filter:blur(16px);border:1px solid rgba(201,162,39,0.38);border-radius:20px;padding:24px 22px 18px;box-shadow:0 8px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.07);}
+.hero-consult-card{position:relative;z-index:1;background:rgba(255,255,255,0.055);backdrop-filter:blur(16px);border:1px solid rgba(201,162,39,0.38);border-radius:20px;padding:24px 22px 18px;box-shadow:0 8px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.07);box-sizing:border-box;width:100%;overflow:hidden;}
 .hero-consult-ribbon{position:absolute;top:-13px;right:18px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:0.64rem;font-weight:900;padding:5px 14px;border-radius:4px;box-shadow:0 4px 14px rgba(201,162,39,0.5);z-index:2;letter-spacing:.8px;text-transform:uppercase;}
 .hero-consult-label{display:flex;align-items:flex-start;gap:9px;color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:600;margin-bottom:14px;line-height:1.4;}
 .hero-consult-label i{color:#c9a227;margin-top:2px;flex-shrink:0;}
@@ -857,8 +857,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <!-- Prueba social con contador -->
             <div style="display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
               <span style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0;box-shadow:0 0 8px #22c55e;animation:ping 1.5s ease-in-out infinite;display:inline-block;"></span>
-              <span style="font-size:0.73rem;color:#14532d;font-weight:800;"><span id="hero-contador">4.127</span> colombianos consultaron esta semana</span>
-              <span style="margin-left:auto;font-size:0.65rem;color:#16a34a;font-weight:700;white-space:nowrap;">GRATIS ✓</span>
+              <span style="font-size:0.73rem;color:#14532d;font-weight:800;min-width:0;flex:1;"><span id="hero-contador">4.127</span> colombianos consultaron esta semana</span>
+              <span style="font-size:0.65rem;color:#16a34a;font-weight:700;white-space:nowrap;flex-shrink:0;">GRATIS ✓</span>
             </div>
 
             <!-- Label principal — pregunta que activa el dolor -->
@@ -895,14 +895,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
 
             <!-- SIMIT oficial + link placa -->
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-              <div style="display:flex;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;min-width:0;">
                 <div style="display:flex;flex-direction:column;height:20px;width:3px;border-radius:2px;overflow:hidden;flex-shrink:0;">
                   <div style="flex:2;background:#FCD116;"></div>
                   <div style="flex:1;background:#003087;"></div>
                   <div style="flex:1;background:#CE1126;"></div>
                 </div>
-                <span style="font-size:0.63rem;color:#475569;font-weight:600;">Datos oficiales del <strong style="color:#003087;">SIMIT</strong> · Colombia</span>
+                <span style="font-size:0.63rem;color:#475569;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Datos oficiales del <strong style="color:#003087;">SIMIT</strong> · Colombia</span>
               </div>
               <button type="button" onclick="openSimitModal(event);switchStab('placa');" style="background:none;border:none;cursor:pointer;font-size:0.63rem;color:#c9a227;font-weight:700;padding:0;white-space:nowrap;">🚗 Por placa →</button>
             </div>
