@@ -210,6 +210,7 @@ function doPost(e) {
       case 'eliminar_caso':       return eliminarFilaPorId('CasosExito', datos.id);
       // ── Envío de correo campaña ──────────────────────────────────────
       case 'enviar_correo':       return enviarCorreoCampana(datos);
+      case 'test_campana':        return respuestaJson({ ok: true, gasOk: true, version: '2026-10' });
       // ── Sync campaña entre dispositivos ─────────────────────────────
       case 'sync_campana_save':   return syncCampanaSave(datos);
       case 'sync_campana_load':   return syncCampanaLoad();
@@ -1559,27 +1560,29 @@ function eliminarFilaPorId(nombreHoja, id) {
 function enviarCorreoCampana(datos) {
   var email  = datos.email  || '';
   var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
-  var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
   if (!email || !email.includes('@')) return respuestaJson({ ok: false, msg: 'Email invalido' });
-  var opts = {
-    htmlBody: datos.html || '',
-    name: datos.nombreRemitente || 'JuridicosWeb',
-    replyTo: 'juridicoswebcasos@gmail.com'
-  };
-  // Intenta enviar desde el alias configurado; si no está verificado, envía desde la cuenta principal
+  // GmailApp.sendEmail SIN from: — siempre funciona, siempre queda en Enviados,
+  // sin depender de que el alias esté verificado en Gmail.
   try {
     GmailApp.sendEmail(email, asunto,
-      'Para ver este correo correctamente activa HTML en tu cliente de correo.',
-      Object.assign({}, opts, { from: cuenta })
+      'Para ver este correo activa HTML en tu cliente de correo.',
+      {
+        htmlBody: datos.html || '',
+        name: datos.nombreRemitente || 'JuridicosWeb',
+        replyTo: EMAIL_DESPACHO
+      }
     );
     return respuestaJson({ ok: true });
-  } catch (e1) {
+  } catch (e) {
+    // Último recurso: MailApp (no queda en Enviados pero garantiza entrega)
     try {
-      GmailApp.sendEmail(email, asunto,
-        'Para ver este correo correctamente activa HTML en tu cliente de correo.',
-        opts
-      );
-      return respuestaJson({ ok: true });
+      MailApp.sendEmail({
+        to: email, subject: asunto,
+        htmlBody: datos.html || '',
+        name: datos.nombreRemitente || 'JuridicosWeb',
+        replyTo: EMAIL_DESPACHO
+      });
+      return respuestaJson({ ok: true, via: 'mailapp' });
     } catch (e2) {
       return respuestaJson({ ok: false, msg: e2.message });
     }

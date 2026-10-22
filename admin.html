@@ -1065,50 +1065,46 @@ tr:hover td{background:#f8faff;cursor:pointer}
             <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#92400e">
               ⚠️ <strong>Importante:</strong> Después de pegar el código, haz clic en <strong>"Implementar → Administrar implementaciones → Nueva versión"</strong> y guarda. Sin esto el script no se actualiza.
             </div>
-            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">// ── PASO 1: Dentro del switch de doPost(), agrega estos cases ──
+            <pre style="background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre;margin:0">// ── PASO 1: Dentro del switch(datos._accion) de doPost(), agrega:
 //   case 'enviar_correo':     return enviarCorreoCampana(datos);
+//   case 'test_campana':      return respuestaJson({ok:true,gasOk:true,version:'2026-10'});
 //   case 'sync_campana_save': return syncCampanaSave(datos);
 //   case 'sync_campana_load': return syncCampanaLoad();
 
-// ── PASO 2: Agrega estas funciones fuera del doPost() ──────────
+// ── PASO 2: Agrega estas funciones al final del script ─────────
 
 function enviarCorreoCampana(datos) {
   var email  = datos.email  || '';
   var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
-  var cuenta = datos.cuenta || Session.getActiveUser().getEmail();
   if (!email || !email.includes('@'))
     return respuestaJson({ ok: false, msg: 'Email invalido' });
+  // Sin "from:" — siempre funciona y siempre queda en Enviados
   try {
-    // Intenta enviar desde la cuenta alias configurada
     GmailApp.sendEmail(email, asunto,
       'Para ver este correo activa HTML en tu cliente de correo.',
       {
         htmlBody: datos.html || '',
         name: datos.nombreRemitente || 'JuridicosWeb',
-        from: cuenta,
         replyTo: 'juridicoswebcasos@gmail.com'
       }
     );
     return respuestaJson({ ok: true });
-  } catch (e1) {
-    // Si el alias no esta verificado, envia desde la cuenta principal
+  } catch (e) {
     try {
-      GmailApp.sendEmail(email, asunto,
-        'Para ver este correo activa HTML en tu cliente de correo.',
-        {
-          htmlBody: datos.html || '',
-          name: datos.nombreRemitente || 'JuridicosWeb',
-          replyTo: 'juridicoswebcasos@gmail.com'
-        }
-      );
-      return respuestaJson({ ok: true });
+      MailApp.sendEmail({
+        to: email, subject: asunto,
+        htmlBody: datos.html || '',
+        name: datos.nombreRemitente || 'JuridicosWeb',
+        replyTo: 'juridicoswebcasos@gmail.com'
+      });
+      return respuestaJson({ ok: true, via: 'mailapp' });
     } catch (e2) {
       return respuestaJson({ ok: false, msg: e2.message });
     }
   }
 }
 
-// ── SYNC de campaña entre dispositivos ────────────────────────
+// ── SYNC entre dispositivos ────────────────────────────────────
 var SYNC_SHEET_NAME = 'CampanSync';
 
 function syncCampanaSave(datos) {
@@ -1128,12 +1124,16 @@ function syncCampanaLoad() {
   return respuestaJson({ ok: true, data: raw || null });
 }
 
-// ── Helper (si no lo tienes ya) ────────────────────────────────
+// ── Helper — incluir si no lo tienes ya ───────────────────────
 // function respuestaJson(obj) {
 //   return ContentService.createTextOutput(JSON.stringify(obj))
 //     .setMimeType(ContentService.MimeType.JSON);
 // }</pre>
-            <button class="camp-btn camp-btn-primary" style="margin-top:10px" onclick="campCopiarScript()">📋 Copiar código</button>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="camp-btn camp-btn-primary" onclick="campCopiarScript()">📋 Copiar código</button>
+              <button class="camp-btn" style="background:#0ea5e9;color:#fff;font-weight:700" onclick="campDiagnosticar()">🔍 Verificar Apps Script</button>
+            </div>
+            <div id="camp-diag-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;font-weight:600"></div>
           </div>
           <div class="camp-card">
             <h3 style="margin:0 0 10px;font-size:15px;font-weight:700">Vista previa del correo</h3>
@@ -4681,6 +4681,39 @@ function campCopiarScript(){
     window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
     campLog('✅ Texto seleccionado — presiona Ctrl+C para copiar','ok');
   }
+}
+
+function campDiagnosticar(){
+  var box = document.getElementById('camp-diag-result');
+  box.style.display = 'block';
+  box.style.background = '#eff6ff';
+  box.style.color = '#1e40af';
+  box.textContent = '⏳ Verificando Apps Script...';
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({ _accion: 'test_campana' })
+  }).then(function(r){ return r.text(); }).then(function(txt){
+    var res;
+    try { res = JSON.parse(txt); } catch(e) {
+      box.style.background = '#fef2f2'; box.style.color = '#991b1b';
+      box.innerHTML = '❌ <strong>GAS devuelve respuesta inválida (no JSON).</strong><br>Esto confirma que el script NO está actualizado. Sigue los pasos de arriba para actualizarlo y reimplementarlo.<br><small style="color:#b91c1c">Respuesta recibida: '+txt.slice(0,200)+'</small>';
+      return;
+    }
+    if(res && res.gasOk){
+      box.style.background = '#f0fdf4'; box.style.color = '#166534';
+      box.innerHTML = '✅ <strong>Apps Script actualizado y funcionando correctamente.</strong><br>Versión: '+res.version+'. Ya puedes iniciar la campaña.';
+    } else if(res && res.ok){
+      box.style.background = '#fef3c7'; box.style.color = '#92400e';
+      box.innerHTML = '⚠️ <strong>El script responde pero NO tiene la función de campaña.</strong><br>Necesitas actualizar el Apps Script (copiar el código de arriba y crear una Nueva versión en Implementar).<br><small>Respuesta: '+JSON.stringify(res)+'</small>';
+    } else {
+      box.style.background = '#fef2f2'; box.style.color = '#991b1b';
+      box.innerHTML = '❌ Error del servidor: '+(res&&res.error||res&&res.msg||JSON.stringify(res));
+    }
+  }).catch(function(e){
+    box.style.background = '#fef2f2'; box.style.color = '#991b1b';
+    box.innerHTML = '❌ No se pudo conectar con el Apps Script: '+e.message;
+  });
 }
 
 /* ── ENVÍO ── */
