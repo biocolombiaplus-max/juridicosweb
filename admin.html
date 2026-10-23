@@ -2185,7 +2185,7 @@ function renderPipelineCRM(){
   rawRows.slice().reverse().forEach(function(r){
     var key = (r['Cédula']||'').toString().trim();
     if(!key) key = 'email:' + (r['Email']||'').toLowerCase().trim();
-    if(!key || key === 'email:') key = 'wa:' + (r['WhatsApp']||'').replace(/\D/g,'').slice(-10);
+    if(!key || key === 'email:') key = 'wa:' + (r['WhatsApp']||'').toString().replace(/\D/g,'').slice(-10);
     if(!key || key === 'wa:') { rows.push(r); return; } // sin identificador, mostrar igual
     if(!seen[key]){ seen[key]=true; rows.push(r); }
   });
