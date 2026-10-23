@@ -5096,6 +5096,36 @@ function campEnviarSiguiente(){
     } else {
       _campErrores++;
       var motivo = (res&&res.msg) || (res&&res.error) || JSON.stringify(res);
+
+      // Detectar error de cuota de Gmail (flag explícito del GAS o palabras clave)
+      var esQuota = res.quotaExcedida || (motivo && (
+        motivo.toLowerCase().indexOf('demasiadas veces') > -1 ||
+        motivo.toLowerCase().indexOf('service invoked too many') > -1 ||
+        motivo.toLowerCase().indexOf('quota') > -1 ||
+        motivo.toLowerCase().indexOf('daily') > -1
+      ));
+
+      if(esQuota){
+        // Marcar esta cuenta como agotada hoy (forzar usados al límite)
+        cuenta.usados = 9999;
+        cuenta.fecha = new Date().toISOString().slice(0,10);
+        campLog('⚠️ Cuota diaria agotada para '+cuenta.email+' — rotando a la siguiente cuenta...','err');
+        // Intentar con siguiente cuenta disponible
+        var sigIdx = campCuentaDisponible();
+        if(sigIdx < 0){
+          campLog('🚫 Todas las cuentas agotaron su cuota hoy. Campaña pausada — reanuda mañana o agrega más cuentas.','err');
+          campPausarEnvio(); campGuardar(); campSyncGuardar();
+          // NO avanzar índice: este contacto debe reintentarse mañana
+          return;
+        } else {
+          campLog('   ↳ Reintentando con cuenta: '+_campCuentas[sigIdx].email,'info');
+          // Reintentar mismo contacto sin avanzar índice
+          campGuardar(); campActualizarStats();
+          if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 2000);
+          return;
+        }
+      }
+
       campLog('❌ '+contacto.email+': '+motivo,'err');
       if(motivo && motivo.toLowerCase().indexOf('alias') > -1){
         campLog('   💡 El alias "'+cuenta.email+'" no está verificado en Gmail → Configura en Gmail > Ajustes > Cuentas > "Añadir otra dirección"','info');
@@ -5109,7 +5139,6 @@ function campEnviarSiguiente(){
     campGuardar(); campActualizarStats();
     campRenderTablaContactos(_campFiltroActual);
     campAutoSync();
-    // Sync inmediato a nube cada 20 enviados (redundante con campAutoSync que hace cada 10)
     if(_campEnviados > 0 && _campEnviados % 20 === 0) campSyncGuardar();
     if(!_campPausado) _campTimer = setTimeout(campEnviarSiguiente, 10000);
   });

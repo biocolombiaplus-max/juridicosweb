@@ -1585,7 +1585,10 @@ function enviarCorreoCampana(datos) {
       });
       return respuestaJson({ ok: true, via: 'mailapp' });
     } catch (e2) {
-      return respuestaJson({ ok: false, msg: e2.message });
+      // Detectar cuota agotada y señalarlo con flag especial para que el frontend rote cuenta
+      var msg2 = e2.message || '';
+      var esQuota2 = /demasiadas|too many|quota|daily|limit/i.test(msg2);
+      return respuestaJson({ ok: false, msg: msg2, quotaExcedida: esQuota2 });
     }
   }
 }
