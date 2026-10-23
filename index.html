@@ -749,8 +749,10 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .hero-inner{grid-template-columns:1fr;}
   .hero-inner > div{min-width:0;overflow:hidden;}
   .hero-card{display:none;}
-  .hero h1{font-size:1.85rem;}
-  .hero{padding:50px 5% 50px;}
+  .hero{min-height:unset;padding:28px 5% 40px;align-items:flex-start;}
+  .hero h1{font-size:2.3rem;line-height:1.1;}
+  .hero-h1-sub{font-size:0.95rem;margin-bottom:20px;}
+  .hero-badge{margin-bottom:14px;}
   .hero-stats{grid-template-columns:repeat(3,1fr);}
   .norma-grid{grid-template-columns:1fr 1fr;}
   .steps-row{flex-wrap:wrap;}
@@ -873,8 +875,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-inner">
     <div>
       <div class="hero-badge"><span class="dot"></span><span class="hero-badge-text">Bufete de Tránsito · Colombia</span></div>
-      <h1>¿Tienes <span class="hl">multas</span> o <span class="hl">fotomultas</span> sin pagar?</h1>
-      <p class="hero-h1-sub">Verifica gratis en 10 segundos si las tuyas ya no son válidas por ley — sin registro, sin pagar nada hasta confirmar.</p>
+      <h1>¿Tienes <span class="hl">multas</span><br>o <span class="hl">fotomultas</span><br>sin pagar?</h1>
+      <p class="hero-h1-sub">Muchas ya no son válidas por ley. Verifica en 10 segundos — gratis, sin registro.</p>
       <div class="hero-ctas">
 
         <!-- Módulo de consulta rápida: la cédula se escribe directo aquí,
@@ -885,7 +887,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="hero-consult-card" style="border:1.5px solid rgba(201,162,39,0.22);box-shadow:0 4px 24px rgba(0,0,0,0.25);background:rgba(255,255,255,0.04);border-radius:16px;padding:22px 20px 18px;">
 
             <!-- Label limpio -->
-            <p style="font-size:0.78rem;font-weight:700;color:rgba(201,162,39,0.85);margin:0 0 10px;letter-spacing:.8px;text-transform:uppercase;">Ingresa tu número de cédula</p>
+            <p style="font-size:0.76rem;font-weight:800;color:rgba(201,162,39,0.9);margin:0 0 10px;letter-spacing:1px;text-transform:uppercase;">✦ Escribe tu cédula y consulta gratis →</p>
 
             <!-- Input + botón -->
             <div class="hero-consult-row" style="gap:10px;margin-bottom:14px;">
