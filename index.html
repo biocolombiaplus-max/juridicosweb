@@ -1198,10 +1198,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><i class="fas fa-check-circle" style="color:#4ade80;"></i> Recibes copia del compromiso por correo</li>
           <li><i class="fas fa-check-circle" style="color:#4ade80;"></i> Análisis, documento y radicación incluidos</li>
         </ul>
-        <button onclick="openSimitModal(event)" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:17px;border:none;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:800;box-shadow:0 5px 22px rgba(124,58,237,0.5);letter-spacing:.2px;margin-top:4px;">
+        <button onclick="openSimitModal(event,'2018','garantia')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:17px;border:none;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:800;box-shadow:0 5px 22px rgba(124,58,237,0.5);letter-spacing:.2px;margin-top:4px;">
           <i class="fas fa-shield-alt"></i> Empezar con $10.000
         </button>
-        <p style="font-size:0.68rem;color:#a78bfa;text-align:center;margin:8px 0 0;">Firmas el compromiso de $98.900 por multa eliminada · 100% legal</p>
+        <p style="font-size:0.68rem;color:#a78bfa;text-align:center;margin:8px 0 0;">Consulta tus multas → paga $10.000 → firmas el compromiso</p>
       </div>
       <!-- PLAN INDIVIDUAL -->
       <div class="price-card pc-cool">
@@ -1216,7 +1216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><i class="fas fa-check-circle"></i> <strong>Firmas en el celular — sin imprimir nada</strong></li>
           <li><i class="fas fa-check-circle"></i> Radicado el mismo día — recibes número de seguimiento</li>
         </ul>
-        <button class="btn btn-navy btn-full" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-alt"></i> Empezar ahora — $49.000</button>
+        <button class="btn btn-navy btn-full" onclick="openSimitModal(event,'2018','individual')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-file-alt"></i> Empezar ahora — $49.000</button>
       </div>
       <!-- PLAN MASIVO -->
       <div class="price-card pc-hot">
@@ -1233,7 +1233,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li><i class="fas fa-check-circle"></i> Radicación simultánea ante cada secretaría ese mismo día</li>
         </ul>
         <div class="pc-note">ℹ️ Si tienes multas en varias secretarías, generamos un documento por cada una — sin costo adicional.</div>
-        <button class="btn btn-shimmer btn-full btn-pulse" onclick="openSimitModal(event)" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-bolt"></i> Empezar ahora — $79.000</button>
+        <button class="btn btn-shimmer btn-full btn-pulse" onclick="openSimitModal(event,'2018','masivo')" style="padding:16px;font-size:0.95rem;border-radius:11px;"><i class="fas fa-bolt"></i> Empezar ahora — $79.000</button>
       </div>
     </div>
     <div class="tutela-box">
@@ -2968,9 +2968,12 @@ function toggleFaq(el){el.parentElement.classList.toggle('open');}
 var currentStep=1;
 var tipoServicio='2018';
 
-function openSimitModal(e,tipo){
+var _planPreselLanding = null; // plan elegido desde la landing antes de consultar
+
+function openSimitModal(e,tipo,planPresel){
   if(e)e.preventDefault();
   tipoServicio=tipo||'2018';
+  _planPreselLanding = planPresel || null;
   resetFlujoSimit();
   goToStep(1);
   openOverlay('overlay-main');
@@ -4507,7 +4510,12 @@ function mostrarResultadoReal(){
     '</div>';
 
   if(aplican.length > 0){
-    html += '<div id="mres-planes-wrap">'+renderPlanes(aplican)+'</div>';
+    if(_planPreselLanding){
+      // Llegó desde la landing con un plan ya elegido — salta directo sin mostrar selector
+      html += '<div id="mres-planes-wrap" style="display:none;">'+renderPlanes(aplican)+'</div>';
+    } else {
+      html += '<div id="mres-planes-wrap">'+renderPlanes(aplican)+'</div>';
+    }
   } else if(revisar.length > 0){
     html +=
       '<div class="result-cta-box" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid rgba(234,88,12,0.25);">'+
@@ -4523,6 +4531,27 @@ function mostrarResultadoReal(){
   }
 
   wrap.innerHTML = html;
+
+  // Si llegó desde la landing con plan pre-elegido → ejecuta ese plan automáticamente
+  if(aplican.length > 0 && _planPreselLanding){
+    var plan = _planPreselLanding;
+    _planPreselLanding = null; // consumir
+    setTimeout(function(){
+      if(plan === 'masivo'){
+        seleccionarTodasAplicables();
+        elegirPlan('masivo');
+      } else if(plan === 'garantia'){
+        // Para garantia: selecciona todas las multas que aplican y va directo al flujo garantia
+        _multasReportadas.forEach(function(m){ if(m.estado==='aplica') m.seleccionada = true; });
+        elegirPlan('garantia');
+      } else {
+        // individual: selecciona solo la primera multa que aplica
+        var primera = _multasReportadas.findIndex(function(m){ return m.estado==='aplica'; });
+        if(primera !== -1) _multasReportadas[primera].seleccionada = true;
+        elegirPlan('individual');
+      }
+    }, 120);
+  }
 }
 
 function toggleSeleccionMulta(idx){
