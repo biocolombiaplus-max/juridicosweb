@@ -2214,16 +2214,38 @@ function renderPipelineCRM(){
       var sub = cedula ? cedula : (email||paso||'').slice(0,28);
       var tiempo = _crmTiempo(fecha);
       var nombreE = nombre.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      var waBtn = wa
-        ? '<button class="crm-card-wa" onclick="event.stopPropagation();recuperarLead(\''+nombreE+'\',\''+wa+'\',\''+escHtml(paso).replace(/'/g,"\\'").slice(0,40)+'\')">💬 WA</button>'
-        : '<span class="crm-card-no-wa">Sin WA</span>';
+
+      // Detectar si ya pasaron +24h sin pagar (para badge urgencia y botón $10k)
+      var horas24 = false;
+      try{
+        var fechaMs = new Date(fecha.replace(/(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/, '$1T$2')).getTime();
+        if(!isNaN(fechaMs)) horas24 = (Date.now() - fechaMs) > 86400000;
+      }catch(ex){}
+
+      var waBtn, extraBtn = '';
+      if(etapa.id === 'dejaron_datos' && wa){
+        // Botón principal: mensaje de reenganche pro
+        waBtn = '<button class="crm-card-wa" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);" onclick="event.stopPropagation();engancharlead(\''+nombreE+'\',\''+wa+'\')">💜 Enganchar</button>';
+        // Si +24h sin pagar: botón adicional plan $10k
+        if(horas24){
+          extraBtn = '<button class="crm-card-wa" style="background:linear-gradient(135deg,#059669,#047857);font-size:0.58rem;padding:3px 7px;" onclick="event.stopPropagation();ofrecerGarantia(\''+nombreE+'\',\''+wa+'\')">🛡️ Ofrecer $10k</button>';
+        }
+      } else {
+        waBtn = wa
+          ? '<button class="crm-card-wa" onclick="event.stopPropagation();recuperarLead(\''+nombreE+'\',\''+wa+'\',\''+escHtml(paso).replace(/'/g,"\\'").slice(0,40)+'\')">💬 WA</button>'
+          : '<span class="crm-card-no-wa">Sin WA</span>';
+      }
+
       var rowEnc = JSON.stringify(JSON.stringify(r)).replace(/"/g,'&quot;');
-      return '<div class="crm-card" style="border-left-color:'+etapa.color+';" onclick="abrirCaso('+rowEnc+')">'+
+      var urgBadge = (etapa.id==='dejaron_datos' && horas24) ? '<div style="font-size:0.58rem;background:#fef08a;color:#713f12;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">⏰ +24h sin pagar</div>' : '';
+      return '<div class="crm-card" style="border-left-color:'+etapa.color+(etapa.id==='dejaron_datos'&&horas24?';box-shadow:0 0 0 1px #fbbf24':'')+'" onclick="abrirCaso('+rowEnc+')">'+
+        urgBadge+
         '<div class="crm-card-name">'+escHtml(nombre)+'</div>'+
         '<div class="crm-card-sub">'+(sub?escHtml(sub):'&nbsp;')+'</div>'+
-        '<div class="crm-card-meta">'+
+        '<div class="crm-card-meta" style="flex-wrap:wrap;gap:4px;">'+
           '<span class="crm-card-time">'+tiempo+'</span>'+
           waBtn+
+          extraBtn+
         '</div>'+
       '</div>';
     }).join('') : '<div class="crm-col-empty">Sin leads en esta etapa</div>';
@@ -3866,6 +3888,56 @@ function recuperarLead(nombre, waNum, paso){
       '👉 https://juridicosweb.com/\n\n'+
       '— Equipo JurídicosWeb';
   }
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
+}
+
+// ── Mensaje de reenganche pro para leads que dejaron datos pero no pagaron ──
+function engancharlead(nombre, waNum){
+  var wa = limpiarWA(waNum);
+  if(!wa || wa.length < 10){ alert('Sin WhatsApp disponible.'); return; }
+  nombre = (nombre||'').split(' ')[0] || 'cliente';
+  var msg =
+    'Hola *'+nombre+'* 👋\n\n'+
+    '⚖️ *JurídicosWeb — Eliminación de Fotomultas y Multas*\n\n'+
+    'Revisamos tu caso y confirmamos que *tienes fundamento legal* para eliminar tu multa o fotomulta. 🎯\n\n'+
+    '¿Sabías que tienes derecho a no pagar una multa que fue mal notificada o que ya prescribió? *Muchos colombianos no lo saben y pagan de más.*\n\n'+
+    '📋 *¿Cómo funciona?*\n'+
+    '→ Presentamos un Derecho de Petición ante la secretaría\n'+
+    '→ La ley les obliga a responder en 15 días hábiles\n'+
+    '→ Si no responden bien, vamos con Tutela — altísima efectividad ✅\n\n'+
+    '💳 *¿Cuánto cuesta?*\n'+
+    '✅ Eliminar *una multa*: *$49.000* todo incluido\n'+
+    '✅ Eliminar *todas* las que apliquen: *$79.000* todo incluido\n\n'+
+    '📲 *¿Cómo pagar?*\n'+
+    'Nequi o Daviplata al número *3159318400*\n'+
+    'A nombre de *Ju... Ca...*\n'+
+    '(escríbeme "ya pagué" y en minutos tienes tu documento)\n\n'+
+    '⏳ *Actúa hoy* — cada día sin radicar, la multa sigue vigente en el SIMIT y puede generar intereses.\n\n'+
+    '¿Continuamos? 👇\n'+
+    '👉 https://juridicosweb.com/\n\n'+
+    '— Equipo JurídicosWeb';
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
+}
+
+// ── Mensaje especial +24h: ofrecer plan $10k Paga Solo al Eliminar ──
+function ofrecerGarantia(nombre, waNum){
+  var wa = limpiarWA(waNum);
+  if(!wa || wa.length < 10){ alert('Sin WhatsApp disponible.'); return; }
+  nombre = (nombre||'').split(' ')[0] || 'cliente';
+  var msg =
+    'Hola *'+nombre+'* 👋\n\n'+
+    '⚖️ *JurídicosWeb — Una oferta especial para tu caso*\n\n'+
+    'Sé que a veces el dinero para el trámite no está disponible de inmediato. Por eso tenemos una opción que *no te va a costar nada si no funciona:*\n\n'+
+    '🛡️ *Plan Paga Solo al Eliminar*\n'+
+    '→ Solo pagas *$10.000 hoy* (gastos de radicación)\n'+
+    '→ Los $98.900 restantes los pagas *ÚNICAMENTE si eliminamos tu multa*\n'+
+    '→ Si NO se elimina → *no debes nada más*. Garantía real, sin letra pequeña.\n\n'+
+    '📲 *Paga los $10.000 ahora:*\n'+
+    'Nequi o Daviplata al *3159318400*\n'+
+    'A nombre de *Ju... Ca...*\n\n'+
+    'Escríbeme "ya pagué los 10" y empezamos hoy mismo. 🚀\n\n'+
+    '👉 https://juridicosweb.com/\n\n'+
+    '— Equipo JurídicosWeb';
   window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
 }
 
