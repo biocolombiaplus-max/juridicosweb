@@ -750,7 +750,7 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .hero-inner > div{min-width:0;overflow:hidden;}
   .hero-card{display:none;}
   .hero{min-height:unset;padding:28px 5% 40px;align-items:flex-start;}
-  .hero h1{font-size:2.3rem;line-height:1.1;}
+  .hero h1{font-size:2.7rem;line-height:1.05;}
   .hero-h1-sub{font-size:0.95rem;margin-bottom:20px;}
   .hero-badge{margin-bottom:14px;}
   .hero-stats{grid-template-columns:repeat(3,1fr);}
@@ -877,6 +877,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="hero-badge"><span class="dot"></span><span class="hero-badge-text">Bufete de Tránsito · Colombia</span></div>
       <h1>¿Tienes <span class="hl">multas</span><br>o <span class="hl">fotomultas</span><br>sin pagar?</h1>
       <p class="hero-h1-sub">Muchas ya no son válidas por ley. Verifica en 10 segundos — gratis, sin registro.</p>
+
+      <!-- Gatillos visuales bajo el título -->
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#4ade80;">✓ 100% GRATIS consultar</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#e8bc3a;">⚡ Resultado en 10 seg</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#93c5fd;">🔒 Sin registro ni datos</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);">$0 si no aplica tu caso</span>
+      </div>
       <div class="hero-ctas">
 
         <!-- Módulo de consulta rápida: la cédula se escribe directo aquí,
@@ -886,29 +894,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="hero-consult-wrap">
           <div class="hero-consult-card" style="border:1.5px solid rgba(201,162,39,0.22);box-shadow:0 4px 24px rgba(0,0,0,0.25);background:rgba(255,255,255,0.04);border-radius:16px;padding:22px 20px 18px;">
 
-            <!-- Label limpio -->
-            <p style="font-size:0.76rem;font-weight:800;color:rgba(201,162,39,0.9);margin:0 0 10px;letter-spacing:1px;text-transform:uppercase;">✦ Escribe tu cédula y consulta gratis →</p>
+            <!-- Label con prueba social en vivo -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+              <p style="font-size:0.76rem;font-weight:800;color:rgba(201,162,39,0.95);margin:0;letter-spacing:.8px;text-transform:uppercase;">Número de cédula</p>
+              <div style="display:flex;align-items:center;gap:5px;">
+                <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 5px #22c55e;animation:ping 1.5s ease-in-out infinite;flex-shrink:0;"></span>
+                <span style="font-size:0.65rem;color:rgba(255,255,255,0.55);font-weight:600;white-space:nowrap;"><span id="hero-contador">4.193</span> consultas hoy</span>
+              </div>
+            </div>
 
             <!-- Input + botón -->
-            <div class="hero-consult-row" style="gap:10px;margin-bottom:14px;">
+            <div class="hero-consult-row" style="gap:10px;margin-bottom:10px;">
               <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Ej. 1234567890" inputmode="numeric" maxlength="12" style="font-size:1.15rem;padding:17px 18px;letter-spacing:2px;border:2px solid rgba(201,162,39,0.5);border-radius:12px;box-shadow:none;" onkeydown="if(event.key==='Enter')consultarDesdeHero()" onfocus="this.style.borderColor='#c9a227';this.style.boxShadow='0 0 0 3px rgba(201,162,39,0.18)'" onblur="this.style.borderColor='rgba(201,162,39,0.5)';this.style.boxShadow='none'">
               <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar" style="width:60px;font-size:1.3rem;border-radius:12px;flex-shrink:0;">
                 <i class="fas fa-search"></i>
               </button>
             </div>
 
-            <!-- Prueba social sutil + garantías en línea -->
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 6px #22c55e;"></span>
-                <span style="font-size:0.68rem;color:rgba(255,255,255,0.6);font-weight:600;"><span id="hero-contador">4.127</span> consultas esta semana</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:14px;">
-                <span style="font-size:0.68rem;color:rgba(255,255,255,0.55);font-weight:600;">✓ Gratis</span>
-                <span style="font-size:0.68rem;color:rgba(255,255,255,0.55);font-weight:600;">✓ Sin registro</span>
-                <span style="font-size:0.68rem;color:rgba(255,255,255,0.55);font-weight:600;">✓ $0 si no aplica</span>
-              </div>
-            </div>
+            <!-- Botón texto consultar GRATIS destacado -->
+            <button type="button" onclick="consultarDesdeHero()" style="width:100%;padding:15px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1rem;font-weight:900;border:none;border-radius:12px;cursor:pointer;letter-spacing:.3px;margin-bottom:12px;box-shadow:0 4px 20px rgba(201,162,39,0.4);">
+              Consultar GRATIS ahora →
+            </button>
+
+            <!-- Microtexto tranquilizador -->
+            <p style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.38);margin:0 0 10px;font-weight:500;">Sin registro · Sin contraseña · $0 si tu caso no aplica</p>
 
             <!-- SIMIT oficial + link placa -->
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
