@@ -211,6 +211,7 @@ function doPost(e) {
       // ── Envío de correo campaña ──────────────────────────────────────
       case 'enviar_correo':       return enviarCorreoCampana(datos);
       case 'test_campana':        return respuestaJson({ ok: true, gasOk: true, version: '2026-10' });
+      case 'guardar_compromiso_garantia': return guardarCompromisoGarantia(datos);
       // ── Sync campaña entre dispositivos ─────────────────────────────
       case 'sync_campana_save':   return syncCampanaSave(datos);
       case 'sync_campana_load':   return syncCampanaLoad();
@@ -1683,5 +1684,74 @@ function crearSesionEpayco(datos) {
 
   } catch (e) {
     return respuestaJson({ ok: false, error: 'Error ePayco: ' + e.message });
+  }
+}
+
+// ── Compromiso de Pago – Plan Garantía ───────────────────────────────────────
+function guardarCompromisoGarantia(datos) {
+  try {
+    var nombre    = datos.nombre    || '';
+    var cedula    = datos.cedula    || '';
+    var email     = datos.email     || '';
+    var whatsapp  = datos.whatsapp  || '';
+    var numMultas = datos.numMultas || 1;
+    var firma64   = datos.firma     || ''; // data:image/png;base64,...
+    var fecha     = datos.fecha     || Utilities.formatDate(new Date(), 'America/Bogota', 'dd/MM/yyyy');
+
+    // 1. Guardar registro en hoja Compromisos
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var hoja = ss.getSheetByName('Compromisos') || ss.insertSheet('Compromisos');
+    if (hoja.getLastRow() === 0) {
+      hoja.appendRow(['Fecha','Nombre','Cedula','Email','WhatsApp','NumMultas','DriveUrl']);
+    }
+
+    // 2. Guardar imagen firma en Drive
+    var driveUrl = '';
+    if (firma64 && firma64.indexOf('base64,') > -1) {
+      var base64Data = firma64.split('base64,')[1];
+      var blob = Utilities.newBlob(Utilities.base64Decode(base64Data), 'image/png', 'firma_' + cedula + '_' + fecha.replace(/\//g,'-') + '.png');
+      var folder = DriveApp.getFoldersByName('Compromisos Garantia').hasNext()
+        ? DriveApp.getFoldersByName('Compromisos Garantia').next()
+        : DriveApp.createFolder('Compromisos Garantia');
+      var file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      driveUrl = file.getUrl();
+    }
+
+    hoja.appendRow([fecha, nombre, cedula, email, whatsapp, numMultas, driveUrl]);
+
+    // 3. Enviar copia por correo al cliente
+    if (email) {
+      var total10k = '$' + (10000 * numMultas).toLocaleString();
+      var cuerpo = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">'
+        + '<div style="background:#4c1d95;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">'
+        + '<h2 style="margin:0">Compromiso de Pago</h2>'
+        + '<p style="margin:6px 0 0;opacity:.85">JurídicosWeb · juridicosweb.com</p>'
+        + '</div>'
+        + '<div style="background:#f9f9f9;padding:24px;border-radius:0 0 12px 12px">'
+        + '<p>Hola <strong>' + nombre + '</strong>,</p>'
+        + '<p>Adjuntamos tu <strong>Compromiso de Pago</strong> firmado el <strong>' + fecha + '</strong>.</p>'
+        + '<table style="width:100%;border-collapse:collapse;margin:16px 0">'
+        + '<tr><td style="padding:8px;background:#ede9fe;border-radius:6px"><strong>Multas a eliminar:</strong></td><td style="padding:8px">' + numMultas + '</td></tr>'
+        + '<tr><td style="padding:8px"><strong>Cédula:</strong></td><td style="padding:8px">' + cedula + '</td></tr>'
+        + '<tr><td style="padding:8px;background:#ede9fe;border-radius:6px"><strong>Pago hoy (adelanto):</strong></td><td style="padding:8px">' + total10k + '</td></tr>'
+        + '<tr><td style="padding:8px"><strong>Pago al eliminar:</strong></td><td style="padding:8px">$98.900 por cada multa eliminada</td></tr>'
+        + '</table>'
+        + '<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;border-radius:6px;margin:16px 0">'
+        + '<strong>Garantía:</strong> Solo pagas los $98.900 cuando la multa quede oficialmente eliminada. Si no se elimina, no pagas nada adicional.'
+        + '</div>'
+        + (driveUrl ? '<p><a href="' + driveUrl + '" style="color:#4c1d95">Ver firma guardada</a></p>' : '')
+        + '<p style="font-size:12px;color:#666">Este correo es tu constancia oficial. Consérvalo.</p>'
+        + '</div></div>';
+
+      GmailApp.sendEmail(email, 'Tu Compromiso de Pago – JurídicosWeb', '', {
+        htmlBody: cuerpo,
+        name: 'JurídicosWeb'
+      });
+    }
+
+    return respuestaJson({ ok: true, driveUrl: driveUrl });
+  } catch(e) {
+    return respuestaJson({ ok: false, error: e.message });
   }
 }
