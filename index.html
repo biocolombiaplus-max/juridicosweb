@@ -4333,89 +4333,87 @@ function renderPlanes(aplican){
   var seleccionadas = aplican.filter(function(m){ return m.seleccionada; });
   var numSel = seleccionadas.length;
   var totalValorSel = seleccionadas.reduce(function(sum,m){ return sum + (Number(m.valor)||0); }, 0);
-  var totalIndividual = numSel * 45000;
-
-  var comparacionHtml = '';
-  if(totalValorSel > 0){
-    comparacionHtml =
-      '<div style="background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1.5px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;margin-bottom:12px;">'+
-      '<p style="font-size:0.68rem;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;">Lo que reportaste que debes hoy en el SIMIT</p>'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
-      '<div style="text-align:center;"><p style="font-size:0.65rem;color:var(--gray);margin:0 0 2px;">'+(numSel>1?'Estas '+numSel+' multas o fotomultas suman':'Esta multa o fotomulta vale')+'</p><p style="font-size:1.3rem;font-weight:900;color:#dc2626;margin:0;line-height:1;">$'+totalValorSel.toLocaleString('es-CO')+'</p></div>'+
-      '<div style="font-size:1.4rem;color:#94a3b8;font-weight:300;">vs</div>'+
-      '<div style="text-align:center;"><p style="font-size:0.65rem;color:var(--gray);margin:0 0 2px;">Las eliminamos por</p><p style="font-size:1.3rem;font-weight:900;color:#16a34a;margin:0;line-height:1;">$'+totalIndividual.toLocaleString('es-CO')+'</p></div>'+
-      '</div></div>';
-  }
+  var n = _numMultasGarantia || Math.max(1, aplican.length);
+  _numMultasGarantia = n;
 
   var html =
-    '<p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin:0 0 12px;text-align:center;">🎉 '+(aplican.length>1?'Estas '+aplican.length+' multas o fotomultas aplican':'Esta multa o fotomulta aplica')+' para eliminar</p>'+
-    '<div style="border:2.5px solid #c9a227;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(201,162,39,0.2);">'+
-    '<div style="background:linear-gradient(90deg,#c9a227,#e8bc3a);padding:6px 16px;"><span style="font-size:0.7rem;font-weight:800;color:#0a1628;letter-spacing:.5px;">PAGAR POR MULTA O FOTOMULTA SELECCIONADA</span></div>'+
-    '<div style="padding:14px 16px;">'+
-    comparacionHtml +
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
-    '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Derecho de Petición</p><p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">$45.000 por cada multa o fotomulta que marques arriba</p></div>'+
-    '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$'+totalIndividual.toLocaleString('es-CO')+'</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">'+numSel+' seleccionada'+(numSel!==1?'s':'')+'</p></div>'+
-    '</div>'+
-    '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#0a1628;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(201,162,39,0.45);opacity:'+(numSel===0?'0.5':'1')+';">'+
-    '<i class="fas fa-file-signature"></i>'+(numSel===0 ? 'Toca "agregar al trámite" arriba primero' : 'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' o fotomulta'+(numSel!==1?'s':'')+' — $'+totalIndividual.toLocaleString('es-CO'))+'</button>'+
-    '</div></div>';
+    '<p style="font-size:0.85rem;font-weight:800;color:var(--navy);margin:0 0 14px;text-align:center;">🎉 '+(aplican.length>1?'Estas '+aplican.length+' multas o fotomultas aplican':'Esta multa o fotomulta aplica')+' para eliminar. Elige tu plan:</p>'+
 
-  if(aplican.length >= 2){
-    html +=
-      '<div style="border:2.5px solid #16a34a;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(22,163,74,0.2);">'+
-      '<div style="background:linear-gradient(90deg,#16a34a,#22c55e);padding:6px 16px;"><span style="font-size:0.7rem;font-weight:800;color:#fff;letter-spacing:.5px;">MEJOR PRECIO — TODAS TUS MULTAS O FOTOMULTAS</span></div>'+
-      '<div style="padding:14px 16px;">'+
-      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
-      '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Eliminar TODAS las que apliquen</p><p style="font-size:0.73rem;color:var(--gray);margin:0;">Las '+aplican.length+' multas o fotomultas, un solo pago</p></div>'+
-      '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.9rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$69.000</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:1px 0 0;">ahorras $'+(aplican.length*45000-69000).toLocaleString('es-CO')+'</p></div>'+
-      '</div>'+
-      '<button onclick="seleccionarTodasAplicables();elegirPlan(\'masivo\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;">'+
-      '<i class="fas fa-bolt"></i>Eliminar las '+aplican.length+' — $69.000</button>'+
-      '</div></div>';
-  }
-
-  html +=
-    '<div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;margin-bottom:14px;">'+
-    '<div style="padding:14px 16px;">'+
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">'+
-    '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Plan Pago al Eliminar</p><p style="font-size:0.73rem;color:var(--gray);margin:0;">Adelanto hoy, resto al eliminar</p></div>'+
-    '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$19.800</p></div>'+
+    // ── PLAN ESTRELLA: PAGA SOLO AL ELIMINAR ──
+    '<div style="border:2.5px solid #7c3aed;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 6px 28px rgba(124,58,237,0.28);">'+
+    '<div style="background:linear-gradient(90deg,#6d28d9,#9333ea);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;">'+
+    '<span style="font-size:0.7rem;font-weight:800;color:#fff;letter-spacing:.6px;">⭐ RECOMENDADO — PAGAS SOLO SI SE ELIMINA</span>'+
+    '<span style="background:#fde68a;color:#92400e;font-size:0.62rem;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.3px;">0 riesgo</span>'+
     '</div>'+
-    '<div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.25);border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
-    '<p style="font-size:0.72rem;color:#dc2626;font-weight:700;margin:0;line-height:1.5;">⚠️ Con este plan terminas pagando <b>$'+(19800+95500*numSel).toLocaleString('es-CO')+'</b> en total ($19.800 hoy + $95.500'+(numSel>1?' por multa o fotomulta':'')+' al eliminar). Pagando de una vez pagas solo <b>$'+totalIndividual.toLocaleString('es-CO')+'</b>.</p>'+
+    '<div style="padding:16px;">'+
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;">'+
+    '<div>'+
+    '<p style="font-size:1.05rem;font-weight:900;color:#4c1d95;margin:0 0 3px;line-height:1.2;">Paga Solo al Eliminar</p>'+
+    '<p style="font-size:0.72rem;color:#6b21a8;margin:0;line-height:1.5;font-weight:600;">Solo $10.000 hoy · el resto ($98.900 c/multa) <em>únicamente si se elimina</em></p>'+
     '</div>'+
-    '<button onclick="elegirPlan(\'diferido\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--navy);color:#fff;padding:14px;border:none;border-radius:11px;cursor:pointer;font-size:0.9rem;font-weight:700;">'+
-    '<i class="fas fa-file-signature"></i>Elegir este plan — Continuar</button>'+
-    '</div></div>'+
-    '<div style="border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(124,58,237,0.2);">'+
-    '<div style="background:linear-gradient(90deg,#7c3aed,#a855f7);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;">'+
-    '<span style="font-size:0.7rem;font-weight:800;color:#fff;letter-spacing:.5px;">MEJOR OPCIÓN — PAGAS SOLO SI SE ELIMINA</span>'+
-    '<span style="font-size:0.65rem;background:rgba(255,255,255,0.25);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700;">0 riesgo</span>'+
+    '<div style="text-align:right;flex-shrink:0;">'+
+    '<p id="gar-precio-hoy" style="font-size:2rem;font-weight:900;color:#7c3aed;margin:0;line-height:1;">$'+(10000*n).toLocaleString('es-CO')+'</p>'+
+    '<p style="font-size:0.65rem;color:#9333ea;font-weight:700;margin:2px 0 0;">hoy para iniciar</p>'+
     '</div>'+
-    '<div style="padding:14px 16px;">'+
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">'+
-    '<div><p style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Paga Solo al Eliminar</p><p style="font-size:0.73rem;color:var(--gray);margin:0;line-height:1.5;">$10.000 hoy por trámite · $98.900 por multa <em>solo si se elimina</em></p></div>'+
-    '<div style="text-align:right;flex-shrink:0;"><p id="gar-precio-hoy" style="font-size:1.9rem;font-weight:900;color:#7c3aed;margin:0;line-height:1;">$10.000</p><p style="font-size:0.65rem;color:#7c3aed;font-weight:700;margin:1px 0 0;">hoy para iniciar</p></div>'+
     '</div>'+
-    '<div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;">'+
-    '<p style="font-size:0.72rem;font-weight:700;color:#6b21a8;margin:0 0 10px;">¿Cuántas multas quieres eliminar con este plan?</p>'+
-    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'+
-    '<div style="display:flex;align-items:center;gap:0;border:1.5px solid #d8b4fe;border-radius:9px;overflow:hidden;">'+
-    '<button onclick="garCambiarN(-1)" style="background:#f3e8ff;border:none;padding:8px 14px;font-size:1.1rem;font-weight:700;color:#7c3aed;cursor:pointer;">−</button>'+
-    '<span id="gar-num" style="padding:8px 16px;font-size:1.1rem;font-weight:800;color:#4c1d95;min-width:40px;text-align:center;">1</span>'+
-    '<button onclick="garCambiarN(1)" style="background:#f3e8ff;border:none;padding:8px 14px;font-size:1.1rem;font-weight:700;color:#7c3aed;cursor:pointer;">+</button>'+
+    '<div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:12px 14px;margin-bottom:12px;">'+
+    '<p style="font-size:0.72rem;font-weight:700;color:#5b21b6;margin:0 0 10px;">¿Cuántas multas o fotomultas quieres eliminar?</p>'+
+    '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'+
+    '<div style="display:flex;align-items:center;border:2px solid #c4b5fd;border-radius:10px;overflow:hidden;">'+
+    '<button onclick="garCambiarN(-1)" style="background:#ede9fe;border:none;padding:9px 16px;font-size:1.2rem;font-weight:700;color:#7c3aed;cursor:pointer;line-height:1;">−</button>'+
+    '<span id="gar-num" style="padding:9px 18px;font-size:1.15rem;font-weight:800;color:#4c1d95;min-width:44px;text-align:center;">'+n+'</span>'+
+    '<button onclick="garCambiarN(1)" style="background:#ede9fe;border:none;padding:9px 16px;font-size:1.2rem;font-weight:700;color:#7c3aed;cursor:pointer;line-height:1;">+</button>'+
     '</div>'+
     '<div>'+
-    '<p id="gar-hoy-txt" style="font-size:0.8rem;font-weight:700;color:#16a34a;margin:0;">Pagas hoy: $10.000</p>'+
-    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#64748b;margin:2px 0 0;">Al eliminar: $98.900 por cada una</p>'+
-    '</div></div></div>'+
-    '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
-    '<p style="font-size:0.72rem;color:#166534;font-weight:700;margin:0;line-height:1.6;">✅ Si la multa NO se elimina, <strong>no pagas los $98.900</strong>. Solo los $10.000 del trámite administrativo. Sin promesas vacías — tú decides si vale la pena.</p>'+
+    '<p id="gar-hoy-txt" style="font-size:0.82rem;font-weight:700;color:#16a34a;margin:0;">Pagas hoy: $'+(10000*n).toLocaleString('es-CO')+'</p>'+
+    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#6b7280;margin:3px 0 0;">Al eliminar: $'+(98900*n).toLocaleString('es-CO')+' total</p>'+
     '</div>'+
-    '<button onclick="elegirPlan(\'garantia\')" id="btn-garantia" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:16px;border:none;border-radius:11px;cursor:pointer;font-size:0.97rem;font-weight:800;box-shadow:0 4px 18px rgba(124,58,237,0.4);">'+
-    '<i class="fas fa-shield-alt"></i>Elegir — Pago hoy: $10.000</button>'+
+    '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:11px;padding:11px 13px;margin-bottom:14px;">'+
+    '<p style="font-size:0.73rem;color:#14532d;font-weight:700;margin:0;line-height:1.65;">'+
+    '✅ <strong>Si la multa NO se elimina, no pagas los $98.900.</strong> Solo los $10.000 del trámite administrativo y radicación. Sin letra pequeña — esa es nuestra garantía real.'+
+    '</p>'+
+    '</div>'+
+    '<button onclick="elegirPlan(\'garantia\')" id="btn-garantia" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:17px;border:none;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:800;box-shadow:0 5px 22px rgba(124,58,237,0.45);letter-spacing:.2px;">'+
+    '<i class="fas fa-shield-alt"></i>Empezar — Solo pago $'+(10000*n).toLocaleString('es-CO')+' hoy'+
+    '</button>'+
+    '<p style="font-size:0.68rem;color:#7c3aed;text-align:center;margin:8px 0 0;font-weight:600;">Firmas un compromiso de pago de $98.900 c/multa al eliminarla ✦ 100% legal</p>'+
     '</div></div>'+
+
+    // ── PLAN INDIVIDUAL ──
+    '<div style="border:2px solid #c9a227;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 14px rgba(201,162,39,0.18);">'+
+    '<div style="background:linear-gradient(90deg,#b8971e,#d4a920);padding:6px 16px;"><span style="font-size:0.68rem;font-weight:800;color:#0a1628;letter-spacing:.5px;">PAGO ÚNICO POR CADA MULTA</span></div>'+
+    '<div style="padding:14px 16px;">'+
+    (totalValorSel>0?
+      '<div style="background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1px solid rgba(220,38,38,0.2);border-radius:9px;padding:10px 12px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+      '<div style="text-align:center;"><p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;">'+(numSel>1?'Tus '+numSel+' multas valen':'Esta multa vale')+'</p><p style="font-size:1.2rem;font-weight:900;color:#dc2626;margin:0;line-height:1;">$'+totalValorSel.toLocaleString('es-CO')+'</p></div>'+
+      '<div style="font-size:1.3rem;color:#94a3b8;">vs</div>'+
+      '<div style="text-align:center;"><p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;">Las eliminas por</p><p style="font-size:1.2rem;font-weight:900;color:#16a34a;margin:0;line-height:1;">$'+(numSel*45000).toLocaleString('es-CO')+'</p></div>'+
+      '</div>'
+    :'')+
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
+    '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 2px;">Derecho de Petición</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$45.000 por cada multa o fotomulta</p></div>'+
+    '<p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+(numSel*45000||45000).toLocaleString('es-CO')+'</p>'+
+    '</div>'+
+    '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#0a1628;padding:15px;border:none;border-radius:11px;cursor:pointer;font-size:0.95rem;font-weight:800;opacity:'+(numSel===0?'0.5':'1')+';">'+
+    '<i class="fas fa-file-signature"></i>'+(numSel===0?'Toca "agregar al trámite" arriba primero':'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' — $'+(numSel*45000).toLocaleString('es-CO'))+'</button>'+
+    '</div></div>'+
+
+    // ── PLAN MASIVO (solo si ≥2 multas) ──
+    (aplican.length>=2?
+      '<div style="border:2px solid #16a34a;border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 3px 14px rgba(22,163,74,0.18);">'+
+      '<div style="background:linear-gradient(90deg,#16a34a,#22c55e);padding:6px 16px;"><span style="font-size:0.68rem;font-weight:800;color:#fff;letter-spacing:.5px;">MEJOR PRECIO — TODAS TUS MULTAS O FOTOMULTAS</span></div>'+
+      '<div style="padding:14px 16px;">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
+      '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 2px;">Eliminar TODAS las que apliquen</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">Las '+aplican.length+' multas, un solo pago</p></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$69.000</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:2px 0 0;">ahorras $'+(aplican.length*45000-69000).toLocaleString('es-CO')+'</p></div>'+
+      '</div>'+
+      '<button onclick="seleccionarTodasAplicables();elegirPlan(\'masivo\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:15px;border:none;border-radius:11px;cursor:pointer;font-size:0.95rem;font-weight:800;">'+
+      '<i class="fas fa-bolt"></i>Eliminar las '+aplican.length+' — $69.000</button>'+
+      '</div></div>'
+    :'')+
+
     '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 0 10px;flex-wrap:wrap;">'+
     '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Proceso 100% legal</span>'+
     '<span style="font-size:0.69rem;color:var(--gray);display:flex;align-items:center;gap:4px;"><i class="fas fa-headset" style="color:#16a34a;"></i>Asesor responde en minutos</span>'+
@@ -4481,7 +4479,7 @@ function garCambiarN(delta){
   if(hoyEl) hoyEl.textContent = 'Pagas hoy: $'+(10000*n).toLocaleString('es-CO');
   if(despEl) despEl.textContent = 'Al eliminar: $'+(98900*n).toLocaleString('es-CO')+' total ($98.900 c/u)';
   var btn = document.getElementById('btn-garantia');
-  if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i>Elegir — Pago hoy: $'+(10000*n).toLocaleString('es-CO');
+  if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i>Empezar — Solo pago $'+(10000*n).toLocaleString('es-CO')+' hoy';
 }
 
 // ===================== FORM VALIDATION =====================
