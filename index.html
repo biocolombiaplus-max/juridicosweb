@@ -6061,6 +6061,26 @@ document.addEventListener('jwPanelChange', function(e){
     _limpiarRetencionTimers();
   }
 });
+
+// ── Interceptar cierre del modal cuando hay panel de pago activo ────────────
+// 1) Botón X (closeOverlay) — reemplazar función para capturar el intento
+var _closeOverlayOriginal = closeOverlay;
+closeOverlay = function(id){
+  if(id === 'overlay-main' && _puedesMostrarRetencion()){
+    mostrarPopupRetencion('cerrar_x');
+    return; // no cerrar aún
+  }
+  _closeOverlayOriginal(id);
+};
+
+// 2) Toque fuera del modal (clic directo en .overlay) — usar fase captura
+//    para interceptar ANTES del listener existente que cierra sin llamar closeOverlay
+document.getElementById('overlay-main').addEventListener('click', function(e){
+  if(e.target === this && _puedesMostrarRetencion()){
+    e.stopImmediatePropagation();
+    mostrarPopupRetencion('cerrar_fuera');
+  }
+}, true); // true = fase captura, se ejecuta antes del handler existente
 </script>
 </body>
 </html>
