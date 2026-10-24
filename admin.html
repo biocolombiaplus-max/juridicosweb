@@ -5092,7 +5092,9 @@ function campEnviarSiguiente(){
     if(res && res.ok !== false){
       _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
       contacto.enviado = true;
-      campLog('✅ Enviado: '+contacto.email,'ok');
+      var canal = res.via === 'brevo' ? '📨 Brevo' : res.via === 'gmail' ? '📧 Gmail' : res.via === 'mailapp' ? '📧 MailApp' : '✉️';
+      campLog('✅ '+canal+' → '+contacto.email,'ok');
+      if(res.brevoAgotado) campLog('   ℹ️ Brevo agotó cuota hoy — se usó Gmail como respaldo','info');
     } else {
       _campErrores++;
       var motivo = (res&&res.msg) || (res&&res.error) || JSON.stringify(res);
@@ -5109,11 +5111,12 @@ function campEnviarSiguiente(){
         // Marcar esta cuenta como agotada hoy (forzar usados al límite)
         cuenta.usados = 9999;
         cuenta.fecha = new Date().toISOString().slice(0,10);
-        campLog('⚠️ Cuota diaria agotada para '+cuenta.email+' — rotando a la siguiente cuenta...','err');
+        campLog('⚠️ Cuota Gmail agotada para '+cuenta.email+' — rotando a la siguiente cuenta...','err');
+        if(res.brevoAgotado) campLog('   ℹ️ Brevo también agotado hoy — solo quedan cuentas Gmail','info');
         // Intentar con siguiente cuenta disponible
         var sigIdx = campCuentaDisponible();
         if(sigIdx < 0){
-          campLog('🚫 Todas las cuentas agotaron su cuota hoy. Campaña pausada — reanuda mañana o agrega más cuentas.','err');
+          campLog('🚫 Brevo + todas las cuentas Gmail agotaron cuota hoy. Campaña pausada — reanuda mañana.','err');
           campPausarEnvio(); campGuardar(); campSyncGuardar();
           // NO avanzar índice: este contacto debe reintentarse mañana
           return;

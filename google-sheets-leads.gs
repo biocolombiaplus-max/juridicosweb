@@ -1556,39 +1556,112 @@ function eliminarFilaPorId(nombreHoja, id) {
 
 // ════════════════════════════════════════════════════════════════════════
 //  CAMPAÑA EMAIL — Envío y Sync entre dispositivos
+//  Orden de prioridad: 1) Brevo API (300/día, mejor deliverability)
+//                      2) GmailApp (500/día por cuenta, queda en Enviados)
+//                      3) MailApp  (último recurso)
 // ════════════════════════════════════════════════════════════════════════
+
+// Clave API de Brevo — se guarda en Script Properties (nunca en código).
+// Pasos: Apps Script → ⚙️ Configuración del proyecto → Propiedades del script
+//        → + Añadir propiedad → Nombre: BREVO_API_KEY  Valor: tu clave
+var BREVO_API_KEY = PropertiesService.getScriptProperties().getProperty('BREVO_API_KEY') || '';
+var BREVO_SENDER_EMAIL = 'hola@juridicosweb.com'; // verificar dominio en Brevo → Remitentes
+var BREVO_SENDER_NAME  = 'JurídicosWeb';
+
+// Contador diario de envíos Brevo (se guarda en PropertiesService para persistir entre ejecuciones)
+var BREVO_LIMITE_DIARIO = 280; // 300 del plan − 20 de margen de seguridad
+
+function brevoUsadosHoy() {
+  var props = PropertiesService.getScriptProperties();
+  var fecha = Utilities.formatDate(new Date(), 'America/Bogota', 'yyyy-MM-dd');
+  var guardada = props.getProperty('brevo_fecha');
+  if (guardada !== fecha) {
+    props.setProperties({ brevo_fecha: fecha, brevo_usados: '0' });
+    return 0;
+  }
+  return parseInt(props.getProperty('brevo_usados') || '0', 10);
+}
+
+function brevoIncrementar() {
+  var props = PropertiesService.getScriptProperties();
+  var n = parseInt(props.getProperty('brevo_usados') || '0', 10) + 1;
+  props.setProperty('brevo_usados', String(n));
+}
+
+function enviarViaBrevo(email, asunto, htmlBody, nombreRemitente) {
+  if (brevoUsadosHoy() >= BREVO_LIMITE_DIARIO) {
+    return { ok: false, motivo: 'cuota_brevo' };
+  }
+  var payload = {
+    sender:  { name: nombreRemitente || BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+    to:      [{ email: email }],
+    subject: asunto,
+    htmlContent: htmlBody,
+    textContent: 'Por favor activa HTML en tu cliente de correo para ver este mensaje.'
+  };
+  try {
+    var resp = UrlFetchApp.fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'api-key': BREVO_API_KEY },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code === 201 || code === 200) {
+      brevoIncrementar();
+      return { ok: true, via: 'brevo' };
+    }
+    var body = resp.getContentText();
+    // 429 = rate limit diario de Brevo
+    var cuotaBrevo = code === 429 || body.indexOf('quota') > -1 || body.indexOf('limit') > -1;
+    return { ok: false, motivo: cuotaBrevo ? 'cuota_brevo' : 'error_brevo', detalle: body };
+  } catch (ex) {
+    return { ok: false, motivo: 'error_brevo', detalle: ex.message };
+  }
+}
 
 function enviarCorreoCampana(datos) {
   var email  = datos.email  || '';
   var asunto = datos.asunto || 'Tu multa de transito tiene solucion legal';
+  var html   = datos.html   || '';
+  var nombre = datos.nombreRemitente || 'JurídicosWeb';
   if (!email || !email.includes('@')) return respuestaJson({ ok: false, msg: 'Email invalido' });
-  // GmailApp.sendEmail SIN from: — siempre funciona, siempre queda en Enviados,
-  // sin depender de que el alias esté verificado en Gmail.
+
+  // ── Canal 1: Brevo ──────────────────────────────────────────────────
+  var rb = enviarViaBrevo(email, asunto, html, nombre);
+  if (rb.ok) return respuestaJson({ ok: true, via: 'brevo' });
+
+  // Si Brevo falló por cuota, lo marcamos para que el admin lo sepa
+  var brevoAgotado = rb.motivo === 'cuota_brevo';
+
+  // ── Canal 2: GmailApp (queda en Enviados) ───────────────────────────
   try {
     GmailApp.sendEmail(email, asunto,
       'Para ver este correo activa HTML en tu cliente de correo.',
-      {
-        htmlBody: datos.html || '',
-        name: datos.nombreRemitente || 'JuridicosWeb',
-        replyTo: EMAIL_DESPACHO
-      }
+      { htmlBody: html, name: nombre, replyTo: EMAIL_DESPACHO }
     );
-    return respuestaJson({ ok: true });
-  } catch (e) {
-    // Último recurso: MailApp (no queda en Enviados pero garantiza entrega)
+    return respuestaJson({ ok: true, via: 'gmail', brevoAgotado: brevoAgotado });
+  } catch (eg) {
+    var msgG = eg.message || '';
+    var cuotaGmail = /demasiadas|too many|quota|daily|limit/i.test(msgG);
+    if (!cuotaGmail) {
+      // error no relacionado con cuota — intentar MailApp de todas formas
+    }
+
+    // ── Canal 3: MailApp (último recurso) ─────────────────────────────
     try {
-      MailApp.sendEmail({
-        to: email, subject: asunto,
-        htmlBody: datos.html || '',
-        name: datos.nombreRemitente || 'JuridicosWeb',
-        replyTo: EMAIL_DESPACHO
+      MailApp.sendEmail({ to: email, subject: asunto, htmlBody: html,
+                          name: nombre, replyTo: EMAIL_DESPACHO });
+      return respuestaJson({ ok: true, via: 'mailapp', brevoAgotado: brevoAgotado });
+    } catch (em) {
+      var msgM = em.message || '';
+      var esQuota = /demasiadas|too many|quota|daily|limit/i.test(msgM);
+      return respuestaJson({
+        ok: false, msg: msgM,
+        quotaExcedida: esQuota,   // frontend rota de cuenta Gmail
+        brevoAgotado: brevoAgotado
       });
-      return respuestaJson({ ok: true, via: 'mailapp' });
-    } catch (e2) {
-      // Detectar cuota agotada y señalarlo con flag especial para que el frontend rote cuenta
-      var msg2 = e2.message || '';
-      var esQuota2 = /demasiadas|too many|quota|daily|limit/i.test(msg2);
-      return respuestaJson({ ok: false, msg: msg2, quotaExcedida: esQuota2 });
     }
   }
 }
