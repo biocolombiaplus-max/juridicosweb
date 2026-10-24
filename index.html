@@ -5800,7 +5800,7 @@ function marcarPagoActivo(){
 function _estaEnPanelPago(){
   return _retencionPaneles.some(function(id){
     var el = document.getElementById(id);
-    return el && (el.style.display !== 'none') && !el.classList.contains('hidden');
+    return el && el.classList.contains('active'); // paneles usan clase .active
   });
 }
 
