@@ -177,7 +177,7 @@ function doGet(e) {
 function doPost(e) {
   try {
     var datos = JSON.parse(e.postData.contents);
-    switch (datos._accion) {
+    switch (datos._accion || datos.accion) {
       case 'confirmar_pago':      return actualizarEstadoPago(datos);
       case 'autorizar_documento': return autorizarDocumento(datos);
       case 'marcar_enviado':      return marcarEnviado(datos);
@@ -219,6 +219,9 @@ function doPost(e) {
       case 'epayco_sesion':       return crearSesionEpayco(datos);
       // ── Tracking de visitas al sitio ─────────────────────────────────
       case 'registrar_visita':    return registrarVisita(datos);
+      // ── Diagnóstico y control de Brevo ───────────────────────────────
+      case 'brevo_diagnostico':   return brevoDiagnostico();
+      case 'brevo_reset_contador': return brevoResetContadorGas();
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -1570,6 +1573,34 @@ var BREVO_SENDER_NAME  = 'JurídicosWeb';
 
 // Contador diario de envíos Brevo (se guarda en PropertiesService para persistir entre ejecuciones)
 var BREVO_LIMITE_DIARIO = 280; // 300 del plan − 20 de margen de seguridad
+
+function brevoDiagnostico() {
+  var key = PropertiesService.getScriptProperties().getProperty('BREVO_API_KEY') || '';
+  if (!key) return respuestaJson({ ok: true, brevoOk: false, sinClave: true });
+  var usados = brevoUsadosHoy();
+  if (usados >= BREVO_LIMITE_DIARIO) return respuestaJson({ ok: true, brevoOk: false, cuotaAgotada: true, usadosHoy: usados });
+  // Ping real a Brevo: listar remitentes (no gasta cuota)
+  try {
+    var resp = UrlFetchApp.fetch('https://api.brevo.com/v3/senders', {
+      method: 'get',
+      headers: { 'api-key': key },
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code === 200) return respuestaJson({ ok: true, brevoOk: true, usadosHoy: usados });
+    if (code === 401) return respuestaJson({ ok: true, brevoOk: false, sinClave: true, detalle: 'Clave API inválida (401)' });
+    return respuestaJson({ ok: true, brevoOk: false, detalle: 'HTTP ' + code + ': ' + resp.getContentText().slice(0, 200) });
+  } catch (e) {
+    return respuestaJson({ ok: true, brevoOk: false, detalle: String(e) });
+  }
+}
+
+function brevoResetContadorGas() {
+  var props = PropertiesService.getScriptProperties();
+  var fecha = Utilities.formatDate(new Date(), 'America/Bogota', 'yyyy-MM-dd');
+  props.setProperties({ brevo_fecha: fecha, brevo_usados: '0' });
+  return respuestaJson({ ok: true, usadosHoy: 0 });
+}
 
 function brevoUsadosHoy() {
   var props = PropertiesService.getScriptProperties();

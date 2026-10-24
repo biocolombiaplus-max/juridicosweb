@@ -1035,14 +1035,21 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div class="camp-panel" id="camp-panel-cuentas">
           <div class="camp-card">
             <!-- Brevo status card (always first, auto) -->
-            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
-              <div style="width:36px;height:36px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📨</div>
-              <div style="flex:1">
-                <div style="font-size:13px;font-weight:800;color:#166534;">Brevo — Canal principal</div>
-                <div style="font-size:11px;color:#15803d;">280 correos/día · Dominio propio · Anti-spam · Automático</div>
-                <div style="margin-top:5px"><div style="background:#bbf7d0;border-radius:99px;height:4px;width:160px"><div id="brevo-bar" style="background:#16a34a;height:4px;border-radius:99px;width:0%"></div></div></div>
+            <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:36px;height:36px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📨</div>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:800;color:#166534;">Brevo — Canal principal</div>
+                  <div style="font-size:11px;color:#15803d;">280 correos/día · Dominio propio · Anti-spam · Automático</div>
+                  <div style="margin-top:5px"><div style="background:#bbf7d0;border-radius:99px;height:4px;width:160px"><div id="brevo-bar" style="background:#16a34a;height:4px;border-radius:99px;width:0%"></div></div></div>
+                </div>
+                <div style="text-align:right;flex-shrink:0"><span id="brevo-contador" style="font-size:12px;font-weight:700;color:#166534;">0/280</span></div>
               </div>
-              <div style="text-align:right;flex-shrink:0"><span id="brevo-contador" style="font-size:12px;font-weight:700;color:#166534;">0/280</span></div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #bbf7d0;padding-top:10px;">
+                <button onclick="brevoVerificar()" style="background:#16a34a;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">🔍 Verificar si Brevo funciona</button>
+                <button onclick="brevoResetContador()" style="background:#fff;color:#166534;border:1.5px solid #86efac;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;">🔄 Resetear contador</button>
+              </div>
+              <div id="brevo-diagnostico" style="margin-top:8px;display:none;font-size:12px;border-radius:7px;padding:8px 12px;"></div>
             </div>
 
             <h3 style="margin:0 0 6px;font-size:14px;font-weight:700">Cuentas Gmail adicionales</h3>
@@ -4366,6 +4373,82 @@ function brevoActualizarUI() {
   var cnt = document.getElementById('brevo-contador');
   if (bar) bar.style.width = pct + '%';
   if (cnt) cnt.textContent = _brevoUsadosHoy + '/' + BREVO_LIMITE;
+}
+
+function brevoMostrarDiag(msg, tipo) {
+  var el = document.getElementById('brevo-diagnostico');
+  if (!el) return;
+  el.style.display = 'block';
+  var colores = { ok:'background:#f0fdf4;color:#166534;border:1px solid #86efac;',
+                  err:'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;',
+                  info:'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;' };
+  el.style.cssText = 'margin-top:8px;font-size:12px;border-radius:7px;padding:8px 12px;line-height:1.6;' + (colores[tipo]||colores.info);
+  el.innerHTML = msg;
+}
+
+function brevoVerificar() {
+  brevoMostrarDiag('⏳ Verificando conexión con Brevo...', 'info');
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ accion: 'brevo_diagnostico' })
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    var res;
+    try { res = JSON.parse(txt); } catch(e) { res = null; }
+    if (!res) {
+      brevoMostrarDiag('❌ El Apps Script devolvió respuesta inválida.<br>'
+        +'<strong>Solución:</strong> Copia el código más reciente de google-sheets-leads.gs en script.google.com, '
+        +'guarda una nueva versión e implementa nuevamente.', 'err');
+      return;
+    }
+    if (res.brevoOk) {
+      _brevoUsadosHoy = res.usadosHoy || 0;
+      brevoActualizarUI();
+      brevoMostrarDiag('✅ <strong>Brevo funciona correctamente.</strong><br>'
+        +'Enviados hoy: <strong>' + res.usadosHoy + '/280</strong> · '
+        +'Disponibles: <strong>' + (280 - (res.usadosHoy||0)) + '</strong><br>'
+        +'<span style="color:#15803d;">Los próximos correos saldrán por Brevo (hola@juridicosweb.com).</span>', 'ok');
+    } else if (res.sinClave) {
+      brevoMostrarDiag('⚠️ <strong>BREVO_API_KEY no está configurada en el Apps Script.</strong><br>'
+        +'<strong>Solución paso a paso:</strong><br>'
+        +'1. Abre <a href="https://script.google.com" target="_blank" style="color:#1d4ed8;">script.google.com</a><br>'
+        +'2. Entra a tu proyecto → menú ⚙️ <em>Configuración del proyecto</em><br>'
+        +'3. Sección <em>Propiedades del script</em> → clic <em>Añadir propiedad</em><br>'
+        +'4. Nombre: <code>BREVO_API_KEY</code> · Valor: tu clave xkeysib-...<br>'
+        +'5. Guardar → vuelve aquí y haz clic en "Verificar si Brevo funciona".', 'err');
+    } else if (res.cuotaAgotada) {
+      brevoMostrarDiag('ℹ️ <strong>Cuota Brevo agotada hoy (280/280).</strong><br>'
+        +'Los envíos del día de hoy continuarán por Gmail. Mañana Brevo se resetea automáticamente.<br>'
+        +'Si necesitas enviar hoy: haz clic en <strong>Resetear contador</strong> solo si estás seguro de que el contador está equivocado.', 'info');
+    } else {
+      brevoMostrarDiag('❌ Error en Brevo: ' + (res.detalle||res.msg||JSON.stringify(res)), 'err');
+    }
+  })
+  .catch(function(e){
+    brevoMostrarDiag('❌ No se pudo conectar al Apps Script.<br>'
+      +'Verifica que la URL del script esté correcta y que el script esté implementado como "Cualquier persona".', 'err');
+  });
+}
+
+function brevoResetContador() {
+  if (!confirm('¿Resetear el contador de Brevo a 0?\n\nHaz esto solo si sabes que el contador está incorrecto (por ejemplo, reiniciaste pruebas o es un nuevo día).')) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ accion: 'brevo_reset_contador' })
+  })
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    var res; try { res = JSON.parse(txt); } catch(e){ res = null; }
+    if (res && res.ok) {
+      _brevoUsadosHoy = 0;
+      brevoActualizarUI();
+      brevoMostrarDiag('✅ Contador de Brevo reseteado a 0. Ya puedes enviar hasta 280 correos hoy por Brevo.', 'ok');
+    } else {
+      brevoMostrarDiag('❌ No se pudo resetear: ' + (res ? JSON.stringify(res) : txt.slice(0,100)), 'err');
+    }
+  })
+  .catch(function(){ brevoMostrarDiag('❌ Error de conexión al resetear.', 'err'); });
 }
 var _campAsuntos = [
   'Tu multa de transito tiene solucion legal hoy mismo',
