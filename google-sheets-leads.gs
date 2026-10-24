@@ -1628,7 +1628,9 @@ function enviarViaBrevo(email, asunto, htmlBody, nombreRemitente) {
     to:      [{ email: email }],
     subject: asunto,
     htmlContent: htmlBody,
-    textContent: 'Por favor activa HTML en tu cliente de correo para ver este mensaje.'
+    textContent: 'Por favor activa HTML en tu cliente de correo para ver este mensaje.',
+    trackOpens:  'enabled',
+    trackClicks: 'enabled'
   };
   try {
     var resp = UrlFetchApp.fetch('https://api.brevo.com/v3/smtp/email', {
