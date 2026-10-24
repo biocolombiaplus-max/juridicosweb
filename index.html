@@ -5968,28 +5968,34 @@ var _exitIntentHandler = function(e){
   }
 };
 
+var _esperandoMostrarAlVolver = false;
+
 var _visibilityHandler = function(){
-  if(document.visibilityState === 'hidden' && _puedesMostrarRetencion()){
-    _retencionMostrada = true; // Marcar para no mostrar al volver si ya se fue
+  if(document.visibilityState === 'hidden'){
+    // Usuario se va: pausar timer y marcar que queremos mostrar al volver
+    _limpiarRetencionTimers();
+    if(_puedesMostrarRetencion()) _esperandoMostrarAlVolver = true;
+  } else if(document.visibilityState === 'visible' && _esperandoMostrarAlVolver){
+    // Usuario volvió → mostrar popup de inmediato
+    _esperandoMostrarAlVolver = false;
+    setTimeout(function(){
+      if(_puedesMostrarRetencion()) mostrarPopupRetencion('volver_mobile');
+    }, 350);
   }
 };
 
 function _arrancarRetencionEnPanel(){
   if(_retencionMostrada || _pagoActivo) return;
   _limpiarRetencionTimers();
-  // Inactividad: si 40 seg sin avanzar → popup
+  // Inactividad: 25s en móvil, 40s en desktop
+  var _esMovil = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
   _retencionTimer = setTimeout(function(){
     mostrarPopupRetencion('inactividad');
-  }, 40000);
-  // Exit intent desktop
+  }, _esMovil ? 25000 : 40000);
+  // Exit intent desktop (mouseleave hacia barra del navegador)
   document.addEventListener('mouseleave', _exitIntentHandler);
+  // Móvil + desktop: detectar cambio de pestaña / minimizar / home
   document.addEventListener('visibilitychange', _visibilityHandler);
-  // Mobile: si baja y vuelve a subir rápido (back gesture), usamos beforeunload
-  window.addEventListener('beforeunload', function(e){
-    if(_puedesMostrarRetencion()){
-      mostrarPopupRetencion('beforeunload');
-    }
-  }, { once: true });
 }
 
 // Arrancar detectores cuando el usuario llegue a un panel de pago.
