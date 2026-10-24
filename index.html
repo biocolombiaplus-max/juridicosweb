@@ -5812,6 +5812,10 @@ function _limpiarRetencionTimers(){
   if(_retencionTimer){ clearTimeout(_retencionTimer); _retencionTimer = null; }
   document.removeEventListener('mouseleave', _exitIntentHandler);
   document.removeEventListener('visibilitychange', _visibilityHandler);
+  if(_scrollRetencionHandler){
+    window.removeEventListener('scroll', _scrollRetencionHandler);
+    _scrollRetencionHandler = null;
+  }
 }
 
 function _retencionDatosMultas(){
@@ -5968,34 +5972,81 @@ var _exitIntentHandler = function(e){
   }
 };
 
-var _esperandoMostrarAlVolver = false;
+// ── Variables de estado para detección móvil ──────────────────────────────
+var _historyRetencionPushed = false;
+var _scrollRetencionY       = 0;
+var _scrollRetencionT       = 0;
+var _scrollRetencionHandler = null;
 
+// Interceptar botón atrás en móvil: empujar estado falso,
+// cuando el usuario presiona atrás dispara popstate en vez de salir.
+function _pushHistoryRetencion(){
+  if(!_historyRetencionPushed && _estaEnPanelPago()){
+    history.pushState({ jwRet: true }, '');
+    _historyRetencionPushed = true;
+  }
+}
+
+window.addEventListener('popstate', function(e){
+  if(e.state && e.state.jwRet){
+    _historyRetencionPushed = false;
+    if(_puedesMostrarRetencion()){
+      // Interceptar: mostrar popup en lugar de navegar atrás
+      mostrarPopupRetencion('back_button');
+    }
+    // Si no puede mostrar (ya pagando), el estado se consumió y el usuario sale normalmente
+  }
+});
+
+// Detectar scroll-up rápido (gesto de salida en móvil)
 var _visibilityHandler = function(){
   if(document.visibilityState === 'hidden'){
-    // Usuario se va: pausar timer y marcar que queremos mostrar al volver
     _limpiarRetencionTimers();
-    if(_puedesMostrarRetencion()) _esperandoMostrarAlVolver = true;
-  } else if(document.visibilityState === 'visible' && _esperandoMostrarAlVolver){
-    // Usuario volvió → mostrar popup de inmediato
-    _esperandoMostrarAlVolver = false;
-    setTimeout(function(){
-      if(_puedesMostrarRetencion()) mostrarPopupRetencion('volver_mobile');
-    }, 350);
+  } else if(document.visibilityState === 'visible'){
+    // Volvió después de cambiar de app → mostrar popup
+    if(_puedesMostrarRetencion()){
+      setTimeout(function(){ mostrarPopupRetencion('volver_app'); }, 350);
+    }
   }
 };
 
 function _arrancarRetencionEnPanel(){
   if(_retencionMostrada || _pagoActivo) return;
   _limpiarRetencionTimers();
-  // Inactividad: 25s en móvil, 40s en desktop
+
   var _esMovil = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  // 1) Timer de inactividad: 20s móvil · 38s desktop
   _retencionTimer = setTimeout(function(){
     mostrarPopupRetencion('inactividad');
-  }, _esMovil ? 25000 : 40000);
-  // Exit intent desktop (mouseleave hacia barra del navegador)
+  }, _esMovil ? 20000 : 38000);
+
+  // 2) Desktop: exit intent por mouseleave
   document.addEventListener('mouseleave', _exitIntentHandler);
-  // Móvil + desktop: detectar cambio de pestaña / minimizar / home
+
+  // 3) Móvil: interceptar botón atrás con history trick
+  if(_esMovil) setTimeout(_pushHistoryRetencion, 500);
+
+  // 4) Cambio de pestaña o cambio de app
   document.addEventListener('visibilitychange', _visibilityHandler);
+
+  // 5) Móvil: detectar scroll-up rápido (gesto previo a presionar atrás)
+  if(_esMovil){
+    _scrollRetencionY = window.scrollY;
+    _scrollRetencionT = Date.now();
+    _scrollRetencionHandler = function(){
+      var ahora = Date.now();
+      var deltaY = window.scrollY - _scrollRetencionY;
+      var deltaT = ahora - _scrollRetencionT;
+      // Scroll hacia arriba > 80px en menos de 250ms = intención de salir
+      if(deltaY < -80 && deltaT < 250 && _puedesMostrarRetencion()){
+        mostrarPopupRetencion('scroll_atras');
+      }
+      _scrollRetencionY = window.scrollY;
+      _scrollRetencionT = ahora;
+    };
+    window.addEventListener('scroll', _scrollRetencionHandler, { passive: true });
+  }
 }
 
 // Arrancar detectores cuando el usuario llegue a un panel de pago.
