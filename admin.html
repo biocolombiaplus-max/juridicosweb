@@ -4778,154 +4778,85 @@ function campGenerarHTML(nombre){
   // Evitar seudónombres: Lead, Contact, #12345, emails, etc.
   if(!n || n.indexOf('@')>=0 || /^(lead|contact|contacto|cliente)$/i.test(n) || /^#?\d+$/.test(n)) n = 'Estimado conductor';
   return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JurídicosWeb</title></head>'
-  +'<body style="margin:0;padding:0;background:#eef2f7;font-family:\'Helvetica Neue\',Arial,sans-serif;">'
-  +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:32px 0;">'
-  +'<tr><td align="center">'
-  +'<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12);">'
+  +'<body style="margin:0;padding:0;background:#0f172a;font-family:\'Helvetica Neue\',Arial,sans-serif;">'
+  +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;padding:24px 0 32px;">'
+  +'<tr><td align="center" style="padding:0 12px;">'
+  +'<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">'
 
-  // Franja Colombia
-  +'<tr><td style="height:7px;background:linear-gradient(to right,#FCD116 33%,#003087 33%,#003087 66%,#CE1126 66%);"></td></tr>'
-
-  // Header
-  +'<tr><td style="background:linear-gradient(135deg,#003087 0%,#1d4ed8 60%,#1e40af 100%);padding:32px 40px 28px;text-align:center;">'
-  +'<div style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:8px 20px;margin-bottom:14px;">'
-  +'<span style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px;">JuridicosWeb</span>'
+  // Header minimal — logo + tagline
+  +'<tr><td style="padding:0 0 20px;text-align:center;">'
+  +'<div style="display:inline-block;background:linear-gradient(135deg,#c9a227,#e8bc3a);border-radius:10px;padding:7px 18px;margin-bottom:10px;">'
+  +'<span style="color:#0a1628;font-size:16px;font-weight:900;letter-spacing:-0.3px;">JuridicosWeb</span>'
   +'</div>'
-  +'<p style="margin:0;color:rgba(255,255,255,0.8);font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Derecho de Transito · Colombia</p>'
+  +'<div style="height:3px;background:linear-gradient(to right,#FCD116 33%,#003087 33%,#003087 66%,#CE1126 66%);border-radius:2px;margin-top:10px;"></div>'
   +'</td></tr>'
 
-  // Barra de urgencia — CSS puro, sin emojis
-  +'<tr><td style="background:linear-gradient(135deg,#dc2626,#991b1b);padding:18px 40px;">'
+  // Hero card — gancho emocional
+  +'<tr><td style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:18px 18px 0 0;padding:28px 28px 22px;text-align:center;">'
+  +'<div style="display:inline-block;background:rgba(201,162,39,0.15);border:1px solid rgba(201,162,39,0.4);border-radius:20px;padding:5px 14px;margin-bottom:14px;">'
+  +'<span style="color:#e8bc3a;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">Noticia importante para ti</span>'
+  +'</div>'
+  +'<h1 style="margin:0 0 10px;font-size:26px;font-weight:900;color:#ffffff;line-height:1.15;">Hola <span style="color:#e8bc3a;">'+n+'</span>,<br>tu multa puede desaparecer</h1>'
+  +'<p style="margin:0;font-size:15px;color:rgba(255,255,255,0.7);line-height:1.6;">Miles de fotomultas en Colombia<br><strong style="color:#4ade80;">ya no son validas por ley</strong> — la tuya puede ser una.</p>'
+  +'</td></tr>'
+
+  // LA GRAN PROMESA — Pagas al Eliminar
+  +'<tr><td style="background:#ffffff;padding:0;">'
+  +'<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:20px 28px;text-align:center;">'
+  +'<p style="margin:0 0 4px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.7);letter-spacing:2px;text-transform:uppercase;">El beneficio que cambia todo</p>'
+  +'<p style="margin:0 0 6px;font-size:22px;font-weight:900;color:#ffffff;line-height:1.2;">PAGAS SOLO SI SE ELIMINA</p>'
+  +'<p style="margin:0;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5;">Iniciamos con <strong style="color:#e8bc3a;">$10.000</strong> de gestion.<br>Lo demas solo lo pagas cuando tu multa desaparezca del SIMIT.</p>'
+  +'</div>'
+
+  // 3 pilares de confianza — horizontal
+  +'<div style="background:#f8fafc;padding:18px 28px;">'
   +'<table width="100%" cellpadding="0" cellspacing="0"><tr>'
-  +'<td style="width:44px;vertical-align:middle;">'
-  +'<div style="background:rgba(255,255,255,0.25);border-radius:50%;width:40px;height:40px;text-align:center;line-height:40px;font-size:20px;font-weight:900;color:#fff;">!</div>'
+  +'<td style="width:33%;text-align:center;padding:0 6px;">'
+  +'<div style="font-size:20px;margin-bottom:4px;">✓</div>'
+  +'<div style="font-size:11px;font-weight:800;color:#1e3a8a;line-height:1.3;">Verificable<br>en el SIMIT</div>'
   +'</td>'
-  +'<td style="padding-left:14px;vertical-align:middle;">'
-  +'<div style="color:#fff;font-weight:800;font-size:15px;line-height:1.3;">Tienes multas activas en el SIMIT</div>'
-  +'<div style="color:#fca5a5;font-size:12px;margin-top:3px;">Cada dia que pasan generan intereses de mora y riesgo de cobro coactivo</div>'
-  +'</td></tr></table>'
-  +'</td></tr>'
-
-  // Cuerpo principal
-  +'<tr><td style="padding:36px 40px 28px;">'
-
-  // Saludo
-  +'<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;">Mensaje importante</p>'
-  +'<h2 style="margin:0 0 14px;font-size:24px;font-weight:900;color:#111827;line-height:1.2;">Hola <span style="color:#1d4ed8;">'+n+'</span>, tu multa tiene solucion hoy</h2>'
-
-  +'<p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.7;">'
-  +'En JuridicosWeb radicamos un <strong>Derecho de Peticin ante la Secretaria de Transito o Movilidad</strong> para eliminar tu comparendo o fotomulta del SIMIT — y lo hacemos de una manera que jamas imaginarias:'
-  +'</p>'
-
-  // Destacado: la promesa diferenciadora
-  +'<div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3b82f6;border-radius:12px;padding:22px 24px;margin:0 0 20px;">'
-  +'<div style="font-size:13px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Asi funciona el proceso:</div>'
-  +'<table width="100%" cellpadding="0" cellspacing="0">'
-  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
-  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">1</span>'
-  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;">Nosotros redactamos tu Derecho de Peticion</span>'
-  +'</td></tr>'
-  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
-  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">2</span>'
-  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;"><strong>Tu lo firmas con el dedo desde el celular</strong> — en segundos</span>'
-  +'</td></tr>'
-  +'<tr><td style="vertical-align:top;padding-bottom:10px;">'
-  +'<span style="display:inline-block;background:#1d4ed8;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">3</span>'
-  +'<span style="font-size:14px;color:#1e3a8a;font-weight:600;margin-left:8px;"><strong>Nosotros lo radicamos de inmediato</strong> ante la entidad</span>'
-  +'</td></tr>'
-  +'<tr><td style="vertical-align:top;">'
-  +'<span style="display:inline-block;background:#16a34a;color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;font-weight:800;">4</span>'
-  +'<span style="font-size:14px;color:#14532d;font-weight:700;margin-left:8px;"><strong>En menos de 3 minutos recibes tu numero de radicado</strong></span>'
-  +'</td></tr>'
-  +'</table>'
-  +'</div>'
-
-  // Verificabilidad — argumento de confianza
-  +'<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 20px;margin:0 0 20px;">'
-  +'<div style="font-size:13px;font-weight:800;color:#14532d;margin-bottom:6px;">100% Verificable y Oficial</div>'
-  +'<p style="margin:0;font-size:13px;color:#166534;line-height:1.6;">'
-  +'Tu radicado puedes verificarlo directamente en la pagina de la Secretaria de Transito, Secretaria de Movilidad o Alcaldia de tu ciudad. No hay letra menuda — el documento tiene plena validez juridica.'
-  +'</p>'
-  +'</div>'
-
-  // Cajitas de beneficios (sin emojis)
-  +'<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">'
-  +'<tr>'
-  +'<td style="width:50%;padding:0 6px 12px 0;vertical-align:top;">'
-  +'<div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:14px;">'
-  +'<div style="display:inline-block;background:#0284c7;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">RAPIDO</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#0c4a6e;margin-bottom:4px;">Radicado en 3 minutos</div>'
-  +'<div style="font-size:12px;color:#0369a1;line-height:1.5;">Sin filas, sin turnos, sin ir a ningun lugar</div>'
-  +'</div>'
+  +'<td style="width:33%;text-align:center;padding:0 6px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">'
+  +'<div style="font-size:20px;margin-bottom:4px;">★</div>'
+  +'<div style="font-size:11px;font-weight:800;color:#1e3a8a;line-height:1.3;">+850 multas<br>eliminadas</div>'
   +'</td>'
-  +'<td style="width:50%;padding:0 0 12px 6px;vertical-align:top;">'
-  +'<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;">'
-  +'<div style="display:inline-block;background:#16a34a;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">PRECIO</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#14532d;margin-bottom:4px;">Desde $45.000</div>'
-  +'<div style="font-size:12px;color:#15803d;line-height:1.5;">Precio fijo, sin cobros ocultos, sin importar el monto</div>'
-  +'</div>'
+  +'<td style="width:33%;text-align:center;padding:0 6px;">'
+  +'<div style="font-size:20px;margin-bottom:4px;">⚡</div>'
+  +'<div style="font-size:11px;font-weight:800;color:#1e3a8a;line-height:1.3;">Radicado<br>en 3 minutos</div>'
   +'</td>'
-  +'</tr>'
-  +'<tr>'
-  +'<td style="width:50%;padding:0 6px 0 0;vertical-align:top;">'
-  +'<div style="background:#fdf4ff;border:1.5px solid #e9d5ff;border-radius:10px;padding:14px;">'
-  +'<div style="display:inline-block;background:#7c3aed;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">LEGAL</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#4a1d96;margin-bottom:4px;">Ley 769/2002</div>'
-  +'<div style="font-size:12px;color:#7c3aed;line-height:1.5;">Respaldado en jurisprudencia del Consejo de Estado</div>'
-  +'</div>'
-  +'</td>'
-  +'<td style="width:50%;padding:0 0 0 6px;vertical-align:top;">'
-  +'<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px;">'
-  +'<div style="display:inline-block;background:#ea580c;color:#fff;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:800;margin-bottom:8px;letter-spacing:0.5px;">RESULTADO</div>'
-  +'<div style="font-size:13px;font-weight:800;color:#7c2d12;margin-bottom:4px;">+850 casos exitosos</div>'
-  +'<div style="font-size:12px;color:#c2410c;line-height:1.5;">Clientes satisfechos en toda Colombia en 2024</div>'
-  +'</div>'
-  +'</td>'
-  +'</tr>'
-  +'</table>'
-
-  // Urgencia — sin emojis
-  +'<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #f59e0b;border-radius:10px;padding:16px 20px;margin:20px 0;">'
-  +'<p style="margin:0;font-size:14px;font-weight:800;color:#78350f;">Por que actuar hoy y no esperar?</p>'
-  +'<p style="margin:6px 0 0;font-size:13px;color:#92400e;line-height:1.6;">Las multas no resueltas acumulan intereses de mora del <strong>2% mensual</strong> y pueden derivar en embargo del vehiculo. Ademas, mientras mas tiempo pasa, mas dificil es actuar sobre algunos tipos de comparendos. La solucion existe hoy.</p>'
+  +'</tr></table>'
   +'</div>'
 
-  // CTA principal — sin emojis en el texto del boton
-  +'<div style="text-align:center;margin:28px 0 20px;">'
-  +'<a href="https://juridicosweb.com?utm_source=email&utm_medium=campana&utm_campaign=simit_masivo" '
-  +'style="display:inline-block;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#ffffff;text-decoration:none;padding:18px 44px;border-radius:50px;font-size:17px;font-weight:800;letter-spacing:0.3px;box-shadow:0 6px 24px rgba(220,38,38,0.45);">'
-  +'Consultar mi cedula GRATIS ahora'
+  // Prueba social — real y corta
+  +'<div style="background:#ffffff;padding:16px 28px;">'
+  +'<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:10px;padding:14px 18px;">'
+  +'<div style="display:flex;align-items:center;margin-bottom:6px;">'
+  +'<div style="width:8px;height:8px;background:#22c55e;border-radius:50%;margin-right:8px;"></div>'
+  +'<span style="font-size:11px;font-weight:800;color:#15803d;letter-spacing:0.5px;">RESULTADO REAL — Bogota, oct 2026</span>'
+  +'</div>'
+  +'<p style="margin:0;font-size:13px;color:#14532d;line-height:1.5;font-style:italic;">"Tenia una fotomulta de 2021 y en 3 dias ya no aparecia en el SIMIT. Increible, y pague solo al final."</p>'
+  +'<p style="margin:6px 0 0;font-size:11px;color:#16a34a;font-weight:700;">— Cliente verificado · Fotomulta eliminada</p>'
+  +'</div>'
+  +'</div>'
+
+  // CTA PRINCIPAL — boton brillante, visible sin scroll
+  +'<div style="background:#ffffff;padding:20px 28px 24px;text-align:center;">'
+  +'<a href="https://juridicosweb.com?utm_source=email&utm_medium=campana&utm_campaign=garantia" '
+  +'style="display:block;background:linear-gradient(135deg,#c9a227,#e8bc3a,#c9a227);color:#0a1628;text-decoration:none;padding:18px 28px;border-radius:14px;font-size:18px;font-weight:900;letter-spacing:0.2px;box-shadow:0 6px 28px rgba(201,162,39,0.55);border:2px solid rgba(255,255,255,0.3);">'
+  +'Verificar si mi multa aplica — GRATIS'
   +'</a>'
-  +'<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Sin registro. Sin pago previo. Solo tu cedula.</p>'
-  +'</div>'
-
-  // Social proof barra
-  +'<div style="background:#f8fafc;border-radius:10px;padding:14px 20px;text-align:center;margin-bottom:20px;">'
-  +'<p style="margin:0;font-size:13px;color:#374151;"><strong style="color:#1d4ed8;">4.9 / 5 estrellas</strong> · Mas de <strong>850 multas eliminadas</strong> · Clientes en Bogota, Medellin, Cali, Barranquilla y toda Colombia</p>'
-  +'</div>'
-
-  // WhatsApp — sin emoji en el texto principal
-  +'<div style="text-align:center;margin-bottom:8px;">'
-  +'<a href="https://wa.me/573159318400?text=Hola%2C+quiero+saber+si+puedo+eliminar+mis+multas" '
-  +'style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:700;box-shadow:0 3px 12px rgba(37,211,102,0.4);">'
-  +'Preguntar por WhatsApp'
-  +'</a>'
-  +'<p style="margin:8px 0 0;font-size:12px;color:#6b7280;">Respuesta en minutos</p>'
+  +'<p style="margin:10px 0 0;font-size:11px;color:#9ca3af;">Sin registro · Solo tu cedula · $0 si no aplica</p>'
   +'</div>'
 
   +'</td></tr>'
 
-  // Footer
-  +'<tr><td style="background:#f1f5f9;padding:20px 40px;border-top:1px solid #e2e8f0;text-align:center;">'
-  +'<p style="margin:0 0 6px;font-size:12px;color:#64748b;font-weight:600;">JuridicosWeb · Bogota, Colombia</p>'
-  +'<p style="margin:0;font-size:11px;color:#94a3b8;line-height:1.6;">'
-  +'Recibiste este correo porque consultaste informacion sobre multas de transito en Colombia. '
-  +'Si no deseas recibir mas informacion, responde este correo con la palabra <strong>CANCELAR</strong>.'
+  // Footer minimalista
+  +'<tr><td style="padding:16px 0;text-align:center;">'
+  +'<p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.35);font-weight:600;">JuridicosWeb · Colombia</p>'
+  +'<p style="margin:0;font-size:10px;color:rgba(255,255,255,0.2);line-height:1.6;">'
+  +'Recibiste este correo porque consultaste sobre multas de transito. '
+  +'Responde con <strong>CANCELAR</strong> para no recibir mas mensajes.'
   +'</p>'
   +'</td></tr>'
-
-  // Franja Colombia
-  +'<tr><td style="height:7px;background:linear-gradient(to right,#FCD116 33%,#003087 33%,#003087 66%,#CE1126 66%);"></td></tr>'
 
   +'</table></td></tr></table></body></html>';
 }

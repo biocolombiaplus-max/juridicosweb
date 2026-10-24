@@ -3482,6 +3482,7 @@ function getMultasSeleccionadas(){
 }
 
 function yaHiceElPago(){
+  marcarPagoActivo && marcarPagoActivo();
   if(pagoSel==='garantia'){ abrirCompromisoGarantia(); return; }
   var esUna   = _planFinal==='una';
   var monto   = esUna ? '$49.000' : '$79.000';
@@ -3739,6 +3740,8 @@ function goToStepNombre(id){
       bar.classList.remove('show');
     }
   }
+  // Notificar al módulo de retención
+  try{ document.dispatchEvent(new CustomEvent('jwPanelChange',{detail:{id:id}})); }catch(e){}
 }
 
 function copiarLlaveNequi(){
@@ -5734,6 +5737,156 @@ function cerrarInstallBanner(){
   if(b) b.classList.remove('show');
   try{ localStorage.setItem('jw_install_oculto','1'); }catch(e){}
 }
+
+// ===================== RETENCIÓN — POPUP PAGAS AL ELIMINAR =====================
+// Reglas: solo en pantallas de pago, solo si el cliente NO ha iniciado pago activo
+var _retencionMostrada = false;
+var _pagoActivo = false;          // true cuando el cliente ya tocó un botón de pago
+var _retencionTimer = null;
+var _retencionPaneles = ['sp-post-firma','sp-pago-radicar'];
+
+// Marcar pago activo (llamado desde botones de pago reales)
+function marcarPagoActivo(){
+  _pagoActivo = true;
+  _limpiarRetencionTimers();
+}
+
+function _estaEnPanelPago(){
+  return _retencionPaneles.some(function(id){
+    var el = document.getElementById(id);
+    return el && (el.style.display !== 'none') && !el.classList.contains('hidden');
+  });
+}
+
+function _puedesMostrarRetencion(){
+  return !_retencionMostrada && !_pagoActivo && _estaEnPanelPago();
+}
+
+function _limpiarRetencionTimers(){
+  if(_retencionTimer){ clearTimeout(_retencionTimer); _retencionTimer = null; }
+  document.removeEventListener('mouseleave', _exitIntentHandler);
+  document.removeEventListener('visibilitychange', _visibilityHandler);
+}
+
+function mostrarPopupRetencion(origen){
+  if(!_puedesMostrarRetencion()) return;
+  _retencionMostrada = true;
+  _limpiarRetencionTimers();
+  var overlay = document.getElementById('retencion-overlay');
+  if(overlay){ overlay.style.display = 'flex'; return; }
+  // Crear overlay primera vez
+  var o = document.createElement('div');
+  o.id = 'retencion-overlay';
+  o.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,25,0.88);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);';
+  o.innerHTML = '<div id="retencion-card" style="background:linear-gradient(160deg,#1a1040,#0f172a);border-radius:22px 22px 0 0;padding:28px 24px 36px;max-width:480px;width:100%;box-shadow:0 -10px 60px rgba(124,58,237,0.35);border-top:2px solid rgba(139,92,246,0.5);position:relative;animation:slideUpCard .35s cubic-bezier(0.34,1.56,0.64,1);">'
+    +'<style>@keyframes slideUpCard{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}'
+    +'@keyframes shimmerGold{0%{background-position:-200% center}100%{background-position:200% center}}</style>'
+    // Botón cerrar
+    +'<button onclick="cerrarRetencion()" aria-label="Cerrar" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;line-height:30px;text-align:center;">✕</button>'
+    // Badge urgencia
+    +'<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:20px;padding:5px 13px;margin-bottom:14px;">'
+    +'<span style="width:7px;height:7px;background:#8b5cf6;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite;"></span>'
+    +'<span style="font-size:11px;font-weight:800;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;">Oferta exclusiva antes de irte</span>'
+    +'</div>'
+    // Título principal
+    +'<h3 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#fff;line-height:1.2;">¿Aún no estás seguro?</h3>'
+    +'<p style="margin:0 0 18px;font-size:14px;color:rgba(255,255,255,0.65);line-height:1.5;">Tenemos una opción para ti:<br><strong style="color:#e8bc3a;">solo pagas si eliminamos tu multa.</strong></p>'
+    // Tarjeta garantia
+    +'<div style="background:linear-gradient(135deg,#1e1b4b,#2d1b69);border:1.5px solid rgba(139,92,246,0.5);border-radius:16px;padding:18px 20px;margin-bottom:18px;">'
+    +'<div style="display:flex;align-items:flex-start;gap:14px;">'
+    +'<div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;padding:10px;flex-shrink:0;">'
+    +'<svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+    +'</div>'
+    +'<div>'
+    +'<div style="font-size:11px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Plan Garantía</div>'
+    +'<div style="font-size:17px;font-weight:900;color:#fff;line-height:1.2;">Inicia con <span style="color:#e8bc3a;">$10.000</span></div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:3px;">El resto <strong style="color:#4ade80;">solo si se elimina</strong> tu multa del SIMIT</div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(139,92,246,0.25);display:flex;gap:8px;flex-wrap:wrap;">'
+    +'<span style="font-size:11px;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:3px 10px;font-weight:700;">Sin riesgo</span>'
+    +'<span style="font-size:11px;background:rgba(232,188,58,0.12);color:#e8bc3a;border:1px solid rgba(232,188,58,0.3);border-radius:10px;padding:3px 10px;font-weight:700;">Verificable en SIMIT</span>'
+    +'<span style="font-size:11px;background:rgba(96,165,250,0.12);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);border-radius:10px;padding:3px 10px;font-weight:700;">Radicado en 3 min</span>'
+    +'</div>'
+    +'</div>'
+    // CTA dorado
+    +'<button onclick="elegirDesdeRetencion(\'garantia\')" style="display:block;width:100%;background:linear-gradient(135deg,#c9a227,#e8bc3a,#c9a227);background-size:200% auto;animation:shimmerGold 2.5s linear infinite;color:#0a1628;border:none;border-radius:14px;padding:17px;font-size:16px;font-weight:900;cursor:pointer;margin-bottom:10px;box-shadow:0 6px 28px rgba(201,162,39,0.5);letter-spacing:0.2px;">'
+    +'Quiero empezar con $10.000 →'
+    +'</button>'
+    // Enlace para mantener plan original
+    +'<div style="text-align:center;">'
+    +'<button onclick="cerrarRetencion()" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;padding:8px;text-decoration:underline;">No gracias, seguir con mi plan actual</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(o);
+  // Cerrar tocando el fondo
+  o.addEventListener('click', function(e){ if(e.target===o) cerrarRetencion(); });
+}
+
+function cerrarRetencion(){
+  var o = document.getElementById('retencion-overlay');
+  if(o){
+    o.style.transition = 'opacity .25s';
+    o.style.opacity = '0';
+    setTimeout(function(){ if(o.parentNode) o.parentNode.removeChild(o); }, 260);
+  }
+}
+
+function elegirDesdeRetencion(plan){
+  cerrarRetencion();
+  marcarPagoActivo();
+  elegirPlan(plan);
+  // Asegurarse de ir a la pantalla de pago si no estamos ya ahí
+  if(!document.getElementById('sp-pago-radicar') || document.getElementById('sp-pago-radicar').style.display==='none'){
+    goToStepNombre('sp-pago-radicar');
+  }
+}
+
+// ——— Detectores de salida y de inactividad ———
+
+var _exitIntentHandler = function(e){
+  // Solo en desktop: cursor sale por la parte superior (hacia barra del navegador)
+  if(e.clientY <= 0 && _puedesMostrarRetencion()){
+    mostrarPopupRetencion('exit_intent');
+  }
+};
+
+var _visibilityHandler = function(){
+  if(document.visibilityState === 'hidden' && _puedesMostrarRetencion()){
+    _retencionMostrada = true; // Marcar para no mostrar al volver si ya se fue
+  }
+};
+
+function _arrancarRetencionEnPanel(){
+  if(_retencionMostrada || _pagoActivo) return;
+  _limpiarRetencionTimers();
+  // Inactividad: si 40 seg sin avanzar → popup
+  _retencionTimer = setTimeout(function(){
+    mostrarPopupRetencion('inactividad');
+  }, 40000);
+  // Exit intent desktop
+  document.addEventListener('mouseleave', _exitIntentHandler);
+  document.addEventListener('visibilitychange', _visibilityHandler);
+  // Mobile: si baja y vuelve a subir rápido (back gesture), usamos beforeunload
+  window.addEventListener('beforeunload', function(e){
+    if(_puedesMostrarRetencion()){
+      mostrarPopupRetencion('beforeunload');
+    }
+  }, { once: true });
+}
+
+// Arrancar detectores cuando el usuario llegue a un panel de pago.
+// goToStepNombre ya existe en este script — añadimos lógica de retención
+// directamente al final del flujo de navegación usando un evento DOM.
+document.addEventListener('jwPanelChange', function(e){
+  var id = e && e.detail && e.detail.id;
+  if(!id) return;
+  if(_retencionPaneles.indexOf(id) > -1 && !_pagoActivo){
+    setTimeout(_arrancarRetencionEnPanel, 800);
+  } else {
+    _limpiarRetencionTimers();
+  }
+});
 </script>
 </body>
 </html>
