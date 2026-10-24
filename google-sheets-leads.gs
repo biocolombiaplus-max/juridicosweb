@@ -1568,7 +1568,7 @@ function eliminarFilaPorId(nombreHoja, id) {
 // Pasos: Apps Script → ⚙️ Configuración del proyecto → Propiedades del script
 //        → + Añadir propiedad → Nombre: BREVO_API_KEY  Valor: tu clave
 var BREVO_API_KEY = PropertiesService.getScriptProperties().getProperty('BREVO_API_KEY') || '';
-var BREVO_SENDER_EMAIL = 'hola@juridicosweb.com'; // verificar dominio en Brevo → Remitentes
+var BREVO_SENDER_EMAIL = 'biomarketing.salud@gmail.com'; // remitente verificado en Brevo
 var BREVO_SENDER_NAME  = 'JurídicosWeb';
 
 // Contador diario de envíos Brevo (se guarda en PropertiesService para persistir entre ejecuciones)
