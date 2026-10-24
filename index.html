@@ -1802,6 +1802,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-bottom:10px;">
           <p style="font-size:0.88rem;font-weight:900;color:#1e3a8a;margin:0 0 10px;text-align:center;">¿Con cuántas multas trabajamos?</p>
           <div style="display:flex;flex-direction:column;gap:7px;">
+            <!-- Plan garantia (visible solo si viene de landing con ese plan) -->
+            <div id="pf-plan-garantia" onclick="seleccionarPlanFinal('garantia')" style="display:none;border:2px solid #7c3aed;border-radius:10px;padding:10px 13px;cursor:pointer;text-align:left;background:linear-gradient(135deg,#f5f3ff,#fff);transition:.2s;position:relative;">
+              <div style="position:absolute;top:-9px;right:10px;background:#7c3aed;color:#fff;font-size:0.62rem;font-weight:800;padding:2px 9px;border-radius:999px;">PAGA AL ELIMINAR</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <p style="font-weight:800;color:#6d28d9;font-size:0.88rem;margin:0;">Garantía: Pagas solo si se elimina</p>
+                  <p style="font-size:0.7rem;color:#64748b;margin:1px 0 0;">$10.000 ahora · resto solo al eliminar</p>
+                </div>
+                <div style="text-align:right;">
+                  <p style="font-size:1.1rem;font-weight:900;color:#7c3aed;margin:0;">$10.000</p>
+                  <p style="font-size:0.62rem;color:#22c55e;font-weight:700;margin:0;">+ $45K × multa</p>
+                </div>
+              </div>
+            </div>
             <!-- Plan una multa -->
             <div id="pf-plan-una" onclick="seleccionarPlanFinal('una')" style="border:2px solid #e2e8f0;border-radius:10px;padding:10px 13px;cursor:pointer;text-align:left;transition:.2s;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -2901,6 +2915,7 @@ var currentStep=1;
 var tipoServicio='2018';
 
 var _planPreselLanding = null; // plan elegido desde la landing antes de consultar
+var _vieneDeLandingGarantia = false; // persiste aunque se consuma _planPreselLanding
 
 function openSimitModal(e,tipo,planPresel){
   if(e)e.preventDefault();
@@ -3321,8 +3336,12 @@ function guardarLeadFirma(){
 function seleccionarPlanFinal(plan){
   _planFinal = plan;
   var esUna = plan==='una';
+  var esGarantia = plan==='garantia';
   document.getElementById('pf-plan-una').style.borderColor   = esUna ? '#2563eb' : '#e2e8f0';
-  document.getElementById('pf-plan-todas').style.borderColor = esUna ? '#e2e8f0' : '#f97316';
+  document.getElementById('pf-plan-todas').style.borderColor = (!esUna && !esGarantia) ? '#f97316' : '#e2e8f0';
+  var pfg = document.getElementById('pf-plan-garantia');
+  if(pfg) pfg.style.borderColor = esGarantia ? '#7c3aed' : '#e2e8f0';
+  if(esGarantia) pagoSel = 'garantia';
 }
 
 function irAPagoFinal(){
@@ -3522,7 +3541,13 @@ goToStepNombre = function(id){
     setTimeout(inicializarCanvasComp, 120);
   }
   if(id==='sp-post-firma'){
-    seleccionarPlanFinal('todas');
+    if(_vieneDeLandingGarantia){
+      var pfg = document.getElementById('pf-plan-garantia');
+      if(pfg) pfg.style.display = 'block';
+      seleccionarPlanFinal('garantia');
+    } else {
+      seleccionarPlanFinal('todas');
+    }
   }
   if(id==='sp-pago-radicar'){
     setTimeout(renderMultasRadicar, 80);
@@ -4477,6 +4502,7 @@ function mostrarResultadoReal(){
         elegirPlan('masivo');
       } else if(plan === 'garantia'){
         // Para garantia: selecciona todas las multas que aplican y va directo al flujo garantia
+        _vieneDeLandingGarantia = true;
         _multasReportadas.forEach(function(m){ if(m.estado==='aplica') m.seleccionada = true; });
         elegirPlan('garantia');
       } else {
