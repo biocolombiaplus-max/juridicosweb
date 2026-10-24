@@ -5886,18 +5886,22 @@ function cerrarRetencion(){
 function elegirDesdeRetencion(){
   cerrarRetencion();
   marcarPagoActivo();
-  // Asegurar que haya multas seleccionadas para no disparar el alert de elegirPlan
-  if(typeof _multasReportadas !== 'undefined' && _multasReportadas.length > 0){
-    _multasReportadas.forEach(function(m){ if(m.estado==='aplica') m.seleccionada = true; });
-    elegirPlan('garantia');
-  } else {
-    // No hay datos de multas individuales → ir directo a pantalla de pago con plan masivo
-    pagoSel = 'garantia';
-    _totalPago = 10000;
-    _multasParaTramite = [{ secretaria:'', infraccion:'única' }];
-    jwTrack && jwTrack('plan_elegido', { plan:'garantia', via:'retencion' });
-    goToStepNombre('sp-pago-radicar');
-  }
+  // El usuario ya firmó — ir directo a pago con plan garantia, nunca volver al formulario
+  var aplican = (typeof _multasReportadas !== 'undefined')
+    ? _multasReportadas.filter(function(m){ return m.estado==='aplica'; })
+    : [];
+  var n = aplican.length || 1;
+  pagoSel             = 'garantia';
+  _numMultasGarantia  = n;
+  _multasParaTramite  = aplican.length > 0 ? aplican : [{ secretaria:'', infraccion:'única' }];
+  _totalPago          = 10000;
+  // Actualizar el banner de monto en sp-pago-radicar
+  var elMonto = document.getElementById('pr-monto');
+  var elDesc  = document.getElementById('pr-plan-desc');
+  if(elMonto) elMonto.textContent = '$10.000';
+  if(elDesc)  elDesc.textContent  = 'Adelanto · $45.000 × ' + n + ' multa' + (n !== 1 ? 's' : '') + ' solo si se eliminan';
+  jwTrack && jwTrack('plan_elegido', { plan:'garantia', via:'retencion', multas: n });
+  goToStepNombre('sp-pago-radicar');
 }
 
 // ——— Detectores de salida y de inactividad ———
