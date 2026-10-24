@@ -1034,17 +1034,111 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <!-- TAB: CUENTAS -->
         <div class="camp-panel" id="camp-panel-cuentas">
           <div class="camp-card">
-            <h3 style="margin:0 0 12px;font-size:15px;font-weight:700">Cuentas de Gmail para envío</h3>
-            <p style="font-size:13px;color:#6b7280;margin:0 0 12px">Cada cuenta puede enviar hasta 90 correos/día. El sistema rota automáticamente entre cuentas disponibles.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-              <input class="camp-input" id="camp-nueva-cuenta-email" placeholder="correo@gmail.com" style="max-width:240px;margin:0">
-              <input class="camp-input" id="camp-nueva-cuenta-nombre" placeholder="Nombre remitente" style="max-width:180px;margin:0">
-              <button class="camp-btn camp-btn-primary" onclick="campAgregarCuenta()">Agregar</button>
+            <!-- Brevo status card (always first, auto) -->
+            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;">
+              <div style="width:36px;height:36px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📨</div>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:800;color:#166534;">Brevo — Canal principal</div>
+                <div style="font-size:11px;color:#15803d;">280 correos/día · Dominio propio · Anti-spam · Automático</div>
+                <div style="margin-top:5px"><div style="background:#bbf7d0;border-radius:99px;height:4px;width:160px"><div id="brevo-bar" style="background:#16a34a;height:4px;border-radius:99px;width:0%"></div></div></div>
+              </div>
+              <div style="text-align:right;flex-shrink:0"><span id="brevo-contador" style="font-size:12px;font-weight:700;color:#166534;">0/280</span></div>
+            </div>
+
+            <h3 style="margin:0 0 6px;font-size:14px;font-weight:700">Cuentas Gmail adicionales</h3>
+            <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">Cada cuenta debe tener su propio Apps Script desplegado. El sistema rota cuando Brevo se agota.</p>
+            <div style="display:grid;gap:8px;margin-bottom:12px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input class="camp-input" id="camp-nueva-cuenta-email" placeholder="correo@gmail.com" style="max-width:220px;margin:0">
+                <input class="camp-input" id="camp-nueva-cuenta-nombre" placeholder="Nombre remitente" style="max-width:160px;margin:0">
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input class="camp-input" id="camp-nueva-cuenta-url" placeholder="URL del script (script.google.com/macros/s/...)" style="flex:1;min-width:260px;margin:0;font-size:11px">
+                <button class="camp-btn camp-btn-primary" onclick="campAgregarCuenta()">+ Agregar</button>
+              </div>
             </div>
             <div id="camp-cuentas-lista"></div>
-            <div style="margin-top:14px;padding:12px;background:#fefce8;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:#854d0e">
-              <strong>⚠️ Importante:</strong> Este sistema genera el enlace mailto: para que tú envíes desde Gmail, O puedes configurar Apps Script con GmailApp para envío automático. Ver la pestaña "Configurar" para el código de Apps Script.
+
+            <details style="margin-top:14px">
+              <summary style="font-size:12px;font-weight:700;color:#4b5563;cursor:pointer;padding:8px 0">📋 ¿Cómo obtener la URL del script de cada cuenta?</summary>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:8px;font-size:12px;color:#374151;line-height:1.7">
+                <strong>Para CADA cuenta Gmail adicional:</strong><br>
+                1. Inicia sesión en Gmail con esa cuenta<br>
+                2. Ve a <a href="https://script.google.com" target="_blank" style="color:#1d4ed8">script.google.com</a> → Nuevo proyecto<br>
+                3. Borra el código de ejemplo y pega el <strong>Script Secundario</strong> de abajo<br>
+                4. <strong>Implementar → Nueva implementación</strong> → Tipo: Aplicación web<br>
+                &nbsp;&nbsp;· Ejecutar como: <em>Yo (esa cuenta)</em><br>
+                &nbsp;&nbsp;· Acceso: <em>Cualquier usuario</em><br>
+                5. Copia la URL y pégala arriba en "URL del script"
+              </div>
+            </details>
+          </div>
+
+          <!-- Secondary GAS code to copy -->
+          <div class="camp-card" style="margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <h3 style="margin:0;font-size:14px;font-weight:700">Script secundario (copiar en cada cuenta Gmail)</h3>
+              <button class="camp-btn" onclick="campCopiarScriptSecundario()" style="font-size:11px;padding:5px 12px">Copiar código</button>
             </div>
+            <pre id="camp-script-secundario" style="background:#0f172a;color:#e2e8f0;border-radius:8px;padding:14px;font-size:10.5px;overflow-x:auto;line-height:1.5;margin:0">/* ── SCRIPT SECUNDARIO JurídicosWeb ──────────────────────────
+   Despliega ESTE script en cada cuenta Gmail adicional.
+   Una vez desplegado como "Aplicación web → Cualquier usuario",
+   copia la URL y pégala en admin.html → Cuentas → URL del script.
+   ─────────────────────────────────────────────────────────── */
+
+var EMAIL_DESPACHO = 'juridicoswebcasos@gmail.com';
+
+function doPost(e) {
+  try {
+    var datos = JSON.parse(e.postData.contents);
+    var accion = datos._accion || datos.accion || '';
+
+    if (accion === 'test_campana') {
+      return json({ ok: true, gasOk: true, version: '2026-10',
+                    cuenta: Session.getEffectiveUser().getEmail() });
+    }
+
+    if (accion !== 'enviar_correo') {
+      return json({ ok: false, msg: 'Accion no soportada: ' + accion });
+    }
+
+    var email  = datos.email  || '';
+    var asunto = datos.asunto || '';
+    var html   = datos.html   || '';
+    var nombre = datos.nombreRemitente || 'JurídicosWeb';
+
+    if (!email || email.indexOf('@') &lt; 0) {
+      return json({ ok: false, msg: 'Email inválido' });
+    }
+
+    GmailApp.sendEmail(email, asunto,
+      'Por favor activa HTML en tu cliente de correo para ver este mensaje.',
+      {
+        htmlBody: html,
+        name: nombre,
+        replyTo: EMAIL_DESPACHO
+      }
+    );
+    return json({ ok: true, via: 'gmail',
+                  desde: Session.getEffectiveUser().getEmail() });
+
+  } catch (ex) {
+    var msg = ex.message || String(ex);
+    var quota = /demasiadas|too many|quota|daily|limit/i.test(msg);
+    return json({ ok: false, msg: msg, quotaExcedida: quota });
+  }
+}
+
+function doGet(e) {
+  return json({ ok: true, gasOk: true, version: '2026-10',
+                cuenta: Session.getEffectiveUser().getEmail() });
+}
+
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
           </div>
         </div>
 
@@ -4255,6 +4349,24 @@ showSection = function(sec){
 var _campInited = false;
 var _campContactos = [];
 var _campCuentas = [];
+var _brevoUsadosHoy = 0;
+var _brevoFechaHoy  = '';
+var BREVO_LIMITE    = 280;
+
+function brevoDisponible() {
+  var hoy = new Date().toISOString().slice(0,10);
+  if (_brevoFechaHoy !== hoy) { _brevoFechaHoy = hoy; _brevoUsadosHoy = 0; }
+  return _brevoUsadosHoy < BREVO_LIMITE;
+}
+function brevoActualizarUI() {
+  var hoy = new Date().toISOString().slice(0,10);
+  if (_brevoFechaHoy !== hoy) { _brevoUsadosHoy = 0; }
+  var pct = Math.min(100, Math.round((_brevoUsadosHoy / BREVO_LIMITE) * 100));
+  var bar = document.getElementById('brevo-bar');
+  var cnt = document.getElementById('brevo-contador');
+  if (bar) bar.style.width = pct + '%';
+  if (cnt) cnt.textContent = _brevoUsadosHoy + '/' + BREVO_LIMITE;
+}
 var _campAsuntos = [
   'Tu multa de transito tiene solucion legal hoy mismo',
   'Eliminamos tu comparendo en 3 minutos sin filas ni abogados',
@@ -4587,31 +4699,49 @@ function campLimpiarContactos(){
 function campRenderCuentas(){
   var el = document.getElementById('camp-cuentas-lista');
   if(!el) return;
-  if(_campCuentas.length === 0){ el.innerHTML = '<p style="font-size:13px;color:#9ca3af;text-align:center;padding:16px">No hay cuentas agregadas</p>'; return; }
+  brevoActualizarUI();
+  if(_campCuentas.length === 0){
+    el.innerHTML = '<p style="font-size:12px;color:#9ca3af;text-align:center;padding:12px">No hay cuentas Gmail adicionales — solo Brevo como canal principal</p>';
+    return;
+  }
+  var hoy = new Date().toISOString().slice(0,10);
   el.innerHTML = _campCuentas.map(function(c,i){
-    var hoy = new Date().toISOString().slice(0,10);
-    var usados = c.fecha === hoy ? (c.usados||0) : 0;
-    var pct = Math.round((usados/90)*100);
-    return '<div class="camp-cuenta-row">'+
-      '<div style="flex:1"><strong style="font-size:13px">'+c.email+'</strong>'+
-      (c.nombre?'<span style="font-size:12px;color:#6b7280;margin-left:6px">'+c.nombre+'</span>':'')+
-      '<div style="margin-top:4px;display:flex;align-items:center;gap:8px"><div style="background:#e5e7eb;border-radius:99px;height:5px;width:120px"><div style="background:#1d4ed8;height:5px;border-radius:99px;width:'+pct+'%"></div></div>'+
-      '<span style="font-size:11px;color:#6b7280">'+usados+'/90 hoy</span></div></div>'+
-      '<button onclick="campEliminarCuenta('+i+')" style="padding:4px 10px;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700">✕</button></div>';
+    var usados = c.fecha===hoy ? (c.usados||0) : 0;
+    var limite = c.limite || 90;
+    var pct = Math.min(100, Math.round((usados/limite)*100));
+    var tieneUrl = !!(c.scriptUrl && c.scriptUrl.indexOf('script.google.com') > -1);
+    var estadoUrl = tieneUrl
+      ? '<span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 7px;border-radius:99px;font-weight:700;">✓ Script configurado</span>'
+      : '<span style="font-size:10px;background:#fef2f2;color:#dc2626;padding:1px 7px;border-radius:99px;font-weight:700;">⚠ Sin URL de script</span>';
+    return '<div class="camp-cuenta-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding:12px 14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;width:100%">'
+      +'<div><strong style="font-size:13px">📧 '+c.email+'</strong>'
+      +(c.nombre?'<span style="font-size:11px;color:#6b7280;margin-left:8px">'+c.nombre+'</span>':'')+'</div>'
+      +'<button onclick="campEliminarCuenta('+i+')" style="padding:3px 9px;background:#fee2e2;color:#dc2626;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700">✕</button></div>'
+      +'<div style="display:flex;align-items:center;gap:10px;width:100%">'
+      +'<div style="background:#e5e7eb;border-radius:99px;height:4px;flex:1"><div style="background:#1d4ed8;height:4px;border-radius:99px;width:'+pct+'%"></div></div>'
+      +'<span style="font-size:11px;color:#6b7280;white-space:nowrap">'+usados+'/'+limite+' hoy</span></div>'
+      +'<div>'+estadoUrl+'</div>'
+      +'</div>';
   }).join('');
 }
 
 function campAgregarCuenta(){
-  var emailEl = document.getElementById('camp-nueva-cuenta-email');
-  var nombreEl= document.getElementById('camp-nueva-cuenta-nombre');
-  var email = (emailEl.value||'').trim().toLowerCase();
-  var nombre = (nombreEl.value||'').trim();
+  var emailEl  = document.getElementById('camp-nueva-cuenta-email');
+  var nombreEl = document.getElementById('camp-nueva-cuenta-nombre');
+  var urlEl    = document.getElementById('camp-nueva-cuenta-url');
+  var email     = (emailEl.value||'').trim().toLowerCase();
+  var nombre    = (nombreEl.value||'').trim();
+  var scriptUrl = (urlEl ? urlEl.value||'' : '').trim();
   if(!email||!email.includes('@')){ alert('Ingresa un email válido'); return; }
   if(_campCuentas.find(function(c){ return c.email===email; })){ alert('Esta cuenta ya está agregada'); return; }
-  _campCuentas.push({email:email,nombre:nombre,usados:0,fecha:''});
-  emailEl.value=''; nombreEl.value='';
+  if(scriptUrl && scriptUrl.indexOf('script.google.com') < 0 && scriptUrl.indexOf('macros') < 0){
+    if(!confirm('La URL no parece ser de Google Apps Script. ¿Agregarla de todas formas?')) return;
+  }
+  _campCuentas.push({email:email, nombre:nombre, scriptUrl:scriptUrl, usados:0, fecha:'', limite:90});
+  emailEl.value=''; nombreEl.value=''; if(urlEl) urlEl.value='';
   campGuardar(); campRenderCuentas();
-  campLog('✅ Cuenta agregada: '+email,'ok');
+  campLog('✅ Cuenta Gmail agregada: '+email+(scriptUrl?' (con script URL)':' ⚠️ sin script URL — no enviará'),'ok');
 }
 
 function campEliminarCuenta(i){
@@ -4823,6 +4953,20 @@ function campCopiarScript(){
   }
 }
 
+function campCopiarScriptSecundario(){
+  var pre = document.getElementById('camp-script-secundario');
+  if(!pre) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(pre.textContent).then(function(){
+      campLog('✅ Script secundario copiado — pégalo en el nuevo proyecto de Apps Script','ok');
+    }).catch(function(){ window.getSelection().selectAllChildren(pre); campLog('Selecciona el código y presiona Ctrl+C','info'); });
+  } else {
+    var r = document.createRange(); r.selectNodeContents(pre);
+    window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
+    campLog('✅ Código seleccionado — presiona Ctrl+C para copiar','ok');
+  }
+}
+
 function campDiagnosticar(){
   var box = document.getElementById('camp-diag-result');
   box.style.display = 'block';
@@ -4871,7 +5015,8 @@ function campCuentaDisponible(){
   for(var i=0;i<_campCuentas.length;i++){
     var c = _campCuentas[i];
     if(c.fecha !== hoy){ c.usados=0; c.fecha=hoy; }
-    if((c.usados||0) < 90) return i;
+    if(!c.scriptUrl || c.scriptUrl.indexOf('script.google.com') < 0) continue; // skip sin URL válida
+    if((c.usados||0) < (c.limite||90)) return i;
   }
   return -1;
 }
@@ -5045,13 +5190,31 @@ function campEnviarSiguiente(){
     campActualizarStats(); campRenderTablaContactos(_campFiltroActual);
     setTimeout(campEnviarSiguiente, 50); return;
   }
-  var cuentaIdx = campCuentaDisponible();
-  if(cuentaIdx < 0){
-    campLog('⚠️ Todas las cuentas alcanzaron el límite diario (90/cuenta). Campaña pausada — reanuda mañana con "Iniciar".','err');
-    campPausarEnvio(); campGuardar(); campSyncGuardar(); return;
+  // Routing: si Brevo aún tiene cuota, usar SCRIPT_URL (GAS principal con Brevo).
+  // Si Brevo se agotó, usar el scriptUrl propio de la cuenta Gmail.
+  var urlEnvio   = SCRIPT_URL;
+  var canalLabel = '📨 Brevo';
+  var cuenta     = null;
+  var cuentaIdx  = -1;
+
+  if (!brevoDisponible()) {
+    // Brevo agotado — necesitamos una cuenta Gmail con scriptUrl
+    cuentaIdx = campCuentaDisponible();
+    if(cuentaIdx < 0){
+      campLog('🚫 Brevo + todas las cuentas Gmail agotaron cuota hoy. Campaña pausada — reanuda mañana.','err');
+      campPausarEnvio(); campGuardar(); campSyncGuardar(); return;
+    }
+    cuenta = _campCuentas[cuentaIdx];
+    urlEnvio   = cuenta.scriptUrl;
+    canalLabel = '📧 Gmail ('+cuenta.email+')';
+  } else {
+    // Brevo disponible — usarlo; igual necesitamos un objeto cuenta para el payload
+    cuentaIdx = campCuentaDisponible();
+    if(cuentaIdx >= 0) cuenta = _campCuentas[cuentaIdx];
+    else cuenta = { email: 'hola@juridicosweb.com', nombre: 'JurídicosWeb' };
   }
+
   contacto = _campContactos[_campIdx];
-  var cuenta   = _campCuentas[cuentaIdx];
   var asunto   = _campAsuntos[Math.floor(Math.random()*_campAsuntos.length)];
   var htmlBody = campGenerarHTML(contacto.nombre||contacto.email.split('@')[0]);
 
@@ -5067,13 +5230,13 @@ function campEnviarSiguiente(){
     nombre: contacto.nombre || '',
     asunto: asuntoFinal,
     cuenta: cuenta.email,
-    nombreRemitente: cuenta.nombre || 'Jurídicos Web',
-    html: htmlBody             // ← Apps Script usa 'html', no 'htmlBody'
+    nombreRemitente: cuenta.nombre || 'JurídicosWeb',
+    html: htmlBody
   };
 
-  campLog('📤 Enviando a '+contacto.email+(nombreCorto?' ('+nombreCorto+')':('')), 'info');
+  campLog('📤 ['+canalLabel+'] Enviando a '+contacto.email+(nombreCorto?' ('+nombreCorto+')':''), 'info');
 
-  fetch(SCRIPT_URL, {
+  fetch(urlEnvio, {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {'Content-Type': 'text/plain'},
@@ -5090,11 +5253,17 @@ function campEnviarSiguiente(){
       return;
     }
     if(res && res.ok !== false){
-      _campEnviados++; cuenta.usados = (cuenta.usados||0)+1;
+      _campEnviados++;
       contacto.enviado = true;
-      var canal = res.via === 'brevo' ? '📨 Brevo' : res.via === 'gmail' ? '📧 Gmail' : res.via === 'mailapp' ? '📧 MailApp' : '✉️';
+      var canal = res.via === 'brevo' ? '📨 Brevo' : res.via === 'gmail' ? '📧 Gmail ('+(res.desde||cuenta.email)+')' : res.via === 'mailapp' ? '📧 MailApp' : '✉️';
+      if (res.via === 'brevo') { _brevoUsadosHoy++; brevoActualizarUI(); }
+      else { cuenta.usados = (cuenta.usados||0)+1; }
       campLog('✅ '+canal+' → '+contacto.email,'ok');
-      if(res.brevoAgotado) campLog('   ℹ️ Brevo agotó cuota hoy — se usó Gmail como respaldo','info');
+      if(res.brevoAgotado) {
+        _brevoUsadosHoy = BREVO_LIMITE;
+        brevoActualizarUI();
+        campLog('   ℹ️ Brevo agotó cuota hoy — próximos van por Gmail','info');
+      }
     } else {
       _campErrores++;
       var motivo = (res&&res.msg) || (res&&res.error) || JSON.stringify(res);
