@@ -2915,7 +2915,7 @@ var currentStep=1;
 var tipoServicio='2018';
 
 var _planPreselLanding = null; // plan elegido desde la landing antes de consultar
-var _vieneDeLandingGarantia = false; // persiste aunque se consuma _planPreselLanding
+var _planDesdeLanding = null;  // persiste: 'garantia'|'individual'|'masivo'|null
 
 function openSimitModal(e,tipo,planPresel){
   if(e)e.preventDefault();
@@ -3541,11 +3541,32 @@ goToStepNombre = function(id){
     setTimeout(inicializarCanvasComp, 120);
   }
   if(id==='sp-post-firma'){
-    if(_vieneDeLandingGarantia){
-      var pfg = document.getElementById('pf-plan-garantia');
+    var pfg  = document.getElementById('pf-plan-garantia');
+    var pfU  = document.getElementById('pf-plan-una');
+    var pfT  = document.getElementById('pf-plan-todas');
+    if(_planDesdeLanding === 'garantia'){
+      // Solo mostrar opción garantia
       if(pfg) pfg.style.display = 'block';
+      if(pfU) pfU.style.display = 'none';
+      if(pfT) pfT.style.display = 'none';
       seleccionarPlanFinal('garantia');
+    } else if(_planDesdeLanding === 'individual'){
+      // Solo mostrar opción una multa
+      if(pfg) pfg.style.display = 'none';
+      if(pfU) pfU.style.display = 'block';
+      if(pfT) pfT.style.display = 'none';
+      seleccionarPlanFinal('una');
+    } else if(_planDesdeLanding === 'masivo'){
+      // Solo mostrar opción todas las multas
+      if(pfg) pfg.style.display = 'none';
+      if(pfU) pfU.style.display = 'none';
+      if(pfT) pfT.style.display = 'block';
+      seleccionarPlanFinal('todas');
     } else {
+      // Sin plan de landing: mostrar solo los dos planes estándar
+      if(pfg) pfg.style.display = 'none';
+      if(pfU) pfU.style.display = 'block';
+      if(pfT) pfT.style.display = 'block';
       seleccionarPlanFinal('todas');
     }
   }
@@ -4497,12 +4518,11 @@ function mostrarResultadoReal(){
     var plan = _planPreselLanding;
     _planPreselLanding = null; // consumir
     setTimeout(function(){
+      _planDesdeLanding = plan; // guardar para sp-post-firma
       if(plan === 'masivo'){
         seleccionarTodasAplicables();
         elegirPlan('masivo');
       } else if(plan === 'garantia'){
-        // Para garantia: selecciona todas las multas que aplican y va directo al flujo garantia
-        _vieneDeLandingGarantia = true;
         _multasReportadas.forEach(function(m){ if(m.estado==='aplica') m.seleccionada = true; });
         elegirPlan('garantia');
       } else {
