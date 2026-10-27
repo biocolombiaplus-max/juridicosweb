@@ -1665,9 +1665,13 @@ function enviarViaBrevo(email, asunto, htmlBody, nombreRemitente) {
   if (brevoUsadosHoy() >= BREVO_LIMITE_DIARIO) {
     return { ok: false, motivo: 'cuota_brevo' };
   }
+  // BCC al remitente para que el correo aparezca en Gmail (como recibido)
+  // y el admin pueda verificar cada envío sin depender del panel de Brevo.
+  var bccList = email !== BREVO_SENDER_EMAIL ? [{ email: BREVO_SENDER_EMAIL }] : [];
   var payload = {
     sender:  { name: nombreRemitente || BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
     to:      [{ email: email }],
+    bcc:     bccList,
     subject: asunto,
     htmlContent: htmlBody,
     textContent: 'Por favor activa HTML en tu cliente de correo para ver este mensaje.',
