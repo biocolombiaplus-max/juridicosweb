@@ -5546,6 +5546,39 @@ function abrirNequi(montoFijo){
 
 function nequiComprobanteEnviado(){
   jwTrack('pago_nequi_comprobante', { plan: pagoSel, monto: _nequiMontoActual });
+
+  var cedula = (_valorConsultado||'').toString().trim();
+  var nombres = (_nombreConsultante||'').trim();
+  var partes = nombres.split(' ');
+  var primerNombre = partes[0]||'';
+  var apellidos = partes.slice(1).join(' ')||'';
+  var placa = (_placaAutoDetectada||'').toString().trim();
+  var wa = (_waConsultante||'').toString().replace(/\D/g,'');
+  var email = (document.getElementById('frm-email') && document.getElementById('frm-email').value)||'';
+  var plan = pagoSel||'garantia';
+  var monto = _nequiMontoActual||10000;
+  var numMultas = _numMultasGarantia||1;
+
+  var payload = {
+    _accion: 'registrar_pago_nequi',
+    cedula: cedula,
+    nombres: primerNombre,
+    apellidos: apellidos,
+    placa: placa,
+    whatsapp: wa,
+    email: email,
+    plan: plan,
+    montoTotal: monto,
+    numMultas: numMultas,
+  };
+
+  fetch(GOOGLE_SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(function(){});
+
   closeOverlay('overlay-nequi');
   closeOverlay('overlay-main');
   mostrarExito('nequi');

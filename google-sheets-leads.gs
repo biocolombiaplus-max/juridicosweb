@@ -212,6 +212,7 @@ function doPost(e) {
       case 'enviar_correo':       return enviarCorreoCampana(datos);
       case 'test_campana':        return respuestaJson({ ok: true, gasOk: true, version: '2026-10' });
       case 'guardar_compromiso_garantia': return guardarCompromisoGarantia(datos);
+      case 'registrar_pago_nequi':  return registrarPagoNequi(datos);
       // ── Sync campaña entre dispositivos ─────────────────────────────
       case 'sync_campana_save':   return syncCampanaSave(datos);
       case 'sync_campana_load':   return syncCampanaLoad();
@@ -1793,6 +1794,55 @@ function crearSesionEpayco(datos) {
 
   } catch (e) {
     return respuestaJson({ ok: false, error: 'Error ePayco: ' + e.message });
+  }
+}
+
+// ── Registro de Pago por Nequi/WhatsApp ──────────────────────────────────────
+function registrarPagoNequi(datos) {
+  try {
+    var planLabel = datos.plan === 'garantia'
+      ? 'Garantía – Adelanto $' + (datos.montoTotal || 10000)
+      : datos.plan === 'masivo'
+        ? 'Masivo – $79.000'
+        : 'Individual – $49.000/multa';
+
+    var leadDatos = {
+      cedula:   datos.cedula   || '',
+      nombres:  datos.nombres  || '',
+      apellidos: datos.apellidos || '',
+      placa:    datos.placa    || '',
+      whatsapp: datos.whatsapp || '',
+      email:    datos.email    || '',
+      plan:     planLabel,
+      montoTotal: datos.montoTotal || 10000,
+      multasSeleccionadas: datos.numMultas || 1,
+      estadoPago: 'Pago Nequi Pendiente',
+      fuente: 'nequi_whatsapp',
+    };
+
+    var result = guardarLead(leadDatos);
+
+    // Notificar al admin por correo
+    try {
+      var adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || 'biomarketing.salud@gmail.com';
+      MailApp.sendEmail({
+        to: adminEmail,
+        subject: '💸 Pago Nequi recibido – ' + (datos.nombres || '') + ' ' + (datos.apellidos || ''),
+        body: [
+          'Cliente: ' + (datos.nombres || '') + ' ' + (datos.apellidos || ''),
+          'Cédula: ' + (datos.cedula || ''),
+          'WhatsApp: ' + (datos.whatsapp || ''),
+          'Plan: ' + planLabel,
+          'Monto enviado: $' + (datos.montoTotal || 10000),
+          '',
+          'Revisar en el panel admin → Pagos Nequi',
+        ].join('\n'),
+      });
+    } catch(mailErr) {}
+
+    return result;
+  } catch(err) {
+    return respuestaJson({ ok: false, error: String(err) });
   }
 }
 

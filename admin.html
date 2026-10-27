@@ -479,6 +479,10 @@ tr:hover td{background:#f8faff;cursor:pointer}
   </div>
   <div class="nav-section">
     <div class="nav-section-title">Clientes</div>
+    <div class="nav-item" data-sec="nequi" onclick="showSection('nequi')">
+      <span class="icon">📲</span> Pagos Nequi/WA
+      <span class="nav-badge" id="badge-nequi" style="background:#7c3aed">0</span>
+    </div>
     <div class="nav-item" data-sec="clientes" onclick="showSection('clientes')">
       <span class="icon">💰</span> Clientes (Pagados)
       <span class="nav-badge" id="badge-clientes" style="background:var(--green)">0</span>
@@ -773,6 +777,18 @@ tr:hover td{background:#f8faff;cursor:pointer}
       <div class="table-wrap">
         <div class="table-header"><h3>💰 Clientes — Pago Confirmado</h3><span class="table-count" id="clientes-count"></span></div>
         <div id="table-clientes-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
+      </div>
+    </div>
+
+    <!-- PAGOS NEQUI / WHATSAPP -->
+    <div class="section" id="section-nequi">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h3>📲 Pagos Nequi / WhatsApp — Pendientes de Confirmar</h3>
+          <span class="table-count" id="nequi-count"></span>
+        </div>
+        <p style="font-size:13px;color:var(--gray);margin:0 0 12px;">Clientes que enviaron comprobante por WhatsApp. Agrega sus datos SIMIT y envíales el link de firma.</p>
+        <div id="table-nequi-wrap"><div class="empty-state"><div class="icon">⏳</div><p>Cargando...</p></div></div>
       </div>
     </div>
 
@@ -1678,7 +1694,7 @@ document.getElementById('login-pass').addEventListener('keydown',function(e){
 // ══════════════════════════════════════════════════
 var sectionTitles = {
   dashboard:'Dashboard / Pipeline', casos:'Todos los Casos',
-  clientes:'Clientes (Pagados)', remarketing:'Remarketing (No pagaron)',
+  nequi:'Pagos Nequi / WhatsApp', clientes:'Clientes (Pagados)', remarketing:'Remarketing (No pagaron)',
   autorizados:'Pagados — Por Radicar', seguimiento:'Esperando Respuesta (15 días)',
   tutelas:'Casos con Tutela', tutelasporradicar:'Tutelas Firmadas — Por Radicar', cerrados:'Casos Cerrados',
   documentos:'PDF Firmados',
@@ -2077,6 +2093,7 @@ function renderAll(){
   renderPipelineCRM();
   renderLiveFeed();
   renderKanban();
+  renderSection('nequi');
   renderSection('casos');
   renderSection('clientes');
   renderSection('remarketing');
@@ -2177,6 +2194,36 @@ function renderSection(sec){
   if(sec==='documentos'){
     if(_documentosFirmados) renderTablaDocumentos(_documentosFirmados);
     else loadDocumentosFirmados();
+    return;
+  }
+  if(sec==='nequi'){
+    filtered = allRows.filter(function(r){ return (r['Estado de Pago']||'').indexOf('Nequi Pendiente') !== -1; });
+    document.getElementById('nequi-count').textContent = filtered.length + ' pendientes';
+    if(!filtered.length){
+      document.getElementById('table-nequi-wrap').innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Sin pagos Nequi pendientes.</p></div>';
+      return;
+    }
+    var html = '<table class="data-table"><thead><tr><th>Nombre</th><th>Cédula</th><th>WhatsApp</th><th>Plan</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody>';
+    filtered.forEach(function(r){
+      var cedula = escHtml(r['Cédula']||'');
+      var wa = (r['WhatsApp']||'').toString().replace(/\D/g,'');
+      var nombre = escHtml((r['Nombres']||'')+' '+(r['Apellidos']||''));
+      var waLink = wa ? 'https://wa.me/57'+wa+'?text='+encodeURIComponent('Hola '+((r['Nombres']||''))+', te enviamos el link para firmar tu documento de eliminación de fotomultas: https://juridicosweb.com/firmar.html?cedula='+(r['Cédula']||'')) : '#';
+      html += '<tr>'+
+        '<td>'+nombre+'</td>'+
+        '<td>'+cedula+'</td>'+
+        '<td>'+(wa ? '<a href="https://wa.me/57'+wa+'" target="_blank">'+escHtml(r['WhatsApp']||'')+'</a>' : '—')+'</td>'+
+        '<td>'+escHtml(r['Plan']||'')+'</td>'+
+        '<td>'+escHtml(r['Monto Total']?'$'+r['Monto Total']:'—')+'</td>'+
+        '<td>'+escHtml(r['Fecha']||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="btn btn-sm btn-outline" onclick="abrirCompletarDatos(\''+cedula+'\')">✏️ Datos SIMIT</button> '+
+          (wa && cedula ? '<a href="'+waLink+'" target="_blank" class="btn btn-sm" style="background:#25d366;color:#fff;text-decoration:none">📲 Enviar Link Firma</a>' : '')+
+        '</td>'+
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('table-nequi-wrap').innerHTML = html;
     return;
   }
   if(sec==='casos'){
@@ -2489,6 +2536,8 @@ function updateStats(){
   document.getElementById('stat-tutelas').textContent = tutelas;
   document.getElementById('stat-pendientes').textContent = pendientes;
 
+  var nequiPendientes = allRows.filter(function(r){ return (r['Estado de Pago']||'').indexOf('Nequi Pendiente') !== -1; }).length;
+  document.getElementById('badge-nequi').textContent = nequiPendientes;
   document.getElementById('badge-total').textContent = total;
   document.getElementById('badge-clientes').textContent = pagos;
   document.getElementById('badge-remarketing').textContent = pendientes;
