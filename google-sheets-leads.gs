@@ -1268,7 +1268,27 @@ function guardarMultasEstructuradas(datos) {
 function completarDatosCliente(datos) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email);
-  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
+  // Si no existe el caso (ej. cliente que pagó por WhatsApp antes de que el
+  // sistema guardara automáticamente), crearlo como registro nuevo para poder
+  // continuar el proceso sin perder el pago que ya hizo.
+  if (fila === -1) {
+    var filaNueva = hoja.getLastRow() + 1;
+    var valoresNuevos = {};
+    valoresNuevos['Nombres']      = datos.nombres || '';
+    valoresNuevos['Apellidos']    = datos.apellidos || '';
+    valoresNuevos['Cédula']       = datos.cedula || datos.cedulaActual || '';
+    valoresNuevos['Placa']        = datos.placa || '';
+    valoresNuevos['WhatsApp']     = datos.whatsapp || '';
+    valoresNuevos['Email']        = datos.emailNuevo || datos.email || '';
+    valoresNuevos['Ciudad']       = datos.ciudad || '';
+    valoresNuevos['Plan']         = 'garantia';
+    valoresNuevos['Estado Pago']  = 'Pago Nequi Pendiente';
+    valoresNuevos['Fecha']        = new Date().toLocaleString('es-CO');
+    valoresNuevos['Notas']        = 'Caso creado desde admin — cliente pagó por WhatsApp/Nequi antes de registro automático.';
+    escribirFila(hoja, filaNueva, valoresNuevos);
+    aplicarFormatoCondicional(hoja);
+    return respuestaJson({ ok: true, reactivado: false, creado: true });
+  }
 
   // Estos campos quedan impresos dentro del propio Derecho de Petición
   // (encabezado, hechos, notificaciones) — si alguno cambia DESPUÉS de que

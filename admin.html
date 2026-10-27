@@ -1361,8 +1361,8 @@ function syncCampanaLoad() {
         <div class="form-group-m"><label>Apellidos</label><input type="text" id="dc-apellidos"></div>
         <div class="form-group-m"><label>Cédula *</label><input type="text" inputmode="numeric" id="dc-cedula"></div>
         <div class="form-group-m"><label>Placa</label><input type="text" id="dc-placa"></div>
-        <div class="form-group-m"><label>WhatsApp</label><input type="text" id="dc-whatsapp"></div>
-        <div class="form-group-m"><label>Correo</label><input type="email" id="dc-email"></div>
+        <div class="form-group-m"><label>WhatsApp <span style="color:#ef4444;">*</span></label><input type="text" id="dc-whatsapp" placeholder="Ej. 3201234567"></div>
+        <div class="form-group-m"><label>Correo <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem;font-weight:400;color:#64748b;">(necesario para radicar)</span></label><input type="email" id="dc-email" placeholder="correo@ejemplo.com"></div>
         <div class="form-group-m"><label>Ciudad</label><input type="text" id="dc-ciudad"></div>
       </div>
       <label id="dc-forzar-wrap" style="display:none;align-items:flex-start;gap:8px;font-size:13px;color:var(--gray700,#334155);background:#fffbeb;border:1px solid rgba(217,119,6,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
@@ -3416,10 +3416,16 @@ function openModalDatosCliente(row, modo, pendingAccion){
   document.getElementById('dc-ciudad').value = row['Ciudad']||'';
   if(modo==='completar'){
     document.getElementById('dc-titulo').textContent = '👤 Completar datos del cliente';
-    document.getElementById('dc-explicacion').textContent = 'Antes de confirmar el pago, el caso necesita nombre y cédula completos — sin esto, el Derecho de Petición saldría con datos vacíos o a medias. Esto pasa sobre todo con casos de WhatsApp donde solo dieron la placa.';
+    document.getElementById('dc-explicacion').innerHTML =
+      'Para poder continuar con el trámite se necesitan algunos datos. ' +
+      '<strong>El correo electrónico es obligatorio</strong>: la Secretaría de Movilidad o Tránsito exige un correo para radicar el Derecho de Petición y enviar la respuesta oficial. ' +
+      'Si el cliente no tiene correo propio, puede usar el de un familiar. ' +
+      'Sin él no es posible radicar ni enviarle la confirmación del radicado.';
   } else {
     document.getElementById('dc-titulo').textContent = '✏️ Editar datos del cliente';
-    document.getElementById('dc-explicacion').textContent = 'Corrige aquí cualquier dato mal digitado (cédula, WhatsApp, correo, etc.) antes de reenviar el enlace de firma o el documento — evita tener que pedirle al cliente que vuelva a empezar.';
+    document.getElementById('dc-explicacion').innerHTML =
+      'Corrige aquí cualquier dato mal digitado antes de reenviar el enlace de firma o el documento. ' +
+      'Recuerda que <strong>el correo es necesario</strong> para radicar ante la Secretaría y enviar la respuesta al cliente — sin él el proceso queda incompleto.';
   }
   // El checkbox de "generar documento nuevo" solo tiene sentido si YA hay
   // un documento firmado en circulación — si el caso todavía no ha
@@ -3437,7 +3443,15 @@ function guardarDatosCliente(){
   if(!_dcCasoOriginal) return;
   var nombres = document.getElementById('dc-nombres').value.trim();
   var cedula = document.getElementById('dc-cedula').value.trim();
+  var whatsapp = document.getElementById('dc-whatsapp').value.trim();
+  var emailVal = document.getElementById('dc-email').value.trim();
   if(!nombres || !cedula){ showToast('⚠️ Nombres y cédula son obligatorios','error'); return; }
+  if(!whatsapp){ showToast('⚠️ WhatsApp es obligatorio para enviar el enlace de firma','error'); document.getElementById('dc-whatsapp').focus(); return; }
+  if(!emailVal){
+    showToast('⚠️ El correo es obligatorio — sin él no podemos radicar ni enviar la respuesta de la Secretaría','error');
+    document.getElementById('dc-email').focus();
+    return;
+  }
 
   var btn = document.getElementById('btn-guardar-dc');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
