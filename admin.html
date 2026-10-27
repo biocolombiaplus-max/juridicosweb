@@ -3401,10 +3401,11 @@ function guardarMultasAdmin(){
 }
 
 var _dcCasoOriginal = null;
+var _dcPendingAccion = null; // acción a ejecutar automáticamente tras guardar datos
 // modo: 'completar' (se abrió sola porque faltaba nombre/cédula antes de
 // pagar) o 'editar' (el admin la abrió a mano para corregir algo) — solo
 // cambia el texto de encabezado, el guardado es el mismo en ambos casos.
-function openModalDatosCliente(row, modo){
+function openModalDatosCliente(row, modo, pendingAccion){
   _dcCasoOriginal = row;
   document.getElementById('dc-nombres').value = row['Nombres']||'';
   document.getElementById('dc-apellidos').value = row['Apellidos']||'';
@@ -3428,6 +3429,7 @@ function openModalDatosCliente(row, modo){
   var wrapForzar = document.getElementById('dc-forzar-wrap');
   wrapForzar.style.display = yaFirmado ? 'flex' : 'none';
   document.getElementById('dc-forzar-reinicio').checked = true;
+  _dcPendingAccion = pendingAccion || null;
   document.getElementById('modal-datos-cliente').classList.add('show');
 }
 
@@ -3473,6 +3475,41 @@ function guardarDatosCliente(){
       // después de que loadData() recargue ya muestra el estado real —
       // con el botón de firma reactivado si aplicó.
       closeModal('modal-caso');
+      // Si los datos se completaron para poder confirmar el pago,
+      // ejecutar la confirmación automáticamente con los datos frescos.
+      var pendAccion = _dcPendingAccion;
+      _dcPendingAccion = null;
+      if(pendAccion === 'confirmar_pago'){
+        var cedulaGuardada = document.getElementById('dc-cedula').value.trim();
+        var nombresGuardados = document.getElementById('dc-nombres').value.trim();
+        var rowFresco = Object.assign({}, _dcCasoOriginal, {
+          Nombres: nombresGuardados,
+          Apellidos: document.getElementById('dc-apellidos').value.trim(),
+          'Cédula': cedulaGuardada,
+          Placa: document.getElementById('dc-placa').value.trim(),
+          WhatsApp: document.getElementById('dc-whatsapp').value.trim(),
+          Email: document.getElementById('dc-email').value.trim(),
+          Ciudad: document.getElementById('dc-ciudad').value.trim()
+        });
+        setTimeout(function(){
+          fetch(SCRIPT_URL, {
+            method:'POST',
+            body: JSON.stringify({ _accion:'confirmar_pago', email: rowFresco['Email'], cedula: rowFresco['Cédula'], nombres: rowFresco['Nombres'] })
+          })
+          .then(function(r){ return r.json(); })
+          .then(function(d){
+            if(d.ok){
+              showToast('✅ Pago confirmado','success');
+              setTimeout(loadData, 1500);
+            } else {
+              showToast('Error al confirmar: '+(d.error||'desconocido'),'error');
+              setTimeout(loadData, 1200);
+            }
+          })
+          .catch(function(e){ showToast('Error: '+e.message,'error'); setTimeout(loadData,1200); });
+        }, 600);
+        return;
+      }
       setTimeout(loadData, 1200);
     } else {
       showToast('Error: '+(data.error||'desconocido'),'error');
@@ -3704,8 +3741,8 @@ function confirmarAccion(accion, btn, extra, tipoMsg){
   // casos de WhatsApp donde solo dieron la placa, sin cédula. Sin esto, el
   // Derecho de Petición saldría con nombre o cédula vacíos.
   if(accion==='confirmar_pago' && (!row['Nombres'] || !row['Cédula'])){
-    showToast('⚠️ Falta nombre o cédula — complétalos antes de confirmar el pago','error');
-    openModalDatosCliente(row, 'completar');
+    showToast('⚠️ Falta nombre o cédula — completa los datos y el pago se confirmará automáticamente','info');
+    openModalDatosCliente(row, 'completar', 'confirmar_pago');
     return;
   }
   var generarMsg = MENSAJES_CONFIRM[tipoMsg];
