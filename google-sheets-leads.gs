@@ -455,7 +455,7 @@ function enviarDocumentoCorreo(datos) {
       'Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.\n\n' +
       'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito';
 
-    MailApp.sendEmail({ to: datos.email, subject: asunto, body: cuerpo, attachments: [blob] });
+    GmailApp.sendEmail(datos.email, asunto, cuerpo, { attachments: [blob], name: 'JurídicosWeb', replyTo: EMAIL_DESPACHO });
     return respuestaJson({ ok: true });
   } catch (err) {
     return respuestaJson({ ok: false, error: String(err) });
@@ -524,7 +524,7 @@ function marcarFirmado(datos) {
         (varios ? ', uno por cada secretaría de tránsito donde tienes multas' : '') + ', listo' + (varios ? 's' : '') + ' para radicar.\n\n' +
         'Cualquier duda, escríbenos por WhatsApp al +' + WHATSAPP_DESPACHO + '.\n\n' +
         'JurídicosWeb.com — Bufete Experto en Derecho de Tránsito';
-      MailApp.sendEmail({ to: emailDestino, subject: asunto, body: cuerpo, attachments: blobsParaCorreo });
+      GmailApp.sendEmail(emailDestino, asunto, cuerpo, { attachments: blobsParaCorreo, name: 'JurídicosWeb', replyTo: EMAIL_DESPACHO });
     } catch (e) { /* no rompe el guardado si falla el envío */ }
   }
 
@@ -561,7 +561,7 @@ function reenviarFirmado(datos) {
   try {
     var nombres = obtenerValorFila(hoja, fila, 'Nombres');
     var varios = blobs.length > 1;
-    MailApp.sendEmail({
+    _enviarEmail({
       to: emailDestino,
       subject: varios ? '📄 Tus Derechos de Petición firmados — JurídicosWeb' : '📄 Tu Derecho de Petición firmado — JurídicosWeb',
       body: 'Hola ' + nombres + ',\n\nTe reenviamos tu' + (varios ? 's' : '') + ' Derecho' + (varios ? 's' : '') + ' de Petición ya firmado' + (varios ? 's' : '') + ', listo' + (varios ? 's' : '') + ' para radicar.\n\n' +
@@ -637,7 +637,7 @@ function radicarPorCorreo(datos) {
     // cuenta de correo real siga siendo la del despacho) -- así el correo se
     // percibe como enviado por el propio ciudadano, no por una firma de
     // abogados, lo que hace más viable la radicación.
-    MailApp.sendEmail({
+    _enviarEmail({
       to: correoSecretaria, cc: EMAIL_DESPACHO, subject: asunto,
       htmlBody: cuerpoHtml, attachments: blob ? [blob] : [],
       name: nombres + ' ' + apellidos,
@@ -659,7 +659,7 @@ function radicarPorCorreo(datos) {
   if (emailCliente) {
     try {
       var listaTxt = radicados.map(function (r) { return r.ciudad + ' (' + r.correo + ')'; }).join(', ');
-      MailApp.sendEmail({
+      _enviarEmail({
         to: emailCliente,
         subject: '📨 Tu Derecho de Petición ya fue radicado',
         body: 'Hola ' + nombres + ',\n\n' +
@@ -904,7 +904,7 @@ function enviarRecordatorioCliente(email, nombres, cedula) {
     '<p style="font-size:13px;color:#64748b;">Si ya te respondieron a favor, ignora este mensaje — nuestro equipo ya está al tanto y seguirá con el proceso de eliminación.</p>' +
     '<p>JurídicosWeb.com — Bufete Experto en Derecho de Tránsito</p>' +
     '</div></div>';
-  try { MailApp.sendEmail({ to: email, subject: asunto, htmlBody: cuerpoHtml }); } catch (e) { /* cuota de correo agotada u otro error — no rompe el resto del chequeo */ }
+  try { _enviarEmail({ to: email, subject: asunto, htmlBody: cuerpoHtml }); } catch (e) { /* cuota de correo agotada u otro error — no rompe el resto del chequeo */ }
 }
 
 // ───────────────────────── campaña de remarketing por correo ─────────────
@@ -961,7 +961,7 @@ function enviarRemarketingMasivo() {
     var correo = construirCorreoRemarketingEtapa(etapa, datosCliente);
 
     try {
-      MailApp.sendEmail({
+      _enviarEmail({
         to: email, subject: correo.asunto, htmlBody: correo.cuerpo,
         name: 'JurídicosWeb — Equipo Legal', replyTo: EMAIL_DESPACHO,
       });
@@ -1193,7 +1193,7 @@ function activarTutela(datos) {
       '<p>JurídicosWeb.com — Bufete Experto en Derecho de Tránsito</p>' +
       '</div></div>';
     try {
-      MailApp.sendEmail({ to: email, subject: '⚖️ Tu Acción de Tutela está lista para firmar', htmlBody: cuerpoHtml });
+      _enviarEmail({ to: email, subject: '⚖️ Tu Acción de Tutela está lista para firmar', htmlBody: cuerpoHtml });
     } catch (e) { /* no rompe la activación si falla el envío */ }
   }
   return respuestaJson({ ok: true });
@@ -1222,7 +1222,7 @@ function marcarTutelaFirmada(datos) {
   var emailDestino = datos.email || obtenerValorFila(hoja, fila, 'Email');
   if (emailDestino) {
     try {
-      MailApp.sendEmail({
+      _enviarEmail({
         to: emailDestino,
         subject: '⚖️ Tu Acción de Tutela firmada — JurídicosWeb',
         body: 'Hola ' + (datos.nombres || obtenerValorFila(hoja, fila, 'Nombres')) + ',\n\n' +
@@ -1579,6 +1579,27 @@ function eliminarFilaPorId(nombreHoja, id) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
+//  Helper de envío unificado — siempre usa GmailApp para que los correos
+//  queden en Enviados de Gmail y sean visibles para el administrador.
+//  Acepta el mismo formato objeto que tenía MailApp.sendEmail:
+//  { to, subject, body?, htmlBody?, attachments?, name?, replyTo?, cc? }
+// ════════════════════════════════════════════════════════════════════════
+function _enviarEmail(opts) {
+  var destinatario = opts.to || '';
+  var asunto       = opts.subject || '';
+  var cuerpo       = opts.body || '';
+  var extras       = {};
+  if (opts.htmlBody)     extras.htmlBody     = opts.htmlBody;
+  if (opts.attachments)  extras.attachments  = opts.attachments;
+  if (opts.name)         extras.name         = opts.name;
+  if (opts.replyTo)      extras.replyTo      = opts.replyTo;
+  if (opts.cc)           extras.cc           = opts.cc;
+  if (!extras.name)      extras.name         = 'JurídicosWeb';
+  if (!extras.replyTo)   extras.replyTo      = EMAIL_DESPACHO;
+  GmailApp.sendEmail(destinatario, asunto, cuerpo, extras);
+}
+
+// ════════════════════════════════════════════════════════════════════════
 //  CAMPAÑA EMAIL — Envío y Sync entre dispositivos
 //  Orden de prioridad: 1) Brevo API (300/día, mejor deliverability)
 //                      2) GmailApp (500/día por cuenta, queda en Enviados)
@@ -1705,7 +1726,7 @@ function enviarCorreoCampana(datos) {
 
     // ── Canal 3: MailApp (último recurso) ─────────────────────────────
     try {
-      MailApp.sendEmail({ to: email, subject: asunto, htmlBody: html,
+      _enviarEmail({ to: email, subject: asunto, htmlBody: html,
                           name: nombre, replyTo: EMAIL_DESPACHO });
       return respuestaJson({ ok: true, via: 'mailapp', brevoAgotado: brevoAgotado });
     } catch (em) {
@@ -1845,7 +1866,7 @@ function registrarPagoNequi(datos) {
     // Notificar al admin por correo
     try {
       var adminEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL') || 'biomarketing.salud@gmail.com';
-      MailApp.sendEmail({
+      _enviarEmail({
         to: adminEmail,
         subject: '💸 Pago Nequi recibido – ' + (datos.nombres || '') + ' ' + (datos.apellidos || ''),
         body: [
