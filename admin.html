@@ -3702,7 +3702,43 @@ function guardarDatosCliente(){
         return;
       }
       setTimeout(loadData, 1200);
+    } else if((data.error||'').indexOf('encontró')!==-1 || (data.error||'').indexOf('encontro')!==-1){
+      // El caso no existe en el Sheet aún. Lo creamos automáticamente.
+      var dcApellidos = document.getElementById('dc-apellidos').value.trim();
+      var dcPlaca     = document.getElementById('dc-placa').value.trim();
+      var dcCiudad    = document.getElementById('dc-ciudad').value.trim();
+      var dcWA        = document.getElementById('dc-whatsapp').value.trim();
+      var dcEmail     = document.getElementById('dc-email').value.trim();
+      fetch(SCRIPT_URL, {
+        method:'POST',
+        body: JSON.stringify({
+          _accion: 'guardar_lead',
+          nombres:  nombres,
+          apellidos: dcApellidos,
+          cedula:   cedula,
+          placa:    dcPlaca,
+          whatsapp: dcWA,
+          email:    dcEmail,
+          ciudad:   dcCiudad,
+          plan:     'garantia',
+          notas:    'Caso creado desde admin al guardar datos — cliente en etapa pagaron'
+        })
+      })
+      .then(function(r2){ return r2.json(); })
+      .then(function(d2){
+        btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+        if(d2.ok || d2.guardado){
+          showToast('✅ Caso creado y datos guardados correctamente','success');
+          closeModal('modal-datos-cliente');
+          closeModal('modal-caso');
+          setTimeout(loadData, 1200);
+        } else {
+          showToast('Error al crear el caso: '+(d2.error||'desconocido'),'error');
+        }
+      })
+      .catch(function(e2){ btn.disabled=false; btn.innerHTML='💾 Guardar datos'; showToast('Error: '+e2.message,'error'); });
     } else {
+      btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
       showToast('Error: '+(data.error||'desconocido'),'error');
     }
   })
