@@ -3423,9 +3423,20 @@ function consultarVerifikAdmin(){
 }
 
 // ── Días hábiles Colombia (excluye sábados, domingos y festivos) ──
+function _parseFechaFlexible(s){
+  if(!s) return null;
+  s = s.trim();
+  // dd/mm/aaaa o dd-mm-aaaa
+  var m = s.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/);
+  if(m) return new Date(m[3]+'-'+m[2]+'-'+m[1]+'T00:00:00');
+  // aaaa-mm-dd o aaaa/mm/dd
+  var m2 = s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})$/);
+  if(m2) return new Date(m2[1]+'-'+m2[2]+'-'+m2[3]+'T00:00:00');
+  return new Date(s+'T00:00:00');
+}
 function calcDiasHabilesColombia(isoInicio, isoFin){
-  var inicio = new Date(isoInicio+'T00:00:00');
-  var fin    = new Date(isoFin+'T00:00:00');
+  var inicio = _parseFechaFlexible(isoInicio);
+  var fin    = _parseFechaFlexible(isoFin);
   if(fin <= inicio) return 0;
   var festivos = _getFestivosSet(inicio.getFullYear(), fin.getFullYear());
   var count = 0;
@@ -3477,11 +3488,11 @@ function agregarFilaMultaAdmin(datos){
     '<div class="mm-grid">'+
     // Fila 1
     '<div class="mm-fg"><label>Número de comparendo</label><input type="text" class="mm-comparendo" placeholder="ej: 08078001000054018132" value="'+escHtml(datos.comparendo||'')+'"></div>'+
-    '<div class="mm-fg"><label>Fecha de la infracción</label><input type="date" class="mm-fecha" max="'+hoy+'" value="'+(datos.fecha||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha de la infracción</label><input type="text" class="mm-fecha mm-date-input" placeholder="dd/mm/aaaa" value="'+escHtml(datos.fecha||'')+'"></div>'+
     // Fila 2
     '<div class="mm-fg full-col"><label>Dirección de la multa</label><input type="text" class="mm-direccion" placeholder="ej: TRAMO VIA AL MAR KM 71 SALINAS DEL REY" value="'+escHtml(datos.direccion||'')+'"></div>'+
     // Fila 3
-    '<div class="mm-fg"><label>Fecha de notificación</label><input type="date" class="mm-fechanotif" value="'+(datos.fechaNotif||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha de notificación</label><input type="text" class="mm-fechanotif mm-date-input" placeholder="dd/mm/aaaa" value="'+escHtml(datos.fechaNotif||'')+'"></div>'+
     '<div class="mm-fg"><label>Días hábiles notificación</label><input type="number" class="mm-diasnotif" placeholder="Se calcula solo" readonly value="'+(datos.diasNotif||'')+'"></div>'+
     // Fila 4
     '<div class="mm-fg"><label>Secretaría de tránsito</label><input type="text" class="mm-secretaria" placeholder="ej: Atlantico" value="'+escHtml(datos.secretaria||'')+'"></div>'+
@@ -3496,10 +3507,10 @@ function agregarFilaMultaAdmin(datos){
     '<div class="mm-fg"><label>Valor (opcional)</label><input type="number" class="mm-valor" placeholder="ej: 604054" value="'+(datos.valor||'')+'"></div>'+
     // Fila 8 — Resolución
     '<div class="mm-fg"><label>Número de resolución</label><input type="text" class="mm-numresol" placeholder="ej: 0000137107" value="'+escHtml(datos.numResol||'')+'"></div>'+
-    '<div class="mm-fg"><label>Fecha de resolución</label><input type="date" class="mm-fecharesol" value="'+(datos.fechaResol||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha de resolución</label><input type="text" class="mm-fecharesol mm-date-input" placeholder="dd/mm/aaaa" value="'+escHtml(datos.fechaResol||'')+'"></div>'+
     // Fila 9 — Coactivo
     '<div class="mm-fg"><label>Número de coactivo</label><input type="text" class="mm-numcoactivo" placeholder="ej: ATF2023017520" value="'+escHtml(datos.numCoactivo||'')+'"></div>'+
-    '<div class="mm-fg"><label>Fecha del coactivo</label><input type="date" class="mm-fechacoactivo" value="'+(datos.fechaCoactivo||'')+'"></div>'+
+    '<div class="mm-fg"><label>Fecha del coactivo</label><input type="text" class="mm-fechacoactivo mm-date-input" placeholder="dd/mm/aaaa" value="'+escHtml(datos.fechaCoactivo||'')+'"></div>'+
     // Fila 10
     '<div class="mm-fg"><label>Ciudad / organismo</label><input type="text" class="mm-ciudad" placeholder="ej: Medellín" value="'+escHtml(datos.ciudad||'')+'"></div>'+
     '<div class="mm-fg"><label>Tipo de multa</label><select class="mm-tipo"><option value="">— Selecciona —</option><option value="comparendo">Comparendo</option><option value="fotomulta">Fotomulta</option><option value="coactivo">Cobro coactivo</option><option value="prescrita">Prescrita (+3 años)</option><option value="mal_notificada">Mal notificada</option></select></div>'+
@@ -3513,6 +3524,32 @@ function agregarFilaMultaAdmin(datos){
   if(datos.tipo)  div.querySelector('.mm-tipo').value  = datos.tipo;
   // Placa en mayúsculas
   div.querySelector('.mm-placa').addEventListener('input', function(){ this.value = this.value.toUpperCase(); });
+  // Fechas: acepta pegar en cualquier formato (SIMIT usa dd/mm/aaaa, aaaa-mm-dd, etc.)
+  div.querySelectorAll('.mm-date-input').forEach(function(inp){
+    function normalizarFecha(raw){
+      var s = raw.trim();
+      // aaaa-mm-dd  → dd/mm/aaaa
+      if(/^\d{4}[-\/]\d{2}[-\/]\d{2}$/.test(s)){
+        var p = s.split(/[-\/]/);
+        return p[2]+'/'+p[1]+'/'+p[0];
+      }
+      // dd-mm-aaaa → dd/mm/aaaa
+      if(/^\d{2}[-\/]\d{2}[-\/]\d{4}$/.test(s)){
+        return s.replace(/[-]/g,'/');
+      }
+      // dd/mm/aaaa ya está bien
+      return s;
+    }
+    inp.addEventListener('paste', function(e){
+      var texto = (e.clipboardData||window.clipboardData).getData('text');
+      e.preventDefault();
+      this.value = normalizarFecha(texto);
+      this.dispatchEvent(new Event('change'));
+    });
+    inp.addEventListener('blur', function(){
+      if(this.value) this.value = normalizarFecha(this.value);
+    });
+  });
   // Auto-calcular días hábiles al cambiar fechas
   var fComp = div.querySelector('.mm-fecha');
   var fNoti = div.querySelector('.mm-fechanotif');
