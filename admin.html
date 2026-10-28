@@ -4261,124 +4261,73 @@ function guardarDatosCliente(){
   if(!ciudad){   showToast('⚠️ La ciudad es obligatoria — determina ante qué Secretaría se radica','error'); document.getElementById('dc-ciudad').focus(); return; }
 
   var btn = document.getElementById('btn-guardar-dc');
-  btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
   var _waEnvio = (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||whatsapp||'').toString().replace(/\D/g,'').slice(-10);
-  // Guardar en localStorage ANTES del fetch para que el fallback esté listo
-  // incluso si el GAS falla o la respuesta llega lenta
   var _lsPatch = {
     'Nombres': nombres, 'Apellidos': apellidos, 'Cédula': cedula,
     'Placa': document.getElementById('dc-placa').value.trim(),
     'WhatsApp': whatsapp, 'Email': emailVal, 'Ciudad': ciudad
   };
+
+  // 1. Guardar en localStorage AHORA (no esperar al GAS)
   try{
     var _lsWa = _waEnvio || cedula;
     if(_lsWa) localStorage.setItem('jw_datos_cliente_'+_lsWa, JSON.stringify(_lsPatch));
   }catch(e){}
-  // Aplicar inmediatamente al objeto en memoria para reflejar en el modal
+
+  // 2. Aplicar a memoria AHORA
   if(_dcCasoOriginal) Object.assign(_dcCasoOriginal, _lsPatch);
   for(var _rri=0; _rri<allRows.length; _rri++){
-    var _rrr = allRows[_rri];
-    var _rrwa = ((_rrr['WhatsApp']||_rrr['Celular']||'').replace(/\D/g,'').slice(-10));
-    var _rrcc = (_rrr['Cédula']||'').toString().trim();
-    if((_waEnvio && _rrwa===_waEnvio)||(_dcCasoOriginal['Cédula'] && _rrcc===_dcCasoOriginal['Cédula'])){
-      Object.assign(allRows[_rri], _lsPatch); break;
-    }
+    var _rrwa2 = ((allRows[_rri]['WhatsApp']||allRows[_rri]['Celular']||'').replace(/\D/g,'').slice(-10));
+    if(_waEnvio && _rrwa2===_waEnvio){ Object.assign(allRows[_rri], _lsPatch); break; }
   }
-  console.log('[guardarDatos] enviando — cedulaActual:', _dcCasoOriginal['Cédula']||cedula, '| wa:', _waEnvio);
-  // Función reutilizable: cierra modal y actualiza DP si está abierto
-  function _dcExito(reactivado){
-    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
-    showToast(reactivado
-      ? '✅ Datos corregidos — se reinició el estado para generar el documento nuevo'
-      : '✅ Datos guardados correctamente','success');
-    if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
-    if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _lsPatch);
-    var dpModal = document.getElementById('modal-gen-dp');
-    if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
-      document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(_dpCaso, _dpMultas);
-    }
-    closeModal('modal-datos-cliente');
-    closeModal('modal-caso');
-    var pendAccion = _dcPendingAccion;
-    _dcPendingAccion = null;
-    if(pendAccion === 'confirmar_pago'){
-      var rowFresco = Object.assign({}, _dcCasoOriginal);
-      setTimeout(function(){
-        fetch(SCRIPT_URL, {
-          method:'POST',
-          body: JSON.stringify({ _accion:'confirmar_pago', email: rowFresco['Email'], cedula: rowFresco['Cédula'], nombres: rowFresco['Nombres'] })
-        })
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          showToast(d.ok ? '✅ Pago confirmado' : 'Error al confirmar: '+(d.error||'?'),'success');
-          setTimeout(loadData, 1500);
-        })
-        .catch(function(){ setTimeout(loadData,1200); });
-      }, 600);
-      return;
-    }
-    setTimeout(loadData, 1200);
+  if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
+  if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _lsPatch);
+  var dpModal2 = document.getElementById('modal-gen-dp');
+  if(dpModal2 && dpModal2.classList.contains('show') && _dpCaso && _dpMultas){
+    document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(_dpCaso, _dpMultas);
   }
 
-  // Timeout de 12 s: si el GAS no responde, los datos ya están en localStorage
-  // y en memoria, así que mostramos éxito de todas formas y cerramos el modal.
-  var _dcCtrl = new AbortController();
-  var _dcTimer = setTimeout(function(){
-    _dcCtrl.abort();
-    console.warn('[guardarDatos] GAS timeout — datos guardados localmente');
-    _dcExito(false);
-  }, 12000);
+  // 3. Cerrar el modal INMEDIATAMENTE sin esperar al GAS
+  btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+  showToast('✅ Datos guardados correctamente','success');
+  closeModal('modal-datos-cliente');
+  closeModal('modal-caso');
 
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    signal: _dcCtrl.signal,
-    body: JSON.stringify({
-      _accion:'completar_datos_cliente',
-      cedulaActual: _dcCasoOriginal['Cédula']||cedula||'',
-      email: _dcCasoOriginal['Email']||emailVal||'',
-      whatsappActual: _waEnvio,
-      nombres: nombres,
-      apellidos: apellidos,
-      cedula: cedula,
-      placa: document.getElementById('dc-placa').value.trim(),
-      whatsapp: whatsapp,
-      emailNuevo: emailVal,
-      ciudad: ciudad,
-      forzarReinicio: document.getElementById('dc-forzar-wrap').style.display!=='none' && document.getElementById('dc-forzar-reinicio').checked,
-    })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    clearTimeout(_dcTimer);
-    console.log('[guardarDatos] GAS respondió:', JSON.stringify(data));
-    if(data.ok){
-      _dcExito(data.reactivado);
-    } else if((data.error||'').indexOf('encontró')!==-1 || (data.error||'').indexOf('encontro')!==-1){
-      // Fila no encontrada en el Sheet — crear lead nuevo con los datos completos
+  // 4. Enviar al GAS en segundo plano (fire-and-forget)
+  var _gasPatch = JSON.stringify({
+    _accion:'completar_datos_cliente',
+    cedulaActual: _lsPatch['Cédula']||'',
+    email: _lsPatch['Email']||'',
+    whatsappActual: _waEnvio,
+    nombres: nombres, apellidos: apellidos, cedula: cedula,
+    placa: _lsPatch['Placa'], whatsapp: whatsapp,
+    emailNuevo: emailVal, ciudad: ciudad,
+    forzarReinicio: document.getElementById('dc-forzar-wrap') && document.getElementById('dc-forzar-wrap').style.display!=='none' && document.getElementById('dc-forzar-reinicio').checked,
+  });
+  setTimeout(function(){
+    fetch(SCRIPT_URL, { method:'POST', body: _gasPatch })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ console.log('[guardarDatos BG] GAS:', JSON.stringify(d)); })
+      .catch(function(e){ console.warn('[guardarDatos BG] error:', e.message); });
+  }, 200);
+
+  // 5. Acción pendiente (confirmar_pago) si aplica
+  var pendAccion = _dcPendingAccion;
+  _dcPendingAccion = null;
+  if(pendAccion === 'confirmar_pago'){
+    var rowFresco = Object.assign({}, _dcCasoOriginal);
+    setTimeout(function(){
       fetch(SCRIPT_URL, {
         method:'POST',
-        body: JSON.stringify({
-          _accion:'guardar_lead', nombres:nombres, apellidos:apellidos,
-          cedula:cedula, placa:document.getElementById('dc-placa').value.trim(),
-          whatsapp:whatsapp, email:emailVal, ciudad:ciudad,
-          plan:'garantia', notas:'Caso creado desde admin — cliente pagó por WA/Nequi'
-        })
+        body: JSON.stringify({ _accion:'confirmar_pago', email: rowFresco['Email'], cedula: rowFresco['Cédula'], nombres: rowFresco['Nombres'] })
       })
-      .then(function(r2){ return r2.json(); })
-      .then(function(d2){ _dcExito(false); })
-      .catch(function(){ _dcExito(false); });
-    } else {
-      // Error del GAS pero datos ya están locales — cerrar igual
-      console.warn('[guardarDatos] error GAS:', data.error, '— usando localStorage');
-      _dcExito(false);
-    }
-  })
-  .catch(function(e){
-    clearTimeout(_dcTimer);
-    if(e.name==='AbortError') return; // ya manejado por el timer
-    console.warn('[guardarDatos] fetch error:', e.message, '— usando localStorage');
-    _dcExito(false);
-  });
+      .then(function(r){ return r.json(); })
+      .then(function(d){ showToast(d.ok ? '✅ Pago confirmado' : 'Error: '+(d.error||'?'), d.ok?'success':'error'); setTimeout(loadData,1500); })
+      .catch(function(){ setTimeout(loadData,1200); });
+    }, 800);
+    return;
+  }
+  setTimeout(loadData, 1500);
 }
 
 // El cliente firma en su celular y el PDF se genera y descarga localmente
