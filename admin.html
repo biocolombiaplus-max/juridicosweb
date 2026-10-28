@@ -4261,6 +4261,26 @@ function guardarDatosCliente(){
       showToast(data.reactivado
         ? '✅ Datos corregidos — como el caso ya estaba firmado, se reinició el estado: envía de nuevo el enlace de firma para el documento corregido'
         : '✅ Datos guardados','success');
+
+      // Actualizar los objetos en memoria con los nuevos valores
+      // para que el documento DP y otros modales los reflejen de inmediato
+      var _dcNuevos = {
+        'Nombres':   document.getElementById('dc-nombres').value.trim(),
+        'Apellidos': document.getElementById('dc-apellidos').value.trim(),
+        'Cédula':    document.getElementById('dc-cedula').value.trim(),
+        'Placa':     document.getElementById('dc-placa').value.trim(),
+        'WhatsApp':  document.getElementById('dc-whatsapp').value.trim(),
+        'Email':     document.getElementById('dc-email').value.trim(),
+        'Ciudad':    document.getElementById('dc-ciudad').value.trim()
+      };
+      if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _dcNuevos);
+      if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _dcNuevos);
+      // Si el modal DP está abierto, volver a renderizarlo con los datos frescos
+      var dpModal = document.getElementById('modal-gen-dp');
+      if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
+        document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(_dpCaso, _dpMultas);
+      }
+
       closeModal('modal-datos-cliente');
       // También se cierra el detalle del caso: quedaba con los datos
       // viejos en pantalla (el modal no se refresca solo), y reabrirlo
