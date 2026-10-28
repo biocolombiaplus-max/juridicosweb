@@ -2042,26 +2042,35 @@ function extraerDatosSimit(datos) {
     contents: [{ parts: [{ text: prompt },{ inline_data: { mime_type: mimeType, data: base64Data } }]}],
     generationConfig: { temperature: 0, maxOutputTokens: 1024 }
   };
-  try {
-    var resp = UrlFetchApp.fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + apiKey,
-      { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
-    );
-    var rawText = resp.getContentText();
-    var result = JSON.parse(rawText);
-    if (result.error) {
-      return respuestaJson({ ok: false, error: 'Gemini: ' + result.error.message + ' (código ' + result.error.code + ')' });
+  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + apiKey;
+  var intentos = 3;
+  for (var intento = 1; intento <= intentos; intento++) {
+    try {
+      var resp = UrlFetchApp.fetch(geminiUrl,
+        { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
+      );
+      var rawText = resp.getContentText();
+      var result = JSON.parse(rawText);
+      if (result.error) {
+        var code = result.error.code;
+        if ((code === 503 || code === 429) && intento < intentos) {
+          Utilities.sleep(2000 * intento); // espera 2s, 4s entre reintentos
+          continue;
+        }
+        return respuestaJson({ ok: false, error: 'Gemini: ' + result.error.message + ' (código ' + code + ')' });
+      }
+      var candidate = (result.candidates || [])[0];
+      if (!candidate) {
+        return respuestaJson({ ok: false, error: 'Gemini no devolvió candidatos. Respuesta: ' + rawText.substring(0, 300) });
+      }
+      var parts = ((candidate.content || {}).parts || []);
+      var text = (parts[0] || {}).text || '';
+      text = text.replace(/```json\n?|\n?```/g,'').trim();
+      var parsed = JSON.parse(text);
+      return respuestaJson({ ok: true, datos: parsed });
+    } catch(e) {
+      if (intento < intentos) { Utilities.sleep(2000 * intento); continue; }
+      return respuestaJson({ ok: false, error: 'Error al procesar imagen: ' + String(e) });
     }
-    var candidate = (result.candidates || [])[0];
-    if (!candidate) {
-      return respuestaJson({ ok: false, error: 'Gemini no devolvió candidatos. Respuesta: ' + rawText.substring(0, 300) });
-    }
-    var parts = ((candidate.content || {}).parts || []);
-    var text = (parts[0] || {}).text || '';
-    text = text.replace(/```json\n?|\n?```/g,'').trim();
-    var parsed = JSON.parse(text);
-    return respuestaJson({ ok: true, datos: parsed });
-  } catch(e) {
-    return respuestaJson({ ok: false, error: 'Error al procesar imagen: ' + String(e) });
   }
 }
