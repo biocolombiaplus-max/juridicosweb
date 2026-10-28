@@ -1708,6 +1708,38 @@ function _aplicarOverrides(rows){
     if(k && _etapasOverride[k]) r['Etapa Manual'] = _etapasOverride[k];
   });
 }
+// Deduplica un arreglo de filas: si dos filas comparten WA, cédula o email,
+// conserva la que tiene más campos rellenos (la más completa).
+function _deduplicarRows(rows){
+  var seen = {};
+  var resultado = [];
+  rows.forEach(function(r){
+    var wa    = (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+    var ced   = (r['Cédula']||'').toString().trim();
+    var email = (r['Email']||'').toString().trim().toLowerCase();
+    var claves = [wa, ced, email].filter(Boolean);
+    // Buscar si ya hay una fila con alguna de estas claves
+    var idxExistente = -1;
+    for(var i=0; i<claves.length; i++){
+      if(seen[claves[i]] !== undefined){ idxExistente = seen[claves[i]]; break; }
+    }
+    var completitud = function(row){
+      return Object.values(row).filter(function(v){ return v!==''&&v!==null&&v!==undefined&&v!=='FALSE'; }).length;
+    };
+    if(idxExistente === -1){
+      var idx = resultado.length;
+      resultado.push(r);
+      claves.forEach(function(c){ seen[c] = idx; });
+    } else {
+      // Conservar la más completa de las dos
+      if(completitud(r) > completitud(resultado[idxExistente])){
+        resultado[idxExistente] = r;
+        claves.forEach(function(c){ seen[c] = idxExistente; });
+      }
+    }
+  });
+  return resultado;
+}
 
 // ══════════════════════════════════════════════════
 // AUTH
@@ -2282,13 +2314,16 @@ function renderSection(sec){
   if(sec==='nequi'){
     // Incluye: pagos Nequi pendientes (campo Sheet) + leads en etapa 'pagaron'
     // que aún no tienen Pago OK=TRUE (ej. movidos manualmente por el admin)
-    filtered = allRows.filter(function(r){
+    var rawNequi = allRows.filter(function(r){
       var estadoPago = (r['Estado de Pago']||'');
       var pagoOk = r['Pago OK']==='TRUE'||r['Pago OK']===true;
       var etapaCrm = _crmEtapa(r);
       return estadoPago.indexOf('Nequi Pendiente') !== -1 ||
              (!pagoOk && (etapaCrm==='pagaron' || !!(r['Comprobante Nequi']||'').toString().trim()));
     });
+    // Deduplicar: si hay varias filas del mismo cliente (WA o cédula iguales),
+    // quedarse con la más completa (mayor número de campos no vacíos)
+    filtered = _deduplicarRows(rawNequi);
     document.getElementById('nequi-count').textContent = filtered.length + ' pendientes';
     if(!filtered.length){
       document.getElementById('table-nequi-wrap').innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Sin pagos Nequi pendientes.</p></div>';
@@ -2299,17 +2334,18 @@ function renderSection(sec){
       var cedula = escHtml(r['Cédula']||'');
       var wa = (r['WhatsApp']||'').toString().replace(/\D/g,'');
       var nombre = escHtml((r['Nombres']||'')+' '+(r['Apellidos']||''));
-      var waLink = wa ? 'https://wa.me/57'+wa+'?text='+encodeURIComponent('Hola '+((r['Nombres']||''))+', te enviamos el link para firmar tu documento de eliminación de fotomultas: https://juridicosweb.com/firmar.html?cedula='+(r['Cédula']||'')) : '#';
+      var rowJson = escHtml(JSON.stringify(r));
+      var waFirma = 'https://wa.me/57'+wa+'?text='+encodeURIComponent('Hola '+(r['Nombres']||'')+', te enviamos el link para firmar tu documento: https://juridicosweb.com/firmar.html?cedula='+(r['Cédula']||wa));
       html += '<tr>'+
-        '<td>'+nombre+'</td>'+
+        '<td><strong>'+nombre+'</strong></td>'+
         '<td>'+cedula+'</td>'+
         '<td>'+(wa ? '<a href="https://wa.me/57'+wa+'" target="_blank">'+escHtml(r['WhatsApp']||'')+'</a>' : '—')+'</td>'+
-        '<td>'+escHtml(r['Plan']||'')+'</td>'+
-        '<td>'+escHtml(r['Monto Total']?'$'+r['Monto Total']:'—')+'</td>'+
-        '<td>'+escHtml(r['Fecha']||'—')+'</td>'+
-        '<td style="white-space:nowrap">'+
-          '<button class="btn btn-sm btn-outline" onclick="abrirCompletarDatos(\''+cedula+'\')">✏️ Datos SIMIT</button> '+
-          (wa && cedula ? '<a href="'+waLink+'" target="_blank" class="btn btn-sm" style="background:#25d366;color:#fff;text-decoration:none">📲 Enviar Link Firma</a>' : '')+
+        '<td>'+escHtml(r['Plan']||'—')+'</td>'+
+        '<td>'+escHtml(r['Monto Total']?'$'+Number(r['Monto Total']).toLocaleString('es-CO'):'—')+'</td>'+
+        '<td>'+escHtml((r['Fecha']||'—').toString().split(' ')[0])+'</td>'+
+        '<td style="white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">'+
+          '<button class="btn btn-sm btn-primary" data-row="'+rowJson+'" onclick="openModalMultas(this)" title="Ingresar multas del SIMIT y enviar link de firma">📝 Datos SIMIT</button>'+
+          (wa ? '<a href="'+waFirma+'" target="_blank" class="btn btn-sm" style="background:#25d366;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:4px">📲 Link Firma</a>' : '')+
         '</td>'+
       '</tr>';
     });
@@ -2327,9 +2363,10 @@ function renderSection(sec){
   // Incluye también leads en etapa 'pagaron' (movidos manualmente) aunque
   // Pago OK no esté seteado aún en el Sheet.
   if(sec==='clientes'){
-    filtered = allRows.filter(function(r){
+    var rawClientes = allRows.filter(function(r){
       return r['Pago OK']==='TRUE'||r['Pago OK']===true || _crmEtapa(r)==='pagaron';
     });
+    filtered = _deduplicarRows(rawClientes);
     document.getElementById('clientes-count').textContent = filtered.length+' clientes';
     document.getElementById('table-clientes-wrap').innerHTML = buildTable(filtered);
     return;
