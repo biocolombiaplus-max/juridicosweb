@@ -187,7 +187,41 @@ body.pad-sticky{padding-bottom:92px;}
   <div class="card hidden" id="v-resultado">
     <h2 style="font-size:1.05rem;margin-bottom:10px;"><i class="fas fa-clipboard-check" style="color:var(--teal);"></i> Resultado</h2>
     <div id="resultado-list"></div>
-    <button class="btn btn-primary" id="btn-ver-documento" onclick="irADocumento()" disabled><i class="fas fa-file-signature"></i> Ver mi documento</button>
+    <button class="btn btn-primary" id="btn-ver-documento" onclick="_pagoYaConfirmado ? irADocumento() : irABorrador()" disabled><i class="fas fa-file-pdf"></i> Ver mi documento en borrador</button>
+  </div>
+
+  <!-- BORRADOR: vista previa del documento con marca de agua ANTES de pagar -->
+  <div class="card hidden" id="v-borrador">
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:18px 16px 14px;margin-bottom:16px;">
+      <div style="text-align:center;margin-bottom:10px;">
+        <span style="font-size:2.6rem;">📋</span>
+        <h2 style="color:#15803d;font-size:1.08rem;margin:6px 0 4px;">Tu Derecho de Petición está listo</h2>
+        <p style="color:#166534;font-size:0.78rem;margin:0;">Generado con tus datos personales, la infracción y los fundamentos legales. Solo falta radicarlo.</p>
+      </div>
+      <ul style="list-style:none;padding:0;margin:10px 0 12px;font-size:0.78rem;color:#166534;">
+        <li style="padding:3px 0;"><i class="fas fa-check-circle" style="color:#16a34a;margin-right:6px;"></i>Encabezado con tus datos completos</li>
+        <li style="padding:3px 0;"><i class="fas fa-check-circle" style="color:#16a34a;margin-right:6px;"></i>Hechos y fundamentos legales</li>
+        <li style="padding:3px 0;"><i class="fas fa-check-circle" style="color:#16a34a;margin-right:6px;"></i>Número de comparendo y fecha de infracción</li>
+        <li style="padding:3px 0;"><i class="fas fa-check-circle" style="color:#16a34a;margin-right:6px;"></i>Pretensiones y solicitudes a la secretaría</li>
+      </ul>
+      <button class="btn btn-outline" id="btn-descargar-borrador" onclick="descargarBorrador()" style="width:100%;margin-bottom:8px;background:#fff;"><i class="fas fa-file-pdf" style="color:#dc2626;"></i> Descargar borrador en PDF</button>
+      <p style="text-align:center;font-size:0.68rem;color:#6b7280;margin:0;">El borrador lleva marca de agua "PENDIENTE DE PAGO". Al completar el pago se genera el documento final sin marca.</p>
+    </div>
+    <div style="border-top:2px dashed #e2e8f0;padding-top:16px;">
+      <p style="font-weight:800;color:var(--navy);font-size:0.95rem;margin:0 0 4px;">¿Quieres radicarlo ante la secretaría?</p>
+      <p class="lead" style="margin-bottom:14px;">Elige tu plan y lo radicamos hoy mismo.</p>
+      <div id="planes-borrador-wrap"></div>
+      <div class="pago-fallback hidden" id="pago-fallback-borrador">
+        <p><i class="fas fa-circle-info"></i> El pago en línea no cargó — escríbenos por WhatsApp para ayudarte.</p>
+        <a class="btn btn-wa-sm" id="pago-fallback-link-borrador" href="#" target="_blank"><i class="fab fa-whatsapp"></i> Completar mi pago por WhatsApp</a>
+      </div>
+      <div class="trust-row" style="margin-top:12px;">
+        <span><i class="fas fa-lock" style="color:#16a34a;"></i> Pago seguro</span>
+        <span><i class="fas fa-file-shield" style="color:#16a34a;"></i> No pagas si no aplica</span>
+        <span><i class="fas fa-headset" style="color:#16a34a;"></i> Asesor disponible</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="mostrar('v-resultado')" style="margin-top:12px;width:100%;"><i class="fas fa-arrow-left"></i> Volver al resultado</button>
   </div>
 
   <!-- PASO 3: DOCUMENTO + FIRMA -->
@@ -299,7 +333,7 @@ var _pagoYaConfirmado = false;
 var _totalPagoFirmar = 45000, _planSelFirmar = 'individual';
 
 function mostrar(id){
-  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-documento','v-pago','v-exito','v-error-envio'].forEach(function(v){
+  ['v-cargando','v-error','v-bloqueado','v-yafirmado','v-saludo','v-multas','v-resultado','v-borrador','v-documento','v-pago','v-exito','v-error-envio'].forEach(function(v){
     document.getElementById(v).classList.toggle('hidden', v!==id);
   });
   actualizarFirmaSticky();
@@ -1008,6 +1042,62 @@ function generarPDFsPorSecretaria(documentos, firmaDataUrl){
   });
 }
 
+// ── BORRADOR (antes del pago) ─────────────────────────────────────────────
+function irABorrador(){
+  setStepBar(2);
+  var p = {
+    nombres:_caso['Nombres']||'', apellidos:_caso['Apellidos']||'', cedula:_caso['Cédula']||'',
+    placa:_caso['Placa']||'', whatsapp:_caso['WhatsApp']||'', email:_caso['Email']||'', ciudad:_caso['Ciudad']||'',
+  };
+  var aplican = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; });
+  var grupos = agruparPorCiudad(aplican);
+  _documentosGenerados = grupos.map(function(g){ return { ciudad:g.ciudad, multas:g.multas, texto:construirTextoPeticion(p,g.multas) }; });
+  var n = aplican.length || 1;
+  var totalIndividual = 45000 * n;
+  document.getElementById('planes-borrador-wrap').innerHTML = renderPlanesFirmar(n, totalIndividual, 'borrador');
+  mostrar('v-borrador');
+}
+
+function generarPDFBorrador(){
+  if(!window.jspdf || !_documentosGenerados.length) return null;
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  _documentosGenerados.forEach(function(d,idx){
+    if(idx>0) doc.addPage();
+    escribirDocumentoEnPDF(doc, d.texto, null, d.multas);
+  });
+  var total = doc.internal.getNumberOfPages();
+  for(var pg=1; pg<=total; pg++){
+    doc.setPage(pg);
+    doc.setFontSize(54);
+    doc.setTextColor(225, 225, 225);
+    doc.text('BORRADOR', 105, 95, {angle:45, align:'center'});
+    doc.text('BORRADOR', 105, 215, {angle:45, align:'center'});
+    doc.setFontSize(13);
+    doc.setTextColor(215, 215, 215);
+    doc.text('PENDIENTE DE PAGO PARA RADICAR', 105, 150, {angle:45, align:'center'});
+    doc.setTextColor(0, 0, 0);
+  }
+  return doc;
+}
+
+function descargarBorrador(){
+  var btn = document.getElementById('btn-descargar-borrador');
+  if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Generando PDF...'; }
+  setTimeout(function(){
+    try{
+      var doc = generarPDFBorrador();
+      if(!doc){
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-file-pdf" style="color:#dc2626;"></i> Descargar borrador en PDF'; }
+        return;
+      }
+      var apellidos = (_caso['Apellidos']||'').replace(/\s+/g,'_');
+      doc.save('Borrador_DP_'+(apellidos||_caso['Cédula']||'cliente')+'.pdf');
+    }catch(e){}
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-file-pdf" style="color:#dc2626;"></i> Descargar borrador en PDF'; }
+  }, 80);
+}
+
 function firmarYEnviar(){
   if(_firmaVacia){ alert('Dibuja tu firma en el recuadro antes de continuar.'); return; }
   if(!_documentosGenerados.length){ alert('No hay documento generado.'); return; }
@@ -1100,13 +1190,14 @@ function mostrarPagoTrasFirma(numDocs){
   mostrar('v-pago');
 }
 
-function renderPlanesFirmar(n, totalIndividual){
+function renderPlanesFirmar(n, totalIndividual, suffix){
+  suffix = suffix || 'firmar';
   var html =
     '<div class="plan-card plan-top">'+
     '<div class="plan-ribbon">MÁS RÁPIDO</div>'+
     '<div class="plan-head"><div><div class="plan-name">Activar y radicar ahora</div><div class="plan-desc">'+n+' multa'+(n!==1?'s':'')+' o fotomulta'+(n!==1?'s':'')+' · pago único</div></div>'+
     '<div class="plan-price">$'+totalIndividual.toLocaleString('es-CO')+'</div></div>'+
-    botonesPagoFirmar('individual', totalIndividual)+
+    botonesPagoFirmar('individual', totalIndividual, suffix)+
     '</div>';
 
   if(n >= 2){
@@ -1115,7 +1206,7 @@ function renderPlanesFirmar(n, totalIndividual){
       '<div class="plan-card">'+
       '<div class="plan-head"><div><div class="plan-name">Eliminar TODAS las que apliquen</div><div class="plan-desc">ahorras $'+ahorra.toLocaleString('es-CO')+'</div></div>'+
       '<div class="plan-price">$69.000</div></div>'+
-      botonesPagoFirmar('masivo', 69000)+
+      botonesPagoFirmar('masivo', 69000, suffix)+
       '</div>';
   }
 
@@ -1124,7 +1215,7 @@ function renderPlanesFirmar(n, totalIndividual){
     '<div class="plan-head"><div><div class="plan-name">Plan Pago al Eliminar</div><div class="plan-desc">adelanto hoy, resto al eliminar</div></div>'+
     '<div class="plan-price">$19.800</div></div>'+
     '<p style="font-size:.7rem;color:var(--red);margin:-4px 0 10px;">Total real si se elimina: $'+(19800+95500*n).toLocaleString('es-CO')+' — sale más caro que activar ahora por $'+totalIndividual.toLocaleString('es-CO')+'</p>'+
-    botonesPagoFirmar('diferido', 19800)+
+    botonesPagoFirmar('diferido', 19800, suffix)+
     '</div>';
 
   return html;
@@ -1135,11 +1226,13 @@ function renderPlanesFirmar(n, totalIndividual){
 // y Nequi se pagan sin salir de la página; el WhatsApp que sí se deja es
 // el de "ya pagué, envío el comprobante" (imprescindible para Nequi, que no
 // se verifica solo).
-function botonesPagoFirmar(plan, monto){
-  var idNequi = 'nequi-'+plan;
+function botonesPagoFirmar(plan, monto, suffix){
+  suffix = suffix || 'firmar';
+  var idNequi = 'nequi-'+suffix+'-'+plan;
+  var fallbackId = 'pago-fallback-'+suffix;
   return ''+
     '<div class="pay-row">'+
-    '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar(this,'+monto+',\''+plan+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
+    '<button class="btn btn-primary btn-sm" onclick="pagarConWompiFirmar(this,'+monto+',\''+plan+'\',\''+fallbackId+'\')"><i class="fas fa-credit-card"></i> Tarjeta / PSE</button>'+
     '<button class="btn btn-navy btn-sm" onclick="toggleNequiFirmar(\''+idNequi+'\','+monto+')"><i class="fas fa-mobile-alt"></i> Nequi</button>'+
     '</div>'+
     '<div class="nequi-inline" id="'+idNequi+'">'+
@@ -1186,9 +1279,11 @@ function linkWhatsAppComprobanteNequi(plan, monto){
 // falla de verdad, muestra un aviso permanente en la página (no una alerta
 // nativa, que en varios navegadores internos de apps puede no verse) con un
 // enlace directo para completar el pago por WhatsApp sin perder el caso.
-function pagarConWompiFirmar(btn, monto, plan){
-  document.getElementById('pago-fallback-firmar').classList.add('hidden');
-  if(!WOMPI_PUBLIC_KEY){ mostrarFallbackPagoFirmar(monto, plan); return; }
+function pagarConWompiFirmar(btn, monto, plan, fallbackId){
+  fallbackId = fallbackId || 'pago-fallback-firmar';
+  var fb = document.getElementById(fallbackId);
+  if(fb) fb.classList.add('hidden');
+  if(!WOMPI_PUBLIC_KEY){ mostrarFallbackPagoFirmar(monto, plan, fallbackId); return; }
   if(typeof WidgetCheckout !== 'undefined'){ abrirWompiFirmar(monto, plan); return; }
 
   var original = btn.innerHTML;
@@ -1204,19 +1299,23 @@ function pagarConWompiFirmar(btn, monto, plan){
     } else if(intentos >= 25){ // ~5 segundos de reintento
       clearInterval(espera);
       btn.disabled = false; btn.innerHTML = original;
-      mostrarFallbackPagoFirmar(monto, plan);
+      mostrarFallbackPagoFirmar(monto, plan, fallbackId);
     }
   }, 200);
 }
 
-function mostrarFallbackPagoFirmar(monto, plan){
+function mostrarFallbackPagoFirmar(monto, plan, fallbackId){
+  fallbackId = fallbackId || 'pago-fallback-firmar';
+  var linkId = fallbackId.replace('pago-fallback-', 'pago-fallback-link-');
+  // legacy: v-pago uses 'pago-fallback-link' (no suffix)
+  if(fallbackId === 'pago-fallback-firmar') linkId = 'pago-fallback-link';
   var nombre = (_caso['Nombres']||'').split(' ')[0] || '';
   var desc = { individual:'el plan de activar mi caso', masivo:'el plan que elimina todas las que apliquen', diferido:'el adelanto del Plan Pago al Eliminar' }[plan] || 'mi plan';
-  var msg = 'Hola, soy '+nombre+'. Ya firmé mi Derecho de Petición y quiero pagar '+desc+' por $'+monto.toLocaleString('es-CO')+', pero el pago en línea no cargó en mi navegador. ¿Me ayudan a completarlo?';
-  document.getElementById('pago-fallback-link').href = 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
-  var caja = document.getElementById('pago-fallback-firmar');
-  caja.classList.remove('hidden');
-  caja.scrollIntoView({behavior:'smooth', block:'center'});
+  var msg = 'Hola, soy '+nombre+'. Quiero pagar '+desc+' por $'+monto.toLocaleString('es-CO')+', pero el pago en línea no cargó en mi navegador. ¿Me ayudan a completarlo?';
+  var linkEl = document.getElementById(linkId);
+  if(linkEl) linkEl.href = 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
+  var caja = document.getElementById(fallbackId);
+  if(caja){ caja.classList.remove('hidden'); caja.scrollIntoView({behavior:'smooth', block:'center'}); }
 }
 
 function abrirWompiFirmar(monto, plan){

@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028i';
+  var VER = '20261028j';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
