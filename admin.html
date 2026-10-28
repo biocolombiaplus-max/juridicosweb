@@ -1667,6 +1667,21 @@ function syncCampanaLoad() {
 </div>
 
 <script>
+// Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
+// Esto rompe el caché del navegador sin necesitar Ctrl+F5
+(function(){
+  var VER = '20261028c';
+  var p = new URLSearchParams(window.location.search);
+  if(p.get('v') !== VER){
+    p.set('v', VER);
+    window.location.replace(window.location.pathname + '?' + p.toString() + window.location.hash);
+  }
+  // Resetear el botón guardar al cargar la página (por si quedó disabled)
+  document.addEventListener('DOMContentLoaded', function(){
+    var b = document.getElementById('btn-guardar-dc');
+    if(b){ b.disabled = false; b.innerHTML = '💾 Guardar datos'; }
+  });
+})();
 // ══════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════
