@@ -1686,14 +1686,21 @@ var USUARIOS = {
 // Estado global
 var allRows = [];
 var currentUser = null;
-// Mapa de overrides de etapa para la sesión actual del admin.
-// Persiste aunque loadData() recargue los datos del Sheet.
-// Clave: cédula || email || WA (los tres que tengamos)
-var _etapasOverride = {};
+// Mapa de overrides de etapa — persiste en localStorage para sobrevivir recargas.
+// Clave: cédula || email || WA (cualquiera de los tres que tengamos).
+var _etapasOverride = (function(){
+  try { return JSON.parse(localStorage.getItem('jw_etapas_override') || '{}'); } catch(e){ return {}; }
+})();
 function _overrideKey(r){
   return (r['Cédula']||'').toString().trim() ||
          (r['Email']||'').toString().trim().toLowerCase() ||
          (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+}
+function _setOverride(cedula, email, wa, etapa){
+  if(cedula) _etapasOverride[cedula.toString().trim()] = etapa;
+  if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapa;
+  if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapa;
+  try { localStorage.setItem('jw_etapas_override', JSON.stringify(_etapasOverride)); } catch(e){}
 }
 function _aplicarOverrides(rows){
   (rows||[]).forEach(function(r){
@@ -2047,6 +2054,14 @@ function loadData(evtBtn){
       if(!Array.isArray(casos)) throw new Error('Formato de respuesta inesperado');
       allRows = casos.filter(function(r){
         return r['Nombres']||r['Email']||r['Cédula']||r['Placa']||r['valor']||r['Valor'];
+      });
+      // Si el Sheet ya tiene Etapa Manual (GAS actualizado), sincronizar override
+      allRows.forEach(function(r){
+        var etapaSheet = (r['Etapa Manual']||'').toString().trim().toLowerCase();
+        var etapasValidas = ['consultaron','dejaron_datos','firmaron','pagaron'];
+        if(etapaSheet && etapasValidas.indexOf(etapaSheet)!==-1){
+          _setOverride(r['Cédula']||'', r['Email']||'', r['WhatsApp']||r['Celular']||'', etapaSheet);
+        }
       });
       _aplicarOverrides(allRows);
       renderAll();
@@ -2534,10 +2549,8 @@ function _initCrmDragDrop(){
       if(!cedula && !email && !wa){ showToast('Este lead no tiene cédula, email ni WA para identificarlo','error'); return; }
       var confirmMsg = '¿Mover a "'+etapaDestino.replace(/_/g,' ').toUpperCase()+'"?\n\nEsto también actualizará el estado en la hoja de cálculo.';
       if(!confirm(confirmMsg)) return;
-      // Guardar override inmediatamente (antes del GAS) para que persista si se recarga
-      if(cedula) _etapasOverride[cedula.toString().trim()] = etapaDestino;
-      if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapaDestino;
-      if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapaDestino;
+      // Guardar override inmediatamente (antes del GAS) — persiste en localStorage
+      _setOverride(cedula, email, wa, etapaDestino);
       // Actualizar UI inmediatamente
       dragging.dataset.etapa = etapaDestino;
       var manualDiv = dragging.querySelector('[style*="e0e7ff"]');
@@ -2558,10 +2571,8 @@ function _initCrmDragDrop(){
       .then(function(d){
         if(d.ok){
           showToast('✅ '+nombre+' → '+etapaDestino.replace(/_/g,' '),'success');
-          // Guardar en el mapa de overrides para que persista si se recarga
-          if(cedula) _etapasOverride[cedula.toString().trim()] = etapaDestino;
-          if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapaDestino;
-          if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapaDestino;
+          // Override ya guardado antes del GAS — confirmar que está en localStorage
+          _setOverride(cedula, email, wa, etapaDestino);
           if(allRows) allRows.forEach(function(r){
             var rWa = (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
             if((cedula && r['Cédula']==cedula)||(email && r['Email']==email)||(wa && rWa===wa)) r['Etapa Manual']=etapaDestino;
