@@ -2047,8 +2047,17 @@ function extraerDatosSimit(datos) {
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey,
       { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
     );
-    var result = JSON.parse(resp.getContentText());
-    var text = (((result.candidates||[])[0]||{}).content||{}).parts[0].text || '';
+    var rawText = resp.getContentText();
+    var result = JSON.parse(rawText);
+    if (result.error) {
+      return respuestaJson({ ok: false, error: 'Gemini: ' + result.error.message + ' (código ' + result.error.code + ')' });
+    }
+    var candidate = (result.candidates || [])[0];
+    if (!candidate) {
+      return respuestaJson({ ok: false, error: 'Gemini no devolvió candidatos. Respuesta: ' + rawText.substring(0, 300) });
+    }
+    var parts = ((candidate.content || {}).parts || []);
+    var text = (parts[0] || {}).text || '';
     text = text.replace(/```json\n?|\n?```/g,'').trim();
     var parsed = JSON.parse(text);
     return respuestaJson({ ok: true, datos: parsed });

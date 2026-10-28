@@ -3640,9 +3640,12 @@ function mmSetCaptura(row, file){
         showToast('✅ IA leyó la captura del SIMIT y rellenó los campos automáticamente','success');
       } else {
         row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
-        label.textContent = (file.name || 'Captura adjunta') + ' — no se pudo extraer datos automáticamente';
-        if(data.error && data.error.indexOf('GEMINI_API_KEY')!==-1){
+        var errMsg = data.error || 'no se pudo extraer datos';
+        label.textContent = (file.name || 'Captura adjunta') + ' — ' + errMsg;
+        if(errMsg.indexOf('GEMINI_API_KEY')!==-1){
           showToast('⚙️ Para auto-rellenar: agrega GEMINI_API_KEY en Apps Script → Propiedades del proyecto','info');
+        } else {
+          showToast('⚠️ ' + errMsg, 'error');
         }
       }
     })
