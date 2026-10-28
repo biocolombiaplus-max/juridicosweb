@@ -424,6 +424,12 @@ function init(){
       document.querySelector('#v-saludo .simit-inner h5').textContent = 'Documento listo para firmar';
       document.querySelector('#v-saludo .simit-inner p').textContent = 'Tu Derecho de Petición ya está redactado con tu caso real — fírmalo primero y actívalo cuando quieras';
     }
+    // Si pago confirmado y hay multas pre-cargadas, ir directo al documento sin pantallas intermedias
+    if(_pagoYaConfirmado){
+      var _prevCheck = [];
+      try{ var _pc = JSON.parse(match['Multas Reportadas']); if(Array.isArray(_pc)) _prevCheck = _pc; }catch(e){}
+      if(_prevCheck.length){ irEmpezar(); return; }
+    }
     mostrar('v-saludo');
   }).catch(function(err){
     clearTimeout(toutId);
@@ -464,8 +470,15 @@ function irAMultas(){
   try{ var p = JSON.parse(reportadasRaw); if(Array.isArray(p)) previas = p; }catch(e){}
 
   if(previas.length){
-    _multasReportadas = previas;
-    calcularYMostrarResultado();
+    _multasReportadas = previas.map(function(m){
+      return calcularCausal(m.fecha, m.valor, m.ciudad, m.notif, m.foto);
+    });
+    // Si el pago ya está confirmado, saltar directo al documento — sin pasos intermedios
+    if(_pagoYaConfirmado){
+      var hayAplica = _multasReportadas.some(function(m){ return m.estado==='aplica'; });
+      if(hayAplica){ irADocumento(); return; }
+    }
+    mostrarResultado();
     return;
   }
   mostrar('v-multas');
