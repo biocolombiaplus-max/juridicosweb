@@ -3620,8 +3620,8 @@ function guardarMultasAdmin(){
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
-    btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
     if(data.ok){
+      btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
       // Mostrar panel de éxito con botón WhatsApp
       var nombre    = (_mmCaso['Nombres']||'').split(' ')[0] || _mmCaso['Nombres'] || 'cliente';
       var wa        = (_mmCaso['WhatsApp']||'').replace(/\D/g,'');
@@ -3655,7 +3655,86 @@ function guardarMultasAdmin(){
       if(footerBtns) footerBtns.style.display = 'none';
       showToast('✅ Multas guardadas — envía el link de firma por WhatsApp','success');
       setTimeout(loadData, 1200);
+    } else if((data.error||'').indexOf('encontró') !== -1) {
+      // Fila no existe en Sheet → crearla primero con guardar_lead, luego reintentar
+      var wa10 = (_mmCaso['WhatsApp']||_mmCaso['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+      btn.innerHTML = '<span class="loading-spinner"></span>Creando caso...';
+      fetch(SCRIPT_URL, {
+        method:'POST',
+        body: JSON.stringify({
+          _accion:'guardar_lead',
+          cedula:    _mmCaso['Cédula']||'',
+          nombres:   _mmCaso['Nombres']||'',
+          apellidos: _mmCaso['Apellidos']||'',
+          email:     _mmCaso['Email']||'',
+          whatsapp:  wa10,
+          ciudad:    _mmCaso['Ciudad']||'',
+          placa:     _mmCaso['Placa']||''
+        })
+      })
+      .then(function(r2){ return r2.json(); })
+      .then(function(){
+        // Reintentar guardar_multas
+        btn.innerHTML = '<span class="loading-spinner"></span>Guardando multas...';
+        var lista2 = [];
+        document.querySelectorAll('#mm-lista .mm-row').forEach(function(f){
+          lista2.push({
+            codigo:        f.querySelector('.mm-codigo').value.trim(),
+            esFotomulta:   f.querySelector('.mm-esfoto').value,
+            descripcion:   f.querySelector('.mm-desc').value.trim(),
+            placa:         f.querySelector('.mm-placa').value.trim(),
+            valor:         f.querySelector('.mm-valor').value.trim(),
+            numResolucion: f.querySelector('.mm-resolucion').value.trim(),
+            fechaResolucion: f.querySelector('.mm-fecharesolucion').value,
+            numCoactivo:   f.querySelector('.mm-coactivo').value.trim(),
+            fechaCoactivo: f.querySelector('.mm-fechacoactivo').value,
+            ciudad:        f.querySelector('.mm-ciudad').value.trim(),
+            tipo:          f.querySelector('.mm-tipo').value,
+            foto:          f.querySelector('.mm-foto').value,
+            notif:         f.querySelector('.mm-notif').value,
+          });
+        });
+        return fetch(SCRIPT_URL, {
+          method:'POST',
+          body: JSON.stringify({
+            _accion:'guardar_multas',
+            cedula:   _mmCaso['Cédula']||'',
+            email:    _mmCaso['Email']||'',
+            whatsapp: wa10,
+            multasReportadas: JSON.stringify(lista2)
+          })
+        });
+      })
+      .then(function(r3){ return r3.json(); })
+      .then(function(data2){
+        btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
+        if(data2.ok){
+          var nombre2   = (_mmCaso['Nombres']||'').split(' ')[0] || 'cliente';
+          var wa2       = (_mmCaso['WhatsApp']||'').replace(/\D/g,'');
+          var _idFirma2 = _mmCaso['Cédula'] || wa10 || _mmCaso['Email'] || '';
+          var linkFirma2 = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma2);
+          var planEl2  = document.querySelector('input[name="mm-plan"]:checked');
+          var plan2    = planEl2 ? planEl2.value : 'todas';
+          var numM2    = document.querySelectorAll('#mm-lista .mm-row').length;
+          var planTxt2 = plan2 === 'una' ? 'la multa seleccionada ($49.000)' : numM2>1?'tus '+numM2+' multas ($79.000)':'tu multa ($49.000)';
+          var msg2 = '¡Hola '+nombre2+'! 👋 Soy de *JurídicosWeb*.\n\n✅ *Tu documento legal está listo.*\n\nYa revisamos tu caso en el SIMIT oficial y preparamos el Derecho de Petición para eliminar '+planTxt2+'.\n\n👇 *Abre este link, revisa el documento y fírmalo con el dedo — toma menos de 2 minutos:*\n'+linkFirma2+'\n\n⚖️ Una vez firmes, nosotros lo radicamos el mismo día ante la secretaría de tránsito. Sin más trámites de tu parte.\n\n_JurídicosWeb — Trámite 100% legal · Sin engaños · Sin esperas_';
+          var panel2 = document.getElementById('mm-success-panel');
+          var waLink2 = document.getElementById('mm-wa-link');
+          var footerBtns2 = document.getElementById('mm-footer-btns');
+          if(panel2){ panel2.style.display='block'; if(waLink2&&wa2){ waLink2.href='https://wa.me/57'+wa2+'?text='+encodeURIComponent(msg2); waLink2._linkFirma=linkFirma2; } }
+          if(footerBtns2) footerBtns2.style.display='none';
+          showToast('✅ Multas guardadas — envía el link de firma por WhatsApp','success');
+          setTimeout(loadData, 1200);
+        } else {
+          showToast('Error: '+(data2.error||'desconocido'),'error');
+        }
+      })
+      .catch(function(e2){
+        btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
+        showToast('Error de conexión: '+e2.message,'error');
+      });
     } else {
+      btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
       showToast('Error: '+(data.error||'desconocido'),'error');
     }
   })
