@@ -1362,17 +1362,16 @@ function syncCampanaLoad() {
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;" id="dc-explicacion">
-        Corrige aquí cualquier dato mal digitado (cédula, WhatsApp, correo, etc.) antes de reenviar el enlace de
-        firma o el documento — evita tener que pedirle al cliente que vuelva a empezar.
+        Estos datos son <strong>obligatorios para elaborar el Derecho de Petición</strong>: el nombre completo identifica al peticionario, la cédula acredita la identidad, el WhatsApp recibe el enlace de firma, el correo recibe la respuesta de la Secretaría y la ciudad determina ante qué autoridad se radica.
       </p>
       <div class="form-grid">
-        <div class="form-group-m"><label>Nombres *</label><input type="text" id="dc-nombres"></div>
-        <div class="form-group-m"><label>Apellidos</label><input type="text" id="dc-apellidos"></div>
-        <div class="form-group-m"><label>Cédula *</label><input type="text" inputmode="numeric" id="dc-cedula"></div>
+        <div class="form-group-m"><label>Nombres <span style="color:#ef4444;">*</span></label><input type="text" id="dc-nombres"></div>
+        <div class="form-group-m"><label>Apellidos <span style="color:#ef4444;">*</span></label><input type="text" id="dc-apellidos"></div>
+        <div class="form-group-m"><label>Cédula <span style="color:#ef4444;">*</span></label><input type="text" inputmode="numeric" id="dc-cedula"></div>
         <div class="form-group-m"><label>Placa</label><input type="text" id="dc-placa"></div>
         <div class="form-group-m"><label>WhatsApp <span style="color:#ef4444;">*</span></label><input type="text" id="dc-whatsapp" placeholder="Ej. 3201234567"></div>
-        <div class="form-group-m"><label>Correo <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem;font-weight:400;color:#64748b;">(necesario para radicar)</span></label><input type="email" id="dc-email" placeholder="correo@ejemplo.com"></div>
-        <div class="form-group-m"><label>Ciudad</label><input type="text" id="dc-ciudad"></div>
+        <div class="form-group-m"><label>Correo <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem;font-weight:400;color:#64748b;">(respuesta de la Secretaría)</span></label><input type="email" id="dc-email" placeholder="correo@ejemplo.com"></div>
+        <div class="form-group-m"><label>Ciudad <span style="color:#ef4444;">*</span> <span style="font-size:0.7rem;font-weight:400;color:#64748b;">(jurisdicción)</span></label><input type="text" id="dc-ciudad" placeholder="Ej. Bogotá"></div>
       </div>
       <label id="dc-forzar-wrap" style="display:none;align-items:flex-start;gap:8px;font-size:13px;color:var(--gray700,#334155);background:#fffbeb;border:1px solid rgba(217,119,6,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
         <input type="checkbox" id="dc-forzar-reinicio" checked style="margin-top:2px;">
@@ -3593,17 +3592,18 @@ function openModalDatosCliente(row, modo, pendingAccion){
 
 function guardarDatosCliente(){
   if(!_dcCasoOriginal) return;
-  var nombres = document.getElementById('dc-nombres').value.trim();
-  var cedula = document.getElementById('dc-cedula').value.trim();
+  var nombres  = document.getElementById('dc-nombres').value.trim();
+  var apellidos= document.getElementById('dc-apellidos').value.trim();
+  var cedula   = document.getElementById('dc-cedula').value.trim();
   var whatsapp = document.getElementById('dc-whatsapp').value.trim();
   var emailVal = document.getElementById('dc-email').value.trim();
-  if(!nombres || !cedula){ showToast('⚠️ Nombres y cédula son obligatorios','error'); return; }
-  if(!whatsapp){ showToast('⚠️ WhatsApp es obligatorio para enviar el enlace de firma','error'); document.getElementById('dc-whatsapp').focus(); return; }
-  if(!emailVal){
-    showToast('⚠️ El correo es obligatorio — sin él no podemos radicar ni enviar la respuesta de la Secretaría','error');
-    document.getElementById('dc-email').focus();
-    return;
-  }
+  var ciudad   = document.getElementById('dc-ciudad').value.trim();
+  if(!nombres){  showToast('⚠️ Los nombres son obligatorios — se incluyen en el Derecho de Petición','error'); document.getElementById('dc-nombres').focus(); return; }
+  if(!apellidos){ showToast('⚠️ Los apellidos son obligatorios — se incluyen en el Derecho de Petición','error'); document.getElementById('dc-apellidos').focus(); return; }
+  if(!cedula){   showToast('⚠️ La cédula es obligatoria — acredita la identidad del peticionario','error'); document.getElementById('dc-cedula').focus(); return; }
+  if(!whatsapp){ showToast('⚠️ El WhatsApp es obligatorio — por ahí se envía el enlace de firma','error'); document.getElementById('dc-whatsapp').focus(); return; }
+  if(!emailVal){ showToast('⚠️ El correo es obligatorio — la Secretaría envía la respuesta ahí','error'); document.getElementById('dc-email').focus(); return; }
+  if(!ciudad){   showToast('⚠️ La ciudad es obligatoria — determina ante qué Secretaría se radica','error'); document.getElementById('dc-ciudad').focus(); return; }
 
   var btn = document.getElementById('btn-guardar-dc');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
