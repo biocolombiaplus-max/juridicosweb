@@ -4242,6 +4242,8 @@ function openModalDatosCliente(row, modo, pendingAccion){
   wrapForzar.style.display = yaFirmado ? 'flex' : 'none';
   document.getElementById('dc-forzar-reinicio').checked = true;
   _dcPendingAccion = pendingAccion || null;
+  var btnDC = document.getElementById('btn-guardar-dc');
+  if(btnDC){ btnDC.disabled = false; btnDC.innerHTML = '💾 Guardar datos'; }
   document.getElementById('modal-datos-cliente').classList.add('show');
 }
 
