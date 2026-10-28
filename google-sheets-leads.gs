@@ -410,8 +410,13 @@ function cerrarCaso(datos) {
 
 function actualizarPorCedula(datos, valores) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
-  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email, datos.whatsapp);
+  if (fila === -1) {
+    // Si no existe, crear con guardarLead para que nunca falle
+    guardarLead({ cedula: datos.cedula||'', email: datos.email||'', whatsapp: datos.whatsapp||'' });
+    fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email, datos.whatsapp);
+    if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso de este cliente' });
+  }
   escribirFila(hoja, fila, valores);
   aplicarFormatoCondicional(hoja);
   return respuestaJson({ ok: true });

@@ -3610,7 +3610,13 @@ function guardarMultasAdmin(){
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
   fetch(SCRIPT_URL, {
     method:'POST',
-    body: JSON.stringify({ _accion:'guardar_multas', cedula:_mmCaso['Cédula'], email:_mmCaso['Email'], multasReportadas: JSON.stringify(lista) })
+    body: JSON.stringify({
+      _accion:'guardar_multas',
+      cedula:   _mmCaso['Cédula']||'',
+      email:    _mmCaso['Email']||'',
+      whatsapp: (_mmCaso['WhatsApp']||_mmCaso['Celular']||'').toString().replace(/\D/g,'').slice(-10),
+      multasReportadas: JSON.stringify(lista)
+    })
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
@@ -3619,7 +3625,8 @@ function guardarMultasAdmin(){
       // Mostrar panel de éxito con botón WhatsApp
       var nombre    = (_mmCaso['Nombres']||'').split(' ')[0] || _mmCaso['Nombres'] || 'cliente';
       var wa        = (_mmCaso['WhatsApp']||'').replace(/\D/g,'');
-      var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_mmCaso['Cédula']||'');
+      var _idFirma = _mmCaso['Cédula'] || (_mmCaso['WhatsApp']||'').replace(/\D/g,'').slice(-10) || _mmCaso['Email'] || '';
+      var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma);
       var planEl    = document.querySelector('input[name="mm-plan"]:checked');
       var plan      = planEl ? planEl.value : 'todas';
       var numMultas = document.querySelectorAll('#mm-lista .mm-row').length;
