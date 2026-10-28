@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028e';
+  var VER = '20261028f';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -2912,7 +2912,7 @@ function renderDetalleMultas(jsonStr){
   try{ lista = JSON.parse(jsonStr); }catch(e){ return null; }
   if(!Array.isArray(lista) || !lista.length) return null;
   return lista.map(function(m,i){
-    var fechaFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    var fechaFmt = m.fecha ? parseFechaMM(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
     var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
     return '<div style="background:var(--gray50);border-radius:8px;padding:12px 14px;margin-bottom:8px;font-size:13px;">'+
       '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;"><strong>Multa #'+(i+1)+' · '+fechaFmt+(m.ciudad?' · '+escHtml(m.ciudad):'')+'</strong>'+(valorFmt?'<span>'+valorFmt+'</span>':'')+'</div>'+
@@ -6288,8 +6288,17 @@ var DP_CIUDADES_INM = [
 function dpNorm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
 function dpCiudadINM(c){ var n=dpNorm(c); return DP_CIUDADES_INM.some(function(x){return n.indexOf(x)!==-1;}); }
 
+function parseFechaMM(s){
+  if(!s) return new Date('invalid');
+  s = String(s).trim();
+  // DD/MM/YYYY o DD-MM-YYYY → YYYY-MM-DD
+  var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) return new Date(m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')+'T00:00:00');
+  return new Date(s+'T00:00:00');
+}
+
 function dpMesesTranscurridos(fechaStr){
-  var d = new Date(fechaStr+'T00:00:00');
+  var d = parseFechaMM(fechaStr);
   var hoy = new Date(); hoy.setHours(0,0,0,0);
   return (hoy.getFullYear()-d.getFullYear())*12+(hoy.getMonth()-d.getMonth())+
     (hoy.getDate()<d.getDate()?-1:0);
@@ -6298,7 +6307,7 @@ function dpMesesTranscurridos(fechaStr){
 function dpAnalizarMulta(m){
   // m viene del JSON guardado en 'Multas Reportadas'
   var meses = dpMesesTranscurridos(m.fecha);
-  var anio = new Date(m.fecha+'T00:00:00').getFullYear();
+  var anio = parseFechaMM(m.fecha).getFullYear();
   var foto = m.foto||'nose'; // 'si'|'no'|'nose'
   var notif = m.notif||'nose'; // 'si'|'no'|'nose'
   var ciudad = m.ciudad||m.secretaria||'';
@@ -6581,7 +6590,7 @@ function dpRenderDocumentoHTML(row, multas){
     // ── II. HECHOS ─────────────────────────────────────────────────────────
     html += '<div style="'+estiloSeccion+'">II. HECHOS</div>';
     gMultas.forEach(function(m, i){
-      var fFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '(fecha no registrada)';
+      var fFmt = m.fecha ? parseFechaMM(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '(fecha no registrada)';
       var val = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
       html += '<div style="'+estiloSubSeccion+'">Hecho '+(i+1)+(gMultas.length>1?' — Comparendo '+escHtml(m.comparendo||''):'')+':</div>';
       html += '<p style="'+estiloPara+'"><strong>PRIMERO.</strong> El día <strong>'+fFmt+'</strong>'
@@ -6678,7 +6687,7 @@ function dpRenderDocumentoHTML(row, multas){
     html += '<ol style="font-size:11px;line-height:1.8;color:#111;margin:0 0 14px;padding-left:22px;">';
     html += '<li>Documento de identidad del peticionario (Cédula de Ciudadanía No. '+escHtml(cedula)+').</li>';
     gMultas.forEach(function(m,i){
-      if(m.comparendo) html += '<li>Constancia del registro SIMIT del comparendo No. <strong>'+escHtml(m.comparendo)+'</strong>'+(m.fecha?' de fecha '+new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'')+' (captura de pantalla adjunta).</li>';
+      if(m.comparendo) html += '<li>Constancia del registro SIMIT del comparendo No. <strong>'+escHtml(m.comparendo)+'</strong>'+(m.fecha?' de fecha '+parseFechaMM(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'')+' (captura de pantalla adjunta).</li>';
     });
     if(capturas.length) html += '<li>Captura(s) de pantalla del sistema SIMIT mostrando el estado actual del registro, la fecha de la infracción'+(hayNotif?', la fecha de notificación':'')+' y los datos del comparendo ('+capturas.length+' imagen(es) adjunta(s) a continuación).</li>';
     html += '<li>La presente petición, debidamente firmada por el peticionario.</li>';
@@ -6753,7 +6762,7 @@ function dpRenderMultasDetalle(multas){
   };
   return '<div class="dp-multas-grid">'+multas.map(function(m,i){
     var b = badges[m.estado]||badges.no_aplica;
-    var fFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    var fFmt = m.fecha ? parseFechaMM(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '—';
     return '<div class="dp-multa-card">'+
       '<div class="dp-mc-num">Multa #'+(i+1)+(m.comparendo?' · '+m.comparendo:'')+'</div>'+
       '<span class="dp-multa-badge '+b.cls+'">'+b.txt+'</span>'+
@@ -6883,7 +6892,7 @@ function dpDescargarPDF(){
     // HECHOS
     y = section(doc,'I. HECHOS',y);
     gMultas.forEach(function(m,i){
-      var fFmt = m.fecha?new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'';
+      var fFmt = m.fecha?parseFechaMM(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'';
       var hechoBase = (i+1)+'. Comparendo del '+fFmt+(m.valor?', por valor de $'+Number(m.valor).toLocaleString('es-CO'):'')+
         (m.codigo?', código '+m.codigo:'')+(m.descripcion?' ('+m.descripcion+')':'')+
         (m.direccion?', en '+m.direccion:'')+'.'+(m.comparendo?' Comparendo No.: '+m.comparendo+'.':'');

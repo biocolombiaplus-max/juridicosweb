@@ -498,6 +498,14 @@ function toggleNotifBlock(select){
   if(wrap) wrap.style.display = select.value==='si' ? '' : 'none';
 }
 
+function parseFecha(s){
+  if(!s) return new Date('invalid');
+  s = String(s).trim();
+  var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) return new Date(m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0')+'T00:00:00');
+  return new Date(s+'T00:00:00');
+}
+
 function mesesTranscurridos(fechaObj){
   var ahora=new Date();
   var meses=(ahora.getFullYear()-fechaObj.getFullYear())*12+(ahora.getMonth()-fechaObj.getMonth());
@@ -543,7 +551,7 @@ function calcularYMostrarResultado(){
 }
 
 function calcularCausal(fecha, valor, ciudad, notif, foto){
-  var fechaObj = new Date(fecha+'T00:00:00');
+  var fechaObj = parseFecha(fecha);
   var meses = mesesTranscurridos(fechaObj);
   var tiempoTexto = formatoTiempo(meses);
   var faltanTexto = formatoTiempo(Math.max(0,36-meses));
@@ -604,7 +612,7 @@ function mostrarResultado(){
   setStepBar(2);
   var html = _multasReportadas.map(function(m,i){
     var b = badgeInfo(m.estado);
-    var fechaFmt = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+    var fechaFmt = parseFecha(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
     var valorFmt = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
     var chk = m.estado==='aplica' ? '<button type="button" class="mres-check '+(m.seleccionada?'is-on':'')+'" onclick="toggleMulta('+i+')"><i class="fas '+(m.seleccionada?'fa-circle-check':'fa-hand-pointer')+'"></i> '+(m.seleccionada?'Incluida en tu documento':'Tocar para incluir')+'</button>' : '';
     return '<div class="mres-card mres-'+m.estado+'">'+
@@ -653,7 +661,7 @@ function construirTextoPeticion(p, multasGrupo){
 
   // ── I. HECHOS ──────────────────────────────────────────────────────
   var hechosMultas = aplican.map(function(m,i){
-    var f = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+    var f = parseFecha(m.fecha).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
     var valorTxt = m.valor ? ' por valor de $'+Number(m.valor).toLocaleString('es-CO') : '';
     var tipoStr = m.foto==='si' ? 'Fotomulta (comparendo por medio técnico)' : 'Comparendo impuesto por agente de tránsito';
     return (i+1)+'. '+tipoStr+' de fecha '+f+valorTxt+(m.ciudad?', registrado ante la Secretaría de Tránsito de '+m.ciudad:'')+'. '+m.causal;
@@ -810,8 +818,8 @@ function construirTextoPeticion(p, multasGrupo){
 // por eso el flujo de tutela salta directo aquí, sin pasar por "Multas".
 function construirTextoTutela(p){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
-  var fechaRad = p.fechaRadicacion ? new Date(p.fechaRadicacion+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha registrada en el radicado';
-  var fechaLim = p.fechaLimite ? new Date(p.fechaLimite+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha límite legal';
+  var fechaRad = p.fechaRadicacion ? parseFecha(p.fechaRadicacion).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha registrada en el radicado';
+  var fechaLim = p.fechaLimite ? parseFecha(p.fechaLimite).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : 'la fecha límite legal';
   var huboRespuesta = p.respuestaSecretaria && !/sin respuesta/i.test(p.respuestaSecretaria);
 
   return p.ciudad+', '+hoy+'\n\nSeñor(a)\nJUEZ DE TUTELA (REPARTO)\n'+p.ciudad+'\nE.S.D.\n\n'+
