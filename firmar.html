@@ -759,7 +759,7 @@ function construirTextoPeticion(p, multasGrupo){
     'El artículo 83 del CPACA establece que en las actuaciones administrativas se presume la buena fe del administrado. Esta presunción implica que la entidad no puede negar el trámite de la presente petición por simple formalismo, y debe proceder a verificar de oficio la existencia de los vicios denunciados.'
   );
 
-  var fundamentosTxt = fj.join('\n\n────────────────────────────────────────\n\n');
+  var fundamentosTxt = fj.join('\n\n------------------------------------------\n\n');
 
   // ── III. PRETENSIONES ──────────────────────────────────────────────
   var pretensiones = [];
@@ -798,25 +798,25 @@ function construirTextoPeticion(p, multasGrupo){
     'Correo electrónico: '+p.email+'\n\n'+
     'Respetados señores:\n\n'+
     'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con cédula de ciudadanía No. '+p.cedula+', mayor de edad, titular del vehículo de placa '+(p.placa||'identificada en los hechos')+', con dirección de notificaciones en el correo electrónico '+p.email+' y/o WhatsApp '+p.whatsapp+', en ejercicio del derecho fundamental consagrado en el artículo 23 de la Constitución Política de Colombia y en los términos de la Ley 1755 de 2015 que modificó el CPACA, me permito interponer respetuosamente ante su despacho el siguiente:\n\n'+
-    '══════════════════════════════════════════\n'+
+    '==========================================\n'+
     'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n'+
-    '══════════════════════════════════════════\n\n'+
+    '==========================================\n\n'+
     'I. HECHOS\n\n'+hechosMultas+'\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO\n\n'+fundamentosTxt+'\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'III. PRETENSIONES\n\n'+pretensionesTxt+'\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'IV. PRUEBAS QUE SE HACEN VALER\n\n'+pruebasTxt+'\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'V. NOTIFICACIONES\n\n'+
     'Para efectos del presente trámite, solicito que todas las comunicaciones, respuestas y actos administrativos que recaigan sobre esta petición sean remitidos a:\n'+
     '  - Correo electrónico: '+p.email+'\n'+
     '  - WhatsApp: '+p.whatsapp+'\n\n'+
     'Esta dirección electrónica se señala de manera expresa como canal de notificación con plena validez jurídica, conforme a los artículos 56 y 67 del CPACA y al artículo 5 de la Ley 527 de 1999.\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'VI. ADVERTENCIA LEGAL\n\n'+advertencia+'\n\n'+
-    '────────────────────────────────────────\n\n'+
+    '------------------------------------------\n\n'+
     'JURAMENTO: Bajo la gravedad del juramento manifiesto que los hechos aquí expuestos son verídicos y que no he presentado una petición idéntica ante esta misma entidad dentro de los últimos seis (6) meses, salvo que la anterior no haya sido resuelta de fondo.\n\n'+
     'Cordialmente,\n\n'+
     '________________________________\n'+
@@ -960,9 +960,15 @@ function dibujarEncabezadoPDF(doc){
 function dibujarPiePDF(doc){
   // intencionalmente vacío
 }
+function limpiarParaPDF(s){
+  // jsPDF Helvetica solo soporta Latin-1 (WinAnsi). Reemplazar caracteres fuera de ese rango.
+  return (s||'').replace(/[─-╿]/g,'-') // box-drawing → guión
+               .replace(/[═-╬]/g,'=')  // double box → igual
+               .replace(/[^\x00-\xFF]/g,'?');     // cualquier otro no-Latin1 → ?
+}
 function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
   dibujarEncabezadoPDF(doc);
-  var lines = doc.splitTextToSize(texto,180);
+  var lines = doc.splitTextToSize(limpiarParaPDF(texto),180);
   var y=24;
   lines.forEach(function(l){
     if(y>280){ dibujarPiePDF(doc); doc.addPage(); dibujarEncabezadoPDF(doc); y=24; }
