@@ -1713,29 +1713,36 @@ function _aplicarOverrides(rows){
 function _deduplicarRows(rows){
   var seen = {};
   var resultado = [];
+  // Campos de identidad — el más reciente (o no-vacío) siempre gana
+  var CAMPOS_IDENTIDAD = ['Cédula','Email','WhatsApp','Celular','Nombres','Apellidos',
+    'Ciudad','Placa','Plan','Estado de Pago','Pago OK','Multas Reportadas',
+    'Autorizar','Etapa Manual','Comprobante Nequi'];
   rows.forEach(function(r){
     var wa    = (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
     var ced   = (r['Cédula']||'').toString().trim();
     var email = (r['Email']||'').toString().trim().toLowerCase();
     var claves = [wa, ced, email].filter(Boolean);
-    // Buscar si ya hay una fila con alguna de estas claves
     var idxExistente = -1;
     for(var i=0; i<claves.length; i++){
       if(seen[claves[i]] !== undefined){ idxExistente = seen[claves[i]]; break; }
     }
-    var completitud = function(row){
-      return Object.values(row).filter(function(v){ return v!==''&&v!==null&&v!==undefined&&v!=='FALSE'; }).length;
-    };
     if(idxExistente === -1){
       var idx = resultado.length;
-      resultado.push(r);
+      resultado.push(Object.assign({}, r));
       claves.forEach(function(c){ seen[c] = idx; });
     } else {
-      // Conservar la más completa de las dos
-      if(completitud(r) > completitud(resultado[idxExistente])){
-        resultado[idxExistente] = r;
-        claves.forEach(function(c){ seen[c] = idxExistente; });
-      }
+      // Fusionar: para cada campo, el valor no-vacío prevalece (nueva fila sobreescribe si tiene datos)
+      var base = resultado[idxExistente];
+      Object.keys(r).forEach(function(k){
+        var v = r[k];
+        var isEmpty = v===''||v===null||v===undefined||v==='FALSE';
+        if(!isEmpty) base[k] = v;
+      });
+      // Actualizar claves con los nuevos datos fusionados
+      var waNew  = (base['WhatsApp']||base['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+      var cedNew = (base['Cédula']||'').toString().trim();
+      var emlNew = (base['Email']||'').toString().trim().toLowerCase();
+      [waNew, cedNew, emlNew].filter(Boolean).forEach(function(c){ seen[c] = idxExistente; });
     }
   });
   return resultado;
