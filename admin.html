@@ -3676,6 +3676,16 @@ function guardarMultasAdmin(){
   });
   if(!lista.length){ showToast(faltaFecha?'⚠️ Ingresa al menos la fecha de cada multa':'⚠️ Agrega al menos una multa','error'); return; }
 
+  // Separar capturas (base64) del JSON que va al Sheet — Sheets tiene límite
+  // de 50.000 caracteres por celda y una imagen en base64 lo supera fácilmente.
+  // Las capturas se suben a Drive por separado; en el Sheet solo van los datos de texto.
+  var capturas = lista.map(function(m){ return m.capturaB64 || ''; });
+  var listaSinCaptura = lista.map(function(m){
+    var c = Object.assign({}, m);
+    delete c.capturaB64;
+    return c;
+  });
+
   var btn = document.getElementById('btn-guardar-mm');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
   fetch(SCRIPT_URL, {
@@ -3685,7 +3695,7 @@ function guardarMultasAdmin(){
       cedula:   _mmCaso['Cédula']||'',
       email:    _mmCaso['Email']||'',
       whatsapp: (_mmCaso['WhatsApp']||_mmCaso['Celular']||'').toString().replace(/\D/g,'').slice(-10),
-      multasReportadas: JSON.stringify(lista)
+      multasReportadas: JSON.stringify(listaSinCaptura)
     })
   })
   .then(function(r){ return r.json(); })
@@ -3724,6 +3734,16 @@ function guardarMultasAdmin(){
       }
       if(footerBtns) footerBtns.style.display = 'none';
       showToast('✅ Multas guardadas — envía el link de firma por WhatsApp','success');
+      // Subir capturas de pantalla a Drive (si las hay), sin bloquear el flujo
+      capturas.forEach(function(b64, idx){
+        if(!b64) return;
+        var nombreArchivo = 'Prueba_Multa'+(idx+1)+'_'+(_mmCaso['Cédula']||_mmCaso['WhatsApp']||'caso')+'_'+Date.now()+'.png';
+        fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({
+          _accion:'radicar_documento', archivoBase64: b64, archivoNombre: nombreArchivo,
+          cedula:_mmCaso['Cédula']||'', email:_mmCaso['Email']||'',
+          whatsapp:(_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'').slice(-10), esPruebaMulta: true
+        })}).catch(function(){});
+      });
       setTimeout(loadData, 1200);
     } else if((data.error||'').indexOf('encontró') !== -1) {
       // Fila no existe en Sheet → crearla primero con guardar_lead, luego reintentar
