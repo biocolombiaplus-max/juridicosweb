@@ -2104,6 +2104,25 @@ function loadData(evtBtn){
         }
       });
       _aplicarOverrides(allRows);
+      // Aplicar parches guardados en localStorage (datos editados desde el admin
+      // que el Sheet aún no tiene por deploy pendiente u otro motivo transitorio)
+      try{
+        allRows.forEach(function(r){
+          var wa10 = ((r['WhatsApp']||r['Celular']||'').replace(/\D/g,'').slice(-10));
+          var cc = (r['Cédula']||'').toString().trim();
+          [wa10, cc].forEach(function(k){
+            if(!k) return;
+            var raw = localStorage.getItem('jw_datos_cliente_'+k);
+            if(!raw) return;
+            try{
+              var patch = JSON.parse(raw);
+              // Solo aplicar si el Sheet sigue vacío en campos clave
+              if(!r['Cédula'] && patch['Cédula']) Object.assign(r, patch);
+              else if(!r['Email'] && patch['Email']) Object.assign(r, patch);
+            }catch(e2){}
+          });
+        });
+      }catch(e){}
       renderAll();
       var hora = new Date().toLocaleTimeString('es-CO');
       if(sync) sync.textContent = 'Actualizado: ' + hora;
@@ -4232,6 +4251,8 @@ function guardarDatosCliente(){
 
   var btn = document.getElementById('btn-guardar-dc');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
+  var _waEnvio = (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||whatsapp||'').toString().replace(/\D/g,'').slice(-10);
+  console.log('[guardarDatos] enviando a GAS — cedulaActual:', _dcCasoOriginal['Cédula']||cedula, '| email:', _dcCasoOriginal['Email']||emailVal, '| whatsappActual:', _waEnvio, '| cedula nueva:', cedula);
   fetch(SCRIPT_URL, {
     method:'POST',
     body: JSON.stringify({
@@ -4257,6 +4278,7 @@ function guardarDatosCliente(){
   .then(function(r){ return r.json(); })
   .then(function(data){
     btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+    console.log('[guardarDatos] respuesta GAS:', JSON.stringify(data));
     if(data.ok){
       showToast(data.reactivado
         ? '✅ Datos corregidos — como el caso ya estaba firmado, se reinició el estado: envía de nuevo el enlace de firma para el documento corregido'
@@ -4275,6 +4297,26 @@ function guardarDatosCliente(){
       };
       if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _dcNuevos);
       if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _dcNuevos);
+      // Actualizar también la fila original en allRows para que al reabrir
+      // el modal (antes de que loadData recargue) se vean los datos nuevos
+      if(_dcCasoOriginal) Object.assign(_dcCasoOriginal, _dcNuevos);
+      var _waKey = (_dcNuevos['WhatsApp']||'').replace(/\D/g,'').slice(-10);
+      var _ccKey = _dcNuevos['Cédula']||'';
+      if(_waKey || _ccKey){
+        for(var _ri=0; _ri<allRows.length; _ri++){
+          var _rr = allRows[_ri];
+          var _rwa = ((_rr['WhatsApp']||_rr['Celular']||'').replace(/\D/g,'').slice(-10));
+          var _rcc = (_rr['Cédula']||'').toString().trim();
+          if((_waKey && _rwa===_waKey) || (_ccKey && _rcc===_ccKey)){
+            Object.assign(allRows[_ri], _dcNuevos); break;
+          }
+        }
+      }
+      // Guardar en localStorage como respaldo local por si el Sheet no persiste
+      try{
+        var _lsKey = 'jw_datos_cliente_' + (_waKey || _ccKey);
+        localStorage.setItem(_lsKey, JSON.stringify(_dcNuevos));
+      }catch(e){}
       // Si el modal DP está abierto, volver a renderizarlo con los datos frescos
       var dpModal = document.getElementById('modal-gen-dp');
       if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
