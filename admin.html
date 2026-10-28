@@ -2306,7 +2306,7 @@ function _crmEtapa(r){
   var email = r['Email']||'';
   var nombre = ((r['Nombres']||'')+(r['Apellidos']||'')).trim();
   var pago = r['Pago OK']==='TRUE'||r['Pago OK']===true;
-  var firmado = paso.indexOf('firma')!==-1||paso.indexOf('signed')!==-1;
+  var firmado = r['Firmado']==='TRUE'||r['Firmado']===true||paso.indexOf('firma')!==-1||paso.indexOf('signed')!==-1;
   var tieneDatos = (nombre&&nombre.length>1)&&(wa||email);
 
   if(pago) return 'pagaron';
