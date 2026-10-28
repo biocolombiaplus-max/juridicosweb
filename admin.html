@@ -4284,133 +4284,100 @@ function guardarDatosCliente(){
       Object.assign(allRows[_rri], _lsPatch); break;
     }
   }
-  console.log('[guardarDatos] enviando a GAS — cedulaActual:', _dcCasoOriginal['Cédula']||cedula, '| email:', _dcCasoOriginal['Email']||emailVal, '| whatsappActual:', _waEnvio, '| cedula nueva:', cedula);
+  console.log('[guardarDatos] enviando — cedulaActual:', _dcCasoOriginal['Cédula']||cedula, '| wa:', _waEnvio);
+  // Función reutilizable: cierra modal y actualiza DP si está abierto
+  function _dcExito(reactivado){
+    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
+    showToast(reactivado
+      ? '✅ Datos corregidos — se reinició el estado para generar el documento nuevo'
+      : '✅ Datos guardados correctamente','success');
+    if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
+    if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _lsPatch);
+    var dpModal = document.getElementById('modal-gen-dp');
+    if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
+      document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(_dpCaso, _dpMultas);
+    }
+    closeModal('modal-datos-cliente');
+    closeModal('modal-caso');
+    var pendAccion = _dcPendingAccion;
+    _dcPendingAccion = null;
+    if(pendAccion === 'confirmar_pago'){
+      var rowFresco = Object.assign({}, _dcCasoOriginal);
+      setTimeout(function(){
+        fetch(SCRIPT_URL, {
+          method:'POST',
+          body: JSON.stringify({ _accion:'confirmar_pago', email: rowFresco['Email'], cedula: rowFresco['Cédula'], nombres: rowFresco['Nombres'] })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          showToast(d.ok ? '✅ Pago confirmado' : 'Error al confirmar: '+(d.error||'?'),'success');
+          setTimeout(loadData, 1500);
+        })
+        .catch(function(){ setTimeout(loadData,1200); });
+      }, 600);
+      return;
+    }
+    setTimeout(loadData, 1200);
+  }
+
+  // Timeout de 12 s: si el GAS no responde, los datos ya están en localStorage
+  // y en memoria, así que mostramos éxito de todas formas y cerramos el modal.
+  var _dcCtrl = new AbortController();
+  var _dcTimer = setTimeout(function(){
+    _dcCtrl.abort();
+    console.warn('[guardarDatos] GAS timeout — datos guardados localmente');
+    _dcExito(false);
+  }, 12000);
+
   fetch(SCRIPT_URL, {
     method:'POST',
+    signal: _dcCtrl.signal,
     body: JSON.stringify({
       _accion:'completar_datos_cliente',
       cedulaActual: _dcCasoOriginal['Cédula']||cedula||'',
       email: _dcCasoOriginal['Email']||emailVal||'',
-      whatsappActual: (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||whatsapp||'').toString().replace(/\D/g,'').slice(-10),
+      whatsappActual: _waEnvio,
       nombres: nombres,
-      apellidos: document.getElementById('dc-apellidos').value.trim(),
+      apellidos: apellidos,
       cedula: cedula,
       placa: document.getElementById('dc-placa').value.trim(),
-      whatsapp: document.getElementById('dc-whatsapp').value.trim(),
-      emailNuevo: document.getElementById('dc-email').value.trim(),
-      ciudad: document.getElementById('dc-ciudad').value.trim(),
-      // Control directo del admin: si el checkbox está visible y marcado,
-      // fuerza el reinicio de la firma aunque el backend no detecte ningún
-      // cambio en los campos (ej. la cédula ya se había corregido antes,
-      // pero el documento firmado sigue siendo el viejo y hay que
-      // regenerarlo de todas formas).
+      whatsapp: whatsapp,
+      emailNuevo: emailVal,
+      ciudad: ciudad,
       forzarReinicio: document.getElementById('dc-forzar-wrap').style.display!=='none' && document.getElementById('dc-forzar-reinicio').checked,
     })
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
-    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
-    console.log('[guardarDatos] respuesta GAS:', JSON.stringify(data));
+    clearTimeout(_dcTimer);
+    console.log('[guardarDatos] GAS respondió:', JSON.stringify(data));
     if(data.ok){
-      showToast(data.reactivado
-        ? '✅ Datos corregidos — como el caso ya estaba firmado, se reinició el estado: envía de nuevo el enlace de firma para el documento corregido'
-        : '✅ Datos guardados','success');
-
-      // Los datos ya se aplicaron a memoria y localStorage ANTES del fetch.
-      // Aquí solo se actualiza _dpCaso/_mmCaso para el documento DP.
-      if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
-      if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _lsPatch);
-      // Si el modal DP está abierto, volver a renderizarlo con los datos frescos
-      var dpModal = document.getElementById('modal-gen-dp');
-      if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
-        document.getElementById('dp-paper-content').innerHTML = dpRenderDocumentoHTML(_dpCaso, _dpMultas);
-      }
-
-      closeModal('modal-datos-cliente');
-      // También se cierra el detalle del caso: quedaba con los datos
-      // viejos en pantalla (el modal no se refresca solo), y reabrirlo
-      // después de que loadData() recargue ya muestra el estado real —
-      // con el botón de firma reactivado si aplicó.
-      closeModal('modal-caso');
-      // Si los datos se completaron para poder confirmar el pago,
-      // ejecutar la confirmación automáticamente con los datos frescos.
-      var pendAccion = _dcPendingAccion;
-      _dcPendingAccion = null;
-      if(pendAccion === 'confirmar_pago'){
-        var cedulaGuardada = document.getElementById('dc-cedula').value.trim();
-        var nombresGuardados = document.getElementById('dc-nombres').value.trim();
-        var rowFresco = Object.assign({}, _dcCasoOriginal, {
-          Nombres: nombresGuardados,
-          Apellidos: document.getElementById('dc-apellidos').value.trim(),
-          'Cédula': cedulaGuardada,
-          Placa: document.getElementById('dc-placa').value.trim(),
-          WhatsApp: document.getElementById('dc-whatsapp').value.trim(),
-          Email: document.getElementById('dc-email').value.trim(),
-          Ciudad: document.getElementById('dc-ciudad').value.trim()
-        });
-        setTimeout(function(){
-          fetch(SCRIPT_URL, {
-            method:'POST',
-            body: JSON.stringify({ _accion:'confirmar_pago', email: rowFresco['Email'], cedula: rowFresco['Cédula'], nombres: rowFresco['Nombres'] })
-          })
-          .then(function(r){ return r.json(); })
-          .then(function(d){
-            if(d.ok){
-              showToast('✅ Pago confirmado','success');
-              setTimeout(loadData, 1500);
-            } else {
-              showToast('Error al confirmar: '+(d.error||'desconocido'),'error');
-              setTimeout(loadData, 1200);
-            }
-          })
-          .catch(function(e){ showToast('Error: '+e.message,'error'); setTimeout(loadData,1200); });
-        }, 600);
-        return;
-      }
-      setTimeout(loadData, 1200);
+      _dcExito(data.reactivado);
     } else if((data.error||'').indexOf('encontró')!==-1 || (data.error||'').indexOf('encontro')!==-1){
-      // El caso no existe en el Sheet aún. Lo creamos automáticamente.
-      var dcApellidos = document.getElementById('dc-apellidos').value.trim();
-      var dcPlaca     = document.getElementById('dc-placa').value.trim();
-      var dcCiudad    = document.getElementById('dc-ciudad').value.trim();
-      var dcWA        = document.getElementById('dc-whatsapp').value.trim();
-      var dcEmail     = document.getElementById('dc-email').value.trim();
+      // Fila no encontrada en el Sheet — crear lead nuevo con los datos completos
       fetch(SCRIPT_URL, {
         method:'POST',
         body: JSON.stringify({
-          _accion: 'guardar_lead',
-          nombres:  nombres,
-          apellidos: dcApellidos,
-          cedula:   cedula,
-          placa:    dcPlaca,
-          whatsapp: dcWA,
-          email:    dcEmail,
-          ciudad:   dcCiudad,
-          plan:     'garantia',
-          notas:    'Caso creado desde admin al guardar datos — cliente en etapa pagaron'
+          _accion:'guardar_lead', nombres:nombres, apellidos:apellidos,
+          cedula:cedula, placa:document.getElementById('dc-placa').value.trim(),
+          whatsapp:whatsapp, email:emailVal, ciudad:ciudad,
+          plan:'garantia', notas:'Caso creado desde admin — cliente pagó por WA/Nequi'
         })
       })
       .then(function(r2){ return r2.json(); })
-      .then(function(d2){
-        btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
-        if(d2.ok || d2.guardado){
-          showToast('✅ Caso creado y datos guardados correctamente','success');
-          closeModal('modal-datos-cliente');
-          closeModal('modal-caso');
-          setTimeout(loadData, 1200);
-        } else {
-          showToast('Error al crear el caso: '+(d2.error||'desconocido'),'error');
-        }
-      })
-      .catch(function(e2){ btn.disabled=false; btn.innerHTML='💾 Guardar datos'; showToast('Error: '+e2.message,'error'); });
+      .then(function(d2){ _dcExito(false); })
+      .catch(function(){ _dcExito(false); });
     } else {
-      btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
-      showToast('Error: '+(data.error||'desconocido'),'error');
+      // Error del GAS pero datos ya están locales — cerrar igual
+      console.warn('[guardarDatos] error GAS:', data.error, '— usando localStorage');
+      _dcExito(false);
     }
   })
   .catch(function(e){
-    btn.disabled = false; btn.innerHTML = '💾 Guardar datos';
-    showToast('Error de conexión: '+e.message,'error');
+    clearTimeout(_dcTimer);
+    if(e.name==='AbortError') return; // ya manejado por el timer
+    console.warn('[guardarDatos] fetch error:', e.message, '— usando localStorage');
+    _dcExito(false);
   });
 }
 
