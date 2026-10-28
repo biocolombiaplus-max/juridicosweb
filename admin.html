@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028g';
+  var VER = '20261028h';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -6335,7 +6335,11 @@ function dpAnalizarMulta(m){
   var foto = m.foto||'nose'; // 'si'|'no'|'nose'
   var notif = m.notif||'nose'; // 'si'|'no'|'nose'
   var ciudad = m.ciudad||m.secretaria||'';
+  var dias = parseInt(m.diasNotif) || 0;
   var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && dpCiudadINM(ciudad);
+  // Notificación tardía: campo manual 'no', o días reales superan los 13 hábiles
+  var notifTardia = foto==='si' && (notif==='no' || (dias > 13 && notif!=='si'));
+  var diasTexto = dias > 0 ? ' ('+dias+' días hábiles registrados, excediendo el límite de 13 exigido por ley)' : '';
   var estado, tipoCausal, causal;
 
   if(meses>=36){
@@ -6344,9 +6348,9 @@ function dpAnalizarMulta(m){
   } else if(posibleINM){
     estado='aplica'; tipoCausal='error_fotomulta_inm';
     causal='El organismo de tránsito figura entre los investigados por la Superintendencia de Transporte (2026) por operar equipos de fotodetección sin el "concepto de desempeño" del Instituto Nacional de Metrología (INM), exigido por el artículo 2 de la Ley 2251 de 2022.';
-  } else if(foto==='si' && notif==='no'){
+  } else if(notifTardia){
     estado='aplica'; tipoCausal='notificacion_tardia';
-    causal='Notificación extemporánea: la Ley 1843 de 2017 (Art. 8) otorga máximo 13 días hábiles desde la infracción para validar y notificar el comparendo a la dirección registrada en el RUNT (10 hábiles para validar + 3 para notificar). El acto administrativo no notificado dentro de este término no produce efectos jurídicos — caducidad de la facultad sancionatoria según los artículos 66 a 69 del CPACA (Ley 1437 de 2011).';
+    causal='Notificación extemporánea: la Ley 1843 de 2017 (Art. 8) otorga máximo 13 días hábiles desde la infracción para validar y notificar el comparendo a la dirección registrada en el RUNT'+diasTexto+'. El acto administrativo no notificado dentro de este término no produce efectos jurídicos — caducidad de la facultad sancionatoria según los artículos 66 a 69 del CPACA (Ley 1437 de 2011).';
   } else if(foto==='si' && notif==='nose'){
     estado='revisar'; tipoCausal='revisar_notificacion';
     causal='Por confirmar: si la notificación al RUNT fue posterior a los 13 días hábiles (Ley 1843/2017), procede solicitar caducidad de la facultad sancionatoria y nulidad del comparendo.';
@@ -6356,8 +6360,8 @@ function dpAnalizarMulta(m){
   }
 
   // Si ya aplica por otra causal pero además hay notificación tardía, se suma
-  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && foto==='si' && notif==='no'){
-    causal += ' Adicionalmente, tampoco se surtió la notificación dentro de los 13 días hábiles exigidos por la Ley 1843 de 2017 — constituye un argumento adicional independiente.';
+  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && notifTardia){
+    causal += ' Adicionalmente, tampoco se surtió la notificación dentro de los 13 días hábiles exigidos por la Ley 1843 de 2017'+diasTexto+' — constituye un argumento adicional independiente.';
   }
 
   return Object.assign({}, m, { meses:meses, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal });

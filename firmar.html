@@ -471,7 +471,7 @@ function irAMultas(){
 
   if(previas.length){
     _multasReportadas = previas.map(function(m){
-      return calcularCausal(m.fecha, m.valor, m.ciudad, m.notif, m.foto);
+      return calcularCausal(m.fecha, m.valor, m.ciudad, m.notif, m.foto, m.diasNotif);
     });
     // Si el pago ya está confirmado, saltar directo al documento — sin pasos intermedios
     if(_pagoYaConfirmado){
@@ -557,36 +557,26 @@ function calcularYMostrarResultado(){
     // Vienen de 'Multas Reportadas' ya calculadas en el sitio — se recalculan
     // con la fecha de hoy por si ya pasó más tiempo desde que se reportaron.
     _multasReportadas = _multasReportadas.map(function(m){
-      return calcularCausal(m.fecha, m.valor, m.ciudad, m.notif, m.foto);
+      return calcularCausal(m.fecha, m.valor, m.ciudad, m.notif, m.foto, m.diasNotif);
     });
   }
   mostrarResultado();
 }
 
-function calcularCausal(fecha, valor, ciudad, notif, foto){
+function calcularCausal(fecha, valor, ciudad, notif, foto, diasNotif){
   var fechaObj = parseFecha(fecha);
   var meses = mesesTranscurridos(fechaObj);
   var tiempoTexto = formatoTiempo(meses);
   var faltanTexto = formatoTiempo(Math.max(0,36-meses));
   var anio = fechaObj.getFullYear();
   var estado, causal, tipoCausal;
+  var dias = parseInt(diasNotif) || 0;
 
-  // El límite 2018-2024 es específico de la investigación Supertransporte
-  // por certificación INM — NO aplica al causal de notificación tardía,
-  // que es una regla general (Ley 1843 de 2017) vigente para cualquier
-  // fotomulta sin importar el año.
   var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && ciudadEnListaINM(ciudad);
-  // La pregunta de notificación al RUNT solo decide algo cuando NINGUNA otra
-  // causal ya aplica (prescripción o INM) — es la última carta, no la
-  // primera — y SOLO tiene sustento legal para fotomultas (Ley 1843/2017,
-  // procedimiento de infracciones detectadas por medios técnicos). Un
-  // comparendo impuesto por un agente de tránsito se notifica de
-  // inmediato, en el momento y en persona — no pasa por el trámite de
-  // notificación postal/RUNT, así que este causal nunca aplica si el
-  // cliente indicó que no fue una cámara. No hay límite de año: aplica
-  // igual a una fotomulta reciente que a una de hace tiempo (mientras no
-  // esté ya prescrita, que se evalúa primero).
   var aplicaNotifRunt = foto==='si';
+  // Notificación tardía: campo manual dice 'no', O los días reales superan 13 días hábiles
+  var notifTardia = aplicaNotifRunt && (notif==='no' || (dias > 13 && notif!=='si'));
+  var diasTexto = dias > 0 ? ' ('+dias+' días hábiles según las fechas registradas, superando el límite legal de 13)' : '';
 
   if(meses>=36){
     estado='aplica'; tipoCausal='prescripcion';
@@ -594,25 +584,23 @@ function calcularCausal(fecha, valor, ciudad, notif, foto){
   } else if(posibleINM){
     estado='aplica'; tipoCausal='error_fotomulta_inm';
     causal='Tu organismo de tránsito aparece entre los investigados por la Superintendencia de Transporte (2026) por operar cámaras sin el "concepto de desempeño" del INM exigido por la Ley 2251 de 2022.';
-  } else if(aplicaNotifRunt && notif==='no'){
+  } else if(notifTardia){
     estado='aplica'; tipoCausal='notificacion_tardia';
-    causal='Notificación extemporánea: la Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificarte (10 para validar el comparendo y 3 más para enviarte la notificación a tu dirección del RUNT). Reportaste que no te llegó dentro de ese plazo — impuesta hace '+tiempoTexto+' — lo que da lugar a pedir la caducidad de la facultad sancionatoria y la nulidad del comparendo.';
+    causal='Notificación extemporánea: la Ley 1843 de 2017 le da a la secretaría máximo 13 días hábiles desde la infracción para notificarte por medio de la dirección registrada en el RUNT'+diasTexto+'. Esta multa fue impuesta hace '+tiempoTexto+' y la notificación excedió ese plazo legal, lo que da lugar a pedir la caducidad de la facultad sancionatoria y la nulidad del comparendo.';
   } else if(aplicaNotifRunt && notif==='nose'){
     estado='revisar'; tipoCausal='revisar_notificacion';
     causal='Por confirmar: si no te llegó la notificación dentro de los 13 días hábiles siguientes a la infracción (Ley 1843 de 2017) a tu dirección del RUNT, también sería causal para pedir que la eliminen. Revisa en el SIMIT o en tu correo/carta la fecha exacta en que te notificaron.';
   } else {
     estado='no_aplica'; tipoCausal='no_aplica';
-    causal='Aún no prescribe: faltan '+faltanTexto+' (fue impuesta hace '+tiempoTexto+')'+(notif==='si'?' y reportaste que sí te notificaron a tiempo.':'.');
+    causal='Aún no prescribe: faltan '+faltanTexto+' (fue impuesta hace '+tiempoTexto+')'+(notif==='si'?' y la notificación llegó dentro del plazo legal.':'.');
   }
 
-  // Si ya aplica por prescripción o por el INM, pero ADEMÁS reportaste
-  // notificación tardía, se suma como refuerzo — nunca resta, solo hace
-  // el documento más sólido.
-  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && aplicaNotifRunt && notif==='no'){
-    causal += ' Adicionalmente, tampoco te notificaron dentro de los 13 días hábiles que exige la Ley 1843 de 2017 a tu dirección del RUNT — otro motivo más para pedir la eliminación.';
+  // Refuerzo: si aplica por otra causal Y además la notificación fue tardía
+  if(estado==='aplica' && tipoCausal!=='notificacion_tardia' && notifTardia){
+    causal += ' Adicionalmente, la notificación tampoco llegó dentro de los 13 días hábiles que exige la Ley 1843 de 2017'+diasTexto+' — argumento adicional para pedir la eliminación.';
   }
 
-  return { fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal, seleccionada:(estado==='aplica') };
+  return { fecha:fecha, valor:valor, ciudad:ciudad, notif:notif, foto:foto, diasNotif:dias, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal, seleccionada:(estado==='aplica') };
 }
 
 function badgeInfo(estado){
