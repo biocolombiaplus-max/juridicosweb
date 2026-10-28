@@ -119,6 +119,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray100);color
 .crm-col-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;}
 .crm-col-count{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.07);}
 .crm-col-cards{overflow-y:auto;padding:10px 10px;display:flex;flex-direction:column;gap:8px;max-height:480px;flex:1;}
+.crm-drop-zone.crm-drop-over{background:rgba(99,102,241,.12);border:2px dashed #6366f1;border-radius:10px;transition:background .15s;}
+.crm-card[draggable]{transition:opacity .15s,box-shadow .15s;}
+.crm-card[draggable]:hover{box-shadow:0 4px 16px rgba(0,0,0,.3);}
 .crm-card{background:#1e293b;border-radius:10px;padding:11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .15s,transform .1s;position:relative;}
 .crm-card:hover{background:#263548;transform:translateY(-1px);}
 .crm-card-name{font-size:0.83rem;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2300,16 +2303,22 @@ function _crmTiempo(fechaStr){
 }
 
 function _crmEtapa(r){
-  // Decide la etapa más avanzada que ha alcanzado el lead
+  // Etapa manual (drag & drop) tiene prioridad absoluta
+  var manual = (r['Etapa Manual']||'').toString().trim().toLowerCase();
+  var etapasValidas = ['consultaron','dejaron_datos','firmaron','pagaron'];
+  if(manual && etapasValidas.indexOf(manual)!==-1) return manual;
+
+  // Detección automática
   var paso = (r['Ultimo Paso']||r['Notas']||'').toLowerCase();
   var wa = r['WhatsApp']||r['Celular']||r['Teléfono']||'';
   var email = r['Email']||'';
   var nombre = ((r['Nombres']||'')+(r['Apellidos']||'')).trim();
   var pago = r['Pago OK']==='TRUE'||r['Pago OK']===true;
   var firmado = r['Firmado']==='TRUE'||r['Firmado']===true||paso.indexOf('firma')!==-1||paso.indexOf('signed')!==-1;
+  var comprobanteNequi = !!(r['Comprobante Nequi']||'').toString().trim();
   var tieneDatos = (nombre&&nombre.length>1)&&(wa||email);
 
-  if(pago) return 'pagaron';
+  if(pago || comprobanteNequi) return 'pagaron';
   if(firmado) return 'firmaron';
   if(tieneDatos) return 'dejaron_datos';
   return 'consultaron';
@@ -2388,9 +2397,13 @@ function renderPipelineCRM(){
       }
 
       var rowEnc = JSON.stringify(JSON.stringify(r)).replace(/"/g,'&quot;');
+      var cedulaEnc = escHtml((r['Cédula']||'').toString());
+      var emailEnc  = escHtml((r['Email']||'').toString());
       var urgBadge = (etapa.id==='dejaron_datos' && horas24) ? '<div style="font-size:0.58rem;background:#fef08a;color:#713f12;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">⏰ +24h sin pagar</div>' : '';
-      return '<div class="crm-card" style="border-left-color:'+etapa.color+(etapa.id==='dejaron_datos'&&horas24?';box-shadow:0 0 0 1px #fbbf24':'')+'" onclick="abrirCaso('+rowEnc+')">'+
-        urgBadge+
+      var comprobanteTag = (r['Comprobante Nequi']||'') ? '<div style="font-size:0.58rem;background:#bbf7d0;color:#14532d;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">💳 Comprobante enviado</div>' : '';
+      var manualTag = (r['Etapa Manual']||'') ? '<div style="font-size:0.55rem;background:#e0e7ff;color:#3730a3;border-radius:4px;padding:1px 5px;font-weight:600;margin-bottom:3px;">✋ Movido manualmente</div>' : '';
+      return '<div class="crm-card" draggable="true" data-cedula="'+cedulaEnc+'" data-email="'+emailEnc+'" data-etapa="'+etapa.id+'" style="cursor:grab;border-left-color:'+etapa.color+(etapa.id==='dejaron_datos'&&horas24?';box-shadow:0 0 0 1px #fbbf24':'')+'" onclick="abrirCaso('+rowEnc+')">'+
+        urgBadge+comprobanteTag+manualTag+
         '<div class="crm-card-name">'+escHtml(nombre)+'</div>'+
         '<div class="crm-card-sub">'+(sub?escHtml(sub):'&nbsp;')+'</div>'+
         '<div class="crm-card-meta" style="flex-wrap:wrap;gap:4px;">'+
@@ -2399,9 +2412,9 @@ function renderPipelineCRM(){
           extraBtn+
         '</div>'+
       '</div>';
-    }).join('') : '<div class="crm-col-empty">Sin leads en esta etapa</div>';
+    }).join('') : '<div class="crm-col-empty" data-etapa-drop="'+etapa.id+'">Sin leads en esta etapa<br><span style="font-size:0.7rem;opacity:.6;">Arrastra aquí</span></div>';
 
-    return '<div class="crm-col">'+
+    return '<div class="crm-col" data-etapa-id="'+etapa.id+'">'+
       '<div class="crm-col-head" style="background:'+etapa.accent+';">'+
         '<div style="display:flex;align-items:center;gap:6px;">'+
           '<span style="font-size:1rem;">'+etapa.icon+'</span>'+
@@ -2415,9 +2428,78 @@ function renderPipelineCRM(){
           '<div style="font-size:0.6rem;color:#475569;">'+pct+'%</div>'+
         '</div>'+
       '</div>'+
-      '<div class="crm-col-cards">'+cardsHtml+'</div>'+
+      '<div class="crm-col-cards crm-drop-zone" data-etapa="'+etapa.id+'" style="min-height:80px;">'+cardsHtml+'</div>'+
     '</div>';
   }).join('');
+
+  // Activar drag & drop
+  _initCrmDragDrop();
+}
+
+function _initCrmDragDrop(){
+  var dragging = null;
+  document.querySelectorAll('.crm-card[draggable]').forEach(function(card){
+    card.addEventListener('dragstart', function(e){
+      dragging = card;
+      card.style.opacity = '0.5';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', function(){
+      card.style.opacity = '';
+      document.querySelectorAll('.crm-drop-zone').forEach(function(z){ z.classList.remove('crm-drop-over'); });
+      dragging = null;
+    });
+  });
+  document.querySelectorAll('.crm-drop-zone').forEach(function(zone){
+    zone.addEventListener('dragover', function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      zone.classList.add('crm-drop-over');
+    });
+    zone.addEventListener('dragleave', function(){ zone.classList.remove('crm-drop-over'); });
+    zone.addEventListener('drop', function(e){
+      e.preventDefault();
+      zone.classList.remove('crm-drop-over');
+      if(!dragging) return;
+      var etapaOrigen = dragging.dataset.etapa;
+      var etapaDestino = zone.dataset.etapa;
+      if(etapaOrigen === etapaDestino) return;
+      var cedula = dragging.dataset.cedula;
+      var email  = dragging.dataset.email;
+      var nombre = dragging.querySelector('.crm-card-name') ? dragging.querySelector('.crm-card-name').textContent : '';
+      var confirmMsg = '¿Mover a "'+etapaDestino.replace(/_/g,' ').toUpperCase()+'"?\n\nEsto también actualizará el estado en la hoja de cálculo.';
+      if(!confirm(confirmMsg)) return;
+      // Actualizar UI inmediatamente
+      dragging.dataset.etapa = etapaDestino;
+      var manualDiv = dragging.querySelector('[style*="e0e7ff"]');
+      if(!manualDiv){
+        var tag = document.createElement('div');
+        tag.style.cssText = 'font-size:0.55rem;background:#e0e7ff;color:#3730a3;border-radius:4px;padding:1px 5px;font-weight:600;margin-bottom:3px;';
+        tag.textContent = '✋ Movido manualmente';
+        dragging.insertBefore(tag, dragging.firstChild);
+      }
+      zone.insertBefore(dragging, zone.firstChild);
+      showToast('Moviendo a '+etapaDestino+'...','info');
+      // Persistir en Sheet
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ _accion:'mover_etapa', cedula: cedula, email: email, etapa: etapaDestino })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.ok){
+          showToast('✅ '+nombre+' movido a "'+etapaDestino.replace(/_/g,' ')+'"','success');
+          // Actualizar allRows local para mantener coherencia
+          if(allRows) allRows.forEach(function(r){
+            if((cedula && r['Cédula']==cedula)||(email && r['Email']==email)) r['Etapa Manual']=etapaDestino;
+          });
+        } else {
+          showToast('Error: '+(d.error||'no se pudo guardar'),'error');
+        }
+      })
+      .catch(function(){ showToast('Error de conexión al mover','error'); });
+    });
+  });
 }
 
 function renderLiveFeed(){

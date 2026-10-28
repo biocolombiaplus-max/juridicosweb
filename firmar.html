@@ -1097,7 +1097,7 @@ function botonesPagoFirmar(plan, monto){
     '<div class="nequi-inline" id="'+idNequi+'">'+
     '<p>Transfiere el monto exacto a este Nequi:</p>'+
     '<div class="nequi-num"><span>'+NEQUI_NUMERO+'</span><button type="button" class="btn-quitar" style="color:var(--navy);" onclick="copiarNequiFirmar()"><i class="fas fa-copy"></i> Copiar</button></div>'+
-    '<a class="btn btn-wa-sm btn-sm" href="'+linkWhatsAppComprobanteNequi(plan,monto)+'" target="_blank"><i class="fab fa-whatsapp"></i> Ya pagué, enviar comprobante</a>'+
+    '<a class="btn btn-wa-sm btn-sm" href="'+linkWhatsAppComprobanteNequi(plan,monto)+'" target="_blank" onclick="registrarComprobanteNequi()"><i class="fab fa-whatsapp"></i> Ya pagué, enviar comprobante</a>'+
     '</div>';
 }
 
@@ -1108,6 +1108,19 @@ function toggleNequiFirmar(id, monto){
 
 function copiarNequiFirmar(){
   navigator.clipboard.writeText(NEQUI_NUMERO);
+}
+
+function registrarComprobanteNequi(){
+  if (!_caso || (!_caso['Cédula'] && !_caso['Email'])) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      _accion: 'notificar_comprobante_nequi',
+      cedula: _caso['Cédula'] || '',
+      email: _caso['Email'] || '',
+      nombres: _caso['Nombres'] || ''
+    })
+  }).catch(function(){});
 }
 
 function linkWhatsAppComprobanteNequi(plan, monto){

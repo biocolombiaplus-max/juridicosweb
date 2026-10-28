@@ -69,6 +69,7 @@ var COLUMNAS_CASOS = [
   'Firmado', 'Enlace PDF Firmado',
   'Tutela Firmada', 'Enlace PDF Tutela', 'Tutela Valor', 'Resultado Tutela', 'Tutela Pagada',
   'Remarketing Envíos', 'Remarketing Última Fecha', 'Remarketing Activo',
+  'Etapa Manual', 'Comprobante Nequi',
 ];
 
 var COLUMNAS_FIRMADOS = [
@@ -213,6 +214,8 @@ function doPost(e) {
       case 'test_campana':        return respuestaJson({ ok: true, gasOk: true, version: '2026-10' });
       case 'guardar_compromiso_garantia': return guardarCompromisoGarantia(datos);
       case 'registrar_pago_nequi':  return registrarPagoNequi(datos);
+      case 'mover_etapa':           return moverEtapaManual(datos);
+      case 'notificar_comprobante_nequi': return notificarComprobanteNequi(datos);
       // ── Sync campaña entre dispositivos ─────────────────────────────
       case 'sync_campana_save':   return syncCampanaSave(datos);
       case 'sync_campana_load':   return syncCampanaLoad();
@@ -1958,4 +1961,43 @@ function guardarCompromisoGarantia(datos) {
   } catch(e) {
     return respuestaJson({ ok: false, error: e.message });
   }
+}
+
+// ── Mover lead a etapa manual (drag & drop desde admin) ──────────────────────
+function moverEtapaManual(datos) {
+  if (!datos.cedula && !datos.email) return respuestaJson({ ok: false, error: 'Falta identificador' });
+  if (!datos.etapa) return respuestaJson({ ok: false, error: 'Falta etapa destino' });
+  var etapasValidas = ['consultaron', 'dejaron_datos', 'firmaron', 'pagaron'];
+  if (etapasValidas.indexOf(datos.etapa) === -1) return respuestaJson({ ok: false, error: 'Etapa inválida' });
+
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
+
+  var valores = { 'Etapa Manual': datos.etapa };
+  // Si mueven a "pagaron" manualmente, también confirmar pago
+  if (datos.etapa === 'pagaron') {
+    valores['Pago OK'] = 'TRUE';
+    valores['Estado de Pago'] = 'Confirmado manual';
+  }
+  // Si mueven a "firmaron" manualmente, marcar firmado
+  if (datos.etapa === 'firmaron') {
+    valores['Firmado'] = 'TRUE';
+  }
+  escribirFila(hoja, fila, valores);
+  return respuestaJson({ ok: true });
+}
+
+// ── Cliente envió comprobante Nequi — avisa al admin ─────────────────────────
+function notificarComprobanteNequi(datos) {
+  if (!datos.cedula && !datos.email) return respuestaJson({ ok: false, error: 'Falta identificador' });
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila !== -1) {
+    escribirFila(hoja, fila, {
+      'Comprobante Nequi': 'Enviado ' + new Date().toLocaleString('es-CO'),
+      'Etapa Manual': 'pagaron'
+    });
+  }
+  return respuestaJson({ ok: true });
 }
