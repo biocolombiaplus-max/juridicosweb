@@ -381,6 +381,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -3641,9 +3642,7 @@ function _mmRellenarCampos(row, d){
 
 function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
   if(modeloIdx >= _GEMINI_MODELOS.length){
-    row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
-    label.textContent = (file.name||'Captura') + ' — modelos saturados, intente en unos minutos';
-    showToast('⏳ Gemini está saturado. Puede rellenar los campos manualmente y guardar la captura.','info');
+    _mmOcrFallback(row, file, b64, label);
     return;
   }
   var modelo = _GEMINI_MODELOS[modeloIdx];
@@ -3685,12 +3684,90 @@ function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
   .catch(function(){ _mmLlamarGeminiConClave(row,file,b64,label,modeloIdx+1,geminiKey); });
 }
 
+// ── OCR local con Tesseract.js (fallback cuando Gemini falla) ─────────────
+function _mmParsearTextoSimit(texto){
+  var t = texto.replace(/\r/g,'');
+  var get = function(pats){
+    for(var i=0;i<pats.length;i++){
+      var m = t.match(pats[i]);
+      if(m && m[1]) return m[1].trim().replace(/\s{2,}/g,' ');
+    }
+    return '';
+  };
+  var fecha = function(s){ // normaliza a dd/mm/aaaa
+    if(!s) return '';
+    var m = s.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+    if(!m) return s;
+    var y = m[3].length===2 ? '20'+m[3] : m[3];
+    return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y;
+  };
+  var raw = {
+    comparendo: get([/(?:N[oúu]m(?:ero)?\.?\s*(?:de\s*)?[Cc]omparendo|COMPARENDO)[:\s#°]+([A-Z0-9\-]{6,25})/,/([A-Z]{2,4}\d{8,18})/]),
+    fecha:      get([/[Ff]echa\s*(?:de\s*)?(?:la\s*)?[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,/[Ff]echa\s*[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
+    direccion:  get([/[Dd]irecci[oó]n[:\s]+([^\n]{5,80})/]),
+    fechaNotif: get([/[Ff]echa\s*(?:de\s*)?[Nn]otificaci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
+    secretaria: get([/[Ss]ecretar[ií]a[:\s]+([^\n]{3,60})/,/[Oo]rganismo[:\s]+([^\n]{3,60})/]),
+    agente:     get([/(?:[Nn]ombre\s*)?[Aa]gente[:\s]+([^\n]{3,60})/,/[Oo]ficial[:\s]+([^\n]{3,60})/]),
+    codigo:     get([/[Cc][oó]digo\s*(?:de\s*)?[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?\b)/,/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–]\s*[A-Z]/]),
+    descripcion:get([/[Dd]escripci[oó]n[:\s]+([^\n]{5,120})/]),
+    placa:      get([/[Pp]laca[:\s]+([A-Z]{3}[-\s]?\d{3}[A-Z]?|\d{3}[-\s]?[A-Z]{3})/,/\b([A-Z]{3}\d{3}[A-Z]?)\b/]),
+    valor:      get([/[Vv]alor\s*(?:[Mm]ulta)?[:\s]+\$?\s*([\d.,]{3,12})/,/\$\s*([\d.,]{3,12})/]),
+    numResol:   get([/[Nn][uú]m(?:ero)?\.?\s*(?:de\s*)?[Rr]esoluci[oó]n[:\s]+([A-Z0-9\-]{4,25})/,/[Rr]esoluci[oó]n\s*N[°o]\.?\s*([A-Z0-9\-]{4,25})/]),
+    fechaResol: get([/[Ff]echa\s*(?:de\s*)?[Rr]esoluci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
+    ciudad:     get([/(?:[Cc]iudad|[Mm]unicipio)[:\s]+([^\n]{3,40})/]),
+    esFoto:     /[Cc]omparendo\s*[Ee]lectr[oó]nico[:\s]+S\b/i.test(t)?'si':/[Cc]omparendo\s*[Ee]lectr[oó]nico[:\s]+N\b/i.test(t)?'no':'nose'
+  };
+  raw.fecha = fecha(raw.fecha);
+  raw.fechaNotif = fecha(raw.fechaNotif);
+  raw.fechaResol = fecha(raw.fechaResol);
+  if(raw.placa) raw.placa = raw.placa.replace(/[-\s]/g,'').toUpperCase();
+  if(raw.valor) raw.valor = raw.valor.replace(/\./g,'').replace(',','.');
+  return raw;
+}
+
+function _mmOcrFallback(row, file, b64, label){
+  if(typeof Tesseract === 'undefined'){
+    row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
+    label.textContent = (file.name||'Captura') + ' — adjunta (rellene los campos manualmente)';
+    showToast('⏳ Gemini saturado. Captura guardada — rellene los campos manualmente.','info');
+    return;
+  }
+  label.textContent = '🔍 Leyendo texto con OCR...';
+  row.querySelector('.mm-captura-zone').style.borderColor='#8b5cf6';
+  Tesseract.recognize(b64,'spa+eng',{
+    logger: function(m){
+      if(m.status==='recognizing text') label.textContent='🔍 OCR... '+Math.round((m.progress||0)*100)+'%';
+    }
+  }).then(function(result){
+    var texto = result.data.text || '';
+    var d = _mmParsearTextoSimit(texto);
+    var rellenos = Object.values(d).filter(function(v){return v&&v!=='nose';}).length;
+    _mmRellenarCampos(row, d);
+    row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
+    if(rellenos > 2){
+      label.textContent='✅ OCR extrajo datos — revisa y corrige si es necesario';
+      showToast('✅ OCR leyó la captura y rellenó los campos. Revisa y corrige lo necesario.','success');
+    } else {
+      label.textContent=(file.name||'Captura')+' — OCR no reconoció bien el texto, rellene manualmente';
+      showToast('⚠️ OCR no extrajo suficientes datos. La captura quedó guardada como prueba.','info');
+    }
+  }).catch(function(){
+    row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
+    label.textContent=(file.name||'Captura')+' — adjunta (rellene manualmente)';
+  });
+}
+
 function _mmLlamarGemini(row, file, b64, label, modeloIdx){
+  if(modeloIdx >= _GEMINI_MODELOS.length){
+    // Todos los modelos Gemini fallaron — usar OCR local
+    _mmOcrFallback(row, file, b64, label);
+    return;
+  }
   var geminiKey = '';
   try{ geminiKey = localStorage.getItem('_jwGeminiKey') || ''; }catch(e){}
   if(!geminiKey){
     _mmPedirClave(function(key){
-      if(!key){ label.textContent = file.name||'Captura adjunta'; row.querySelector('.mm-captura-zone').style.borderColor='#22c55e'; return; }
+      if(!key){ _mmOcrFallback(row,file,b64,label); return; }
       try{ localStorage.setItem('_jwGeminiKey', key); }catch(e){}
       _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, key);
     });
