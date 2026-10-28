@@ -1699,7 +1699,7 @@ function _overrideKey(r){
 function _setOverride(cedula, email, wa, etapa){
   if(cedula) _etapasOverride[cedula.toString().trim()] = etapa;
   if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapa;
-  if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapa;
+  if(wa)     _etapasOverride[wa.toString().replace(/\D/g,'').slice(-10)] = etapa;
   try { localStorage.setItem('jw_etapas_override', JSON.stringify(_etapasOverride)); } catch(e){}
 }
 function _aplicarOverrides(rows){
