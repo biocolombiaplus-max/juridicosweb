@@ -3686,7 +3686,6 @@ function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
 
 // ── OCR local con Tesseract.js (fallback cuando Gemini falla) ─────────────
 function _mmParsearTextoSimit(texto){
-  // Normalizar: colapsar múltiples espacios en cada línea, conservar saltos de línea
   var t = texto.replace(/\r/g,'').split('\n').map(function(l){return l.replace(/\s+/g,' ').trim();}).filter(Boolean).join('\n');
 
   var get = function(pats){
@@ -3703,109 +3702,124 @@ function _mmParsearTextoSimit(texto){
     var y = m[3].length===2?'20'+m[3]:m[3];
     return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y;
   };
+  // Verifica si un string es solo encabezado de tabla (no un valor real)
+  var esEncabezado = function(s){
+    return /^(Agente|Secretar|Fuente|Fecha|Hora|Direcci|Comparendo|C[oó]digo|Descripci|Placa|Servicio|Tipo|Licencia)$/i.test((s||'').trim().split(/\s/)[0]);
+  };
 
-  // ── Estructura de la página SIMIT ──────────────────────────────────────
-  // El SIMIT tiene dos partes:
-  //   SIDEBAR (izquierda):
-  //     "Resolución: SAN26095209"
-  //     "Fecha: 25/08/2026"
-  //     "Comparendo: 6808100000005056069"
-  //     "Fecha comparendo: 01/04/2026"
-  //     "Secretaría: Barrancabermeja"
-  //     "Infracción: D04 - No detenerse..."
-  //   TABLA (derecha) — el OCR lee encabezados y valores como líneas separadas:
-  //     Fila 1 encabezados: "No. comparendo Fecha Hora Dirección Comparendo electrónico"
-  //     Fila 1 valores:     "6808100000005056069 01/04/2026 09:20:00 DIAGONAL 60 ... S"
-  //     Fila 2 encabezados: "Fecha notificación Fuente comparendo Secretaría Agente"
-  //     Fila 2 valores:     "26/06/2026 No reportada Barrancabermeja (68081000) FEIBER MALDONADO MORA"
-  //     Tabla Infracción:   "Código Descripción"
-  //                         "D04 No detenerse ante una luz roja..."
-  //     Tabla Vehículo:     "Placa No. Licencia del vehículo Tipo Servicio"
-  //                         "OXN44G ..."
-  // ───────────────────────────────────────────────────────────────────────
+  // ── SIDEBAR: requiere ":" para distinguir de encabezados de tabla ─────
+  var numResol   = get([/[Rr]esoluci[oó]n:\s*([A-Z]{2,5}\d{4,12})/]);
+  var fechaResol = get([/[Ff]echa(?:\s+resoluci[oó]n)?:\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})(?=[\s\S]{0,150}[Cc]omparendo:)/,
+                        /[Rr]esoluci[oó]n[^\n]*\n[^\n]*?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/]);
+  var comparendo = get([/[Cc]omparendo:\s*(\d{8,20})/,/\b(\d{15,20})\b/]);
+  var fechaInfrac= get([/[Ff]echa\s+comparendo:\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/,
+                        /[Ff]echa\s+infracci[oó]n:\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/]);
+  var secSidebar = (function(){
+    var s = get([/[Ss]ecretar[ií]a:\s*([^\n\(]+)/]);
+    return s && !esEncabezado(s) ? s.replace(/\s*\(\d+\).*/,'').trim() : '';
+  })();
+  var codigo     = get([/[Ii]nfracci[oó]n:\s*([A-Z]\d{2,3}[A-Z]?)\s*[-–]/,
+                        /[Cc][oó]digo:\s*([A-Z]\d{2,3}[A-Z]?)\b/]);
+  var descSidebar= get([/[Ii]nfracci[oó]n:\s*[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/]);
+  var valor      = get([/[Vv]alor:\s*\$?\s*([\d.,]{3,15})/,/\$\s*([\d.,]{3,15})/]);
 
-  // ── SIDEBAR (etiqueta: valor en la misma línea) ────────────────────────
-  var numResol   = get([/[Rr]esoluci[oó]n[:\s]+([A-Z]{2,5}\d{4,12})/]);
-  var fechaResol = get([/[Rr]esoluci[oó]n[^\n]+\n[Ff]echa[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/,
-                        /[Ff]echa[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})(?=[\s\S]{0,100}[Cc]omparendo[:\s])/]);
-  var comparendo = get([/[Cc]omparendo[:\s]+(\d{8,20})/,/\b(\d{15,20})\b/]);
-  var fechaInfrac= get([/[Ff]echa\s+comparendo[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/]);
-  var secSidebar = get([/[Ss]ecretar[ií]a[:\s]+([^\n\(]+)/]).replace(/\s*\(\d+\).*/,'').trim();
-  var codigo     = get([/[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–]/,
-                        /[Cc][oó]digo[:\s]+([A-Z]\d{2,3}[A-Z]?)\b/]);
-  var descSidebar= get([/[Ii]nfracci[oó]n[:\s]+[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/]);
-  var valor      = get([/[Vv]alor[:\s]+\$?\s*([\d.,]{3,15})/,/\$\s*([\d.,]{3,15})/]);
-
-  // ── FILA 1 TABLA (No. comparendo | Fecha | Hora | Dirección | Comparendo electrónico) ──
-  // El OCR produce: encabezados en una línea, valores en la siguiente
-  // Buscar la línea de valores: contiene un número largo + fecha + hora + dirección + S/N
+  // ── FILA 1 TABLA: encabezados luego valores en línea siguiente ────────
   var direccion = '', esFoto = 'nose';
   var mFila1 = t.match(/[Dd]irecci[oó]n[^\n]*\n([^\n]+)/);
   if(mFila1){
     var vl1 = mFila1[1];
-    // Dirección: buscar texto de vía después de la hora (HH:MM)
     var mDir = vl1.match(/\d{2}:\d{2}(?::\d{2})?\s+([A-Z][^\n]+?)(?:\s+[SN]\s*$|\s+[SN]\b)/i);
     if(mDir) direccion = mDir[1].trim();
-    else {
-      var mDir2 = vl1.match(/(?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|KM)\b[^\n]{3,80}/i);
+    if(!direccion){
+      var mDir2 = vl1.match(/(?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|VIA|KM)\b[^\n]{3,80}/i);
       if(mDir2) direccion = mDir2[0].trim();
     }
-    // Fotomulta: S o N al final de la línea de valores
     esFoto = /\bS\s*$/.test(vl1.trim()) ? 'si' : /\bN\s*$/.test(vl1.trim()) ? 'no' : 'nose';
-    // Si no encontramos comparendo en sidebar, buscarlo aquí
     if(!comparendo){ var mc=vl1.match(/\b(\d{10,20})\b/); if(mc) comparendo=mc[1]; }
-    // Si no encontramos fechaInfrac en sidebar, buscarlo aquí
     if(!fechaInfrac){ var mfi=vl1.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/); if(mfi) fechaInfrac=mfi[1]; }
   }
-  // Fallback esFoto
-  if(esFoto==='nose') esFoto = /[Cc]omparendo electr[oó]nico[\s\S]{0,20}S\b/i.test(t)?'si':/[Cc]omparendo electr[oó]nico[\s\S]{0,20}N\b/i.test(t)?'no':'nose';
+  // Fallback dirección: buscar nombre de vía en cualquier parte del texto
+  if(!direccion){
+    var mDirAny = t.match(/\b((?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|VIA|KM)\s+\d+[^\n]{3,60})/i);
+    if(mDirAny) direccion = mDirAny[1].trim();
+  }
+  if(esFoto==='nose') esFoto = /[Cc]omparendo\s+electr[oó]nico[\s\S]{0,30}\bS\b/i.test(t)?'si':/[Cc]omparendo\s+electr[oó]nico[\s\S]{0,30}\bN\b/i.test(t)?'no':'nose';
 
-  // ── FILA 2 TABLA (Fecha notificación | Fuente comparendo | Secretaría | Agente) ──
-  // Valores: "26/06/2026 No reportada Barrancabermeja (68081000) FEIBER MALDONADO MORA"
+  // ── FILA 2 TABLA: "Fecha notificación ... Secretaría ... Agente" ──────
+  // Línea de valores: "26/06/2026 No reportada Barrancabermeja (68081000) FEIBER MALDONADO MORA"
   var fechaNotif = '', secretaria = secSidebar, agente = '';
+  // Intento 1: buscar encabezado "Fecha notificación" y capturar la siguiente línea
   var mFila2 = t.match(/[Ff]echa\s+notificaci[oó]n[^\n]*\n([^\n]+)/);
   if(mFila2){
     var vl2 = mFila2[1];
     var mfn = vl2.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
     if(mfn) fechaNotif = mfn[1];
-    // Secretaría: texto entre "No reportada" y "(" o nombre en mayúsculas
-    var mSec = vl2.match(/[Nn]o\s+reportada\s+([A-ZÁÉÍÓÚÑA-Za-z\s]+?)(?:\s*\(|\s{3}|$)/);
-    if(mSec) secretaria = mSec[1].trim();
-    else if(!secretaria){ var mSec2=vl2.match(/\d{4}\s+\S+\s+\S+\s+([A-ZÁÉÍÓÚÑ][A-Za-z\s]{3,30}?)(?:\s*\(|\s{3}|$)/); if(mSec2) secretaria=mSec2[1].trim(); }
-    // Agente: nombre en MAYÚSCULAS al final de la línea
-    var mAg = vl2.match(/\b([A-ZÁÉÍÓÚÑ]{2,}\s+[A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{2,})?)\s*$/);
-    if(mAg) agente = mAg[1].trim();
+    var mSec = vl2.match(/[Nn]o\s+reportada\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñÁÉÍÓÚÑ\s]+?)(?:\s*\(|\s{2,}|$)/);
+    if(mSec && !esEncabezado(mSec[1])) secretaria = mSec[1].trim();
+    else if(!secretaria){
+      var mSec2 = vl2.match(/\d{4}\s+\S+\s+([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñÁÉÍÓÚÑ]{2,}\s+[A-Za-záéíóúñÁÉÍÓÚÑ]{2,}[^\(]*)(?:\s*\(|\s{2,}|$)/);
+      if(mSec2 && !esEncabezado(mSec2[1])) secretaria = mSec2[1].trim();
+    }
+    // Agente: dos o más palabras todo-mayúsculas al final
+    var mAg = vl2.match(/([A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{2,}){1,3})\s*$/);
+    if(mAg && !esEncabezado(mAg[1])) agente = mAg[1].trim();
   }
+  // Intento 2: buscar la línea con "No reportada" directamente
+  if(!fechaNotif || !secretaria || !agente){
+    var mNR = t.match(/[Nn]o\s+reportada\s+([A-ZÁÉÍÓÚÑ][^\n]+)/);
+    if(mNR){
+      var vNR = mNR[1];
+      var mSec3 = vNR.match(/^([A-ZÁÉÍÓÚÑ][A-Za-záéíóúñÁÉÍÓÚÑ\s]+?)(?:\s*\(|\s{2,})/);
+      if(mSec3 && !secretaria && !esEncabezado(mSec3[1])) secretaria = mSec3[1].trim();
+      var mAg2 = vNR.match(/([A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{2,}){1,3})\s*$/);
+      if(mAg2 && !agente && !esEncabezado(mAg2[1])) agente = mAg2[1].trim();
+    }
+    // Buscar fecha de notificación por patrón diferente (segunda fecha en el texto)
+    if(!fechaNotif){
+      var todasFechas=[], rFechas=/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g, mf3;
+      while((mf3=rFechas.exec(t))!==null) todasFechas.push(mf3[1]);
+      // fechaNotif suele ser la fecha más reciente (mayor)
+      var fechaInfNorm = norm(fechaInfrac), fechaResNorm = norm(fechaResol);
+      for(var fi2=0;fi2<todasFechas.length;fi2++){
+        var fn = norm(todasFechas[fi2]);
+        if(fn && fn!==fechaInfNorm && fn!==fechaResNorm){ fechaNotif=todasFechas[fi2]; break; }
+      }
+    }
+  }
+  // Intento 3: buscar agente por label "Agente:" con colon
+  if(!agente) agente = get([/[Aa]gente:\s*([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s]{5,50})/]);
 
-  // ── TABLA INFRACCIÓN (Código | Descripción → siguiente línea: D04 <texto>) ──
+  // ── TABLA INFRACCIÓN ──────────────────────────────────────────────────
   var descripcion = descSidebar;
   if(!descripcion || !codigo){
     var mInfr = t.match(/[Cc][oó]digo\s+[Dd]escripci[oó]n\n([^\n]+)/);
+    if(!mInfr) mInfr = t.match(/[Cc][oó]digo\s*\|\s*[Dd]escripci[oó]n[^\n]*\n([^\n]+)/);
     if(mInfr){
       var vi = mInfr[1];
       var mCod = vi.match(/^([A-Z]\d{2,3}[A-Z]?)\s+/);
-      if(mCod){ if(!codigo) codigo=mCod[1]; var desc=vi.slice(mCod[0].length).replace(/[Cc][oó]digo\s+[Dd]escripci[oó]n.*$/,'').trim(); if(desc) descripcion=desc; }
+      if(mCod){ if(!codigo) codigo=mCod[1]; var desc=vi.slice(mCod[0].length).trim(); if(desc) descripcion=desc; }
     }
   }
-  if(!codigo) codigo = get([/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–\s]/]);
+  if(!codigo) codigo = get([/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–]/]);
   if(!descripcion && codigo) descripcion = get([new RegExp('\\b'+codigo+'\\s+([A-Z][^\\n]{10,200})')]);
-  // Limpiar artefactos de encabezados al final de la descripción
-  if(descripcion) descripcion = descripcion.replace(/\s*(C[oó]digo|Descripci[oó]n|Infractor|Datos\s+conductor|No\.\s*Licencia)[\s\S]*$/i,'').trim();
+  if(descripcion) descripcion = descripcion.replace(/\s*(C[oó]digo|Descripci[oó]n|Infractor|Datos\s+conductor|No\.\s*Licencia|Placa|Servicio|Tipo)[\s\S]*$/i,'').trim();
 
-  // ── TABLA VEHÍCULO (Placa → siguiente línea: OXN44G ...) ──
-  var placa = get([/[Pp]laca\n([A-Z]{3}\d{2,3}[A-Z]?)\b/,/[Pp]laca[:\s]+([A-Z]{3}\d{2,3}[A-Z]?)\b/,/\b([A-Z]{3}\d{2,3}[A-Z]?)\b/]);
+  // ── TABLA VEHÍCULO ────────────────────────────────────────────────────
+  var placa = get([/[Pp]laca\n([A-Z]{3}\d{2,3}[A-Z]?)\b/,/[Pp]laca:\s*([A-Z]{3}\d{2,3}[A-Z]?)\b/,/\b([A-Z]{3}\d{2,3}[A-Z]?)\b/]);
 
-  // Si no encontramos fechaInfrac, usar la fecha distinta a la de resolución
+  // Fecha comparendo: si sigue sin encontrarse, tomar cualquier fecha ≠ fechaResol y ≠ fechaNotif
   if(!fechaInfrac){
-    var allF=[],rf=/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g,mf2;
-    while((mf2=rf.exec(t))!==null) allF.push(mf2[1]);
-    var frN=norm(fechaResol);
-    for(var fi=0;fi<allF.length;fi++){ if(norm(allF[fi])!==frN){fechaInfrac=allF[fi];break;} }
+    var allF2=[],rf2=/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g,mf4;
+    while((mf4=rf2.exec(t))!==null) allF2.push(mf4[1]);
+    var frN2=norm(fechaResol), fnN=norm(fechaNotif);
+    for(var fi3=0;fi3<allF2.length;fi3++){ var fn3=norm(allF2[fi3]); if(fn3&&fn3!==frN2&&fn3!==fnN){fechaInfrac=allF2[fi3];break;} }
   }
 
   if(placa) placa=placa.replace(/[-\s]/g,'').toUpperCase();
   if(valor) valor=valor.replace(/\./g,'').replace(',','.');
-  secretaria = secretaria.replace(/\s*\(\d+\).*/,'').trim();
+  if(secretaria) secretaria=secretaria.replace(/\s*\(\d+\).*/,'').trim();
+  if(agente && esEncabezado(agente)) agente='';
+  if(secretaria && esEncabezado(secretaria)) secretaria='';
 
   return {
     comparendo:  comparendo||'',
