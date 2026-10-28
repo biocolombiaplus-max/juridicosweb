@@ -2446,10 +2446,11 @@ function renderPipelineCRM(){
       var rowEnc = JSON.stringify(JSON.stringify(r)).replace(/"/g,'&quot;');
       var cedulaEnc = escHtml((r['Cédula']||'').toString());
       var emailEnc  = escHtml((r['Email']||'').toString());
-      var urgBadge = (etapa.id==='dejaron_datos' && horas24) ? '<div style="font-size:0.58rem;background:#fef08a;color:#713f12;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">⏰ +24h sin pagar</div>' : '';
+      var waEnc     = escHtml((r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10));
+      var urgBadge =(etapa.id==='dejaron_datos' && horas24) ? '<div style="font-size:0.58rem;background:#fef08a;color:#713f12;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">⏰ +24h sin pagar</div>' : '';
       var comprobanteTag = (r['Comprobante Nequi']||'') ? '<div style="font-size:0.58rem;background:#bbf7d0;color:#14532d;border-radius:4px;padding:1px 5px;font-weight:700;margin-bottom:3px;">💳 Comprobante enviado</div>' : '';
       var manualTag = (r['Etapa Manual']||'') ? '<div style="font-size:0.55rem;background:#e0e7ff;color:#3730a3;border-radius:4px;padding:1px 5px;font-weight:600;margin-bottom:3px;">✋ Movido manualmente</div>' : '';
-      return '<div class="crm-card" draggable="true" data-cedula="'+cedulaEnc+'" data-email="'+emailEnc+'" data-etapa="'+etapa.id+'" style="cursor:grab;border-left-color:'+etapa.color+(etapa.id==='dejaron_datos'&&horas24?';box-shadow:0 0 0 1px #fbbf24':'')+'" onclick="abrirCaso('+rowEnc+')">'+
+      return '<div class="crm-card" draggable="true" data-cedula="'+cedulaEnc+'" data-email="'+emailEnc+'" data-wa="'+waEnc+'" data-etapa="'+etapa.id+'" style="cursor:grab;border-left-color:'+etapa.color+(etapa.id==='dejaron_datos'&&horas24?';box-shadow:0 0 0 1px #fbbf24':'')+'" onclick="abrirCaso('+rowEnc+')">'+
         urgBadge+comprobanteTag+manualTag+
         '<div class="crm-card-name">'+escHtml(nombre)+'</div>'+
         '<div class="crm-card-sub">'+(sub?escHtml(sub):'&nbsp;')+'</div>'+
@@ -2513,7 +2514,9 @@ function _initCrmDragDrop(){
       if(etapaOrigen === etapaDestino) return;
       var cedula = dragging.dataset.cedula;
       var email  = dragging.dataset.email;
+      var wa     = dragging.dataset.wa || '';
       var nombre = dragging.querySelector('.crm-card-name') ? dragging.querySelector('.crm-card-name').textContent : '';
+      if(!cedula && !email && !wa){ showToast('Este lead no tiene cédula, email ni WA para identificarlo','error'); return; }
       var confirmMsg = '¿Mover a "'+etapaDestino.replace(/_/g,' ').toUpperCase()+'"?\n\nEsto también actualizará el estado en la hoja de cálculo.';
       if(!confirm(confirmMsg)) return;
       // Actualizar UI inmediatamente
@@ -2530,15 +2533,15 @@ function _initCrmDragDrop(){
       // Persistir en Sheet
       fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ _accion:'mover_etapa', cedula: cedula, email: email, etapa: etapaDestino })
+        body: JSON.stringify({ _accion:'mover_etapa', cedula: cedula, email: email, whatsapp: wa, etapa: etapaDestino })
       })
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d.ok){
-          showToast('✅ '+nombre+' movido a "'+etapaDestino.replace(/_/g,' ')+'"','success');
-          // Actualizar allRows local para mantener coherencia
+          showToast('✅ '+nombre+' → '+etapaDestino.replace(/_/g,' '),'success');
           if(allRows) allRows.forEach(function(r){
-            if((cedula && r['Cédula']==cedula)||(email && r['Email']==email)) r['Etapa Manual']=etapaDestino;
+            var rWa = (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+            if((cedula && r['Cédula']==cedula)||(email && r['Email']==email)||(wa && rWa===wa)) r['Etapa Manual']=etapaDestino;
           });
         } else {
           showToast('Error: '+(d.error||'no se pudo guardar'),'error');
@@ -3537,10 +3540,27 @@ var _dcPendingAccion = null; // acción a ejecutar automáticamente tras guardar
 // modo: 'completar' (se abrió sola porque faltaba nombre/cédula antes de
 // pagar) o 'editar' (el admin la abrió a mano para corregir algo) — solo
 // cambia el texto de encabezado, el guardado es el mismo en ambos casos.
+function _splitNombreApellido(nombreCompleto, apellidoActual){
+  // Si ya hay apellido separado, respetarlo
+  if(apellidoActual && apellidoActual.trim()) return { nombres: nombreCompleto, apellidos: apellidoActual };
+  var partes = (nombreCompleto||'').trim().split(/\s+/);
+  if(partes.length <= 1) return { nombres: nombreCompleto, apellidos: '' };
+  // Colombiano típico: 2 nombres + 2 apellidos → split en mitad
+  // Con 2 palabras: primera=nombre, segunda=apellido
+  // Con 3 palabras: primera=nombre, resto=apellidos
+  // Con 4+ palabras: primeras 2=nombres, últimas 2=apellidos
+  var mitad = partes.length >= 4 ? 2 : 1;
+  return {
+    nombres:   partes.slice(0, mitad).join(' '),
+    apellidos: partes.slice(mitad).join(' ')
+  };
+}
+
 function openModalDatosCliente(row, modo, pendingAccion){
   _dcCasoOriginal = row;
-  document.getElementById('dc-nombres').value = row['Nombres']||'';
-  document.getElementById('dc-apellidos').value = row['Apellidos']||'';
+  var split = _splitNombreApellido(row['Nombres']||'', row['Apellidos']||'');
+  document.getElementById('dc-nombres').value = split.nombres;
+  document.getElementById('dc-apellidos').value = split.apellidos;
   document.getElementById('dc-cedula').value = row['Cédula']||'';
   document.getElementById('dc-placa').value = row['Placa']||'';
   document.getElementById('dc-whatsapp').value = row['WhatsApp']||'';
@@ -3593,6 +3613,7 @@ function guardarDatosCliente(){
       _accion:'completar_datos_cliente',
       cedulaActual: _dcCasoOriginal['Cédula']||'',
       email: _dcCasoOriginal['Email']||'',
+      whatsappActual: (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||'').toString().replace(/\D/g,'').slice(-10),
       nombres: nombres,
       apellidos: document.getElementById('dc-apellidos').value.trim(),
       cedula: cedula,

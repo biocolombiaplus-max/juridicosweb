@@ -1278,7 +1278,7 @@ function guardarMultasEstructuradas(datos) {
 // Derecho de Petición nunca salga con datos vacíos o a medias.
 function completarDatosCliente(datos) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email, datos.whatsappActual);
   // Si no existe el caso (ej. cliente que pagó por WhatsApp antes de que el
   // sistema guardara automáticamente), crearlo como registro nuevo para poder
   // continuar el proceso sin perder el pago que ya hizo.
@@ -1483,15 +1483,24 @@ function obtenerOCrearCarpeta(nombre) {
 
 // Devuelve el número de fila (1-based, incluye encabezado) de la ÚLTIMA
 // coincidencia por cédula (o por email si no hay cédula), o -1 si no existe.
-function buscarFilaPorCedulaOEmail(hoja, cedula, email) {
+function buscarFilaPorCedulaOEmail(hoja, cedula, email, whatsapp) {
   var valores = hoja.getDataRange().getValues();
   var colCedula = COLUMNAS_CASOS.indexOf('Cédula');
-  var colEmail = COLUMNAS_CASOS.indexOf('Email');
+  var colEmail  = COLUMNAS_CASOS.indexOf('Email');
+  var colWA     = COLUMNAS_CASOS.indexOf('WhatsApp');
+  // Prioridad: cédula > email > WhatsApp (últimos 10 dígitos)
+  var waNorm = whatsapp ? String(whatsapp).replace(/\D/g,'').slice(-10) : '';
   for (var i = valores.length - 1; i >= 1; i--) {
     if (cedula && valores[i][colCedula] && String(valores[i][colCedula]) === String(cedula)) return i + 1;
   }
   for (var j = valores.length - 1; j >= 1; j--) {
     if (email && valores[j][colEmail] && String(valores[j][colEmail]).toLowerCase() === String(email).toLowerCase()) return j + 1;
+  }
+  if (waNorm) {
+    for (var k = valores.length - 1; k >= 1; k--) {
+      var waFila = String(valores[k][colWA]||'').replace(/\D/g,'').slice(-10);
+      if (waFila && waFila === waNorm) return k + 1;
+    }
   }
   return -1;
 }
@@ -1973,13 +1982,13 @@ function guardarCompromisoGarantia(datos) {
 
 // ── Mover lead a etapa manual (drag & drop desde admin) ──────────────────────
 function moverEtapaManual(datos) {
-  if (!datos.cedula && !datos.email) return respuestaJson({ ok: false, error: 'Falta identificador' });
+  if (!datos.cedula && !datos.email && !datos.whatsapp) return respuestaJson({ ok: false, error: 'Falta identificador' });
   if (!datos.etapa) return respuestaJson({ ok: false, error: 'Falta etapa destino' });
   var etapasValidas = ['consultaron', 'dejaron_datos', 'firmaron', 'pagaron'];
   if (etapasValidas.indexOf(datos.etapa) === -1) return respuestaJson({ ok: false, error: 'Etapa inválida' });
 
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email, datos.whatsapp);
   if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
 
   var valores = { 'Etapa Manual': datos.etapa };
@@ -1998,9 +2007,9 @@ function moverEtapaManual(datos) {
 
 // ── Cliente envió comprobante Nequi — avisa al admin ─────────────────────────
 function notificarComprobanteNequi(datos) {
-  if (!datos.cedula && !datos.email) return respuestaJson({ ok: false, error: 'Falta identificador' });
+  if (!datos.cedula && !datos.email && !datos.whatsapp) return respuestaJson({ ok: false, error: 'Falta identificador' });
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email, datos.whatsapp);
   if (fila !== -1) {
     escribirFila(hoja, fila, {
       'Comprobante Nequi': 'Enviado ' + new Date().toLocaleString('es-CO'),
