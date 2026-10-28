@@ -3586,6 +3586,88 @@ function toggleNotifMm(select){
 }
 
 // ── Captura de pantalla SIMIT ──────────────────────────────────────────────
+var _GEMINI_MODELOS = ['gemini-2.5-flash','gemini-2.5-flash-8b','gemini-3.8-flash','gemini-2.5-pro'];
+var _GEMINI_PROMPT  = 'Eres un asistente jurídico colombiano. Extrae los datos de esta captura del SIMIT y devuelve SOLO un JSON válido con estas claves exactas (cadena vacía "" si no encuentras el dato):\n{"comparendo":"número completo del comparendo","fecha":"fecha infracción dd/mm/aaaa","direccion":"dirección en mayúsculas","fechaNotif":"fecha notificación dd/mm/aaaa","secretaria":"nombre secretaría/municipio tránsito","agente":"nombre completo del agente","codigo":"código infracción ej D04","descripcion":"descripción completa infracción","placa":"placa vehículo mayúsculas","numResol":"número de resolución","fechaResol":"fecha resolución dd/mm/aaaa","ciudad":"ciudad organismo tránsito","esFoto":"si/no/nose según Comparendo electrónico S o N","valor":"valor multa solo números"}\nDevuelve ÚNICAMENTE el JSON sin markdown ni texto adicional.';
+
+function _mmRellenarCampos(row, d){
+  if(d.comparendo) row.querySelector('.mm-comparendo').value = d.comparendo;
+  if(d.fecha)      row.querySelector('.mm-fecha').value      = d.fecha;
+  if(d.direccion)  row.querySelector('.mm-direccion').value  = d.direccion;
+  if(d.fechaNotif){
+    row.querySelector('.mm-fechanotif').value = d.fechaNotif;
+    var f1 = row.querySelector('.mm-fecha').value, f2 = d.fechaNotif;
+    if(f1 && f2){ var dias = calcDiasHabilesColombia(f1,f2); if(dias>=0) row.querySelector('.mm-diasnotif').value=String(dias); }
+  }
+  if(d.secretaria) row.querySelector('.mm-secretaria').value = d.secretaria;
+  if(d.agente)     row.querySelector('.mm-agente').value     = d.agente;
+  if(d.codigo)     row.querySelector('.mm-codigo').value     = d.codigo;
+  if(d.descripcion)row.querySelector('.mm-descripcion').value= d.descripcion;
+  if(d.placa)      row.querySelector('.mm-placa').value      = d.placa.toUpperCase();
+  if(d.valor)      row.querySelector('.mm-valor').value      = d.valor;
+  if(d.numResol)   row.querySelector('.mm-numresol').value   = d.numResol;
+  if(d.fechaResol) row.querySelector('.mm-fecharesol').value = d.fechaResol;
+  if(d.ciudad)     row.querySelector('.mm-ciudad').value     = d.ciudad;
+  if(d.esFoto){
+    var fv = d.esFoto==='si'?'si':d.esFoto==='no'?'no':'nose';
+    row.querySelector('.mm-foto').value = fv;
+    if(fv==='si') row.querySelector('.mm-notif-wrap').style.display='';
+  }
+}
+
+function _mmLlamarGemini(row, file, b64, label, modeloIdx){
+  if(modeloIdx >= _GEMINI_MODELOS.length){
+    row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+    label.textContent = (file.name||'Captura') + ' — modelos saturados, intente en unos minutos';
+    showToast('⏳ Gemini está saturado ahora mismo. Puede rellenar los campos manualmente y guardar la captura.','info');
+    return;
+  }
+  var geminiKey = '';
+  try{ geminiKey = localStorage.getItem('_jwGeminiKey') || ''; }catch(e){}
+  if(!geminiKey){
+    geminiKey = window.prompt('🔑 Ingrese su clave de Gemini API (aistudio.google.com/app/apikeys):\nSe guardará solo en este navegador.');
+    if(!geminiKey){ label.textContent = file.name||'Captura adjunta'; row.querySelector('.mm-captura-zone').style.borderColor='#22c55e'; return; }
+    try{ localStorage.setItem('_jwGeminiKey', geminiKey); }catch(e){}
+  }
+  var modelo = _GEMINI_MODELOS[modeloIdx];
+  label.textContent = '🤖 Leyendo con IA (' + modelo + ')...';
+  var base64Data = b64.replace(/^data:image\/[^;]+;base64,/,'');
+  var mimeType = (b64.match(/^data:(image\/[^;]+);base64,/)||[])[1]||'image/png';
+  var payload = {
+    contents:[{parts:[{text:_GEMINI_PROMPT},{inline_data:{mime_type:mimeType,data:base64Data}}]}],
+    generationConfig:{temperature:0,maxOutputTokens:1024}
+  };
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+modelo+':generateContent?key='+geminiKey,
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(function(r){return r.json();})
+  .then(function(result){
+    if(result.error){
+      var code = result.error.code;
+      if(code===401||code===403){
+        try{localStorage.removeItem('_jwGeminiKey');}catch(e){}
+        showToast('🔑 Clave de Gemini inválida. Será pedida de nuevo.','error');
+        label.textContent = file.name||'Captura adjunta';
+        row.querySelector('.mm-captura-zone').style.borderColor='#ef4444';
+        return;
+      }
+      // 404 = modelo no disponible, 503/429 = saturado → probar siguiente
+      _mmLlamarGemini(row, file, b64, label, modeloIdx+1);
+      return;
+    }
+    var candidate = (result.candidates||[])[0];
+    if(!candidate){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); return; }
+    var text = (((candidate.content||{}).parts||[])[0]||{}).text||'';
+    text = text.replace(/```json\n?|\n?```/g,'').trim();
+    try{
+      var d = JSON.parse(text);
+      _mmRellenarCampos(row, d);
+      row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
+      label.textContent = '✅ Datos extraídos con '+modelo+' — revisa y corrige si es necesario';
+      showToast('✅ IA leyó la captura del SIMIT y rellenó los campos automáticamente','success');
+    }catch(e){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); }
+  })
+  .catch(function(){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); });
+}
+
 function mmSetCaptura(row, file){
   if(!file || !file.type.startsWith('image/')) return;
   var reader = new FileReader();
@@ -3593,66 +3675,12 @@ function mmSetCaptura(row, file){
     var b64 = e.target.result;
     row.querySelector('.mm-captura-b64').value = b64;
     var img = row.querySelector('.mm-captura-preview');
-    img.src = b64; img.style.display = 'block';
-    row.querySelector('.mm-captura-clear').style.display = 'block';
+    img.src = b64; img.style.display='block';
+    row.querySelector('.mm-captura-clear').style.display='block';
     var label = row.querySelector('.mm-captura-label');
     label.textContent = '🤖 Leyendo datos del SIMIT con IA...';
-    row.querySelector('.mm-captura-zone').style.borderColor = '#f59e0b';
-    // Llamar a GAS para extraer datos con Gemini AI
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ _accion: 'extraer_simit', imagenBase64: b64 })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if(data.ok && data.datos){
-        var d = data.datos;
-        // Rellenar cada campo del formulario si viene el dato
-        if(d.comparendo) row.querySelector('.mm-comparendo').value = d.comparendo;
-        if(d.fecha)      row.querySelector('.mm-fecha').value      = d.fecha;
-        if(d.direccion)  row.querySelector('.mm-direccion').value  = d.direccion;
-        if(d.fechaNotif){
-          row.querySelector('.mm-fechanotif').value = d.fechaNotif;
-          // Recalcular días hábiles
-          var f1 = row.querySelector('.mm-fecha').value;
-          var f2 = d.fechaNotif;
-          if(f1 && f2){
-            var dias = calcDiasHabilesColombia(f1, f2);
-            if(dias >= 0) row.querySelector('.mm-diasnotif').value = String(dias);
-          }
-        }
-        if(d.secretaria) row.querySelector('.mm-secretaria').value = d.secretaria;
-        if(d.agente)     row.querySelector('.mm-agente').value     = d.agente;
-        if(d.codigo)     row.querySelector('.mm-codigo').value     = d.codigo;
-        if(d.descripcion)row.querySelector('.mm-descripcion').value= d.descripcion;
-        if(d.placa)      row.querySelector('.mm-placa').value      = d.placa.toUpperCase();
-        if(d.valor)      row.querySelector('.mm-valor').value      = d.valor;
-        if(d.numResol)   row.querySelector('.mm-numresol').value   = d.numResol;
-        if(d.fechaResol) row.querySelector('.mm-fecharesol').value = d.fechaResol;
-        if(d.ciudad)     row.querySelector('.mm-ciudad').value     = d.ciudad;
-        if(d.esFoto){
-          var fotoVal = d.esFoto==='si'?'si':d.esFoto==='no'?'no':'nose';
-          row.querySelector('.mm-foto').value = fotoVal;
-          if(fotoVal==='si') row.querySelector('.mm-notif-wrap').style.display='';
-        }
-        row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
-        label.textContent = '✅ Datos extraídos — revisa y corrige si es necesario';
-        showToast('✅ IA leyó la captura del SIMIT y rellenó los campos automáticamente','success');
-      } else {
-        row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
-        var errMsg = data.error || 'no se pudo extraer datos';
-        label.textContent = (file.name || 'Captura adjunta') + ' — ' + errMsg;
-        if(errMsg.indexOf('GEMINI_API_KEY')!==-1){
-          showToast('⚙️ Para auto-rellenar: agrega GEMINI_API_KEY en Apps Script → Propiedades del proyecto','info');
-        } else {
-          showToast('⚠️ ' + errMsg, 'error');
-        }
-      }
-    })
-    .catch(function(){
-      row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
-      label.textContent = file.name || 'Captura adjunta';
-    });
+    row.querySelector('.mm-captura-zone').style.borderColor='#f59e0b';
+    _mmLlamarGemini(row, file, b64, label, 0);
   };
   reader.readAsDataURL(file);
 }
