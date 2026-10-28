@@ -267,7 +267,7 @@ function guardarLead(datos) {
   if (datos.correo && !datos.email) datos.email = datos.correo;
 
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email, datos.whatsapp);
   var esDiferido = /Adelanto/i.test(datos.plan || '');
   // Si el caso llega ya pagado (ej. cliente de WhatsApp registrado a mano
   // desde el panel, que confirmó el pago por fuera de la página), lo
@@ -1278,26 +1278,25 @@ function guardarMultasEstructuradas(datos) {
 // Derecho de Petición nunca salga con datos vacíos o a medias.
 function completarDatosCliente(datos) {
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
-  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual, datos.email, datos.whatsappActual);
-  // Si no existe el caso (ej. cliente que pagó por WhatsApp antes de que el
-  // sistema guardara automáticamente), crearlo como registro nuevo para poder
-  // continuar el proceso sin perder el pago que ya hizo.
+  // Buscar por cédula original, email original, o WA original (en ese orden)
+  var wa_busq = datos.whatsappActual || datos.whatsapp || '';
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedulaActual || datos.cedula, datos.email || datos.emailNuevo, wa_busq);
+  // Si no existe el caso, crearlo con guardarLead (que también busca por WA)
+  // antes de intentar actualizar.
   if (fila === -1) {
-    var filaNueva = hoja.getLastRow() + 1;
-    var valoresNuevos = {};
-    valoresNuevos['Nombres']      = datos.nombres || '';
-    valoresNuevos['Apellidos']    = datos.apellidos || '';
-    valoresNuevos['Cédula']       = datos.cedula || datos.cedulaActual || '';
-    valoresNuevos['Placa']        = datos.placa || '';
-    valoresNuevos['WhatsApp']     = datos.whatsapp || '';
-    valoresNuevos['Email']        = datos.emailNuevo || datos.email || '';
-    valoresNuevos['Ciudad']       = datos.ciudad || '';
-    valoresNuevos['Plan']         = 'garantia';
-    valoresNuevos['Estado Pago']  = 'Pago Nequi Pendiente';
-    valoresNuevos['Fecha']        = new Date().toLocaleString('es-CO');
-    valoresNuevos['Notas']        = 'Caso creado desde admin — cliente pagó por WhatsApp/Nequi antes de registro automático.';
-    escribirFila(hoja, filaNueva, valoresNuevos);
-    aplicarFormatoCondicional(hoja);
+    var leadData = {
+      cedula:    datos.cedula   || datos.cedulaActual || '',
+      email:     datos.emailNuevo || datos.email || '',
+      whatsapp:  datos.whatsapp || '',
+      nombres:   datos.nombres   || '',
+      apellidos: datos.apellidos || '',
+      placa:     datos.placa     || '',
+      ciudad:    datos.ciudad    || '',
+      plan:      'garantia',
+      estadoPago: 'Pago Nequi Pendiente',
+      notas:     'Caso creado desde admin — cliente pagó por WA/Nequi antes de registro automático.',
+    };
+    guardarLead(leadData);
     return respuestaJson({ ok: true, reactivado: false, creado: true });
   }
 

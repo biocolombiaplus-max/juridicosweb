@@ -3635,9 +3635,9 @@ function guardarDatosCliente(){
     method:'POST',
     body: JSON.stringify({
       _accion:'completar_datos_cliente',
-      cedulaActual: _dcCasoOriginal['Cédula']||'',
-      email: _dcCasoOriginal['Email']||'',
-      whatsappActual: (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||'').toString().replace(/\D/g,'').slice(-10),
+      cedulaActual: _dcCasoOriginal['Cédula']||cedula||'',
+      email: _dcCasoOriginal['Email']||emailVal||'',
+      whatsappActual: (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||whatsapp||'').toString().replace(/\D/g,'').slice(-10),
       nombres: nombres,
       apellidos: document.getElementById('dc-apellidos').value.trim(),
       cedula: cedula,
