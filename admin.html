@@ -3810,6 +3810,7 @@ function _mmParsearTextoSimit(texto){
   // ── TABLA INFRACCIÓN ──────────────────────────────────────────────────
   var descripcion = descSidebar;
   if(!descripcion || !codigo){
+    // Intento 1: "Código Descripción\n<código> <desc>" — headers en una línea, valores en la siguiente
     var mInfr = t.match(/[Cc][oó]digo\s+[Dd]escripci[oó]n\n([^\n]+)/);
     if(!mInfr) mInfr = t.match(/[Cc][oó]digo\s*\|\s*[Dd]escripci[oó]n[^\n]*\n([^\n]+)/);
     if(mInfr){
@@ -3817,9 +3818,26 @@ function _mmParsearTextoSimit(texto){
       var mCod = vi.match(/^([A-Z]\d{2,3}[A-Z]?)\s+/);
       if(mCod){ if(!codigo) codigo=mCod[1]; var desc=vi.slice(mCod[0].length).trim(); if(desc) descripcion=desc; }
     }
+    // Intento 2: "Código\n<código>\nDescripción\n<desc>" — cada celda en su propia línea (OCR columnar)
+    if(!mInfr || (!descripcion && !codigo)){
+      var mCodCol = t.match(/[Cc][oó]digo\n([A-Z]\d{2,3}[A-Z]?)\n/);
+      if(mCodCol && !codigo) codigo = mCodCol[1];
+      var mDescCol = t.match(/[Dd]escripci[oó]n\n([^\n]{10,200})/);
+      if(mDescCol && !descripcion) descripcion = mDescCol[1].trim();
+    }
   }
-  if(!codigo) codigo = get([/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–]/]);
-  if(!descripcion && codigo) descripcion = get([new RegExp('\\b'+codigo+'\\s+([A-Z][^\\n]{10,200})')]);
+  // Intento 3: buscar el código y capturar lo que sigue en la misma línea (descripción sin header)
+  if(!codigo) codigo = get([/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–\s]/]);
+  if(!descripcion && codigo){
+    // Busca "<código> <descripción>" — acepta mayúsculas o minúsculas en la descripción
+    var mDescFallback = t.match(new RegExp('\\b'+codigo+'\\s+([A-Za-záéíóúñÁÉÍÓÚÑ][^\\n]{8,200})'));
+    if(mDescFallback) descripcion = mDescFallback[1].trim();
+  }
+  // Intento 4: si el código está en el texto y la descripción está en la línea inmediatamente siguiente
+  if(!descripcion && codigo){
+    var mDescNext = t.match(new RegExp('\\b'+codigo+'\\b[^\\n]*\\n([A-Za-záéíóúñÁÉÍÓÚÑ][^\\n]{8,200})'));
+    if(mDescNext) descripcion = mDescNext[1].trim();
+  }
   if(descripcion) descripcion = descripcion.replace(/\s*(C[oó]digo|Descripci[oó]n|Infractor|Datos\s+conductor|No\.\s*Licencia|Placa|Servicio|Tipo)[\s\S]*$/i,'').trim();
 
   // ── TABLA VEHÍCULO ────────────────────────────────────────────────────
