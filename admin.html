@@ -3589,6 +3589,31 @@ function toggleNotifMm(select){
 var _GEMINI_MODELOS = ['gemini-2.5-flash','gemini-2.5-flash-8b','gemini-3.8-flash','gemini-2.5-pro'];
 var _GEMINI_PROMPT  = 'Eres un asistente jurídico colombiano. Extrae los datos de esta captura del SIMIT y devuelve SOLO un JSON válido con estas claves exactas (cadena vacía "" si no encuentras el dato):\n{"comparendo":"número completo del comparendo","fecha":"fecha infracción dd/mm/aaaa","direccion":"dirección en mayúsculas","fechaNotif":"fecha notificación dd/mm/aaaa","secretaria":"nombre secretaría/municipio tránsito","agente":"nombre completo del agente","codigo":"código infracción ej D04","descripcion":"descripción completa infracción","placa":"placa vehículo mayúsculas","numResol":"número de resolución","fechaResol":"fecha resolución dd/mm/aaaa","ciudad":"ciudad organismo tránsito","esFoto":"si/no/nose según Comparendo electrónico S o N","valor":"valor multa solo números"}\nDevuelve ÚNICAMENTE el JSON sin markdown ni texto adicional.';
 
+function _mmPedirClave(cb){
+  var ov = document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;padding:28px 24px;width:min(480px,90vw);box-shadow:0 8px 40px rgba(0,0,0,.3);font-family:inherit;">'
+    +'<p style="margin:0 0 6px;font-weight:700;font-size:1rem;color:#1e293b;">🔑 Clave de Gemini API</p>'
+    +'<p style="margin:0 0 14px;font-size:.85rem;color:#64748b;">Obténgala gratis en <b>aistudio.google.com/app/apikeys</b><br>Se guarda solo en este navegador, no se envía a ningún servidor.</p>'
+    +'<input id="_gmKeyIn" type="text" placeholder="Pegue aquí su clave AQ.Ab8..." autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;outline:none;margin-bottom:14px;">'
+    +'<div style="display:flex;gap:10px;justify-content:flex-end;">'
+    +'<button onclick="this.closest(\'div\').parentNode.parentNode._gmCancel()" style="padding:8px 18px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:.9rem;">Cancelar</button>'
+    +'<button id="_gmKeyOk" style="padding:8px 20px;background:#4f46e5;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;">Guardar y continuar</button>'
+    +'</div></div>';
+  ov._gmCancel = function(){ document.body.removeChild(ov); cb(''); };
+  document.body.appendChild(ov);
+  var inp = ov.querySelector('#_gmKeyIn');
+  var ok  = ov.querySelector('#_gmKeyOk');
+  inp.focus();
+  ok.addEventListener('click', function(){
+    var v = inp.value.trim();
+    if(!v){ inp.style.borderColor='#ef4444'; return; }
+    document.body.removeChild(ov);
+    cb(v);
+  });
+  inp.addEventListener('keydown', function(ev){ if(ev.key==='Enter') ok.click(); });
+}
+
 function _mmRellenarCampos(row, d){
   if(d.comparendo) row.querySelector('.mm-comparendo').value = d.comparendo;
   if(d.fecha)      row.querySelector('.mm-fecha').value      = d.fecha;
@@ -3614,19 +3639,12 @@ function _mmRellenarCampos(row, d){
   }
 }
 
-function _mmLlamarGemini(row, file, b64, label, modeloIdx){
+function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
   if(modeloIdx >= _GEMINI_MODELOS.length){
-    row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+    row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
     label.textContent = (file.name||'Captura') + ' — modelos saturados, intente en unos minutos';
-    showToast('⏳ Gemini está saturado ahora mismo. Puede rellenar los campos manualmente y guardar la captura.','info');
+    showToast('⏳ Gemini está saturado. Puede rellenar los campos manualmente y guardar la captura.','info');
     return;
-  }
-  var geminiKey = '';
-  try{ geminiKey = localStorage.getItem('_jwGeminiKey') || ''; }catch(e){}
-  if(!geminiKey){
-    geminiKey = window.prompt('🔑 Ingrese su clave de Gemini API (aistudio.google.com/app/apikeys):\nSe guardará solo en este navegador.');
-    if(!geminiKey){ label.textContent = file.name||'Captura adjunta'; row.querySelector('.mm-captura-zone').style.borderColor='#22c55e'; return; }
-    try{ localStorage.setItem('_jwGeminiKey', geminiKey); }catch(e){}
   }
   var modelo = _GEMINI_MODELOS[modeloIdx];
   label.textContent = '🤖 Leyendo con IA (' + modelo + ')...';
@@ -3649,12 +3667,11 @@ function _mmLlamarGemini(row, file, b64, label, modeloIdx){
         row.querySelector('.mm-captura-zone').style.borderColor='#ef4444';
         return;
       }
-      // 404 = modelo no disponible, 503/429 = saturado → probar siguiente
-      _mmLlamarGemini(row, file, b64, label, modeloIdx+1);
+      _mmLlamarGeminiConClave(row,file,b64,label,modeloIdx+1,geminiKey);
       return;
     }
     var candidate = (result.candidates||[])[0];
-    if(!candidate){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); return; }
+    if(!candidate){ _mmLlamarGeminiConClave(row,file,b64,label,modeloIdx+1,geminiKey); return; }
     var text = (((candidate.content||{}).parts||[])[0]||{}).text||'';
     text = text.replace(/```json\n?|\n?```/g,'').trim();
     try{
@@ -3663,9 +3680,23 @@ function _mmLlamarGemini(row, file, b64, label, modeloIdx){
       row.querySelector('.mm-captura-zone').style.borderColor='#22c55e';
       label.textContent = '✅ Datos extraídos con '+modelo+' — revisa y corrige si es necesario';
       showToast('✅ IA leyó la captura del SIMIT y rellenó los campos automáticamente','success');
-    }catch(e){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); }
+    }catch(e){ _mmLlamarGeminiConClave(row,file,b64,label,modeloIdx+1,geminiKey); }
   })
-  .catch(function(){ _mmLlamarGemini(row,file,b64,label,modeloIdx+1); });
+  .catch(function(){ _mmLlamarGeminiConClave(row,file,b64,label,modeloIdx+1,geminiKey); });
+}
+
+function _mmLlamarGemini(row, file, b64, label, modeloIdx){
+  var geminiKey = '';
+  try{ geminiKey = localStorage.getItem('_jwGeminiKey') || ''; }catch(e){}
+  if(!geminiKey){
+    _mmPedirClave(function(key){
+      if(!key){ label.textContent = file.name||'Captura adjunta'; row.querySelector('.mm-captura-zone').style.borderColor='#22c55e'; return; }
+      try{ localStorage.setItem('_jwGeminiKey', key); }catch(e){}
+      _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, key);
+    });
+    return;
+  }
+  _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey);
 }
 
 function mmSetCaptura(row, file){
