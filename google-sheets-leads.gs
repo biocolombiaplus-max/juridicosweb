@@ -2042,35 +2042,41 @@ function extraerDatosSimit(datos) {
     contents: [{ parts: [{ text: prompt },{ inline_data: { mime_type: mimeType, data: base64Data } }]}],
     generationConfig: { temperature: 0, maxOutputTokens: 1024 }
   };
-  var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + apiKey;
-  var intentos = 3;
-  for (var intento = 1; intento <= intentos; intento++) {
-    try {
-      var resp = UrlFetchApp.fetch(geminiUrl,
-        { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
-      );
-      var rawText = resp.getContentText();
-      var result = JSON.parse(rawText);
-      if (result.error) {
-        var code = result.error.code;
-        if ((code === 503 || code === 429) && intento < intentos) {
-          Utilities.sleep(2000 * intento); // espera 2s, 4s entre reintentos
-          continue;
+  // Intentar modelos en orden hasta que uno funcione
+  var modelos = ['gemini-2.5-flash', 'gemini-2.5-flash-8b', 'gemini-3.8-flash'];
+  var baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/';
+  var ultimoError = '';
+  for (var m = 0; m < modelos.length; m++) {
+    var url = baseUrl + modelos[m] + ':generateContent?key=' + apiKey;
+    for (var intento = 1; intento <= 2; intento++) {
+      try {
+        var resp = UrlFetchApp.fetch(url,
+          { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
+        );
+        var rawText = resp.getContentText();
+        var result = JSON.parse(rawText);
+        if (result.error) {
+          var code = result.error.code;
+          ultimoError = result.error.message + ' (código ' + code + ')';
+          if (code === 404) break; // modelo no disponible → probar el siguiente
+          if ((code === 503 || code === 429) && intento < 2) {
+            Utilities.sleep(3000);
+            continue;
+          }
+          break; // otro error → probar siguiente modelo
         }
-        return respuestaJson({ ok: false, error: 'Gemini: ' + result.error.message + ' (código ' + code + ')' });
+        var candidate = (result.candidates || [])[0];
+        if (!candidate) { ultimoError = 'Sin candidatos'; break; }
+        var parts = ((candidate.content || {}).parts || []);
+        var text = (parts[0] || {}).text || '';
+        text = text.replace(/```json\n?|\n?```/g,'').trim();
+        var parsed = JSON.parse(text);
+        return respuestaJson({ ok: true, datos: parsed, modelo: modelos[m] });
+      } catch(e) {
+        ultimoError = String(e);
+        if (intento < 2) { Utilities.sleep(2000); continue; }
       }
-      var candidate = (result.candidates || [])[0];
-      if (!candidate) {
-        return respuestaJson({ ok: false, error: 'Gemini no devolvió candidatos. Respuesta: ' + rawText.substring(0, 300) });
-      }
-      var parts = ((candidate.content || {}).parts || []);
-      var text = (parts[0] || {}).text || '';
-      text = text.replace(/```json\n?|\n?```/g,'').trim();
-      var parsed = JSON.parse(text);
-      return respuestaJson({ ok: true, datos: parsed });
-    } catch(e) {
-      if (intento < intentos) { Utilities.sleep(2000 * intento); continue; }
-      return respuestaJson({ ok: false, error: 'Error al procesar imagen: ' + String(e) });
     }
   }
+  return respuestaJson({ ok: false, error: 'Gemini: ' + ultimoError });
 }
