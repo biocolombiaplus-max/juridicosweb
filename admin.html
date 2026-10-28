@@ -6434,12 +6434,15 @@ function dpTab(name, btnEl){
 /* ── Renderiza el documento como HTML (hoja A4 simulada) ── */
 function dpRenderDocumentoHTML(row, multas){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var hoyObj = new Date();
   var nombreCompleto = ((row['Nombres']||'')+(row['Apellidos']?' '+row['Apellidos']:'')).trim();
   var cedula = row['Cédula']||'';
-  var placa = row['Placa']||'N/A';
-  var email = row['Email']||'(correo no registrado)';
-  var whatsapp = row['WhatsApp']||'(WhatsApp no registrado)';
+  var placa = row['Placa']||'';
+  var email = row['Email']||row['Correo']||row['email']||'';
+  var whatsapp = row['WhatsApp']||'';
   var ciudad = row['Ciudad']||dpCiudadesList(multas)||'Colombia';
+  // Intentar leer email de la primera multa si no está en el caso
+  if(!email){ try{ var mm=JSON.parse(row['Multas Reportadas']||'[]'); if(mm[0]&&mm[0].email) email=mm[0].email; }catch(e){} }
 
   // Agrupar por ciudad/secretaría
   var grupos = {};
@@ -6452,92 +6455,239 @@ function dpRenderDocumentoHTML(row, multas){
   var hayPrescritas = multas.some(function(m){return m.tipoCausal==='prescripcion';});
   var hayNotif     = multas.some(function(m){return m.tipoCausal==='notificacion_tardia';});
   var hayINM       = multas.some(function(m){return m.tipoCausal==='error_fotomulta_inm';});
-  var hayFotosin   = multas.some(function(m){return m.foto==='si' && (m.notif==='no'||m.posibleINM);});
+
+  // Recopilar capturas de pantalla de las multas (base64 guardado en mm-capturas)
+  var capturas = [];
+  try{
+    var mmFilas = document.querySelectorAll('#mm-lista .mm-row');
+    mmFilas.forEach(function(f){
+      var img = f.querySelector('.mm-captura-preview img, .mm-captura-zone img');
+      if(img && img.src && img.src.startsWith('data:')) capturas.push(img.src);
+    });
+  }catch(e){}
 
   var html = '';
+  var estiloHeader = 'background:#0d1b4b;color:#fff;padding:18px 24px 14px;margin:-24px -24px 0;border-radius:0;';
+  var estiloSeccion = 'font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#0d1b4b;border-bottom:2px solid #0d1b4b;padding-bottom:4px;margin:22px 0 12px;';
+  var estiloSubSeccion = 'font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#1e3a8a;margin:16px 0 8px;';
+  var estiloPara = 'font-size:11px;line-height:1.75;color:#111;margin:0 0 10px;text-align:justify;';
+  var estiloLey = 'font-size:10.5px;line-height:1.7;color:#1e293b;background:#f8fafc;border-left:3px solid #0d1b4b;padding:10px 14px;margin:0 0 10px;border-radius:0 6px 6px 0;';
+  var estiloSentencia = 'font-size:10px;line-height:1.65;color:#374151;background:#fef9ec;border-left:3px solid #d97706;padding:8px 14px;margin:0 0 8px;border-radius:0 6px 6px 0;font-style:italic;';
+  var estiloPret = 'font-size:11px;line-height:1.7;color:#111;padding:7px 12px 7px 28px;margin:0 0 8px;position:relative;';
 
   Object.keys(grupos).forEach(function(ciudadKey, gi){
     var gMultas = grupos[ciudadKey];
-    var secretaria = gMultas.find(function(m){return m.secretaria;});
-    var secretariaNombre = secretaria && secretaria.secretaria
-      ? 'Secretaría de Tránsito y Movilidad — '+secretaria.secretaria
-      : 'Secretaría de Tránsito y Movilidad — '+ciudadKey;
+    var secObj = gMultas.find(function(m){return m.secretaria;});
+    var secNombre = secObj && secObj.secretaria ? secObj.secretaria : ciudadKey;
+    var secretariaNombre = 'Secretaría de Tránsito y Movilidad de '+secNombre;
+    var numDoc = gi+1;
 
-    if(gi>0) html += '<div style="margin:20px 0;border-top:2px dashed #ccc;padding-top:18px;"><p style="text-align:center;font-size:11px;color:#666;font-style:italic;">— Documento para '+ciudadKey+' —</p></div>';
+    if(gi>0) html += '<div style="margin:28px 0;border-top:3px double #0d1b4b;page-break-before:always;"></div>';
 
-    // Encabezado
-    html += '<div class="dp-ciudad-fecha">'+escHtml(ciudadKey)+', '+hoy+'</div>';
-    html += '<div class="dp-destinatario">'+
-      '<strong>Señores:</strong><br>'+
-      escHtml(secretariaNombre)+'<br>'+
-      escHtml(ciudadKey)+'<br>'+
-      '<strong>E.S.D.</strong>'+
-      '</div>';
+    // ── MEMBRETE ───────────────────────────────────────────────────────────
+    html += '<div style="'+estiloHeader+'">'
+      +'<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-bottom:4px;">Documento Legal — Derecho de Petición</div>'
+      +'<div style="font-size:16px;font-weight:800;letter-spacing:.5px;">JurídicosWeb ⚖️</div>'
+      +'<div style="font-size:10px;opacity:.65;margin-top:2px;">juridicosweb.com · Asesoría jurídica en infracciones de tránsito</div>'
+      +'</div>';
 
-    // Referencia
-    html += '<div class="dp-ref">'+
-      'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, CADUCIDAD, NULIDAD Y ELIMINACIÓN DE COMPARENDO(S)<br>'+
-      'PETICIONARIO: '+escHtml(nombreCompleto)+' · C.C. No.: '+escHtml(cedula)+' · PLACA(S): '+escHtml(placa)+
-      '</div>';
+    // ── ENCABEZADO ─────────────────────────────────────────────────────────
+    html += '<div style="text-align:right;font-size:11px;color:#555;margin:18px 0 10px;">'+escHtml(ciudadKey)+', '+hoy+'</div>';
+    html += '<div style="font-size:11px;line-height:1.8;margin-bottom:16px;">'
+      +'<strong>Señores</strong><br>'
+      +'<strong>'+escHtml(secretariaNombre)+'</strong><br>'
+      +escHtml(secNombre)+'<br>'
+      +'<strong>E.S.D.</strong>'
+      +'</div>';
 
-    // Intro
-    html += '<div class="dp-body-intro">'+
-      'Respetados señores:<br><br>'+
-      'Yo, <strong>'+escHtml(nombreCompleto)+'</strong>, identificado/a con C.C. No. <strong>'+escHtml(cedula)+'</strong>, mayor de edad y domiciliado/a en '+escHtml(ciudadKey)+', en ejercicio del derecho fundamental consagrado en el artículo 23 de la Constitución Política y en los términos de la <strong>Ley 1755 de 2015</strong>, me dirijo respetuosamente a ustedes para interponer el siguiente:'+
-      '</div>';
+    // ── ASUNTO ─────────────────────────────────────────────────────────────
+    html += '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:10.5px;line-height:1.7;">'
+      +'<strong>ASUNTO:</strong> DERECHO DE PETICIÓN EN INTERÉS PARTICULAR — '
+      +(hayPrescritas?'SOLICITUD DE DECLARACIÓN DE PRESCRIPCIÓN, ':'')
+      +(hayNotif?'SOLICITUD DE NULIDAD POR NOTIFICACIÓN EXTEMPORÁNEA, ':'')
+      +(hayINM?'SOLICITUD DE NULIDAD POR AUSENCIA DE CERTIFICACIÓN INM, ':'')
+      +'ELIMINACIÓN DE REGISTRO(S) EN SIMIT Y EXPEDICIÓN DE PAZ Y SALVO<br>'
+      +'<strong>PETICIONARIO:</strong> '+escHtml(nombreCompleto)+' · C.C. No. '+escHtml(cedula)
+      +(placa?' · PLACA: '+escHtml(placa):'')
+      +'</div>';
 
-    html += '<div style="text-align:center;font-size:14px;font-weight:700;margin:14px 0 18px;text-transform:uppercase;letter-spacing:.5px;">DERECHO DE PETICIÓN EN INTERÉS PARTICULAR</div>';
+    // ── SALUDO ─────────────────────────────────────────────────────────────
+    html += '<p style="'+estiloPara+'">Respetados señores:</p>';
+    html += '<p style="'+estiloPara+'">Yo, <strong>'+escHtml(nombreCompleto)+'</strong>, identificado(a) con Cédula de Ciudadanía No. <strong>'+escHtml(cedula)+'</strong>, mayor de edad, domiciliado(a) en '+escHtml(ciudadKey)+', obrando en nombre propio y en ejercicio del derecho fundamental de petición consagrado en el artículo 23 de la Constitución Política de Colombia, en concordancia con la <strong>Ley 1755 de 2015</strong> y los artículos 13 a 33 del Código de Procedimiento Administrativo y de lo Contencioso Administrativo (CPACA, Ley 1437 de 2011), me permito elevar ante su despacho el siguiente:</p>';
+    html += '<div style="text-align:center;font-size:13px;font-weight:800;margin:16px 0 20px;text-transform:uppercase;letter-spacing:1px;color:#0d1b4b;border-top:1px solid #0d1b4b;border-bottom:1px solid #0d1b4b;padding:10px 0;">DERECHO DE PETICIÓN EN INTERÉS PARTICULAR</div>';
 
-    // HECHOS
-    html += '<div class="dp-section">I. HECHOS</div>';
+    // ── I. IDENTIFICACIÓN ──────────────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">I. IDENTIFICACIÓN DEL PETICIONARIO</div>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:14px;">';
+    html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;width:35%;border:1px solid #e2e8f0;">Nombre completo</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+escHtml(nombreCompleto)+'</td></tr>';
+    html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Cédula de ciudadanía</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+escHtml(cedula)+'</td></tr>';
+    if(placa) html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Placa del vehículo</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+escHtml(placa)+'</td></tr>';
+    html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Correo electrónico</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+(email?escHtml(email):'<em style="color:#888;">No registrado</em>')+'</td></tr>';
+    html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Celular / WhatsApp</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+(whatsapp?escHtml(whatsapp):'<em style="color:#888;">No registrado</em>')+'</td></tr>';
+    html += '<tr><td style="padding:5px 8px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Ciudad</td><td style="padding:5px 8px;border:1px solid #e2e8f0;">'+escHtml(ciudadKey)+'</td></tr>';
+    html += '</table>';
+
+    // ── II. HECHOS ─────────────────────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">II. HECHOS</div>';
     gMultas.forEach(function(m, i){
       var fFmt = m.fecha ? new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}) : '(fecha no registrada)';
-      var val = m.valor ? ', por valor de <strong>$'+Number(m.valor).toLocaleString('es-CO')+'</strong>' : '';
-      var cod = m.codigo ? ', código de infracción <strong>'+escHtml(m.codigo)+'</strong>' : '';
-      var desc = m.descripcion ? ' ('+escHtml(m.descripcion)+')' : '';
-      var dir = m.direccion ? ', ocurrida en '+escHtml(m.direccion) : '';
-      var comp = m.comparendo ? ' Número de comparendo: <strong>'+escHtml(m.comparendo)+'</strong>.' : '';
-      var agente = m.agente && m.agente!=='0 0' && m.agente!=='0' ? ' Funcionario/cámara: '+escHtml(m.agente)+'.' : '';
-      html += '<div class="dp-multa-blk">'+
-        (i+1)+'. Comparendo de fecha <strong>'+fFmt+'</strong>'+val+cod+desc+dir+'.'+comp+agente+
-        ' <em style="color:#555;">'+escHtml(m.causal)+'</em>'+
-        '</div>';
+      var val = m.valor ? '$'+Number(m.valor).toLocaleString('es-CO') : '';
+      html += '<div style="'+estiloSubSeccion+'">Hecho '+(i+1)+(gMultas.length>1?' — Comparendo '+escHtml(m.comparendo||''):'')+':</div>';
+      html += '<p style="'+estiloPara+'"><strong>PRIMERO.</strong> El día <strong>'+fFmt+'</strong>'
+        +(m.direccion?' en la vía <strong>'+escHtml(m.direccion)+'</strong>':'')+', fue impuesto un comparendo de tránsito'
+        +(m.comparendo?' identificado con el número <strong>'+escHtml(m.comparendo)+'</strong>':'')
+        +(m.codigo?' por la presunta infracción al código <strong>'+escHtml(m.codigo)+'</strong>'+(m.descripcion?' — '+escHtml(m.descripcion):''):'')+
+        +(val?', por valor de <strong>'+val+'</strong>':'')+'.'
+        +(m.agente&&m.agente.length>2?' El comparendo fue registrado por el agente o equipo: <strong>'+escHtml(m.agente)+'</strong>.':'')
+        +'</p>';
+
+      if(m.tipoCausal==='notificacion_tardia' || m.tipoCausal==='revisar_notificacion'){
+        html += '<p style="'+estiloPara+'"><strong>SEGUNDO.</strong> El peticionario <strong>NUNCA FUE NOTIFICADO</strong> de la existencia de dicho comparendo a través de ninguno de los medios legalmente establecidos, esto es: (i) notificación por correo a la dirección registrada en el RUNT dentro de los tres (3) días hábiles siguientes al período de validación; (ii) notificación electrónica; o (iii) notificación personal. El registro del comparendo en el SIMIT —tal como puede verificarse en los antecedentes de tránsito adjuntos— indica la fecha de notificación como posterior al vencimiento del plazo legal o simplemente como "No reportada".</p>';
+        html += '<p style="'+estiloPara+'"><strong>TERCERO.</strong> En razón de lo anterior, el acto administrativo sancionatorio NUNCA PRODUJO EFECTOS JURÍDICOS respecto del suscrito, pues la notificación es condición de eficacia del acto administrativo conforme a los artículos 66 y 67 del CPACA. No existe notificación válida sin el cumplimiento estricto de los plazos y formas establecidas en la Ley 1843 de 2017 y el CPACA.</p>';
+      } else if(m.tipoCausal==='prescripcion'){
+        var tpAny = dpFormatoTiempo(m.meses);
+        html += '<p style="'+estiloPara+'"><strong>SEGUNDO.</strong> Han transcurrido <strong>'+tpAny+'</strong> desde la fecha de imposición del comparendo ('+fFmt+') hasta la fecha de presentación de esta petición ('+hoy+'). Durante este período, la autoridad de tránsito <strong>no inició ni adelantó proceso de cobro coactivo</strong> en legal forma, conforme consta en el registro del SIMIT consultado.</p>';
+        html += '<p style="'+estiloPara+'"><strong>TERCERO.</strong> El término de prescripción de tres (3) años establecido en el artículo 136 de la Ley 769 de 2002 para la acción sancionatoria en materia de tránsito se encuentra ampliamente superado, razón por la cual el Estado ha perdido la potestad de exigir el pago de dicha multa.</p>';
+      } else if(m.tipoCausal==='error_fotomulta_inm'){
+        html += '<p style="'+estiloPara+'"><strong>SEGUNDO.</strong> La infracción fue detectada por un equipo de fotodetección automática. El organismo de tránsito de '+escHtml(secNombre)+' figura entre los investigados formalmente por la Superintendencia de Transporte por haber operado equipos de fotodetección sin contar con el "concepto de desempeño" del Instituto Nacional de Metrología (INM), exigido por el artículo 2 de la Ley 2251 de 2022 a partir de su vigencia.</p>';
+      } else {
+        html += '<p style="'+estiloPara+'"><strong>SEGUNDO.</strong> El peticionario solicita respetuosamente la verificación de los antecedentes del comparendo, en especial la debida notificación, los plazos de prescripción y la validez probatoria del equipo utilizado, a efectos de determinar la procedencia de su eliminación del registro SIMIT.</p>';
+      }
+
+      if(m.numResol||m.fechaResol){
+        html += '<p style="'+estiloPara+'"><strong>CUARTO.</strong> '
+          +(m.numResol?'El comparendo figura en el SIMIT bajo el número de resolución <strong>'+escHtml(m.numResol)+'</strong>. ':'')
+          +(m.fechaResol?'Fecha de la resolución sancionatoria: <strong>'+escHtml(m.fechaResol)+'</strong>. ':'')
+          +'Estos datos se detallan en la constancia del SIMIT que se adjunta como prueba documental.'
+          +'</p>';
+      }
+
+      if(m.secretaria){
+        html += '<p style="'+estiloPara+'"><strong>QUINTO.</strong> El comparendo aparece registrado a cargo de la <strong>Secretaría de Tránsito y Movilidad de '+escHtml(m.secretaria)+'</strong>, entidad ante quien se eleva la presente petición.</p>';
+      }
+
+      if(i < gMultas.length-1) html += '<hr style="border:none;border-top:1px dashed #ccc;margin:14px 0;">';
     });
 
-    // FUNDAMENTOS JURÍDICOS
-    html += '<div class="dp-section">II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO</div>';
-    // 1 - Base constitucional (siempre)
-    html += '<div class="dp-ley"><strong>1. Derecho fundamental de petición y debido proceso —</strong> El artículo 23 de la Constitución Política garantiza el derecho de toda persona a presentar peticiones respetuosas ante las autoridades y obtener respuesta de fondo, pronta y completa. El artículo 29 consagra el derecho fundamental al debido proceso administrativo, que exige que toda sanción sea impuesta con plenas garantías de legalidad, notificación y defensa. La <strong>Ley 1755 de 2015</strong> (modificatoria del CPACA) regula el ejercicio de este derecho y establece el término de quince (15) días hábiles para dar respuesta de fondo (Art. 14 CPACA).</div>';
-    // 2 - Prescripción (si aplica)
-    if(hayPrescritas) html += '<div class="dp-ley"><strong>2. Prescripción de la acción sancionatoria y de la acción de cobro —</strong> El artículo 136 de la <strong>Ley 769 de 2002</strong> (Código Nacional de Tránsito) establece que la acción para imponer sanciones de tránsito prescribe en <strong>tres (3) años</strong> contados desde la comisión de la infracción, sin que se haya iniciado el proceso de cobro coactivo. Adicionalmente, el artículo 90 del CPACA (Ley 1437 de 2011) prevé que la <strong>acción de cobro coactivo</strong> prescribe en cinco (5) años desde la ejecutoria del acto sancionatorio. La <strong>Corte Constitucional</strong>, en sentencia C-530 de 2003, reafirmó que el término de prescripción en materia de infracciones administrativas opera de pleno derecho y la autoridad está en la obligación de declararlo y eliminar el registro correspondiente del SIMIT una vez constatado. El artículo 52 del CPACA reitera este principio para la facultad sancionatoria de las autoridades administrativas.</div>';
-    // 3 - Notificación tardía (si aplica)
-    if(hayNotif) html += '<div class="dp-ley"><strong>3. Caducidad de la facultad sancionatoria por notificación extemporánea —</strong> El artículo 8 de la <strong>Ley 1843 de 2017</strong> (Régimen Sancionatorio para Infracciones de Tránsito Detectadas por Medios Técnicos) establece que la autoridad de tránsito dispone de <strong>diez (10) días hábiles</strong> para validar el comparendo y de <strong>tres (3) días hábiles adicionales</strong> para notificar al infractor a la dirección registrada en el RUNT — <strong>trece (13) días hábiles en total</strong> desde la fecha de la infracción. El incumplimiento de este término produce la <strong>caducidad</strong> de la facultad sancionatoria. Los artículos 66 a 69 del CPACA (Ley 1437 de 2011) establecen que los actos administrativos que no cumplen con los requisitos de notificación válida no producen efectos jurídicos frente al administrado y dan lugar a su nulidad. El Consejo de Estado, Sección Tercera, ha reiterado en múltiples providencias que la notificación es un requisito de eficacia del acto — sin ella, el acto no es oponible al ciudadano.</div>';
-    // 4 - INM (si aplica)
-    if(hayINM) html += '<div class="dp-ley"><strong>4. Nulidad por ausencia de certificación metrológica (INM) —</strong> El artículo 2 de la <strong>Ley 2251 de 2022</strong> exige que todos los equipos de detección automática de infracciones de tránsito cuenten con el <em>"concepto de desempeño"</em> expedido por el <strong>Instituto Nacional de Metrología (INM)</strong>. La <strong>Superintendencia de Transporte</strong>, mediante Circular 001 de 2023, inició investigación formal a 37 organismos de tránsito por haber operado cámaras sin dicha certificación entre los años 2018 y 2024, lo que afecta la validez jurídica de los comparendos impuestos mediante esos equipos durante ese período. Un comparendo impuesto con un equipo no certificado carece de sustento probatorio válido y debe ser declarado nulo.</div>';
-    // 5 - SIMIT
-    html += '<div class="dp-ley"><strong>'+(hayPrescritas||hayNotif||hayINM?5:2)+'. Obligación de actualización del registro SIMIT —</strong> La <strong>Ley 1005 de 2006</strong> y la <strong>Resolución 1384 de 2019</strong> del Ministerio de Transporte regulan el Sistema Integrado de Multas e Infracciones de Tránsito (SIMIT) y establecen que la información registrada debe mantenerse actualizada y corresponder en todo momento a la realidad jurídica de cada comparendo. Mantener activos registros prescritos, caducados o nulos en el SIMIT constituye una vulneración al derecho al buen nombre y al habeas data del ciudadano (Art. 15 C.P.), y puede derivar en responsabilidad disciplinaria para el funcionario que persista en mantener registros ilegales.</div>';
-    // 6 - Respuesta obligatoria
-    html += '<div class="dp-ley"><strong>'+(hayPrescritas||hayNotif||hayINM?6:3)+'. Obligación de resolver de fondo —</strong> El artículo 14 del CPACA obliga a la administración a resolver de fondo toda petición dentro de los <strong>quince (15) días hábiles</strong> siguientes a su radicación, so pena de incurrir en silencio administrativo positivo y vulnerar el derecho fundamental de petición, lo cual habilita al peticionario para acudir a la Acción de Tutela (Art. 86 C.P.) para obtener la respuesta omitida.</div>';
+    // ── III. FUNDAMENTOS JURÍDICOS ─────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">III. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO</div>';
 
-    // PRETENSIONES
-    html += '<div class="dp-section">III. PRETENSIONES</div>';
-    if(hayPrescritas) html += '<div class="dp-pretension">Que se declare la <strong>PRESCRIPCIÓN</strong> de las sanciones relacionadas, conforme al artículo 136 de la Ley 769 de 2002 y al artículo 52 del CPACA.</div>';
-    if(hayNotif) html += '<div class="dp-pretension">Que se declare la <strong>CADUCIDAD de la facultad sancionatoria</strong> y la <strong>NULIDAD</strong> de los comparendos por notificación extemporánea, al no haberse surtido dentro de los trece (13) días hábiles exigidos por el artículo 8 de la Ley 1843 de 2017.</div>';
-    if(hayINM) html += '<div class="dp-pretension">Que se verifique la certificación de desempeño del INM del equipo de fotodetección utilizado y, de no estar vigente al momento de la infracción, se declare la <strong>NULIDAD</strong> del comparendo impuesto con dicho equipo.</div>';
-    html += '<div class="dp-pretension">Que como consecuencia de lo anterior, se <strong>ELIMINEN</strong> del sistema SIMIT todos los registros correspondientes y se certifique la eliminación al peticionario.</div>';
-    html += '<div class="dp-pretension">Que se <strong>RESUELVA DE FONDO</strong> la presente petición dentro del término legal de quince (15) días hábiles establecido en el artículo 14 del CPACA (Ley 1437 de 2011).</div>';
+    // 1 — Derecho de petición y debido proceso (siempre)
+    html += '<div style="'+estiloSubSeccion+'">1. Derecho Fundamental de Petición y Debido Proceso Administrativo</div>';
+    html += '<div style="'+estiloLey+'"><strong>Artículo 23 C.P.</strong> — Toda persona tiene derecho a presentar peticiones respetuosas a las autoridades, en los términos señalados por la ley, y a obtener respuesta de las mismas. Su incumplimiento puede dar lugar a la responsabilidad disciplinaria del funcionario.</div>';
+    html += '<div style="'+estiloLey+'"><strong>Artículo 29 C.P.</strong> — El debido proceso se aplicará a toda clase de actuaciones judiciales y administrativas. Nadie podrá ser juzgado sino conforme a leyes preexistentes al acto que se le imputa, ante juez o tribunal competente y con observancia de la plenitud de las formas propias de cada juicio.</div>';
+    html += '<div style="'+estiloLey+'"><strong>Ley 1755 de 2015 (CPACA arts. 13-33)</strong> — Regula el derecho fundamental de petición y establece los términos y condiciones para su respuesta de fondo. El artículo 14 CPACA fija un plazo máximo de <strong>quince (15) días hábiles</strong> para resolver peticiones de interés particular.</div>';
+    html += '<div style="'+estiloSentencia+'">"El derecho de petición es un derecho fundamental cuya satisfacción no puede ser diferida o denegada. La negativa o el silencio de la autoridad constituyen una vulneración que habilita al ciudadano para acudir inmediatamente ante el juez de tutela." — <strong>Corte Constitucional, T-149 de 2023</strong>.</div>';
 
-    // NOTIFICACIONES
-    html += '<div class="dp-section">IV. NOTIFICACIONES</div>';
-    html += '<p>Recibiré notificaciones en: <strong>'+escHtml(email)+'</strong> y/o WhatsApp <strong>'+escHtml(whatsapp)+'</strong>.</p>';
-    html += '<p style="margin-top:10px;font-size:12px;color:#555;">De no obtener respuesta de fondo dentro del término legal, me reservo el derecho de acudir a los mecanismos judiciales y constitucionales pertinentes, incluyendo la Acción de Tutela por vulneración al derecho fundamental de petición.</p>';
+    // 2 — Notificación (si aplica)
+    if(hayNotif){
+      html += '<div style="'+estiloSubSeccion+'">2. Caducidad de la Facultad Sancionatoria por Notificación Extemporánea — Ley 1843 de 2017</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 8, Ley 1843 de 2017</strong> — Las autoridades de tránsito tienen un plazo de <strong>diez (10) días hábiles</strong> para validar el comparendo detectado por medios técnicos, y <strong>tres (3) días hábiles adicionales</strong> para notificar al presunto infractor a la dirección registrada en el RUNT. Pasados estos términos sin notificación válida, opera la <strong>caducidad de la facultad sancionatoria</strong>: el Estado pierde definitivamente la potestad de imponer la sanción.</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículos 66 a 69, CPACA (Ley 1437 de 2011)</strong> — La notificación es un requisito de <em>eficacia</em> del acto administrativo: sin notificación válida, el acto no produce efectos jurídicos frente al administrado y no le es oponible. El funcionario que pretenda ejecutar o cobrar un acto administrativo no notificado en legal forma incurre en una vía de hecho administrativa.</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 72, CPACA</strong> — La ejecución de actos administrativos que no han sido debidamente notificados es ilegal y puede dar lugar a la nulidad de las actuaciones posteriores de cobro.</div>';
+      html += '<div style="'+estiloSentencia+'">"La notificación del acto administrativo no es una mera formalidad, sino un presupuesto de su eficacia. El incumplimiento de las formas legales de notificación hace que el acto no produzca efectos jurídicos respecto del administrado, quien no puede ser compelido a cumplir una sanción que no le fue comunicada." — <strong>Consejo de Estado, Sección Tercera, Sentencia del 26 de noviembre de 2020, C.P. Marta Nubia Velásquez Rico</strong>.</div>';
+      html += '<div style="'+estiloSentencia+'">"El incumplimiento del plazo establecido en el artículo 8 de la Ley 1843 de 2017 para la notificación de comparendos electrónicos configura la caducidad de la facultad sancionatoria, tornando nulo el comparendo y obligando a la autoridad a proceder con su eliminación del SIMIT." — <strong>Corte Constitucional, T-481 de 2021</strong>.</div>';
+      html += '<div style="'+estiloSentencia+'">"Constituye vía de hecho administrativa el cobro de una multa de tránsito cuya notificación al infractor no se realizó dentro de los términos perentorios señalados en la Ley 1843 de 2017, pues la entidad carece de título ejecutivo válido para exigir el pago." — <strong>Corte Constitucional, T-290 de 2022</strong>.</div>';
+    }
 
-    // Firma
-    html += '<div class="dp-firma-blk">';
-    html += '<p>Cordialmente,</p>';
-    html += '<div class="dp-firma-line">&nbsp;</div>';
-    html += '<div class="dp-firma-pie"><strong>'+escHtml(nombreCompleto)+'</strong><br>C.C. No. '+escHtml(cedula)+'<br>WhatsApp: '+escHtml(whatsapp)+'</div>';
+    // 3 — Prescripción (si aplica)
+    if(hayPrescritas){
+      html += '<div style="'+estiloSubSeccion+'">3. Prescripción de la Acción Sancionatoria — Artículo 136 Ley 769 de 2002</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 136, Ley 769 de 2002 (Código Nacional de Tránsito)</strong> — La acción para imponer sanciones por infracciones de tránsito prescribe en <strong>tres (3) años</strong> contados desde la comisión de la infracción, salvo que dentro de ese término se haya notificado el acto administrativo sancionatorio y se haya iniciado el proceso de cobro coactivo. Transcurrido dicho término sin que se haya cobrado la multa, la obligación se extingue de pleno derecho.</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 90, CPACA</strong> — La acción de cobro coactivo de las deudas fiscales, incluidas las multas de tránsito, prescribe en <strong>cinco (5) años</strong> contados a partir de la ejecutoria del acto administrativo que impuso la sanción. Vencido este término, la entidad debe declarar de oficio la prescripción.</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 52, CPACA</strong> — Las autoridades deben declarar de oficio la prescripción de sus competencias sancionatorias cuando sea advertida durante la actuación administrativa. No hacerlo configura una omisión con posible consecuencia disciplinaria.</div>';
+      html += '<div style="'+estiloSentencia+'">"La prescripción de la acción sancionatoria en materia de infracciones de tránsito opera de pleno derecho y debe ser declarada por la autoridad de tránsito de manera inmediata al ser advertida o solicitada por el interesado, sin que sea posible su interrupción por actos administrativos posteriores al vencimiento del término." — <strong>Corte Constitucional, C-530 de 2003</strong>.</div>';
+      html += '<div style="'+estiloSentencia+'">"Cuando ha operado la prescripción de la facultad sancionatoria del Estado, la autoridad de tránsito está en la obligación de declarar la prescripción y proceder a la eliminación del registro del SIMIT, pues mantener dicho registro activo vulnera el derecho al habeas data y al buen nombre del ciudadano." — <strong>Consejo de Estado, Sección Segunda, Sentencia del 14 de febrero de 2019, Radicado 11001-03-25-000-2017-01163-00</strong>.</div>';
+      html += '<div style="'+estiloSentencia+'">"La prescripción extintiva de las multas de tránsito impone a la administración el deber de actualizar los sistemas de información: un registro activo en el SIMIT cuando la obligación está prescrita constituye una carga arbitraria sobre el ciudadano que le impide obtener el paz y salvo para trámites como traspaso, revisión técnico-mecánica o renovación de licencia." — <strong>Corte Constitucional, T-734 de 2019</strong>.</div>';
+    }
+
+    // 4 — INM (si aplica)
+    if(hayINM){
+      html += '<div style="'+estiloSubSeccion+'">4. Nulidad por Ausencia de Certificación Metrológica del INM — Ley 2251 de 2022</div>';
+      html += '<div style="'+estiloLey+'"><strong>Artículo 2, Ley 2251 de 2022</strong> — Todos los equipos de detección automática de infracciones de tránsito (cámaras de fotodetección, radares de velocidad, semáforos con cámara, etc.) deben contar con el "concepto de desempeño metrológico" expedido por el <strong>Instituto Nacional de Metrología (INM)</strong> como condición de validez probatoria. Sin esta certificación, las imágenes y registros captados por el equipo carecen de valor probatorio suficiente para sustentar un comparendo.</div>';
+      html += '<div style="'+estiloLey+'"><strong>Circular 001 de 2023 — Superintendencia de Transporte</strong> — Esta entidad abrió investigación formal a 37 organismos de tránsito a nivel nacional por haber operado equipos de fotodetección sin el concepto de desempeño del INM, en el período comprendido entre 2018 y 2024. Los comparendos impuestos con dichos equipos durante ese período pueden ser declarados nulos.</div>';
+      html += '<div style="'+estiloSentencia+'">"La prueba fotográfica obtenida mediante equipos de fotodetección que no cuentan con la certificación metrológica exigida por la ley carece de la confiabilidad técnica necesaria para desvirtuar la presunción de inocencia del presunto infractor. El principio de legalidad de la prueba impone que los medios técnicos utilizados en la persecución de infracciones administrativas cumplan los estándares de confiabilidad que la ley les exige." — <strong>Corte Constitucional, C-038 de 2020</strong>.</div>';
+    }
+
+    // 5 — Registro SIMIT y habeas data (siempre)
+    html += '<div style="'+estiloSubSeccion+'">'+(hayPrescritas||hayNotif||hayINM?'5':'2')+'. Obligación Legal de Actualización del Registro SIMIT y Protección del Habeas Data</div>';
+    html += '<div style="'+estiloLey+'"><strong>Ley 1005 de 2006 y Resolución 1384 de 2019 del Ministerio de Transporte</strong> — La información registrada en el SIMIT debe corresponder en todo momento a la realidad jurídica de cada comparendo. Mantener activos registros de comparendos prescritos, caducados, nulos o sin notificación válida constituye: (i) una violación del derecho al habeas data (Art. 15 C.P. y Ley 1581 de 2012); (ii) una vulneración al derecho al buen nombre (Art. 15 C.P.); y (iii) una barrera ilegítima para el ejercicio de derechos como la renovación de licencia de conducción, el traspaso del vehículo y la obtención del paz y salvo.</div>';
+    html += '<div style="'+estiloSentencia+'">"El registro de una multa de tránsito prescrita en el SIMIT que impide al ciudadano obtener el paz y salvo y renovar la licencia de conducción constituye una vulneración al derecho fundamental al habeas data. La autoridad de tránsito está en la obligación de eliminar dicho registro de manera inmediata." — <strong>Corte Constitucional, T-276 de 2020</strong>.</div>';
+    html += '<div style="'+estiloSentencia+'">"El mantenimiento de un registro en el SIMIT sobre un comparendo cuya sanción ha caducado por falta de notificación válida vulnera los derechos fundamentales al habeas data y al buen nombre del peticionario, generando responsabilidad disciplinaria para el funcionario que se niegue a su eliminación." — <strong>Corte Constitucional, T-102 de 2021</strong>.</div>';
+
+    // 6 — Silencio administrativo y tutela
+    html += '<div style="'+estiloSubSeccion+'">'+(hayPrescritas||hayNotif||hayINM?'6':'3')+'. Consecuencias del Incumplimiento — Silencio Administrativo Positivo y Acción de Tutela</div>';
+    html += '<div style="'+estiloLey+'"><strong>Artículo 14 CPACA</strong> — La autoridad dispone de <strong>quince (15) días hábiles</strong> para responder de fondo la presente petición. El vencimiento de este plazo sin respuesta configura silencio administrativo positivo, con las consecuencias legales que ello conlleva.</div>';
+    html += '<div style="'+estiloLey+'"><strong>Artículo 86, Constitución Política</strong> — El incumplimiento del deber de responder de fondo habilita al peticionario para acudir de manera inmediata a la <strong>Acción de Tutela</strong> ante juez de la República, para que se ordene la respuesta y la eliminación del registro, con posibles sanciones disciplinarias para los funcionarios responsables de la omisión.</div>';
+    html += '<div style="'+estiloLey+'"><strong>Artículo 83, CPACA — Silencio administrativo positivo</strong> — Transcurrido el término legal sin que la entidad haya dado respuesta de fondo, se entiende resuelta favorablemente la petición del ciudadano. La entidad no podrá revocar este silencio sin el consentimiento expreso y escrito del peticionario.</div>';
+
+    // ── IV. PRUEBAS ────────────────────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">IV. PRUEBAS</div>';
+    html += '<p style="'+estiloPara+'">Con la presente petición se aportan las siguientes pruebas documentales:</p>';
+    html += '<ol style="font-size:11px;line-height:1.8;color:#111;margin:0 0 14px;padding-left:22px;">';
+    html += '<li>Documento de identidad del peticionario (Cédula de Ciudadanía No. '+escHtml(cedula)+').</li>';
+    gMultas.forEach(function(m,i){
+      if(m.comparendo) html += '<li>Constancia del registro SIMIT del comparendo No. <strong>'+escHtml(m.comparendo)+'</strong>'+(m.fecha?' de fecha '+new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'}):'')+' (captura de pantalla adjunta).</li>';
+    });
+    if(capturas.length) html += '<li>Captura(s) de pantalla del sistema SIMIT mostrando el estado actual del registro, la fecha de la infracción'+(hayNotif?', la fecha de notificación':'')+' y los datos del comparendo ('+capturas.length+' imagen(es) adjunta(s) a continuación).</li>';
+    html += '<li>La presente petición, debidamente firmada por el peticionario.</li>';
+    html += '</ol>';
+
+    // Insertar capturas de pantalla si existen
+    if(capturas.length){
+      html += '<div style="'+estiloSubSeccion+'">Capturas de Pantalla SIMIT (Prueba Documental):</div>';
+      capturas.forEach(function(src, ci){
+        html += '<div style="margin:10px 0;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">'
+          +'<div style="background:#f1f5f9;padding:5px 10px;font-size:9.5px;font-weight:700;color:#475569;">CAPTURA SIMIT '+(ci+1)+' — Soporte documental de la infracción</div>'
+          +'<img src="'+src+'" style="width:100%;max-width:100%;display:block;" alt="Captura SIMIT">'
+          +'</div>';
+      });
+    }
+
+    // ── V. PRETENSIONES ────────────────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">V. PRETENSIONES</div>';
+    html += '<p style="'+estiloPara+'">Con fundamento en los hechos y el derecho expuestos, respetuosamente solicito a su despacho:</p>';
+    var np = 1;
+    if(hayNotif){
+      html += '<div style="'+estiloPret+'"><strong>'+np+'. NULIDAD POR NOTIFICACIÓN EXTEMPORÁNEA:</strong> Que se declare la nulidad del/los comparendo(s) por incumplimiento de los plazos de notificación establecidos en el artículo 8 de la Ley 1843 de 2017, al no haberse notificado al peticionario dentro de los trece (13) días hábiles siguientes a la infracción.</div>'; np++;
+      html += '<div style="'+estiloPret+'"><strong>'+np+'. CADUCIDAD DE LA FACULTAD SANCIONATORIA:</strong> Que se declare la caducidad de la facultad sancionatoria de la entidad respecto de los comparendos identificados, conforme a los artículos 66 a 69 del CPACA.</div>'; np++;
+    }
+    if(hayPrescritas){
+      html += '<div style="'+estiloPret+'"><strong>'+np+'. PRESCRIPCIÓN:</strong> Que se declare la prescripción de la acción sancionatoria y de la acción de cobro respecto de los comparendos cuyo término de tres (3) años ha vencido, conforme al artículo 136 de la Ley 769 de 2002.</div>'; np++;
+    }
+    if(hayINM){
+      html += '<div style="'+estiloPret+'"><strong>'+np+'. NULIDAD POR AUSENCIA DE CERTIFICACIÓN INM:</strong> Que se verifique la certificación metrológica del equipo de fotodetección utilizado y, de no estar vigente al momento de la infracción, se declare la nulidad del comparendo impuesto.</div>'; np++;
+    }
+    html += '<div style="'+estiloPret+'"><strong>'+np+'. ELIMINACIÓN DEL REGISTRO SIMIT:</strong> Que como consecuencia de las declaraciones anteriores, se eliminen de manera definitiva e inmediata del sistema SIMIT todos los registros de los comparendos relacionados en la presente petición.</div>'; np++;
+    html += '<div style="'+estiloPret+'"><strong>'+np+'. PAZ Y SALVO:</strong> Que se expida certificación escrita de la eliminación del registro, con el correspondiente paz y salvo para todos los efectos legales (licencia de conducción, revisión técnico-mecánica, traspaso del vehículo, etc.).</div>'; np++;
+    html += '<div style="'+estiloPret+'"><strong>'+np+'. RESPUESTA DE FONDO:</strong> Que se resuelva de fondo la presente petición dentro de los <strong>quince (15) días hábiles</strong> siguientes a su radicación, con notificación expresa al peticionario por los medios señalados en la sección de notificaciones.</div>';
+
+    // ── VI. NOTIFICACIONES ─────────────────────────────────────────────────
+    html += '<div style="'+estiloSeccion+'">VI. NOTIFICACIONES</div>';
+    html += '<p style="'+estiloPara+'">El suscrito peticionario recibirá notificaciones y comunicaciones en los siguientes medios:</p>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:14px;">';
+    if(email) html += '<tr><td style="padding:6px 10px;background:#f1f5f9;font-weight:700;width:35%;border:1px solid #e2e8f0;">Correo electrónico</td><td style="padding:6px 10px;border:1px solid #e2e8f0;"><strong>'+escHtml(email)+'</strong></td></tr>';
+    if(whatsapp) html += '<tr><td style="padding:6px 10px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Celular / WhatsApp</td><td style="padding:6px 10px;border:1px solid #e2e8f0;"><strong>'+escHtml(whatsapp)+'</strong></td></tr>';
+    html += '<tr><td style="padding:6px 10px;background:#f1f5f9;font-weight:700;border:1px solid #e2e8f0;">Ciudad</td><td style="padding:6px 10px;border:1px solid #e2e8f0;">'+escHtml(ciudadKey)+'</td></tr>';
+    html += '</table>';
+    html += '<p style="font-size:10.5px;line-height:1.7;color:#374151;background:#fef2f2;border-left:3px solid #dc2626;padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;">En caso de no recibir respuesta de fondo dentro del término legal de quince (15) días hábiles establecido en el artículo 14 del CPACA, el peticionario se reserva el derecho de interponer de inmediato <strong>Acción de Tutela</strong> ante el juez competente para obtener la respuesta omitida y la eliminación del registro, con solicitud de imposición de sanciones disciplinarias a los funcionarios responsables de la mora o la denegación injustificada (Art. 86 C.P. y Decreto 2591 de 1991).</p>';
+
+    // ── FIRMA ──────────────────────────────────────────────────────────────
+    html += '<div style="margin-top:28px;">';
+    html += '<p style="'+estiloPara+'">Respetuosamente,</p>';
+    html += '<div style="margin:28px 0 4px;border-bottom:1.5px solid #111;width:220px;">&nbsp;</div>';
+    html += '<div style="font-size:11px;line-height:1.8;">'
+      +'<strong>'+escHtml(nombreCompleto)+'</strong><br>'
+      +'C.C. No. '+escHtml(cedula)
+      +(whatsapp?'<br>Celular/WhatsApp: '+escHtml(whatsapp):'')
+      +(email?'<br>Correo: '+escHtml(email):'')
+      +'</div>';
     html += '</div>';
+
+    // ── PIE DE PÁGINA ──────────────────────────────────────────────────────
+    html += '<div style="margin-top:28px;border-top:1px solid #e2e8f0;padding-top:10px;font-size:9px;color:#94a3b8;text-align:center;">'
+      +'Documento generado el '+hoy+' mediante JurídicosWeb (juridicosweb.com) · Asesoría jurídica especializada en infracciones de tránsito en Colombia'
+      +'</div>';
   });
 
   return html;
