@@ -351,8 +351,9 @@ function normalizarTexto(s){
 function init(){
   var params = new URLSearchParams(window.location.search);
   var cedula = (params.get('cedula')||'').trim();
+  var waParam = String(params.get('wa')||'').replace(/\D/g,'').slice(-10);
   _tipo = params.get('tipo')==='tutela' ? 'tutela' : 'peticion';
-  if(!cedula){ mostrar('v-error'); return; }
+  if(!cedula && !waParam){ mostrar('v-error'); return; }
 
   if(_tipo==='tutela'){
     document.title = 'Firma tu Acción de Tutela — JurídicosWeb';
@@ -378,9 +379,10 @@ function init(){
       var rCed = String(r['Cédula']||'').replace(/\D/g,'').trim();
       var rWa  = String(r['WhatsApp']||r['Celular']||'').replace(/\D/g,'').slice(-10);
       var rEmail = String(r['Email']||'').trim().toLowerCase();
-      return rCed === cedulaNorm ||
+      return (cedulaNorm && rCed === cedulaNorm) ||
+             (waParam && rWa === waParam) ||
              (cedulaNorm.length >= 8 && rWa === cedulaNorm.slice(-10)) ||
-             rEmail === cedula.toLowerCase();
+             (cedula && rEmail === cedula.toLowerCase());
     }).pop();
     if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos tu caso. Pídele a tu asesor que verifique los datos o escríbenos por WhatsApp.'; mostrar('v-error'); return; }
     _caso = match;

@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028d';
+  var VER = '20261028e';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -2996,7 +2996,8 @@ function buildAcciones(row, estado){
     try{ tieneMultas = Array.isArray(JSON.parse(row['Multas Reportadas'])) && JSON.parse(row['Multas Reportadas']).length>0; }catch(e){}
     // El botón principal (enviar el enlace) va primero — es lo único que
     // normalmente hace falta tocar en este punto del caso.
-    var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']);
+    var _waFirma10 = String(row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10);
+    var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula'])+(_waFirma10?'&wa='+_waFirma10:'');
     var msgFirma = encodeURIComponent('Hola '+row['Nombres']+', tu pago quedó confirmado ✅. Para preparar tu Derecho de Petición, entra a este enlace desde tu celular, revisa tu documento y fírmalo con el dedo — toma 2 minutos: '+linkFirma);
     if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma+'" target="_blank" class="btn btn-success btn-sm">🖊️ '+(tieneMultas?'Enviar enlace de firma':'Enviar enlace (sin multas cargadas)')+'</a>';
     html += '<button class="btn btn-outline btn-sm" onclick="copiarEnlace(\''+linkFirma+'\',this)">📋 Copiar enlace de firma</button>';
@@ -3089,7 +3090,8 @@ function buildAccionesTutela(row, rowAttr){
   var tutelaPagada = row['Tutela Pagada']==='TRUE'||row['Tutela Pagada']===true;
 
   if(!tutelaFirmada){
-    var linkTutela = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula'])+'&tipo=tutela';
+    var _waTutela10 = String(row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10);
+    var linkTutela = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula'])+(_waTutela10?'&wa='+_waTutela10:'')+'&tipo=tutela';
     var msgWa = encodeURIComponent('Hola '+row['Nombres']+', activamos tu Acción de Tutela ✅. Entra a este enlace desde tu celular para revisarla y firmarla — toma 2 minutos. Recuerda: solo pagas los $45.000 si el resultado es positivo: '+linkTutela);
     html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'activar_tutela\',this,null,\'activar_tutela\')">⚖️ Activar Tutela y enviar enlace</button>';
     if(row['WhatsApp']) html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgWa+'" target="_blank" class="btn btn-success btn-sm">💬 Enviar enlace por WhatsApp</a>';
@@ -4086,7 +4088,8 @@ function guardarMultasAdmin(){
       var nombre    = (_mmCaso['Nombres']||'').split(' ')[0] || _mmCaso['Nombres'] || 'cliente';
       var wa        = (_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'');
       var _idFirma = _mmCaso['Cédula'] || (_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'').slice(-10) || _mmCaso['Email'] || '';
-      var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma);
+      var _waFirma10mm = String(_mmCaso['WhatsApp']||_mmCaso['Celular']||'').replace(/\D/g,'').slice(-10);
+      var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma) + (_waFirma10mm?'&wa='+_waFirma10mm:'');
       var planEl    = document.querySelector('input[name="mm-plan"]:checked');
       var plan      = planEl ? planEl.value : 'todas';
       var numMultas = document.querySelectorAll('#mm-lista .mm-row').length;
@@ -6426,7 +6429,8 @@ function dpRenderModal(){
   document.getElementById('dp-multas-detalle').innerHTML = dpRenderMultasDetalle(multas);
 
   // Botones
-  var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']||'');
+  var _waDp10 = String(row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10);
+  var linkFirma = FIRMAR_BASE_URL+'?cedula='+encodeURIComponent(row['Cédula']||'')+(_waDp10?'&wa='+_waDp10:'');
   var nombre1 = (row['Nombres']||'').split(' ')[0]||'cliente';
   var msgFirma = encodeURIComponent('¡Hola '+nombre1+'! 👋\n\nTu Derecho de Petición ya está listo ✅\n\nAbre este link desde tu celular, revisa el documento y fírmalo con el dedo — solo toma 2 minutos:\n'+linkFirma+'\n\nUna vez firmes lo radicamos el mismo día ante la secretaría de tránsito. ⚖️\n\n_JurídicosWeb_');
   var btnFirma = document.getElementById('dp-btn-firma');
