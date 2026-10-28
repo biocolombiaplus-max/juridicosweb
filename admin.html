@@ -3686,7 +3686,8 @@ function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
 
 // ── OCR local con Tesseract.js (fallback cuando Gemini falla) ─────────────
 function _mmParsearTextoSimit(texto){
-  var t = texto.replace(/\r/g,'');
+  // Normalizar: colapsar múltiples espacios en cada línea, conservar saltos de línea
+  var t = texto.replace(/\r/g,'').split('\n').map(function(l){return l.replace(/\s+/g,' ').trim();}).filter(Boolean).join('\n');
 
   var get = function(pats){
     for(var i=0;i<pats.length;i++){
@@ -3695,7 +3696,7 @@ function _mmParsearTextoSimit(texto){
     }
     return '';
   };
-  var norm = function(s){ // dd/mm/aaaa
+  var norm = function(s){
     if(!s) return '';
     var m = s.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
     if(!m) return '';
@@ -3703,120 +3704,124 @@ function _mmParsearTextoSimit(texto){
     return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y;
   };
 
-  // Número de comparendo: número largo (≥10 dígitos) — "Comparendo: 680810..."
-  var comparendo = get([
-    /[Cc]omparendo[:\s]+(\d{8,20})/,
-    /[Nn]o\.?\s*comparendo[\s\S]{0,50}?(\d{10,20})/i,
-    /\b(\d{15,20})\b/
-  ]);
+  // ── Estructura de la página SIMIT ──────────────────────────────────────
+  // El SIMIT tiene dos partes:
+  //   SIDEBAR (izquierda):
+  //     "Resolución: SAN26095209"
+  //     "Fecha: 25/08/2026"
+  //     "Comparendo: 6808100000005056069"
+  //     "Fecha comparendo: 01/04/2026"
+  //     "Secretaría: Barrancabermeja"
+  //     "Infracción: D04 - No detenerse..."
+  //   TABLA (derecha) — el OCR lee encabezados y valores como líneas separadas:
+  //     Fila 1 encabezados: "No. comparendo Fecha Hora Dirección Comparendo electrónico"
+  //     Fila 1 valores:     "6808100000005056069 01/04/2026 09:20:00 DIAGONAL 60 ... S"
+  //     Fila 2 encabezados: "Fecha notificación Fuente comparendo Secretaría Agente"
+  //     Fila 2 valores:     "26/06/2026 No reportada Barrancabermeja (68081000) FEIBER MALDONADO MORA"
+  //     Tabla Infracción:   "Código Descripción"
+  //                         "D04 No detenerse ante una luz roja..."
+  //     Tabla Vehículo:     "Placa No. Licencia del vehículo Tipo Servicio"
+  //                         "OXN44G ..."
+  // ───────────────────────────────────────────────────────────────────────
 
-  // Número de resolución: código corto alfanumérico — "Resolución: SAN26095209"
-  var numResol = get([
-    /[Rr]esoluci[oó]n[:\s]+([A-Z]{2,5}\d{4,12})/,
-    /[Rr]esoluci[oó]n[:\s]+([A-Z0-9\-]{5,20})/
-  ]);
+  // ── SIDEBAR (etiqueta: valor en la misma línea) ────────────────────────
+  var numResol   = get([/[Rr]esoluci[oó]n[:\s]+([A-Z]{2,5}\d{4,12})/]);
+  var fechaResol = get([/[Rr]esoluci[oó]n[^\n]+\n[Ff]echa[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/,
+                        /[Ff]echa[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})(?=[\s\S]{0,100}[Cc]omparendo[:\s])/]);
+  var comparendo = get([/[Cc]omparendo[:\s]+(\d{8,20})/,/\b(\d{15,20})\b/]);
+  var fechaInfrac= get([/[Ff]echa\s+comparendo[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/]);
+  var secSidebar = get([/[Ss]ecretar[ií]a[:\s]+([^\n\(]+)/]).replace(/\s*\(\d+\).*/,'').trim();
+  var codigo     = get([/[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–]/,
+                        /[Cc][oó]digo[:\s]+([A-Z]\d{2,3}[A-Z]?)\b/]);
+  var descSidebar= get([/[Ii]nfracci[oó]n[:\s]+[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/]);
+  var valor      = get([/[Vv]alor[:\s]+\$?\s*([\d.,]{3,15})/,/\$\s*([\d.,]{3,15})/]);
 
-  // Fecha resolución: "Fecha: 25/08/2026" línea justo después de "Resolución: SAN..."
-  var fechaResol = get([
-    /[Rr]esoluci[oó]n[:\s]+[A-Z0-9]+[\s\S]{0,30}?[Ff]echa[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/
-  ]);
-
-  // Fecha de la infracción: "Fecha comparendo: 01/04/2026" (no la fecha de la resolución)
-  var fechaInfrac = get([
-    /[Ff]echa\s+comparendo[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
-    /[Ff]echa\s+[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
-    // En la tabla: columna "Fecha" con valor debajo
-    /(?:^|\n)[Ff]echa\s*\n(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/
-  ]);
-  // Buscar todas las fechas dd/mm/aaaa y elegir la que no sea la de la resolución
-  if(!fechaInfrac){
-    var todasFechas = [];
-    var re = /\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g, mf;
-    while((mf=re.exec(t))!==null) todasFechas.push(mf[1]);
-    var frNorm = norm(fechaResol);
-    for(var fi=0;fi<todasFechas.length;fi++){
-      if(norm(todasFechas[fi]) !== frNorm){ fechaInfrac = todasFechas[fi]; break; }
+  // ── FILA 1 TABLA (No. comparendo | Fecha | Hora | Dirección | Comparendo electrónico) ──
+  // El OCR produce: encabezados en una línea, valores en la siguiente
+  // Buscar la línea de valores: contiene un número largo + fecha + hora + dirección + S/N
+  var direccion = '', esFoto = 'nose';
+  var mFila1 = t.match(/[Dd]irecci[oó]n[^\n]*\n([^\n]+)/);
+  if(mFila1){
+    var vl1 = mFila1[1];
+    // Dirección: buscar texto de vía después de la hora (HH:MM)
+    var mDir = vl1.match(/\d{2}:\d{2}(?::\d{2})?\s+([A-Z][^\n]+?)(?:\s+[SN]\s*$|\s+[SN]\b)/i);
+    if(mDir) direccion = mDir[1].trim();
+    else {
+      var mDir2 = vl1.match(/(?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|KM)\b[^\n]{3,80}/i);
+      if(mDir2) direccion = mDir2[0].trim();
     }
+    // Fotomulta: S o N al final de la línea de valores
+    esFoto = /\bS\s*$/.test(vl1.trim()) ? 'si' : /\bN\s*$/.test(vl1.trim()) ? 'no' : 'nose';
+    // Si no encontramos comparendo en sidebar, buscarlo aquí
+    if(!comparendo){ var mc=vl1.match(/\b(\d{10,20})\b/); if(mc) comparendo=mc[1]; }
+    // Si no encontramos fechaInfrac en sidebar, buscarlo aquí
+    if(!fechaInfrac){ var mfi=vl1.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/); if(mfi) fechaInfrac=mfi[1]; }
+  }
+  // Fallback esFoto
+  if(esFoto==='nose') esFoto = /[Cc]omparendo electr[oó]nico[\s\S]{0,20}S\b/i.test(t)?'si':/[Cc]omparendo electr[oó]nico[\s\S]{0,20}N\b/i.test(t)?'no':'nose';
+
+  // ── FILA 2 TABLA (Fecha notificación | Fuente comparendo | Secretaría | Agente) ──
+  // Valores: "26/06/2026 No reportada Barrancabermeja (68081000) FEIBER MALDONADO MORA"
+  var fechaNotif = '', secretaria = secSidebar, agente = '';
+  var mFila2 = t.match(/[Ff]echa\s+notificaci[oó]n[^\n]*\n([^\n]+)/);
+  if(mFila2){
+    var vl2 = mFila2[1];
+    var mfn = vl2.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+    if(mfn) fechaNotif = mfn[1];
+    // Secretaría: texto entre "No reportada" y "(" o nombre en mayúsculas
+    var mSec = vl2.match(/[Nn]o\s+reportada\s+([A-ZÁÉÍÓÚÑA-Za-z\s]+?)(?:\s*\(|\s{3}|$)/);
+    if(mSec) secretaria = mSec[1].trim();
+    else if(!secretaria){ var mSec2=vl2.match(/\d{4}\s+\S+\s+\S+\s+([A-ZÁÉÍÓÚÑ][A-Za-z\s]{3,30}?)(?:\s*\(|\s{3}|$)/); if(mSec2) secretaria=mSec2[1].trim(); }
+    // Agente: nombre en MAYÚSCULAS al final de la línea
+    var mAg = vl2.match(/\b([A-ZÁÉÍÓÚÑ]{2,}\s+[A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{2,})?)\s*$/);
+    if(mAg) agente = mAg[1].trim();
   }
 
-  // Fecha notificación (tabla: "Fecha notificación\n26/06/2026")
-  var fechaNotif = get([
-    /[Ff]echa\s+notificaci[oó]n[\s\S]{0,30}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
-    /notificaci[oó]n[\s\S]{0,30}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i
-  ]);
+  // ── TABLA INFRACCIÓN (Código | Descripción → siguiente línea: D04 <texto>) ──
+  var descripcion = descSidebar;
+  if(!descripcion || !codigo){
+    var mInfr = t.match(/[Cc][oó]digo\s+[Dd]escripci[oó]n\n([^\n]+)/);
+    if(mInfr){
+      var vi = mInfr[1];
+      var mCod = vi.match(/^([A-Z]\d{2,3}[A-Z]?)\s+/);
+      if(mCod){ if(!codigo) codigo=mCod[1]; var desc=vi.slice(mCod[0].length).replace(/[Cc][oó]digo\s+[Dd]escripci[oó]n.*$/,'').trim(); if(desc) descripcion=desc; }
+    }
+  }
+  if(!codigo) codigo = get([/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–\s]/]);
+  if(!descripcion && codigo) descripcion = get([new RegExp('\\b'+codigo+'\\s+([A-Z][^\\n]{10,200})')]);
+  // Limpiar artefactos de encabezados al final de la descripción
+  if(descripcion) descripcion = descripcion.replace(/\s*(C[oó]digo|Descripci[oó]n|Infractor|Datos\s+conductor|No\.\s*Licencia)[\s\S]*$/i,'').trim();
 
-  // Dirección: buscar keywords de vías colombianas
-  var direccion = get([
-    /[Dd]irecci[oó]n[\s\n]+([A-ZÁÉÍÓÚÑ][^\n]{5,80})/,
-    /\b((?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|AUTOPISTA|KM)\b[^\n]{3,80})/i
-  ]);
+  // ── TABLA VEHÍCULO (Placa → siguiente línea: OXN44G ...) ──
+  var placa = get([/[Pp]laca\n([A-Z]{3}\d{2,3}[A-Z]?)\b/,/[Pp]laca[:\s]+([A-Z]{3}\d{2,3}[A-Z]?)\b/,/\b([A-Z]{3}\d{2,3}[A-Z]?)\b/]);
 
-  // Secretaría: quitar código entre paréntesis "Barrancabermeja (68081000)" → "Barrancabermeja"
-  var secretaria = get([
-    /[Ss]ecretar[ií]a[:\s]+([^\n\(]{3,50})/,
-    /[Ss]ecretar[ií]a\s*\n([^\n\(]{3,50})/
-  ]).replace(/\s*\(\d+\).*/,'').trim();
+  // Si no encontramos fechaInfrac, usar la fecha distinta a la de resolución
+  if(!fechaInfrac){
+    var allF=[],rf=/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g,mf2;
+    while((mf2=rf.exec(t))!==null) allF.push(mf2[1]);
+    var frN=norm(fechaResol);
+    for(var fi=0;fi<allF.length;fi++){ if(norm(allF[fi])!==frN){fechaInfrac=allF[fi];break;} }
+  }
 
-  // Agente: nombre en mayúsculas después del label "Agente"
-  var agente = get([
-    /\bAgente\s*\n([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s]{4,50})/,
-    /\bAgente[:\s]+([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s]{4,50})/
-  ]).replace(/\n.*/,'').trim();
-  // Validar que no sea un label
-  if(/^[Ff]echa|^[Ss]ecret|^[Ff]uente|^[Ii]nfr/i.test(agente)) agente='';
-
-  // Código de infracción: letra + 2-3 dígitos (tabla SIMIT: "Código Descripción\nD04 No detenerse...")
-  var codigo = get([
-    /[Cc][oó]digo[\s\S]{0,40}?([A-Z]\d{2,3}[A-Z]?)\b/,
-    /[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–\s]/,
-    /\b([A-Z]\d{2,3})\s*[-–\s]/
-  ]);
-
-  // Descripción: texto después del código (en tabla SIMIT sin guión, solo espacio)
-  var descripcion = get([
-    /[Ii]nfracci[oó]n[:\s]+[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/,
-    /[Dd]escripci[oó]n[\s\S]{0,30}?([A-Z][^\n]{10,200})/,
-    codigo && codigo.length>1 ? new RegExp('\\b'+codigo+'\\s+([A-Z][^\\n]{10,200})') : /(?!)/
-  ]);
-
-  // Placa: "Placa\nOXN44G" (tabla con salto de línea entre header y valor)
-  var placa = get([
-    /[Pp]laca[\s\S]{0,60}?([A-Z]{3}\d{2,3}[A-Z]?)\b/,
-    /\b([A-Z]{3}\d{2,3}[A-Z]?)\b/
-  ]);
-
-  // Valor multa
-  var valor = get([
-    /[Vv]alor[:\s]+\$?\s*([\d.,]{3,15})/,
-    /\$\s*([\d.,]{3,15})/
-  ]);
-
-  // Ciudad: mismo que secretaría normalmente
-  var ciudad = secretaria;
-
-  // ¿Fotomulta? "Comparendo electrónico S" → sí
-  var esFoto = /[Cc]omparendo\s*electr[oó]nico[\s\S]{0,15}S\b/i.test(t)?'si'
-             : /[Cc]omparendo\s*electr[oó]nico[\s\S]{0,15}N\b/i.test(t)?'no'
-             : 'nose';
-
-  if(placa) placa = placa.replace(/[-\s]/g,'').toUpperCase();
-  if(valor) valor = valor.replace(/\./g,'').replace(',','.');
+  if(placa) placa=placa.replace(/[-\s]/g,'').toUpperCase();
+  if(valor) valor=valor.replace(/\./g,'').replace(',','.');
+  secretaria = secretaria.replace(/\s*\(\d+\).*/,'').trim();
 
   return {
-    comparendo: comparendo,
-    fecha:      norm(fechaInfrac),
-    direccion:  direccion,
-    fechaNotif: norm(fechaNotif),
-    secretaria: secretaria,
-    agente:     agente,
-    codigo:     codigo,
-    descripcion:descripcion,
-    placa:      placa||'',
-    valor:      valor||'',
-    numResol:   numResol,
-    fechaResol: norm(fechaResol),
-    ciudad:     ciudad,
-    esFoto:     esFoto
+    comparendo:  comparendo||'',
+    fecha:       norm(fechaInfrac),
+    direccion:   direccion||'',
+    fechaNotif:  norm(fechaNotif),
+    secretaria:  secretaria||'',
+    agente:      agente||'',
+    codigo:      codigo||'',
+    descripcion: descripcion||'',
+    placa:       placa||'',
+    valor:       valor||'',
+    numResol:    numResol||'',
+    fechaResol:  norm(fechaResol),
+    ciudad:      secretaria||'',
+    esFoto:      esFoto
   };
 }
 
@@ -3829,7 +3834,7 @@ function _mmOcrFallback(row, file, b64, label){
   }
   label.textContent = '🔍 Leyendo texto con OCR...';
   row.querySelector('.mm-captura-zone').style.borderColor='#8b5cf6';
-  Tesseract.recognize(b64,'spa+eng',{
+  Tesseract.recognize(b64,'eng',{
     logger: function(m){
       if(m.status==='recognizing text') label.textContent='🔍 OCR... '+Math.round((m.progress||0)*100)+'%';
     }
