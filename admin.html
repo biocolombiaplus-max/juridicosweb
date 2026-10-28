@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028h';
+  var VER = '20261028i';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -3599,6 +3599,11 @@ function agregarFilaMultaAdmin(datos){
   if(datos.foto)  div.querySelector('.mm-foto').value  = datos.foto;
   if(datos.foto==='si') div.querySelector('.mm-notif-wrap').style.display = '';
   if(datos.tipo)  div.querySelector('.mm-tipo').value  = datos.tipo;
+  // Si fechaNotif igual a fecha (error de OCR), limpiar para que admin corrija
+  if(datos.fechaNotif && datos.fechaNotif === datos.fecha){
+    div.querySelector('.mm-fechanotif').value = '';
+    div.querySelector('.mm-diasnotif').value  = '';
+  }
   if(datos.capturaSmall){
     div.querySelector('.mm-captura-b64-small').value = datos.capturaSmall;
     var prvSmall = div.querySelector('.mm-captura-preview');
@@ -3654,7 +3659,7 @@ function toggleNotifMm(select){
 
 // ── Captura de pantalla SIMIT ──────────────────────────────────────────────
 var _GEMINI_MODELOS = ['gemini-2.5-flash','gemini-2.5-flash-8b','gemini-3.8-flash','gemini-2.5-pro'];
-var _GEMINI_PROMPT  = 'Eres un asistente jurídico colombiano. Extrae los datos de esta captura del SIMIT y devuelve SOLO un JSON válido con estas claves exactas (cadena vacía "" si no encuentras el dato):\n{"comparendo":"número completo del comparendo","fecha":"fecha infracción dd/mm/aaaa","direccion":"dirección en mayúsculas","fechaNotif":"fecha notificación dd/mm/aaaa","secretaria":"nombre secretaría/municipio tránsito","agente":"nombre completo del agente","codigo":"código infracción ej D04","descripcion":"descripción completa infracción","placa":"placa vehículo mayúsculas","numResol":"número de resolución","fechaResol":"fecha resolución dd/mm/aaaa","ciudad":"ciudad organismo tránsito","esFoto":"si/no/nose según Comparendo electrónico S o N","valor":"valor multa solo números"}\nDevuelve ÚNICAMENTE el JSON sin markdown ni texto adicional.';
+var _GEMINI_PROMPT  = 'Eres un asistente jurídico colombiano. Extrae los datos de esta captura del SIMIT y devuelve SOLO un JSON válido con estas claves exactas (cadena vacía "" si no encuentras el dato):\n{"comparendo":"número completo del comparendo","fecha":"fecha infracción dd/mm/aaaa — es la fecha en que ocurrió la infracción","direccion":"dirección en mayúsculas","fechaNotif":"fecha de notificación dd/mm/aaaa — es la fecha en que el SIMIT o la secretaría notificó al conductor (campo \'Fecha notificación\' o \'Fecha notif.\'); SIEMPRE es POSTERIOR a la fecha de infracción; si no aparece o es la misma que la infracción devuelve cadena vacía \\"\\"","secretaria":"nombre secretaría/municipio tránsito","agente":"nombre completo del agente","codigo":"código infracción ej D04","descripcion":"descripción completa infracción","placa":"placa vehículo mayúsculas","numResol":"número de resolución","fechaResol":"fecha resolución dd/mm/aaaa","ciudad":"ciudad organismo tránsito","esFoto":"si/no/nose según Comparendo electrónico S o N","valor":"valor multa solo números"}\nDevuelve ÚNICAMENTE el JSON sin markdown ni texto adicional.';
 
 function _mmPedirClave(cb){
   var ov = document.createElement('div');
@@ -3685,7 +3690,7 @@ function _mmRellenarCampos(row, d){
   if(d.comparendo) row.querySelector('.mm-comparendo').value = d.comparendo;
   if(d.fecha)      row.querySelector('.mm-fecha').value      = d.fecha;
   if(d.direccion)  row.querySelector('.mm-direccion').value  = d.direccion;
-  if(d.fechaNotif){
+  if(d.fechaNotif && d.fechaNotif !== d.fecha){
     row.querySelector('.mm-fechanotif').value = d.fechaNotif;
     var f1 = row.querySelector('.mm-fecha').value, f2 = d.fechaNotif;
     if(f1 && f2){ var dias = calcDiasHabilesColombia(f1,f2); if(dias>=0) row.querySelector('.mm-diasnotif').value=String(dias); }
