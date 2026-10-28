@@ -2245,6 +2245,8 @@ function getEstado(row){
   if(tutela) return 'tutela';
   if(/positiva/i.test(respuesta) && saldoPendiente && !saldoPagado) return 'esperando_saldo';
   if(enviado && !respuesta) return 'esperando_respuesta';
+  var linkEnviado = row['Link Firma Enviado']==='TRUE'||row['Link Firma Enviado']===true;
+  if(autorizado && linkEnviado && !(row['Firmado']==='TRUE')) return 'link_enviado';
   if(autorizado) return 'autorizado';
   if(pagado) return 'pagado';
   return 'pendiente';
@@ -2266,7 +2268,8 @@ function badgeForEstado(estado){
     pendiente:'<span class="badge badge-pending">🎯 Remarketing</span>',
     pagado:   '<span class="badge badge-paid">💰 Pagado</span>',
     autorizado:'<span class="badge badge-doc">✅ Por radicar</span>',
-    esperando_respuesta: '<span class="badge" style="background:#fef3c7;color:#92400e">⏰ Esperando respuesta</span>',
+    link_enviado:'<span class="badge" style="background:#d1fae5;color:#065f46">🔗 Link Enviado — Pendiente firma</span>',
+    esperando_respuesta: '<span class="badge" style="background:#fef3c7;color:#92400e">⏰ Radicado — Esperando respuesta</span>',
     esperando_saldo: '<span class="badge" style="background:#dbeafe;color:#1e40af">🧾 Esperando saldo</span>',
     tutela:   '<span class="badge badge-tutela">⚖️ Tutela</span>',
     cerrado:  '<span class="badge" style="background:#f0fdf4;color:#166534">🏁 Cerrado</span>',
@@ -3000,7 +3003,22 @@ function buildAcciones(row, estado){
     var dias = diasHastaLimite(row);
     if(dias!==null && dias<=0){
       var yaEnviado = row['Recordatorio Enviado']==='TRUE'||row['Recordatorio Enviado']===true;
-      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'enviar_recordatorio_manual\',this,null,\'enviar_recordatorio_manual\')">📧 '+(yaEnviado?'Reenviar':'Enviar')+' recordatorio (15 días cumplidos)</button>';
+      html += '<button class="btn btn-primary btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'enviar_recordatorio_manual\',this,null,\'enviar_recordatorio_manual\')">📧 '+(yaEnviado?'Reenviar':'Enviar')+' recordatorio por correo (15d cumplidos)</button>';
+      // WhatsApp de seguimiento 15 días
+      if(row['WhatsApp']){
+        var nom1 = (row['Nombres']||'').split(' ')[0]||'';
+        var msgWa15 = encodeURIComponent(
+          '¡Hola '+nom1+'! 👋 Soy el equipo de JurídicosWeb.com.\n\n'
+          +'Ya se cumplieron los *15 días hábiles* (Art. 14 CPACA) desde que radicamos tu Derecho de Petición ante la secretaría de tránsito. ⏰\n\n'
+          +'Por favor revisa:\n'
+          +'✉️ Tu correo electrónico principal\n'
+          +'📁 La carpeta de *spam* o *correo no deseado*\n\n'
+          +'¿Recibiste alguna respuesta de la secretaría?\n\n'
+          +'👉 Si *NO* recibiste nada — escríbenos aquí mismo para iniciar de inmediato una *Acción de Tutela* y exigirles la respuesta. Solo pagas *$45.000* y *únicamente si el resultado es positivo* ✅\n\n'
+          +'_JurídicosWeb.com — Expertos en tránsito_ ⚖️'
+        );
+        html += '<a href="https://wa.me/57'+row['WhatsApp']+'?text='+msgWa15+'" target="_blank" class="btn btn-success btn-sm">💬 WhatsApp seguimiento 15 días</a>';
+      }
     }
     html += '<button class="btn btn-success btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'positiva\'},\'respuesta_positiva\')">✅ Respuesta Positiva</button>';
     html += '<button class="btn btn-danger btn-sm" data-row="'+rowAttr+'" onclick="confirmarAccion(\'marcar_respuesta\',this,{respuesta:\'negativa\'},\'respuesta_negativa\')">❌ Respuesta Negativa</button>';
@@ -6396,8 +6414,18 @@ function dpRenderModal(){
   var btnCopiarLink = document.getElementById('dp-btn-copiar-link');
   var btnRadicar = document.getElementById('dp-btn-radicar');
   if(btnFirma){
-    if(row['WhatsApp']) btnFirma.onclick = function(){ window.open('https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma,'_blank'); };
-    else btnFirma.style.display='none';
+    if(row['WhatsApp']){
+      btnFirma.onclick = function(){
+        window.open('https://wa.me/57'+row['WhatsApp']+'?text='+msgFirma,'_blank');
+        // Marcar en GAS que el link ya fue enviado al cliente
+        fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({_accion:'link_firma_enviado', cedula: row['Cédula'], email: row['Email']||''})
+        }).catch(function(){});
+        showToast('✅ Link de firma enviado — etapa actualizada a "Link Enviado"','success');
+        btnFirma.textContent='✅ Link enviado (reenviar)';
+        btnFirma.style.background='#16a34a';
+      };
+    } else btnFirma.style.display='none';
   }
   if(btnCopiarLink) btnCopiarLink.onclick = function(){ copiarEnlace(linkFirma, btnCopiarLink); };
   if(btnRadicar){

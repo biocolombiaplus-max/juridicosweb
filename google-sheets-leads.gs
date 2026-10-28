@@ -70,6 +70,7 @@ var COLUMNAS_CASOS = [
   'Tutela Firmada', 'Enlace PDF Tutela', 'Tutela Valor', 'Resultado Tutela', 'Tutela Pagada',
   'Remarketing Envíos', 'Remarketing Última Fecha', 'Remarketing Activo',
   'Etapa Manual', 'Comprobante Nequi',
+  'Link Firma Enviado', 'Fecha Link Firma',
 ];
 
 var COLUMNAS_FIRMADOS = [
@@ -191,6 +192,7 @@ function doPost(e) {
       case 'marcar_firmado':      return marcarFirmado(datos);
       case 'reenviar_firmado':    return reenviarFirmado(datos);
       case 'radicar_por_correo':  return radicarPorCorreo(datos);
+      case 'link_firma_enviado':   return marcarLinkFirmaEnviado(datos);
       case 'enviar_recordatorio_manual': return enviarRecordatorioManual(datos);
       case 'activar_tutela':      return activarTutela(datos);
       case 'marcar_tutela_firmada': return marcarTutelaFirmada(datos);
@@ -882,6 +884,16 @@ function revisarRecordatorios15Dias() {
     }
   }
   aplicarFormatoCondicional(hoja);
+}
+
+// Marca que el link de firma fue enviado al cliente por WhatsApp.
+function marcarLinkFirmaEnviado(datos) {
+  var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+  var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
+  if (fila === -1) return respuestaJson({ ok: false, error: 'No se encontró el caso' });
+  var hoy = Utilities.formatDate(new Date(), 'GMT-5', 'yyyy-MM-dd HH:mm');
+  escribirFila(hoja, fila, { 'Link Firma Enviado': 'TRUE', 'Fecha Link Firma': hoy });
+  return respuestaJson({ ok: true });
 }
 
 // Botón "Enviar recordatorio" en el panel — mismo correo que el envío
