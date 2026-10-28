@@ -3687,6 +3687,7 @@ function _mmLlamarGeminiConClave(row, file, b64, label, modeloIdx, geminiKey){
 // ── OCR local con Tesseract.js (fallback cuando Gemini falla) ─────────────
 function _mmParsearTextoSimit(texto){
   var t = texto.replace(/\r/g,'');
+
   var get = function(pats){
     for(var i=0;i<pats.length;i++){
       var m = t.match(pats[i]);
@@ -3694,35 +3695,129 @@ function _mmParsearTextoSimit(texto){
     }
     return '';
   };
-  var fecha = function(s){ // normaliza a dd/mm/aaaa
+  var norm = function(s){ // dd/mm/aaaa
     if(!s) return '';
     var m = s.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
-    if(!m) return s;
-    var y = m[3].length===2 ? '20'+m[3] : m[3];
+    if(!m) return '';
+    var y = m[3].length===2?'20'+m[3]:m[3];
     return m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+y;
   };
-  var raw = {
-    comparendo: get([/(?:N[oúu]m(?:ero)?\.?\s*(?:de\s*)?[Cc]omparendo|COMPARENDO)[:\s#°]+([A-Z0-9\-]{6,25})/,/([A-Z]{2,4}\d{8,18})/]),
-    fecha:      get([/[Ff]echa\s*(?:de\s*)?(?:la\s*)?[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,/[Ff]echa\s*[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
-    direccion:  get([/[Dd]irecci[oó]n[:\s]+([^\n]{5,80})/]),
-    fechaNotif: get([/[Ff]echa\s*(?:de\s*)?[Nn]otificaci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
-    secretaria: get([/[Ss]ecretar[ií]a[:\s]+([^\n]{3,60})/,/[Oo]rganismo[:\s]+([^\n]{3,60})/]),
-    agente:     get([/(?:[Nn]ombre\s*)?[Aa]gente[:\s]+([^\n]{3,60})/,/[Oo]ficial[:\s]+([^\n]{3,60})/]),
-    codigo:     get([/[Cc][oó]digo\s*(?:de\s*)?[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?\b)/,/\b([A-Z]\d{2,3}[A-Z]?)\s*[-–]\s*[A-Z]/]),
-    descripcion:get([/[Dd]escripci[oó]n[:\s]+([^\n]{5,120})/]),
-    placa:      get([/[Pp]laca[:\s]+([A-Z]{3}[-\s]?\d{3}[A-Z]?|\d{3}[-\s]?[A-Z]{3})/,/\b([A-Z]{3}\d{3}[A-Z]?)\b/]),
-    valor:      get([/[Vv]alor\s*(?:[Mm]ulta)?[:\s]+\$?\s*([\d.,]{3,12})/,/\$\s*([\d.,]{3,12})/]),
-    numResol:   get([/[Nn][uú]m(?:ero)?\.?\s*(?:de\s*)?[Rr]esoluci[oó]n[:\s]+([A-Z0-9\-]{4,25})/,/[Rr]esoluci[oó]n\s*N[°o]\.?\s*([A-Z0-9\-]{4,25})/]),
-    fechaResol: get([/[Ff]echa\s*(?:de\s*)?[Rr]esoluci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/]),
-    ciudad:     get([/(?:[Cc]iudad|[Mm]unicipio)[:\s]+([^\n]{3,40})/]),
-    esFoto:     /[Cc]omparendo\s*[Ee]lectr[oó]nico[:\s]+S\b/i.test(t)?'si':/[Cc]omparendo\s*[Ee]lectr[oó]nico[:\s]+N\b/i.test(t)?'no':'nose'
+
+  // Número de comparendo: número largo (≥10 dígitos) — "Comparendo: 680810..."
+  var comparendo = get([
+    /[Cc]omparendo[:\s]+(\d{8,20})/,
+    /[Nn]o\.?\s*comparendo[\s\S]{0,50}?(\d{10,20})/i,
+    /\b(\d{15,20})\b/
+  ]);
+
+  // Número de resolución: código corto alfanumérico — "Resolución: SAN26095209"
+  var numResol = get([
+    /[Rr]esoluci[oó]n[:\s]+([A-Z]{2,5}\d{4,12})/,
+    /[Rr]esoluci[oó]n[:\s]+([A-Z0-9\-]{5,20})/
+  ]);
+
+  // Fecha resolución: "Fecha: 25/08/2026" línea justo después de "Resolución: SAN..."
+  var fechaResol = get([
+    /[Rr]esoluci[oó]n[:\s]+[A-Z0-9]+[\s\S]{0,30}?[Ff]echa[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/
+  ]);
+
+  // Fecha de la infracción: "Fecha comparendo: 01/04/2026" (no la fecha de la resolución)
+  var fechaInfrac = get([
+    /[Ff]echa\s+comparendo[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
+    /[Ff]echa\s+[Ii]nfracci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
+    // En la tabla: columna "Fecha" con valor debajo
+    /(?:^|\n)[Ff]echa\s*\n(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/
+  ]);
+  // Buscar todas las fechas dd/mm/aaaa y elegir la que no sea la de la resolución
+  if(!fechaInfrac){
+    var todasFechas = [];
+    var re = /\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/g, mf;
+    while((mf=re.exec(t))!==null) todasFechas.push(mf[1]);
+    var frNorm = norm(fechaResol);
+    for(var fi=0;fi<todasFechas.length;fi++){
+      if(norm(todasFechas[fi]) !== frNorm){ fechaInfrac = todasFechas[fi]; break; }
+    }
+  }
+
+  // Fecha notificación
+  var fechaNotif = get([
+    /[Ff]echa\s+notificaci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
+    /notificaci[oó]n[\s\S]{0,20}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i
+  ]);
+
+  // Dirección: buscar keywords de vías colombianas
+  var direccion = get([
+    /[Dd]irecci[oó]n[\s\n]+([A-ZÁÉÍÓÚÑ][^\n]{5,80})/,
+    /\b((?:DIAGONAL|DIAG|CALLE|CLL|CARRERA|CRA|AVENIDA|AV|TRANSVERSAL|TV|AUTOPISTA|KM)\b[^\n]{3,80})/i
+  ]);
+
+  // Secretaría: quitar código entre paréntesis "Barrancabermeja (68081000)" → "Barrancabermeja"
+  var secretaria = get([
+    /[Ss]ecretar[ií]a[:\s]+([^\n\(]{3,50})/,
+    /[Ss]ecretar[ií]a\s*\n([^\n\(]{3,50})/
+  ]).replace(/\s*\(\d+\).*/,'').trim();
+
+  // Agente: nombre en mayúsculas después del label "Agente"
+  var agente = get([
+    /\bAgente\s*\n([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s]{4,50})/,
+    /\bAgente[:\s]+([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\s]{4,50})/
+  ]).replace(/\n.*/,'').trim();
+  // Validar que no sea un label
+  if(/^[Ff]echa|^[Ss]ecret|^[Ff]uente|^[Ii]nfr/i.test(agente)) agente='';
+
+  // Código de infracción: letra + 2-3 dígitos
+  var codigo = get([
+    /[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–]/,
+    /[Cc][oó]digo[:\s]+([A-Z]\d{2,3}[A-Z]?)\b/,
+    /\b([A-Z]\d{2,3})\s*[-–]\s*[A-Z]/
+  ]);
+
+  // Descripción: texto después del código
+  var descripcion = get([
+    /[Ii]nfracci[oó]n[:\s]+[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/,
+    /[Dd]escripci[oó]n[:\s]+([^\n]{10,200})/,
+    new RegExp(codigo && codigo.length>1 ? codigo+'\\s*[-–]\\s*([^\\n]{10,200})' : '$^')
+  ]);
+
+  // Placa: formato colombiano (ABC123, ABC12D, etc.)
+  var placa = get([
+    /[Pp]laca[:\s]+([A-Z]{3}\d{2,3}[A-Z]?)\b/,
+    /\b([A-Z]{3}\d{2,3}[A-Z]?)\b/
+  ]);
+
+  // Valor multa
+  var valor = get([
+    /[Vv]alor[:\s]+\$?\s*([\d.,]{3,15})/,
+    /\$\s*([\d.,]{3,15})/
+  ]);
+
+  // Ciudad: mismo que secretaría normalmente
+  var ciudad = secretaria;
+
+  // ¿Fotomulta? "Comparendo electrónico S" → sí
+  var esFoto = /[Cc]omparendo\s*electr[oó]nico[\s\S]{0,15}S\b/i.test(t)?'si'
+             : /[Cc]omparendo\s*electr[oó]nico[\s\S]{0,15}N\b/i.test(t)?'no'
+             : 'nose';
+
+  if(placa) placa = placa.replace(/[-\s]/g,'').toUpperCase();
+  if(valor) valor = valor.replace(/\./g,'').replace(',','.');
+
+  return {
+    comparendo: comparendo,
+    fecha:      norm(fechaInfrac),
+    direccion:  direccion,
+    fechaNotif: norm(fechaNotif),
+    secretaria: secretaria,
+    agente:     agente,
+    codigo:     codigo,
+    descripcion:descripcion,
+    placa:      placa||'',
+    valor:      valor||'',
+    numResol:   numResol,
+    fechaResol: norm(fechaResol),
+    ciudad:     ciudad,
+    esFoto:     esFoto
   };
-  raw.fecha = fecha(raw.fecha);
-  raw.fechaNotif = fecha(raw.fechaNotif);
-  raw.fechaResol = fecha(raw.fechaResol);
-  if(raw.placa) raw.placa = raw.placa.replace(/[-\s]/g,'').toUpperCase();
-  if(raw.valor) raw.valor = raw.valor.replace(/\./g,'').replace(',','.');
-  return raw;
 }
 
 function _mmOcrFallback(row, file, b64, label){
