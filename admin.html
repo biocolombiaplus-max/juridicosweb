@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>JurídicosWeb — Panel de Administración</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1379,7 +1382,7 @@ function syncCampanaLoad() {
         <span>🔄 Generar un documento nuevo y pedir que firme otra vez (recomendado — el documento firmado actualmente no se corrige solo, sigue teniendo el dato de antes hasta que el cliente firme uno nuevo).</span>
       </label>
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn btn-primary" id="btn-guardar-dc" onclick="guardarDatosCliente()">💾 Guardar datos</button>
+        <button class="btn btn-primary" id="btn-guardar-dc" onclick="try{guardarDatosCliente();}catch(err){alert('Error JS: '+err.message);}">💾 Guardar datos</button>
         <button class="btn btn-outline" onclick="closeModal('modal-datos-cliente')">Cancelar</button>
       </div>
     </div>
@@ -4248,7 +4251,7 @@ function openModalDatosCliente(row, modo, pendingAccion){
 }
 
 function guardarDatosCliente(){
-  if(!_dcCasoOriginal) return;
+  if(!_dcCasoOriginal){ showToast('Error: no hay caso seleccionado','error'); return; }
   var nombres  = document.getElementById('dc-nombres').value.trim();
   var apellidos= document.getElementById('dc-apellidos').value.trim();
   var cedula   = document.getElementById('dc-cedula').value.trim();
