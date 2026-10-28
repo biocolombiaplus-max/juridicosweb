@@ -3739,10 +3739,10 @@ function _mmParsearTextoSimit(texto){
     }
   }
 
-  // Fecha notificación
+  // Fecha notificación (tabla: "Fecha notificación\n26/06/2026")
   var fechaNotif = get([
-    /[Ff]echa\s+notificaci[oó]n[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
-    /notificaci[oó]n[\s\S]{0,20}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i
+    /[Ff]echa\s+notificaci[oó]n[\s\S]{0,30}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/,
+    /notificaci[oó]n[\s\S]{0,30}?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i
   ]);
 
   // Dirección: buscar keywords de vías colombianas
@@ -3765,23 +3765,23 @@ function _mmParsearTextoSimit(texto){
   // Validar que no sea un label
   if(/^[Ff]echa|^[Ss]ecret|^[Ff]uente|^[Ii]nfr/i.test(agente)) agente='';
 
-  // Código de infracción: letra + 2-3 dígitos
+  // Código de infracción: letra + 2-3 dígitos (tabla SIMIT: "Código Descripción\nD04 No detenerse...")
   var codigo = get([
-    /[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–]/,
-    /[Cc][oó]digo[:\s]+([A-Z]\d{2,3}[A-Z]?)\b/,
-    /\b([A-Z]\d{2,3})\s*[-–]\s*[A-Z]/
+    /[Cc][oó]digo[\s\S]{0,40}?([A-Z]\d{2,3}[A-Z]?)\b/,
+    /[Ii]nfracci[oó]n[:\s]+([A-Z]\d{2,3}[A-Z]?)\s*[-–\s]/,
+    /\b([A-Z]\d{2,3})\s*[-–\s]/
   ]);
 
-  // Descripción: texto después del código
+  // Descripción: texto después del código (en tabla SIMIT sin guión, solo espacio)
   var descripcion = get([
     /[Ii]nfracci[oó]n[:\s]+[A-Z]\d{2,3}[A-Z]?\s*[-–]\s*([^\n]{10,200})/,
-    /[Dd]escripci[oó]n[:\s]+([^\n]{10,200})/,
-    new RegExp(codigo && codigo.length>1 ? codigo+'\\s*[-–]\\s*([^\\n]{10,200})' : '$^')
+    /[Dd]escripci[oó]n[\s\S]{0,30}?([A-Z][^\n]{10,200})/,
+    codigo && codigo.length>1 ? new RegExp('\\b'+codigo+'\\s+([A-Z][^\\n]{10,200})') : /(?!)/
   ]);
 
-  // Placa: formato colombiano (ABC123, ABC12D, etc.)
+  // Placa: "Placa\nOXN44G" (tabla con salto de línea entre header y valor)
   var placa = get([
-    /[Pp]laca[:\s]+([A-Z]{3}\d{2,3}[A-Z]?)\b/,
+    /[Pp]laca[\s\S]{0,60}?([A-Z]{3}\d{2,3}[A-Z]?)\b/,
     /\b([A-Z]{3}\d{2,3}[A-Z]?)\b/
   ]);
 
