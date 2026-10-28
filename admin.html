@@ -2087,7 +2087,7 @@ function loadData(evtBtn){
   setConexionStatus(null, 'Conectando...');
 
   // JSONP bypasa el problema CORS/redirect de Apps Script en navegadores
-  jsonpGet(SCRIPT_URL + '?accion=listar_casos', 18000)
+  jsonpGet(SCRIPT_URL + '?accion=listar_casos&_t=' + Date.now(), 18000)
     .then(function(data){
       setBtnLoading(btn, false);
       var casos = data.casos || data.data || [];
@@ -4200,6 +4200,17 @@ function _splitNombreApellido(nombreCompleto, apellidoActual){
 }
 
 function openModalDatosCliente(row, modo, pendingAccion){
+  // Aplicar parche local si el Sheet aún no tiene los datos
+  try{
+    var _wa10 = ((row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10));
+    var _cc10 = (row['Cédula']||'').toString().trim();
+    var _pRaw = localStorage.getItem('jw_datos_cliente_'+(_wa10||_cc10));
+    if(_pRaw){
+      var _p = JSON.parse(_pRaw);
+      if(!row['Cédula'] && _p['Cédula']) row = Object.assign({}, row, _p);
+      else if(!row['Email'] && _p['Email']) row = Object.assign({}, row, _p);
+    }
+  }catch(e){}
   _dcCasoOriginal = row;
   var split = _splitNombreApellido(row['Nombres']||'', row['Apellidos']||'');
   document.getElementById('dc-nombres').value = split.nombres;
@@ -4252,6 +4263,27 @@ function guardarDatosCliente(){
   var btn = document.getElementById('btn-guardar-dc');
   btn.disabled = true; btn.innerHTML = '<span class="loading-spinner"></span>Guardando...';
   var _waEnvio = (_dcCasoOriginal['WhatsApp']||_dcCasoOriginal['Celular']||whatsapp||'').toString().replace(/\D/g,'').slice(-10);
+  // Guardar en localStorage ANTES del fetch para que el fallback esté listo
+  // incluso si el GAS falla o la respuesta llega lenta
+  var _lsPatch = {
+    'Nombres': nombres, 'Apellidos': apellidos, 'Cédula': cedula,
+    'Placa': document.getElementById('dc-placa').value.trim(),
+    'WhatsApp': whatsapp, 'Email': emailVal, 'Ciudad': ciudad
+  };
+  try{
+    var _lsWa = _waEnvio || cedula;
+    if(_lsWa) localStorage.setItem('jw_datos_cliente_'+_lsWa, JSON.stringify(_lsPatch));
+  }catch(e){}
+  // Aplicar inmediatamente al objeto en memoria para reflejar en el modal
+  if(_dcCasoOriginal) Object.assign(_dcCasoOriginal, _lsPatch);
+  for(var _rri=0; _rri<allRows.length; _rri++){
+    var _rrr = allRows[_rri];
+    var _rrwa = ((_rrr['WhatsApp']||_rrr['Celular']||'').replace(/\D/g,'').slice(-10));
+    var _rrcc = (_rrr['Cédula']||'').toString().trim();
+    if((_waEnvio && _rrwa===_waEnvio)||(_dcCasoOriginal['Cédula'] && _rrcc===_dcCasoOriginal['Cédula'])){
+      Object.assign(allRows[_rri], _lsPatch); break;
+    }
+  }
   console.log('[guardarDatos] enviando a GAS — cedulaActual:', _dcCasoOriginal['Cédula']||cedula, '| email:', _dcCasoOriginal['Email']||emailVal, '| whatsappActual:', _waEnvio, '| cedula nueva:', cedula);
   fetch(SCRIPT_URL, {
     method:'POST',
@@ -4284,39 +4316,10 @@ function guardarDatosCliente(){
         ? '✅ Datos corregidos — como el caso ya estaba firmado, se reinició el estado: envía de nuevo el enlace de firma para el documento corregido'
         : '✅ Datos guardados','success');
 
-      // Actualizar los objetos en memoria con los nuevos valores
-      // para que el documento DP y otros modales los reflejen de inmediato
-      var _dcNuevos = {
-        'Nombres':   document.getElementById('dc-nombres').value.trim(),
-        'Apellidos': document.getElementById('dc-apellidos').value.trim(),
-        'Cédula':    document.getElementById('dc-cedula').value.trim(),
-        'Placa':     document.getElementById('dc-placa').value.trim(),
-        'WhatsApp':  document.getElementById('dc-whatsapp').value.trim(),
-        'Email':     document.getElementById('dc-email').value.trim(),
-        'Ciudad':    document.getElementById('dc-ciudad').value.trim()
-      };
-      if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _dcNuevos);
-      if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _dcNuevos);
-      // Actualizar también la fila original en allRows para que al reabrir
-      // el modal (antes de que loadData recargue) se vean los datos nuevos
-      if(_dcCasoOriginal) Object.assign(_dcCasoOriginal, _dcNuevos);
-      var _waKey = (_dcNuevos['WhatsApp']||'').replace(/\D/g,'').slice(-10);
-      var _ccKey = _dcNuevos['Cédula']||'';
-      if(_waKey || _ccKey){
-        for(var _ri=0; _ri<allRows.length; _ri++){
-          var _rr = allRows[_ri];
-          var _rwa = ((_rr['WhatsApp']||_rr['Celular']||'').replace(/\D/g,'').slice(-10));
-          var _rcc = (_rr['Cédula']||'').toString().trim();
-          if((_waKey && _rwa===_waKey) || (_ccKey && _rcc===_ccKey)){
-            Object.assign(allRows[_ri], _dcNuevos); break;
-          }
-        }
-      }
-      // Guardar en localStorage como respaldo local por si el Sheet no persiste
-      try{
-        var _lsKey = 'jw_datos_cliente_' + (_waKey || _ccKey);
-        localStorage.setItem(_lsKey, JSON.stringify(_dcNuevos));
-      }catch(e){}
+      // Los datos ya se aplicaron a memoria y localStorage ANTES del fetch.
+      // Aquí solo se actualiza _dpCaso/_mmCaso para el documento DP.
+      if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
+      if(_mmCaso) _mmCaso = Object.assign({}, _mmCaso, _lsPatch);
       // Si el modal DP está abierto, volver a renderizarlo con los datos frescos
       var dpModal = document.getElementById('modal-gen-dp');
       if(dpModal && dpModal.classList.contains('show') && _dpCaso && _dpMultas){
