@@ -226,6 +226,7 @@ function doPost(e) {
       // ── Diagnóstico y control de Brevo ───────────────────────────────
       case 'brevo_diagnostico':   return brevoDiagnostico();
       case 'brevo_reset_contador': return brevoResetContadorGas();
+      case 'extraer_simit':       return extraerDatosSimit(datos);
       default:                    return guardarLead(datos);
     }
   } catch (err) {
@@ -2021,4 +2022,37 @@ function notificarComprobanteNequi(datos) {
     });
   }
   return respuestaJson({ ok: true });
+}
+
+
+// ── Extracción automática de datos desde captura de pantalla del SIMIT ────────
+// Usa Gemini 1.5 Flash (gratis en Google AI Studio) para leer la imagen y
+// devolver los campos estructurados listos para rellenar el formulario de multas.
+// Requiere: Apps Script → Propiedades del proyecto → agregar clave GEMINI_API_KEY
+// Obtén la clave gratis en: https://aistudio.google.com/app/apikey
+function extraerDatosSimit(datos) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+  if (!apiKey) return respuestaJson({ ok: false, error: 'Agrega GEMINI_API_KEY en las propiedades del script' });
+  var b64 = datos.imagenBase64 || '';
+  if (!b64) return respuestaJson({ ok: false, error: 'No se recibió imagen' });
+  var base64Data = b64.replace(/^data:image\/[^;]+;base64,/, '');
+  var mimeType   = (b64.match(/^data:(image\/[^;]+);base64,/) || [])[1] || 'image/png';
+  var prompt = 'Eres un asistente jurídico colombiano. Extrae los datos de esta captura del SIMIT y devuelve SOLO un JSON válido con estas claves exactas (vacío "" si no encuentras el dato):\n{"comparendo":"número completo del comparendo","fecha":"fecha infracción dd/mm/aaaa","direccion":"dirección en mayúsculas","fechaNotif":"fecha notificación dd/mm/aaaa","secretaria":"nombre secretaría/municipio tránsito","agente":"nombre completo del agente","codigo":"código infracción ej D04","descripcion":"descripción completa infracción","placa":"placa vehículo mayúsculas","numResol":"número de resolución","fechaResol":"fecha resolución dd/mm/aaaa","ciudad":"ciudad organismo tránsito","esFoto":"si/no/nose según Comparendo electrónico S o N","valor":"valor multa solo números"}\nDevuelve ÚNICAMENTE el JSON sin markdown ni texto adicional.';
+  var payload = {
+    contents: [{ parts: [{ text: prompt },{ inline_data: { mime_type: mimeType, data: base64Data } }]}],
+    generationConfig: { temperature: 0, maxOutputTokens: 1024 }
+  };
+  try {
+    var resp = UrlFetchApp.fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey,
+      { method: 'POST', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true }
+    );
+    var result = JSON.parse(resp.getContentText());
+    var text = (((result.candidates||[])[0]||{}).content||{}).parts[0].text || '';
+    text = text.replace(/```json\n?|\n?```/g,'').trim();
+    var parsed = JSON.parse(text);
+    return respuestaJson({ ok: true, datos: parsed });
+  } catch(e) {
+    return respuestaJson({ ok: false, error: 'Error al procesar imagen: ' + String(e) });
+  }
 }

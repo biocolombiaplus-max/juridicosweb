@@ -3595,8 +3595,61 @@ function mmSetCaptura(row, file){
     var img = row.querySelector('.mm-captura-preview');
     img.src = b64; img.style.display = 'block';
     row.querySelector('.mm-captura-clear').style.display = 'block';
-    row.querySelector('.mm-captura-label').textContent = file.name || 'Captura adjunta';
-    row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+    var label = row.querySelector('.mm-captura-label');
+    label.textContent = '🤖 Leyendo datos del SIMIT con IA...';
+    row.querySelector('.mm-captura-zone').style.borderColor = '#f59e0b';
+    // Llamar a GAS para extraer datos con Gemini AI
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ _accion: 'extraer_simit', imagenBase64: b64 })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.ok && data.datos){
+        var d = data.datos;
+        // Rellenar cada campo del formulario si viene el dato
+        if(d.comparendo) row.querySelector('.mm-comparendo').value = d.comparendo;
+        if(d.fecha)      row.querySelector('.mm-fecha').value      = d.fecha;
+        if(d.direccion)  row.querySelector('.mm-direccion').value  = d.direccion;
+        if(d.fechaNotif){
+          row.querySelector('.mm-fechanotif').value = d.fechaNotif;
+          // Recalcular días hábiles
+          var f1 = row.querySelector('.mm-fecha').value;
+          var f2 = d.fechaNotif;
+          if(f1 && f2){
+            var dias = calcDiasHabilesColombia(f1, f2);
+            if(dias >= 0) row.querySelector('.mm-diasnotif').value = String(dias);
+          }
+        }
+        if(d.secretaria) row.querySelector('.mm-secretaria').value = d.secretaria;
+        if(d.agente)     row.querySelector('.mm-agente').value     = d.agente;
+        if(d.codigo)     row.querySelector('.mm-codigo').value     = d.codigo;
+        if(d.descripcion)row.querySelector('.mm-descripcion').value= d.descripcion;
+        if(d.placa)      row.querySelector('.mm-placa').value      = d.placa.toUpperCase();
+        if(d.valor)      row.querySelector('.mm-valor').value      = d.valor;
+        if(d.numResol)   row.querySelector('.mm-numresol').value   = d.numResol;
+        if(d.fechaResol) row.querySelector('.mm-fecharesol').value = d.fechaResol;
+        if(d.ciudad)     row.querySelector('.mm-ciudad').value     = d.ciudad;
+        if(d.esFoto){
+          var fotoVal = d.esFoto==='si'?'si':d.esFoto==='no'?'no':'nose';
+          row.querySelector('.mm-foto').value = fotoVal;
+          if(fotoVal==='si') row.querySelector('.mm-notif-wrap').style.display='';
+        }
+        row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+        label.textContent = '✅ Datos extraídos — revisa y corrige si es necesario';
+        showToast('✅ IA leyó la captura del SIMIT y rellenó los campos automáticamente','success');
+      } else {
+        row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+        label.textContent = (file.name || 'Captura adjunta') + ' — no se pudo extraer datos automáticamente';
+        if(data.error && data.error.indexOf('GEMINI_API_KEY')!==-1){
+          showToast('⚙️ Para auto-rellenar: agrega GEMINI_API_KEY en Apps Script → Propiedades del proyecto','info');
+        }
+      }
+    })
+    .catch(function(){
+      row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+      label.textContent = file.name || 'Captura adjunta';
+    });
   };
   reader.readAsDataURL(file);
 }
