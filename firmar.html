@@ -372,8 +372,17 @@ function init(){
   .then(function(data){
     if(!data.ok) throw new Error(data.error||'sheet_no_publico');
     var filas = data.casos || [];
-    var match = filas.filter(function(r){ return String(r['Cédula']||'').trim()===cedula; }).pop();
-    if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos un caso con esa cédula ('+cedula+'). Pídele a tu asesor que revise el enlace o que verifique que la cédula quedó bien guardada.'; mostrar('v-error'); return; }
+    // Buscar por cédula exacta primero, luego por WhatsApp (últimos 10 dígitos), luego por email
+    var cedulaNorm = cedula.replace(/\D/g,'');
+    var match = filas.filter(function(r){
+      var rCed = String(r['Cédula']||'').replace(/\D/g,'').trim();
+      var rWa  = String(r['WhatsApp']||r['Celular']||'').replace(/\D/g,'').slice(-10);
+      var rEmail = String(r['Email']||'').trim().toLowerCase();
+      return rCed === cedulaNorm ||
+             (cedulaNorm.length >= 8 && rWa === cedulaNorm.slice(-10)) ||
+             rEmail === cedula.toLowerCase();
+    }).pop();
+    if(!match){ document.getElementById('v-error-texto').textContent = 'No encontramos tu caso. Pídele a tu asesor que verifique los datos o escríbenos por WhatsApp.'; mostrar('v-error'); return; }
     _caso = match;
 
     if(_tipo==='tutela'){
