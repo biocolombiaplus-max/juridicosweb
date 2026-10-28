@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028c';
+  var VER = '20261028d';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -2126,7 +2126,7 @@ function loadData(evtBtn){
       // que el Sheet aún no tiene por deploy pendiente u otro motivo transitorio)
       try{
         allRows.forEach(function(r){
-          var wa10 = ((r['WhatsApp']||r['Celular']||'').replace(/\D/g,'').slice(-10));
+          var wa10 = (String(r['WhatsApp']||r['Celular']||'').replace(/\D/g,'').slice(-10));
           var cc = (r['Cédula']||'').toString().trim();
           [wa10, cc].forEach(function(k){
             if(!k) return;
@@ -4220,7 +4220,7 @@ function _splitNombreApellido(nombreCompleto, apellidoActual){
 function openModalDatosCliente(row, modo, pendingAccion){
   // Aplicar parche local si el Sheet aún no tiene los datos
   try{
-    var _wa10 = ((row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10));
+    var _wa10 = (String(row['WhatsApp']||row['Celular']||'').replace(/\D/g,'').slice(-10));
     var _cc10 = (row['Cédula']||'').toString().trim();
     var _pRaw = localStorage.getItem('jw_datos_cliente_'+(_wa10||_cc10));
     if(_pRaw){
@@ -4297,7 +4297,7 @@ function guardarDatosCliente(){
   // 2. Aplicar a memoria AHORA
   if(_dcCasoOriginal) Object.assign(_dcCasoOriginal, _lsPatch);
   for(var _rri=0; _rri<allRows.length; _rri++){
-    var _rrwa2 = ((allRows[_rri]['WhatsApp']||allRows[_rri]['Celular']||'').replace(/\D/g,'').slice(-10));
+    var _rrwa2 = (String(allRows[_rri]['WhatsApp']||allRows[_rri]['Celular']||'').replace(/\D/g,'').slice(-10));
     if(_waEnvio && _rrwa2===_waEnvio){ Object.assign(allRows[_rri], _lsPatch); break; }
   }
   if(_dpCaso) _dpCaso = Object.assign({}, _dpCaso, _lsPatch);
