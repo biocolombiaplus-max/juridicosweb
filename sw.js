@@ -1,4 +1,4 @@
-var CACHE_NAME = 'jw-shell-v2';
+var CACHE_NAME = 'jw-shell-v3';
 var SHELL = [
   '/',
   '/index.html',
@@ -27,16 +27,21 @@ self.addEventListener('fetch', function(e){
   if(url.origin !== location.origin) return; // no interceptar CDNs externos (fonts, GTM, etc.)
 
   if(e.request.mode === 'navigate'){
-    // cache:'no-store' evita que el navegador reutilice una respuesta HTTP
-    // vieja (de GitHub Pages/CDN) para el HTML — sin esto, "network-first"
-    // podía seguir devolviendo una versión desactualizada de la página
-    // aunque ya hubiera una nueva publicada.
+    // Siempre network-first para HTML — nunca devolver caché viejo
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).then(function(res){
-        var copy = res.clone();
-        caches.open(CACHE_NAME).then(function(c){ c.put('/index.html', copy); });
+        // Solo cachear index.html para el shell offline
+        if(url.pathname === '/' || url.pathname === '/index.html'){
+          var copy = res.clone();
+          caches.open(CACHE_NAME).then(function(c){ c.put('/index.html', copy); });
+        }
         return res;
-      }).catch(function(){ return caches.match('/index.html'); })
+      }).catch(function(){
+        // Offline fallback solo para index
+        if(url.pathname === '/' || url.pathname === '/index.html')
+          return caches.match('/index.html');
+        return new Response('Sin conexión', {status:503});
+      })
     );
     return;
   }
