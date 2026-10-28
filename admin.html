@@ -3840,6 +3840,7 @@ function _mmOcrFallback(row, file, b64, label){
     }
   }).then(function(result){
     var texto = result.data.text || '';
+    console.log('=== OCR RAW TEXT ===\n' + texto + '\n=== FIN OCR ===');
     var d = _mmParsearTextoSimit(texto);
     var rellenos = Object.values(d).filter(function(v){return v&&v!=='nose';}).length;
     _mmRellenarCampos(row, d);
