@@ -966,7 +966,7 @@ function limpiarParaPDF(s){
                .replace(/[═-╬]/g,'=')  // double box → igual
                .replace(/[^\x00-\xFF]/g,'?');     // cualquier otro no-Latin1 → ?
 }
-function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
+function escribirDocumentoEnPDF(doc, texto, firmaDataUrl, multas){
   dibujarEncabezadoPDF(doc);
   var lines = doc.splitTextToSize(limpiarParaPDF(texto),180);
   var y=24;
@@ -975,13 +975,35 @@ function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
     if(firmaDataUrl && l.indexOf('____')===0){ doc.addImage(firmaDataUrl,'PNG',14,y-15,55,17); }
     doc.text(l,14,y); y+=5.2;
   });
+  // Anexar capturas SIMIT al final del documento
+  if(multas && multas.length){
+    var caps = multas.filter(function(m){ return m.capturaSmall; });
+    if(caps.length){
+      if(y > 240){ dibujarPiePDF(doc); doc.addPage(); dibujarEncabezadoPDF(doc); y=24; }
+      y += 8;
+      doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.text('ANEXOS - CAPTURAS DE PANTALLA SIMIT', 14, y); y += 6;
+      doc.setFont('helvetica','normal'); doc.setFontSize(8);
+      caps.forEach(function(m, ci){
+        var lbl = 'Anexo '+(ci+1)+(m.comparendo ? ' - Comparendo: '+m.comparendo : m.fecha ? ' - Fecha: '+m.fecha : '');
+        if(y > 270){ dibujarPiePDF(doc); doc.addPage(); dibujarEncabezadoPDF(doc); y=24; }
+        doc.text(lbl, 14, y); y += 4;
+        try{
+          var iW=180, iH=68;
+          if(y + iH > 282){ dibujarPiePDF(doc); doc.addPage(); dibujarEncabezadoPDF(doc); y=24; }
+          doc.addImage(m.capturaSmall,'JPEG',14,y,iW,iH);
+          y += iH + 6;
+        }catch(ex){}
+      });
+    }
+  }
   dibujarPiePDF(doc);
 }
 function generarPDFConFirma(documentos, firmaDataUrl){
   if(!window.jspdf || !documentos || !documentos.length) return null;
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  documentos.forEach(function(d,idx){ if(idx>0) doc.addPage(); escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl); });
+  documentos.forEach(function(d,idx){ if(idx>0) doc.addPage(); escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl, d.multas); });
   return doc;
 }
 
@@ -993,7 +1015,7 @@ function generarPDFsPorSecretaria(documentos, firmaDataUrl){
   var jsPDF = window.jspdf.jsPDF;
   return documentos.map(function(d){
     var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl);
+    escribirDocumentoEnPDF(doc, d.texto, firmaDataUrl, d.multas);
     return { ciudad: d.ciudad, doc: doc };
   });
 }

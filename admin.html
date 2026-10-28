@@ -1670,7 +1670,7 @@ function syncCampanaLoad() {
 // Forzar versión fresca: si la URL no tiene ?v= correcto, redirigir con él
 // Esto rompe el caché del navegador sin necesitar Ctrl+F5
 (function(){
-  var VER = '20261028f';
+  var VER = '20261028g';
   var p = new URLSearchParams(window.location.search);
   if(p.get('v') !== VER){
     p.set('v', VER);
@@ -3591,6 +3591,7 @@ function agregarFilaMultaAdmin(datos){
         '<button type="button" class="mm-captura-clear" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:0.72rem;cursor:pointer;" onclick="mmClearCaptura(event,this)">✕</button>'+
       '</div>'+
       '<input type="hidden" class="mm-captura-b64">'+
+      '<input type="hidden" class="mm-captura-b64-small">'+
     '</div>'+
     '</div>';
   document.getElementById('mm-lista').appendChild(div);
@@ -3598,6 +3599,14 @@ function agregarFilaMultaAdmin(datos){
   if(datos.foto)  div.querySelector('.mm-foto').value  = datos.foto;
   if(datos.foto==='si') div.querySelector('.mm-notif-wrap').style.display = '';
   if(datos.tipo)  div.querySelector('.mm-tipo').value  = datos.tipo;
+  if(datos.capturaSmall){
+    div.querySelector('.mm-captura-b64-small').value = datos.capturaSmall;
+    var prvSmall = div.querySelector('.mm-captura-preview');
+    prvSmall.src = datos.capturaSmall; prvSmall.style.display = 'block';
+    div.querySelector('.mm-captura-clear').style.display = 'block';
+    div.querySelector('.mm-captura-label').textContent = '📸 Captura cargada';
+    div.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+  }
   // Placa en mayúsculas
   div.querySelector('.mm-placa').addEventListener('input', function(){ this.value = this.value.toUpperCase(); });
   // Fechas: acepta pegar en cualquier formato (SIMIT usa dd/mm/aaaa, aaaa-mm-dd, etc.)
@@ -3979,6 +3988,19 @@ function mmSetCaptura(row, file){
     label.textContent = '🤖 Leyendo datos del SIMIT con IA...';
     row.querySelector('.mm-captura-zone').style.borderColor='#f59e0b';
     _mmLlamarGemini(row, file, b64, label, 0);
+    // Generar miniatura comprimida para incrustar en el PDF
+    var tmpImg = new Image();
+    tmpImg.onload = function(){
+      var maxW = 800, maxH = 600;
+      var w = tmpImg.width, h = tmpImg.height;
+      if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+      if(h > maxH){ w = Math.round(w * maxH / h); h = maxH; }
+      var cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(tmpImg, 0, 0, w, h);
+      row.querySelector('.mm-captura-b64-small').value = cv.toDataURL('image/jpeg', 0.45);
+    };
+    tmpImg.src = b64;
   };
   reader.readAsDataURL(file);
 }
@@ -3996,6 +4018,7 @@ function mmClearCaptura(e, btn){
   e.stopPropagation();
   var row = btn.closest('.mm-row');
   row.querySelector('.mm-captura-b64').value = '';
+  row.querySelector('.mm-captura-b64-small').value = '';
   row.querySelector('.mm-captura-preview').style.display = 'none';
   btn.style.display = 'none';
   row.querySelector('.mm-captura-label').textContent = 'Pegar con Ctrl+V · Arrastar · o clic para seleccionar archivo';
@@ -4053,6 +4076,7 @@ function guardarMultasAdmin(){
       tipo:         f.querySelector('.mm-tipo').value,
       foto:         f.querySelector('.mm-foto').value,
       notif:        f.querySelector('.mm-notif').value,
+      capturaSmall: f.querySelector('.mm-captura-b64-small').value || '',
       capturaB64:   f.querySelector('.mm-captura-b64').value || '',
     });
   });
