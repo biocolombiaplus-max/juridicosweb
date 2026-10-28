@@ -3523,6 +3523,17 @@ function agregarFilaMultaAdmin(datos){
     '<div class="mm-fg"><label>Tipo de multa</label><select class="mm-tipo"><option value="">— Selecciona —</option><option value="comparendo">Comparendo</option><option value="fotomulta">Fotomulta</option><option value="coactivo">Cobro coactivo</option><option value="prescrita">Prescrita (+3 años)</option><option value="mal_notificada">Mal notificada</option></select></div>'+
     // Notificación (condicional fotomulta)
     '<div class="mm-fg full-col mm-notif-wrap" style="display:none;"><label>¿Le llegó la notificación en los 13 días hábiles? <span style="font-weight:400;color:var(--gray500,#64748b);">(solo fotomultas)</span></label><select class="mm-notif"><option value="nose">No sé</option><option value="si">Sí, a tiempo</option><option value="no">No, o llegó tarde</option></select></div>'+
+    // Captura de pantalla SIMIT como prueba
+    '<div class="mm-fg full-col" style="margin-top:4px;">'+
+      '<label style="display:flex;align-items:center;gap:6px;">📸 Captura de pantalla SIMIT <span style="font-weight:400;font-size:0.72rem;color:var(--gray500,#64748b);">(opcional — como prueba del error de notificación o prescripción)</span></label>'+
+      '<div class="mm-captura-zone" style="border:2px dashed #cbd5e1;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .2s;background:var(--surface,#f8fafc);" onclick="this.querySelector(\'.mm-captura-file\').click()" ondragover="event.preventDefault();this.style.borderColor=\'#3b82f6\'" ondragleave="this.style.borderColor=\'\'" ondrop="mmHandleDrop(event,this)">'+
+        '<input type="file" class="mm-captura-file" accept="image/*" style="display:none" onchange="mmHandleFile(this)">'+
+        '<span class="mm-captura-label" style="color:#64748b;font-size:0.82rem;flex:1;">Pegar con Ctrl+V · Arrastar · o clic para seleccionar archivo</span>'+
+        '<img class="mm-captura-preview" style="display:none;max-height:60px;max-width:120px;border-radius:4px;object-fit:cover;border:1px solid #e2e8f0;" alt="preview">'+
+        '<button type="button" class="mm-captura-clear" style="display:none;background:#ef4444;color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:0.72rem;cursor:pointer;" onclick="mmClearCaptura(event,this)">✕</button>'+
+      '</div>'+
+      '<input type="hidden" class="mm-captura-b64">'+
+    '</div>'+
     '</div>';
   document.getElementById('mm-lista').appendChild(div);
   if(datos.notif) div.querySelector('.mm-notif').value = datos.notif;
@@ -3574,6 +3585,57 @@ function toggleNotifMm(select){
   if(wrap) wrap.style.display = select.value==='si' ? '' : 'none';
 }
 
+// ── Captura de pantalla SIMIT ──────────────────────────────────────────────
+function mmSetCaptura(row, file){
+  if(!file || !file.type.startsWith('image/')) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var b64 = e.target.result;
+    row.querySelector('.mm-captura-b64').value = b64;
+    var img = row.querySelector('.mm-captura-preview');
+    img.src = b64; img.style.display = 'block';
+    row.querySelector('.mm-captura-clear').style.display = 'block';
+    row.querySelector('.mm-captura-label').textContent = file.name || 'Captura adjunta';
+    row.querySelector('.mm-captura-zone').style.borderColor = '#22c55e';
+  };
+  reader.readAsDataURL(file);
+}
+function mmHandleFile(input){
+  var row = input.closest('.mm-row');
+  if(input.files && input.files[0]) mmSetCaptura(row, input.files[0]);
+}
+function mmHandleDrop(e, zone){
+  e.preventDefault(); zone.style.borderColor = '';
+  var row = zone.closest('.mm-row');
+  var file = e.dataTransfer.files[0];
+  if(file) mmSetCaptura(row, file);
+}
+function mmClearCaptura(e, btn){
+  e.stopPropagation();
+  var row = btn.closest('.mm-row');
+  row.querySelector('.mm-captura-b64').value = '';
+  row.querySelector('.mm-captura-preview').style.display = 'none';
+  btn.style.display = 'none';
+  row.querySelector('.mm-captura-label').textContent = 'Pegar con Ctrl+V · Arrastar · o clic para seleccionar archivo';
+  row.querySelector('.mm-captura-zone').style.borderColor = '';
+  row.querySelector('.mm-captura-file').value = '';
+}
+// Pegar imagen desde portapapeles (Ctrl+V) cuando el modal está abierto
+document.addEventListener('paste', function(e){
+  var modal = document.getElementById('modal-multas');
+  if(!modal || modal.style.display==='none') return;
+  var items = (e.clipboardData||window.clipboardData||{}).items || [];
+  for(var i=0;i<items.length;i++){
+    if(items[i].type.startsWith('image/')){
+      var rows = document.querySelectorAll('#mm-lista .mm-row');
+      var targetRow = rows[rows.length-1]; // última multa agregada
+      if(targetRow) mmSetCaptura(targetRow, items[i].getAsFile());
+      e.preventDefault();
+      break;
+    }
+  }
+});
+
 function guardarMultasAdmin(){
   if(!_mmCaso) return;
   var filas = document.querySelectorAll('#mm-lista .mm-row');
@@ -3609,6 +3671,7 @@ function guardarMultasAdmin(){
       tipo:         f.querySelector('.mm-tipo').value,
       foto:         f.querySelector('.mm-foto').value,
       notif:        f.querySelector('.mm-notif').value,
+      capturaB64:   f.querySelector('.mm-captura-b64').value || '',
     });
   });
   if(!lista.length){ showToast(faltaFecha?'⚠️ Ingresa al menos la fecha de cada multa':'⚠️ Agrega al menos una multa','error'); return; }
@@ -3631,8 +3694,8 @@ function guardarMultasAdmin(){
       btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
       // Mostrar panel de éxito con botón WhatsApp
       var nombre    = (_mmCaso['Nombres']||'').split(' ')[0] || _mmCaso['Nombres'] || 'cliente';
-      var wa        = (_mmCaso['WhatsApp']||'').replace(/\D/g,'');
-      var _idFirma = _mmCaso['Cédula'] || (_mmCaso['WhatsApp']||'').replace(/\D/g,'').slice(-10) || _mmCaso['Email'] || '';
+      var wa        = (_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'');
+      var _idFirma = _mmCaso['Cédula'] || (_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'').slice(-10) || _mmCaso['Email'] || '';
       var linkFirma = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma);
       var planEl    = document.querySelector('input[name="mm-plan"]:checked');
       var plan      = planEl ? planEl.value : 'todas';
@@ -3699,7 +3762,7 @@ function guardarMultasAdmin(){
         btn.disabled = false; btn.innerHTML = '💾 Guardar y activar enlace de firma';
         if(data2.ok){
           var nombre2   = (_mmCaso['Nombres']||'').split(' ')[0] || 'cliente';
-          var wa2       = (_mmCaso['WhatsApp']||'').replace(/\D/g,'');
+          var wa2       = (_mmCaso['WhatsApp']||'').toString().replace(/\D/g,'');
           var _idFirma2 = _mmCaso['Cédula'] || wa10 || _mmCaso['Email'] || '';
           var linkFirma2 = FIRMAR_BASE_URL + '?cedula=' + encodeURIComponent(_idFirma2);
           var planEl2  = document.querySelector('input[name="mm-plan"]:checked');
