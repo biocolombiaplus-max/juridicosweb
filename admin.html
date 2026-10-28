@@ -2280,7 +2280,15 @@ function renderSection(sec){
     return;
   }
   if(sec==='nequi'){
-    filtered = allRows.filter(function(r){ return (r['Estado de Pago']||'').indexOf('Nequi Pendiente') !== -1; });
+    // Incluye: pagos Nequi pendientes (campo Sheet) + leads en etapa 'pagaron'
+    // que aún no tienen Pago OK=TRUE (ej. movidos manualmente por el admin)
+    filtered = allRows.filter(function(r){
+      var estadoPago = (r['Estado de Pago']||'');
+      var pagoOk = r['Pago OK']==='TRUE'||r['Pago OK']===true;
+      var etapaCrm = _crmEtapa(r);
+      return estadoPago.indexOf('Nequi Pendiente') !== -1 ||
+             (!pagoOk && (etapaCrm==='pagaron' || !!(r['Comprobante Nequi']||'').toString().trim()));
+    });
     document.getElementById('nequi-count').textContent = filtered.length + ' pendientes';
     if(!filtered.length){
       document.getElementById('table-nequi-wrap').innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Sin pagos Nequi pendientes.</p></div>';
@@ -2315,11 +2323,13 @@ function renderSection(sec){
     document.getElementById('table-casos-wrap').innerHTML = buildTable(filtered);
     return;
   }
-  // Clientes = TODO el que ya pagó, sin importar en qué etapa vaya después
-  // (autorizado, esperando respuesta, tutela, cerrado...) — es el módulo de
-  // clientes reales. Remarketing = lo opuesto: llenó datos pero no pagó.
+  // Clientes = TODO el que ya pagó, sin importar en qué etapa vaya después.
+  // Incluye también leads en etapa 'pagaron' (movidos manualmente) aunque
+  // Pago OK no esté seteado aún en el Sheet.
   if(sec==='clientes'){
-    filtered = allRows.filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true; });
+    filtered = allRows.filter(function(r){
+      return r['Pago OK']==='TRUE'||r['Pago OK']===true || _crmEtapa(r)==='pagaron';
+    });
     document.getElementById('clientes-count').textContent = filtered.length+' clientes';
     document.getElementById('table-clientes-wrap').innerHTML = buildTable(filtered);
     return;
@@ -2687,7 +2697,7 @@ function filtrarTabla(){
 
 function updateStats(){
   var total = allRows.length;
-  var pagos = allRows.filter(function(r){ return r['Pago OK']==='TRUE'; }).length;
+  var pagos = allRows.filter(function(r){ return r['Pago OK']==='TRUE'||r['Pago OK']===true||_crmEtapa(r)==='pagaron'; }).length;
   var enviados = allRows.filter(function(r){ return r['Doc Enviado']==='TRUE'; }).length;
   var tutelas = allRows.filter(function(r){ return getEstado(r)==='tutela'; }).length;
   var pendientes = allRows.filter(function(r){ return getEstado(r)==='pendiente'; }).length;
@@ -2705,7 +2715,12 @@ function updateStats(){
   document.getElementById('stat-tutelas').textContent = tutelas;
   document.getElementById('stat-pendientes').textContent = pendientes;
 
-  var nequiPendientes = allRows.filter(function(r){ return (r['Estado de Pago']||'').indexOf('Nequi Pendiente') !== -1; }).length;
+  var nequiPendientes = allRows.filter(function(r){
+    var pagoOk = r['Pago OK']==='TRUE'||r['Pago OK']===true;
+    var etapaCrm = _crmEtapa(r);
+    return (r['Estado de Pago']||'').indexOf('Nequi Pendiente') !== -1 ||
+           (!pagoOk && (etapaCrm==='pagaron' || !!(r['Comprobante Nequi']||'').toString().trim()));
+  }).length;
   document.getElementById('badge-nequi').textContent = nequiPendientes;
   document.getElementById('badge-total').textContent = total;
   document.getElementById('badge-clientes').textContent = pagos;
