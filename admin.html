@@ -6482,7 +6482,7 @@ function dpRenderDocumentoHTML(row, multas){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
   var hoyObj = new Date();
   var nombreCompleto = ((row['Nombres']||'')+(row['Apellidos']?' '+row['Apellidos']:'')).trim();
-  var cedula = row['Cédula']||'';
+  var cedula = row['Cédula']||row['Cedula']||row['cedula']||row['CC']||row['C.C']||row['Cédula de ciudadanía']||'';
   var placa = row['Placa']||'';
   var email = row['Email']||row['Correo']||row['email']||'';
   var whatsapp = row['WhatsApp']||'';
