@@ -1686,6 +1686,21 @@ var USUARIOS = {
 // Estado global
 var allRows = [];
 var currentUser = null;
+// Mapa de overrides de etapa para la sesión actual del admin.
+// Persiste aunque loadData() recargue los datos del Sheet.
+// Clave: cédula || email || WA (los tres que tengamos)
+var _etapasOverride = {};
+function _overrideKey(r){
+  return (r['Cédula']||'').toString().trim() ||
+         (r['Email']||'').toString().trim().toLowerCase() ||
+         (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
+}
+function _aplicarOverrides(rows){
+  (rows||[]).forEach(function(r){
+    var k = _overrideKey(r);
+    if(k && _etapasOverride[k]) r['Etapa Manual'] = _etapasOverride[k];
+  });
+}
 
 // ══════════════════════════════════════════════════
 // AUTH
@@ -2033,6 +2048,7 @@ function loadData(evtBtn){
       allRows = casos.filter(function(r){
         return r['Nombres']||r['Email']||r['Cédula']||r['Placa']||r['valor']||r['Valor'];
       });
+      _aplicarOverrides(allRows);
       renderAll();
       var hora = new Date().toLocaleTimeString('es-CO');
       if(sync) sync.textContent = 'Actualizado: ' + hora;
@@ -2518,6 +2534,10 @@ function _initCrmDragDrop(){
       if(!cedula && !email && !wa){ showToast('Este lead no tiene cédula, email ni WA para identificarlo','error'); return; }
       var confirmMsg = '¿Mover a "'+etapaDestino.replace(/_/g,' ').toUpperCase()+'"?\n\nEsto también actualizará el estado en la hoja de cálculo.';
       if(!confirm(confirmMsg)) return;
+      // Guardar override inmediatamente (antes del GAS) para que persista si se recarga
+      if(cedula) _etapasOverride[cedula.toString().trim()] = etapaDestino;
+      if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapaDestino;
+      if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapaDestino;
       // Actualizar UI inmediatamente
       dragging.dataset.etapa = etapaDestino;
       var manualDiv = dragging.querySelector('[style*="e0e7ff"]');
@@ -2538,6 +2558,10 @@ function _initCrmDragDrop(){
       .then(function(d){
         if(d.ok){
           showToast('✅ '+nombre+' → '+etapaDestino.replace(/_/g,' '),'success');
+          // Guardar en el mapa de overrides para que persista si se recarga
+          if(cedula) _etapasOverride[cedula.toString().trim()] = etapaDestino;
+          if(email)  _etapasOverride[email.toString().trim().toLowerCase()] = etapaDestino;
+          if(wa)     _etapasOverride[wa.replace(/\D/g,'').slice(-10)] = etapaDestino;
           if(allRows) allRows.forEach(function(r){
             var rWa = (r['WhatsApp']||r['Celular']||'').toString().replace(/\D/g,'').slice(-10);
             if((cedula && r['Cédula']==cedula)||(email && r['Email']==email)||(wa && rWa===wa)) r['Etapa Manual']=etapaDestino;
