@@ -3674,26 +3674,8 @@ function guardarMultasAdmin(){
       })
       .then(function(r2){ return r2.json(); })
       .then(function(){
-        // Reintentar guardar_multas
+        // Reintentar guardar_multas reutilizando la lista ya recolectada
         btn.innerHTML = '<span class="loading-spinner"></span>Guardando multas...';
-        var lista2 = [];
-        document.querySelectorAll('#mm-lista .mm-row').forEach(function(f){
-          lista2.push({
-            codigo:        f.querySelector('.mm-codigo').value.trim(),
-            esFotomulta:   f.querySelector('.mm-esfoto').value,
-            descripcion:   f.querySelector('.mm-desc').value.trim(),
-            placa:         f.querySelector('.mm-placa').value.trim(),
-            valor:         f.querySelector('.mm-valor').value.trim(),
-            numResolucion: f.querySelector('.mm-resolucion').value.trim(),
-            fechaResolucion: f.querySelector('.mm-fecharesolucion').value,
-            numCoactivo:   f.querySelector('.mm-coactivo').value.trim(),
-            fechaCoactivo: f.querySelector('.mm-fechacoactivo').value,
-            ciudad:        f.querySelector('.mm-ciudad').value.trim(),
-            tipo:          f.querySelector('.mm-tipo').value,
-            foto:          f.querySelector('.mm-foto').value,
-            notif:         f.querySelector('.mm-notif').value,
-          });
-        });
         return fetch(SCRIPT_URL, {
           method:'POST',
           body: JSON.stringify({
@@ -3701,7 +3683,7 @@ function guardarMultasAdmin(){
             cedula:   _mmCaso['Cédula']||'',
             email:    _mmCaso['Email']||'',
             whatsapp: wa10,
-            multasReportadas: JSON.stringify(lista2)
+            multasReportadas: JSON.stringify(lista)
           })
         });
       })
