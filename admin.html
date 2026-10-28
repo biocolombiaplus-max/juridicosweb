@@ -188,6 +188,9 @@ tr:hover td{background:#f8faff;cursor:pointer}
 /* ── FORM NUEVO CASO ── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-group-m{margin-bottom:16px}
+.cp-plan-btn{background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;width:100%;}
+.cp-plan-btn:hover{border-color:#6366f1;background:#eef2ff;}
+.cp-plan-btn.selected{border-color:#6366f1;background:#eef2ff;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
 .form-group-m label{display:block;font-size:12px;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .form-group-m input,.form-group-m select,.form-group-m textarea{width:100%;padding:10px 14px;border:2px solid var(--gray200);border-radius:8px;font-size:14px;font-family:inherit}
 .form-group-m input:focus,.form-group-m select:focus,.form-group-m textarea:focus{outline:none;border-color:var(--navy)}
@@ -1413,34 +1416,78 @@ function syncCampanaLoad() {
 <!-- MODAL CONFIRMAR PAGO (corrige plan/monto si el cliente pagó distinto a lo seleccionado) -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-confirmar-pago">
-  <div class="modal">
+  <div class="modal" style="max-width:500px;">
     <div class="modal-header">
       <h2 id="cp-modal-titulo">💰 Confirmar Pago</h2>
       <button class="modal-close" onclick="closeModal('modal-confirmar-pago')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--gray600);margin-bottom:6px;">
-        Cliente: <strong id="cp-cliente-nombre">—</strong>
-      </p>
-      <p style="font-size:13px;color:var(--gray600);margin-bottom:16px;" id="cp-explicacion">
-        Confirma qué plan y monto realmente pagó. Si eligió un plan en la página pero al final pagó otro (ej.
-        seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar), corrígelo aquí — así el caso queda con
-        el plan correcto y el sistema calcula bien el saldo pendiente.
-      </p>
-      <div class="form-group-m">
-        <label>Plan que realmente pagó</label>
-        <select id="cp-plan" onchange="actualizarMontoSugeridoPago()">
-          <option value="Pago individual — $45.000 c/u">Pago individual — $45.000 c/u</option>
-          <option value="Eliminar todas las que apliquen — $69.000">Eliminar todas las que apliquen — $69.000</option>
-          <option value="Pago al Eliminar — Adelanto $19.800 + $95.500 c/u">Pago al Eliminar — Adelanto $19.800 + $95.500 c/u</option>
-        </select>
+      <!-- Info cliente -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:0.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Cliente</div>
+        <div style="font-size:1rem;font-weight:700;color:#0f172a;" id="cp-cliente-nombre">—</div>
+        <div style="font-size:0.78rem;color:#64748b;margin-top:2px;" id="cp-cliente-sub">—</div>
+        <div id="cp-plan-detectado" style="margin-top:8px;display:none;">
+          <span style="font-size:0.72rem;background:#dbeafe;color:#1e40af;padding:2px 9px;border-radius:99px;font-weight:600;">📱 Plan detectado de la web</span>
+          <span id="cp-plan-detectado-texto" style="font-size:0.78rem;color:#1e3a8a;margin-left:6px;font-weight:600;"></span>
+        </div>
       </div>
-      <div class="form-group-m">
-        <label>Monto realmente pagado</label>
-        <input type="number" id="cp-monto" inputmode="numeric">
+
+      <!-- Selección rápida de plan -->
+      <div style="font-size:0.72rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">¿Qué plan pagó?</div>
+      <div id="cp-planes-rapidos" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <button class="cp-plan-btn" data-plan="individual" data-monto="45000" onclick="seleccionarPlanRapido(this)">
+          <div style="font-size:0.8rem;font-weight:700;">Plan Individual</div>
+          <div style="font-size:1.1rem;font-weight:900;color:#1d4ed8;">$45.000</div>
+          <div style="font-size:0.65rem;color:#64748b;">por multa</div>
+        </button>
+        <button class="cp-plan-btn" data-plan="masivo" data-monto="69000" onclick="seleccionarPlanRapido(this)">
+          <div style="font-size:0.8rem;font-weight:700;">Plan Total</div>
+          <div style="font-size:1.1rem;font-weight:900;color:#059669;">$69.000</div>
+          <div style="font-size:0.65rem;color:#64748b;">todas las multas</div>
+        </button>
+        <button class="cp-plan-btn" data-plan="garantia_adelanto" data-monto="10000" onclick="seleccionarPlanRapido(this)">
+          <div style="font-size:0.8rem;font-weight:700;">Garantía $10k</div>
+          <div style="font-size:1.1rem;font-weight:900;color:#7c3aed;">$10.000</div>
+          <div style="font-size:0.65rem;color:#64748b;">adelanto plan garantía</div>
+        </button>
+        <button class="cp-plan-btn" data-plan="diferido" data-monto="19800" onclick="seleccionarPlanRapido(this)">
+          <div style="font-size:0.8rem;font-weight:700;">Pago al Eliminar</div>
+          <div style="font-size:1.1rem;font-weight:900;color:#d97706;">$19.800</div>
+          <div style="font-size:0.65rem;color:#64748b;">adelanto diferido</div>
+        </button>
       </div>
-      <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn btn-primary" id="btn-confirmar-cp" onclick="confirmarPagoDesdeModal()">💰 Confirmar Pago</button>
+
+      <!-- Monto manual y canal -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="form-group-m" style="margin:0;">
+          <label>Monto recibido <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="cp-monto" inputmode="numeric" placeholder="Ej. 45000" oninput="limpiarSeleccionPlanRapido()" style="font-size:1rem;font-weight:700;">
+        </div>
+        <div class="form-group-m" style="margin:0;">
+          <label>Canal de pago</label>
+          <select id="cp-canal">
+            <option value="Nequi">Nequi</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="PSE">PSE</option>
+            <option value="Tarjeta">Tarjeta</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Wompi">Wompi</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Plan interno (oculto, se actualiza con los botones) -->
+      <input type="hidden" id="cp-plan">
+
+      <!-- Notas opcionales -->
+      <div class="form-group-m" style="margin-bottom:16px;">
+        <label>Notas (opcional)</label>
+        <input type="text" id="cp-notas-pago" placeholder="Ej. pagó por WhatsApp, referencia 123…">
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" id="btn-confirmar-cp" onclick="confirmarPagoDesdeModal()" style="flex:1;">💰 Confirmar Pago</button>
         <button class="btn btn-outline" onclick="closeModal('modal-confirmar-pago')">Cancelar</button>
       </div>
     </div>
@@ -3712,18 +3759,42 @@ function guardarCorreoRadicacionYReintentar(){
 // ══════════════════════════════════════════════════
 var _cpCasoRow = null;
 
-function montoSugeridoPlan(plan, row){
-  var n = Number(row['Multas Seleccionadas']) || 1;
-  if(/Eliminar todas/i.test(plan||'')) return 69000;
-  if(/Adelanto/i.test(plan||'')) return 19800;
-  return 45000 * n;
+// Mapa de planes: clave interna → {label, monto, planBtn}
+var CP_PLANES = {
+  'individual':        { label:'Pago individual — $45.000 c/u',                      monto:45000,  btn:'individual' },
+  'masivo':            { label:'Eliminar todas las que apliquen — $69.000',           monto:69000,  btn:'masivo' },
+  'garantia_adelanto': { label:'Plan Garantía — Adelanto $10.000',                    monto:10000,  btn:'garantia_adelanto' },
+  'diferido':          { label:'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u',  monto:19800,  btn:'diferido' },
+};
+
+function _detectarPlanBtn(planStr){
+  if(!planStr) return null;
+  var p = planStr.toLowerCase();
+  if(/10\.?000|garantia|garantía/i.test(p)) return 'garantia_adelanto';
+  if(/19\.?800|diferid|adelanto/i.test(p))  return 'diferido';
+  if(/69\.?000|todas/i.test(p))             return 'masivo';
+  if(/45\.?000|individual/i.test(p))        return 'individual';
+  return null;
+}
+
+function seleccionarPlanRapido(btn){
+  document.querySelectorAll('.cp-plan-btn').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  var key = btn.dataset.plan;
+  var n = Number((_cpCasoRow||{})['Multas Seleccionadas']) || 1;
+  var monto = key==='individual' ? 45000*n : Number(btn.dataset.monto);
+  document.getElementById('cp-monto').value = monto;
+  document.getElementById('cp-plan').value = CP_PLANES[key] ? CP_PLANES[key].label : key;
+}
+
+function limpiarSeleccionPlanRapido(){
+  document.querySelectorAll('.cp-plan-btn').forEach(function(b){ b.classList.remove('selected'); });
+  document.getElementById('cp-plan').value = '';
 }
 
 function abrirModalConfirmarPago(btn){
   var row;
   try{ row = JSON.parse(btn.getAttribute('data-row')); }catch(e){ return; }
-  // Sin nombre o cédula el documento saldría incompleto — igual que antes,
-  // se pide completar los datos primero.
   if(!row['Nombres'] || !row['Cédula']){
     showToast('⚠️ Falta nombre o cédula — complétalos antes de confirmar el pago','error');
     openModalDatosCliente(row, 'completar');
@@ -3731,31 +3802,55 @@ function abrirModalConfirmarPago(btn){
   }
   _cpCasoRow = row;
   var yaPagado = row['Pago OK']==='TRUE'||row['Pago OK']===true;
-  document.getElementById('cp-cliente-nombre').textContent = (row['Nombres']||'')+' '+(row['Apellidos']||'');
   document.getElementById('cp-modal-titulo').textContent = yaPagado ? '✏️ Corregir plan / monto' : '💰 Confirmar Pago';
-  document.getElementById('cp-explicacion').textContent = yaPagado
-    ? 'Este caso ya tiene el pago confirmado. Si el plan o el monto quedaron mal registrados, corrígelos aquí — se recalcula el saldo pendiente según el plan definitivo.'
-    : 'Confirma qué plan y monto realmente pagó. Si eligió un plan en la página pero al final pagó otro (ej. seleccionó $45.000 pero pagó los $19.800 del Plan Pago al Eliminar), corrígelo aquí — así el caso queda con el plan correcto y el sistema calcula bien el saldo pendiente.';
   document.getElementById('btn-confirmar-cp').textContent = yaPagado ? '💾 Guardar corrección' : '💰 Confirmar Pago';
-  var planSel = document.getElementById('cp-plan');
-  var planActual = row['Plan'] || 'Pago individual — $45.000 c/u';
-  var coincide = Array.prototype.some.call(planSel.options, function(o){ return o.value===planActual; });
-  planSel.value = coincide ? planActual : 'Pago individual — $45.000 c/u';
-  document.getElementById('cp-monto').value = row['Monto Total'] || montoSugeridoPlan(planSel.value, row);
-  document.getElementById('modal-confirmar-pago').classList.add('show');
-}
 
-function actualizarMontoSugeridoPago(){
-  if(!_cpCasoRow) return;
-  var plan = document.getElementById('cp-plan').value;
-  document.getElementById('cp-monto').value = montoSugeridoPlan(plan, _cpCasoRow);
+  // Nombre + sub info
+  document.getElementById('cp-cliente-nombre').textContent = ((row['Nombres']||'')+' '+(row['Apellidos']||'')).trim();
+  var sub = [row['Cédula']?'C.C. '+row['Cédula']:'', row['WhatsApp']?'WA '+row['WhatsApp']:'', row['Email']||''].filter(Boolean).join(' · ');
+  document.getElementById('cp-cliente-sub').textContent = sub || '—';
+
+  // Mostrar plan detectado de la web si existe
+  var planRaw = row['Plan'] || '';
+  var planDetBtn = _detectarPlanBtn(planRaw);
+  var planDetEl = document.getElementById('cp-plan-detectado');
+  var planDetTxt = document.getElementById('cp-plan-detectado-texto');
+  if(planRaw && planRaw !== 'pendiente_pago' && planDetBtn){
+    planDetEl.style.display = 'block';
+    planDetTxt.textContent = CP_PLANES[planDetBtn] ? CP_PLANES[planDetBtn].label : planRaw;
+  } else { planDetEl.style.display = 'none'; }
+
+  // Pre-seleccionar botón del plan detectado
+  document.querySelectorAll('.cp-plan-btn').forEach(function(b){ b.classList.remove('selected'); });
+  document.getElementById('cp-plan').value = '';
+  document.getElementById('cp-monto').value = '';
+  if(planDetBtn){
+    var btnEl = document.querySelector('.cp-plan-btn[data-plan="'+planDetBtn+'"]');
+    if(btnEl) seleccionarPlanRapido(btnEl);
+  } else if(row['Monto Total']){
+    document.getElementById('cp-monto').value = row['Monto Total'];
+  }
+
+  // Canal
+  document.getElementById('cp-canal').value = 'Nequi';
+  document.getElementById('cp-notas-pago').value = '';
+  document.getElementById('modal-confirmar-pago').classList.add('show');
 }
 
 function confirmarPagoDesdeModal(){
   if(!_cpCasoRow) return;
   var plan = document.getElementById('cp-plan').value;
   var monto = Number(document.getElementById('cp-monto').value);
-  if(!monto || monto <= 0){ showToast('⚠️ Escribe el monto realmente pagado','error'); return; }
+  var canal = document.getElementById('cp-canal').value;
+  var notas = document.getElementById('cp-notas-pago').value.trim();
+  if(!monto || monto <= 0){ showToast('⚠️ Selecciona un plan o escribe el monto recibido','error'); document.getElementById('cp-monto').focus(); return; }
+  if(!plan){
+    // Inferir plan desde monto
+    if(monto>=65000) plan='Eliminar todas las que apliquen — $69.000';
+    else if(monto>=40000) plan='Pago individual — $45.000 c/u';
+    else if(monto>=15000) plan='Pago al Eliminar — Adelanto $19.800 + $95.500 c/u';
+    else plan='Plan Garantía — Adelanto $10.000';
+  }
 
   var btn = document.getElementById('btn-confirmar-cp');
   btn.disabled = true; var textoOriginal = btn.textContent; btn.textContent='Procesando...';
@@ -3763,6 +3858,7 @@ function confirmarPagoDesdeModal(){
     _accion: 'confirmar_pago',
     email: _cpCasoRow['Email'], cedula: _cpCasoRow['Cédula'], nombres: _cpCasoRow['Nombres'],
     plan: plan, montoTotal: monto, multasSeleccionadas: _cpCasoRow['Multas Seleccionadas'],
+    estadoPago: 'PAGADO - '+canal+(notas?' ('+notas+')':''),
   };
   fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) })
     .then(function(r){ return r.json(); })
@@ -3770,7 +3866,7 @@ function confirmarPagoDesdeModal(){
       btn.disabled = false; btn.textContent = textoOriginal;
       if(data.ok){
         var yaPagado = _cpCasoRow['Pago OK']==='TRUE'||_cpCasoRow['Pago OK']===true;
-        showToast(yaPagado ? '✅ Plan y monto corregidos' : '✅ Pago confirmado','success');
+        showToast(yaPagado ? '✅ Plan y monto corregidos' : '✅ Pago confirmado — $'+monto.toLocaleString('es-CO')+' vía '+canal,'success');
         closeModal('modal-confirmar-pago');
         closeModal('modal-caso');
         setTimeout(loadData, 1500);

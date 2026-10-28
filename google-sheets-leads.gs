@@ -258,6 +258,14 @@ function registrarVisita(datos) {
 // ───────────────────────── crear / actualizar el caso ─────────────────────────
 
 function guardarLead(datos) {
+  // Normalizar tipo/valor → cedula o placa (landing envía {tipo,valor} en vez de cedula/placa directos)
+  if (datos.valor && datos.tipo) {
+    if (datos.tipo === 'cedula' && !datos.cedula) datos.cedula = datos.valor;
+    if (datos.tipo === 'placa'  && !datos.placa)  datos.placa  = datos.valor;
+  }
+  // Normalizar campo 'correo' → 'email'
+  if (datos.correo && !datos.email) datos.email = datos.correo;
+
   var hoja = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
   var fila = buscarFilaPorCedulaOEmail(hoja, datos.cedula, datos.email);
   var esDiferido = /Adelanto/i.test(datos.plan || '');
