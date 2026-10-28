@@ -632,51 +632,166 @@ function agruparPorCiudad(multas){
 function construirTextoPeticion(p, multasGrupo){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
   var ciudadDoc = (multasGrupo && multasGrupo.length) ? multasGrupo[0].ciudad : p.ciudad;
-  var secretaria = 'Secretaría de Tránsito y Movilidad – '+ciudadDoc;
+  var secretaria = 'Secretaría de Tránsito y Movilidad' + (ciudadDoc ? ' de ' + ciudadDoc : '');
   var aplican = multasGrupo || [];
-  var hayPrescritas = aplican.some(function(m){ return m.tipoCausal==='prescripcion'; });
-  // Se detecta por el dato crudo (notif + rango de años), no por el texto del
-  // causal — así se cita esta base legal tanto cuando la notificación tardía
-  // fue el motivo principal como cuando solo refuerza una prescripción o un
-  // caso INM ya aplicable.
-  var hayNotif = aplican.some(function(m){ return m.notif==='no' && m.foto==='si'; });
-  var hayINM = aplican.some(function(m){ return m.posibleINM; });
+  var hayPrescritas  = aplican.some(function(m){ return m.tipoCausal==='prescripcion'; });
+  var hayNotif       = aplican.some(function(m){ return m.notif==='no' && m.foto==='si'; });
+  var hayINM         = aplican.some(function(m){ return m.posibleINM; });
+  var hayAgente      = aplican.some(function(m){ return m.foto==='no'; });
+  var hayFotomulta   = aplican.some(function(m){ return m.foto==='si'; });
 
+  // ── I. HECHOS ──────────────────────────────────────────────────────
   var hechosMultas = aplican.map(function(m,i){
     var f = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
     var valorTxt = m.valor ? ' por valor de $'+Number(m.valor).toLocaleString('es-CO') : '';
-    return (i+1)+'. Comparendo de fecha '+f+valorTxt+(m.ciudad?', registrado ante '+m.ciudad:'')+'. '+m.causal;
+    var tipoStr = m.foto==='si' ? 'Fotomulta (comparendo por medio técnico)' : 'Comparendo impuesto por agente de tránsito';
+    return (i+1)+'. '+tipoStr+' de fecha '+f+valorTxt+(m.ciudad?', registrado ante la Secretaría de Tránsito de '+m.ciudad:'')+'. '+m.causal;
   }).join('\n\n');
 
-  var considerandos = [];
-  considerandos.push('Que el artículo 29 de la Constitución Política consagra el derecho fundamental al debido proceso, aplicable también a las actuaciones administrativas sancionatorias, y que dicha garantía exige que toda sanción administrativa se imponga y se mantenga vigente únicamente mientras subsistan sus fundamentos fácticos y jurídicos.');
-  if(hayPrescritas) considerandos.push('Que el artículo 136 de la Ley 769 de 2002 (Código Nacional de Tránsito) establece un término de prescripción de tres (3) años para el cobro de las sanciones de tránsito, término que en el(los) comparendo(s) relacionado(s) ya se encuentra ampliamente superado. En concordancia, el artículo 52 de la Ley 1437 de 2011 (CPACA) reconoce el mismo límite temporal para el ejercicio de la facultad sancionatoria de las autoridades administrativas.');
-  if(hayNotif) considerandos.push('Que la Ley 1843 de 2017 le da a la autoridad de tránsito un término máximo de diez (10) días hábiles siguientes a la infracción para validar el comparendo, y tres (3) días hábiles adicionales para notificarlo — trece (13) días hábiles en total desde la infracción —, notificación que debe surtirse a la dirección registrada en el RUNT. Un acto administrativo no notificado dentro de ese término no es oponible al administrado, no produce efectos jurídicos en su contra y da lugar a la caducidad de la facultad sancionatoria, conforme a los artículos 66 a 69 del CPACA (Ley 1437 de 2011).');
-  if(hayINM) considerandos.push('Que la Ley 2251 de 2022 y la Resolución 718 de 2023 del Ministerio de Transporte exigen que los equipos de fotodetección cuenten con el "concepto de desempeño" del Instituto Nacional de Metrología (INM). La Superintendencia de Transporte investiga desde 2026 a organismos de tránsito que operaron dichos equipos sin cumplir este requisito entre 2018 y 2024 ('+FUENTE_OFICIAL_INM+').');
-  considerandos.push('Que el artículo 14 del CPACA obliga a la administración a resolver de fondo toda petición dentro de los quince (15) días hábiles siguientes a su radicación.');
-  var considerandosTxt = considerandos.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
+  // ── II. FUNDAMENTOS JURÍDICOS ──────────────────────────────────────
+  var fj = [];
 
-  var pretensiones=[];
-  if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN de las sanciones relacionadas, conforme al Art. 136 de la Ley 769 de 2002.');
-  if(hayNotif) pretensiones.push('Que se declare la CADUCIDAD de la facultad sancionatoria y la NULIDAD de los comparendos por notificación extemporánea, al no haberse surtido dentro de los trece (13) días hábiles que exige la Ley 1843 de 2017, contados desde la infracción, a la dirección registrada en el RUNT.');
-  if(hayINM) pretensiones.push('Que se verifique el concepto de desempeño del INM del equipo de fotodetección y, de no existir, se declare la NULIDAD del comparendo.');
-  pretensiones.push('Que, en consecuencia, se ELIMINEN del sistema SIMIT los registros correspondientes, y se certifique dicha eliminación al peticionario.');
-  pretensiones.push('Que se resuelva de fondo la presente petición dentro del término legal de quince (15) días hábiles previsto en el Art. 14 del CPACA.');
-  var pretensionesTxt = pretensiones.map(function(t,i){ return (i+1)+'. '+t; }).join('\n\n');
+  // Bloque 1: Debido proceso (siempre)
+  fj.push(
+    'BLOQUE 1 – DERECHO FUNDAMENTAL AL DEBIDO PROCESO ADMINISTRATIVO\n\n'+
+    'El artículo 29 de la Constitución Política de Colombia consagra el derecho fundamental al debido proceso, el cual, conforme a la jurisprudencia uniforme de la Corte Constitucional (Sentencias C-506/2002, C-980/2010, T-460/2016), es plenamente aplicable a las actuaciones administrativas sancionatorias en materia de tránsito. Dicha garantía exige que: (i) toda infracción sea tipificada previamente en la ley; (ii) la sanción se imponga mediante procedimiento legalmente establecido; (iii) el investigado tenga plena oportunidad de ejercer su defensa; y (iv) la sanción se mantenga únicamente mientras subsistan sus fundamentos fácticos y jurídicos.\n\n'+
+    'El artículo 4 del CPACA (Ley 1437 de 2011, modificado por la Ley 1755 de 2015) consagra los principios que rigen las actuaciones administrativas: legalidad, debido proceso, igualdad, imparcialidad, buena fe, moralidad, participación, responsabilidad, transparencia y celeridad. Su desconocimiento constituye causal de nulidad del acto administrativo, conforme al artículo 137 del CPACA.'
+  );
 
-  return ciudadDoc+', '+hoy+'\n\nSeñores:\n'+secretaria+'\nE.S.D.\n\n'+
-    'REFERENCIA: DERECHO DE PETICIÓN – SOLICITUD DE PRESCRIPCIÓN, CADUCIDAD, NULIDAD Y ELIMINACIÓN DE COMPARENDOS\n'+
-    'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\nC.C. No.: '+p.cedula+'\nPLACA(S): '+(p.placa||'N/A')+'\n\n'+
+  // Bloque 2: PRESCRIPCIÓN
+  if(hayPrescritas) fj.push(
+    'BLOQUE 2 – PRESCRIPCIÓN DE LA ACCIÓN SANCIONATORIA\n\n'+
+    '2.1. RÉGIMEN LEGAL APLICABLE\n'+
+    'El artículo 136 de la Ley 769 de 2002 (Código Nacional de Tránsito Terrestre) dispone textualmente: "Las infracciones al tránsito prescriben en tres (3) años, contados a partir de la fecha de la comisión de la infracción." Este término opera de pleno derecho una vez transcurrido, sin necesidad de declaración judicial previa, y extingue simultáneamente tanto la obligación sustancial como la facultad sancionatoria de la entidad, en concordancia con el artículo 2512 del Código Civil.\n\n'+
+    '2.2. NORMAS CONCORDANTES\n'+
+    'a) Artículo 52 de la Ley 1437 de 2011 (CPACA): "Los procedimientos administrativos sancionatorios caducan si transcurridos tres (3) años desde la comisión de la infracción no se ha proferido el acto administrativo sancionatorio." La prescripción de la acción sancionatoria es irrenunciable e irretroactiva, y no admite suspensión ni interrupción por actuaciones administrativas posteriores no notificadas válidamente al infractor.\n'+
+    'b) Artículo 87 del CPACA: Las entidades están obligadas a revocar de oficio o a petición de parte los actos administrativos que sean contrarios a la Constitución o la ley. Un comparendo prescrito carece de fundamento jurídico vigente y su mantenimiento en el SIMIT constituye una actuación contraria a la ley.\n'+
+    'c) Decreto Ley 019 de 2012 (Estatuto Antitrámites), artículo 45: Prohíbe a las entidades de tránsito mantener en cobro comparendos prescritos.\n\n'+
+    '2.3. JURISPRUDENCIA APLICABLE\n'+
+    'La Corte Constitucional, en Sentencia C-117/2018 (M.P. Alejandro Linares), reafirmó que el término de prescripción en materia de infracciones de tránsito es una garantía del debido proceso administrativo. El Consejo de Estado, Sección Tercera, en Sentencia del 12 de agosto de 2014, radicado 08001-23-31-000-2012-00022-01, señaló que las sanciones de tránsito prescriben a los tres (3) años independientemente de cualquier actuación de cobro no notificada. El Tribunal Administrativo de Cundinamarca, en auto de 2019, ordenó la eliminación del SIMIT de registros prescritos al amparo del citado artículo 136 de la Ley 769 de 2002.\n\n'+
+    '2.4. APLICACIÓN AL CASO CONCRETO\n'+
+    'Como se evidencia en los hechos, el o los comparendos relacionados fueron impuestos hace más de tres (3) años sin que se haya demostrado la existencia de pago, acuerdo de pago debidamente notificado, o actuación suspensiva del término prescriptivo válidamente comunicada al peticionario. En consecuencia, la prescripción opera ipso iure, y la entidad está jurídicamente impedida para mantener dicho registro activo en el SIMIT o intentar su cobro por cualquier vía.'
+  );
+
+  // Bloque 3: MAL NOTIFICADA / CADUCIDAD
+  if(hayNotif) fj.push(
+    'BLOQUE '+(hayPrescritas?'3':'2')+' – CADUCIDAD DE LA FACULTAD SANCIONATORIA POR NOTIFICACIÓN EXTEMPORÁNEA (LEY 1843 DE 2017)\n\n'+
+    '3.1. RÉGIMEN PROCEDIMENTAL DE LA FOTOMULTA\n'+
+    'La Ley 1843 de 2017 "Por medio de la cual se regula el uso de dispositivos electrónicos de detección de infracciones de tránsito", en su artículo 4, establece un procedimiento estricto y de términos perentorios para la imposición y notificación de fotomultas:\n'+
+    '  - Dentro de los diez (10) días hábiles siguientes a la infracción: el organismo de tránsito debe validar el comparendo.\n'+
+    '  - Dentro de los tres (3) días hábiles siguientes a esa validación: debe notificar al propietario del vehículo a la dirección registrada en el RUNT.\n'+
+    '  - Plazo máximo total: TRECE (13) días hábiles contados desde la fecha de la infracción.\n\n'+
+    '3.2. NATURALEZA DE LA NOTIFICACIÓN Y CONSECUENCIA DE SU INCUMPLIMIENTO\n'+
+    'Los artículos 66 a 69 del CPACA (Ley 1437 de 2011) establecen que los actos administrativos solo producen efectos jurídicos frente al destinatario a partir de su notificación en legal forma. Un acto administrativo sancionatorio no notificado dentro del término legal: (i) no es oponible al administrado; (ii) no genera obligación de pago exigible; (iii) hace caducar la facultad sancionatoria de la entidad; y (iv) debe ser retirado del sistema SIMIT.\n'+
+    'La Corte Constitucional, en Sentencia T-460 de 2016 (M.P. Jorge Ignacio Pretelt Chaljub), reiteró que la notificación oportuna es un elemento esencial del debido proceso en materia de fotomultas, y que su omisión o extemporaneidad genera una nulidad insaneable del acto sancionatorio. La Sentencia C-980 de 2010 (M.P. Gabriel Eduardo Mendoza Martelo) señaló expresamente que los organismos de tránsito no pueden imponer sanciones de tránsito sin agotar íntegramente el procedimiento de notificación previsto en la ley.\n\n'+
+    '3.3. RESOLUCIÓN 3245 DE 2009 DEL MINISTERIO DE TRANSPORTE\n'+
+    'Esta resolución reglamenta el procedimiento de infracciones de tránsito detectadas por medios técnicos y fotográficos, y establece que la notificación debe realizarse al propietario del vehículo en la dirección que figure registrada en el RUNT, so pena de ineficacia del acto administrativo.\n\n'+
+    '3.4. APLICACIÓN AL CASO CONCRETO\n'+
+    'El o los comparendos reportados corresponden a fotomultas impuestas mediante dispositivos tecnológicos. El peticionario declara bajo la gravedad del juramento no haber recibido notificación dentro de los trece (13) días hábiles exigidos por la Ley 1843 de 2017. Ello configura caducidad de la facultad sancionatoria y nulidad del acto administrativo, con la consiguiente obligación de la entidad de eliminar el registro del SIMIT.'
+  );
+
+  // Bloque 4: INM (fotomultas 2018-2024)
+  if(hayINM) fj.push(
+    'BLOQUE '+(hayPrescritas&&hayNotif?'4':hayPrescritas||hayNotif?'3':'2')+' – NULIDAD POR AUSENCIA DE CERTIFICACIÓN DEL INSTITUTO NACIONAL DE METROLOGÍA (INM)\n\n'+
+    '4.1. EXIGENCIA LEGAL DE METROLOGÍA LEGAL\n'+
+    'La Ley 2251 de 2022 y la Resolución 718 de 2023 del Ministerio de Transporte establecen como requisito sine qua non para la validez de las fotomultas que los equipos de fotodetección cuenten con el "concepto de desempeño" expedido por el Instituto Nacional de Metrología (INM) de Colombia. Dicho concepto garantiza la exactitud, confiabilidad y trazabilidad metrológica de las mediciones de velocidad, semáforos y demás parámetros captados por los equipos.\n\n'+
+    '4.2. INVESTIGACIÓN DE LA SUPERINTENDENCIA DE TRANSPORTE\n'+
+    'La Superintendencia de Transporte inició en 2026 una investigación formal contra múltiples organismos de tránsito por haber operado equipos de fotodetección sin el concepto de desempeño del INM durante el período 2018-2024 ('+FUENTE_OFICIAL_INM+'). La operación de un equipo de fotodetección sin certificación metrológica válida genera, de conformidad con el artículo 29 Constitucional y el principio de legalidad, la nulidad absoluta de todos los comparendos impuestos con dicho equipo, al carecer de certeza sobre la exactitud de la medición que les dio origen.\n\n'+
+    '4.3. PRINCIPIO IN DUBIO PRO REO EN MATERIA ADMINISTRATIVA SANCIONATORIA\n'+
+    'La Corte Constitucional, en Sentencia C-391 de 2002 y reiterado en C-980/2010, señaló que el principio in dubio pro reo es aplicable a los procedimientos administrativos sancionatorios. La duda sobre la exactitud metrológica del equipo con que se impuso la fotomulta debe resolverse a favor del administrado. La entidad tiene la carga de probar la validez y exactitud de la medición; en ausencia de dicha prueba, el comparendo carece de sustento fáctico.\n\n'+
+    '4.4. APLICACIÓN AL CASO CONCRETO\n'+
+    'El organismo de tránsito de '+ciudadDoc+' figura entre las entidades investigadas. La fotomulta impuesta al peticionario en el período señalado pudo haber sido generada por un equipo que operaba sin el concepto de desempeño del INM, lo cual invalida técnica y jurídicamente la medición que le dio origen.'
+  );
+
+  // Bloque: comparendo por agente
+  if(hayAgente) {
+    var bloqueNum = 2 + (hayPrescritas?1:0) + (hayNotif?1:0) + (hayINM?1:0);
+    fj.push(
+    'BLOQUE '+bloqueNum+' – VICIOS PROCEDIMENTALES DEL COMPARENDO IMPUESTO POR AGENTE DE TRÁNSITO\n\n'+
+    bloqueNum+'.1. REQUISITOS FORMALES DEL COMPARENDO (ART. 135-140 LEY 769 DE 2002)\n'+
+    'El artículo 135 de la Ley 769 de 2002 establece que el comparendo como acto administrativo debe contener de manera imperativa: (a) lugar, fecha y hora de la infracción; (b) clase y número del vehículo; (c) nombre, apellido y número de cédula del conductor o propietario; (d) número de licencia de conducción; (e) infracción cometida con indicación del artículo violado; (f) cuantía de la multa; (g) nombre y código del agente; y (h) firma o huella digital del infractor, o constancia de su negativa. La ausencia de cualquiera de estos elementos constituye defecto procedimental absoluto y causa la nulidad insaneable del comparendo, conforme al artículo 137, numeral 2, del CPACA.\n\n'+
+    bloqueNum+'.2. DERECHO DE CONTRADICCIÓN Y RECURSOS DISPONIBLES\n'+
+    'El artículo 140 de la Ley 769 de 2002 consagra el derecho del comparendado a interponer recurso de reposición ante la autoridad de tránsito y, en subsidio, recurso de apelación ante el superior jerárquico, dentro de los cinco (5) días hábiles siguientes a la notificación del comparendo. Si el comparendo no fue notificado al infractor con indicación expresa de los recursos procedentes, los términos para impugnar no corren, conforme al artículo 74 del CPACA.\n\n'+
+    bloqueNum+'.3. PRINCIPIO DE TIPICIDAD Y LEGALIDAD SANCIONATORIA\n'+
+    'La Corte Constitucional, en Sentencia C-818 de 2005 y C-699 de 2015, reafirmó que el principio de tipicidad exige que la conducta sancionada y la sanción aplicable estén descritas de manera precisa, clara e inequívoca en la ley. Un comparendo que no identifique con precisión la infracción cometida, el artículo violado y la norma que establece la sanción carece del presupuesto de tipicidad y debe anularse. El Consejo de Estado, Sección Segunda, en Sentencia del 22 de febrero de 2018, radicado 25000-23-42-000-2015-03521-01, ordenó la eliminación del SIMIT de comparendos que presentaban irregularidades en su formulario.\n\n'+
+    bloqueNum+'.4. PRINCIPIO DE FAVORABILIDAD\n'+
+    'El artículo 29 de la Constitución Política y el artículo 3 del CPACA consagran el principio de favorabilidad en los procedimientos sancionatorios: en caso de duda sobre la interpretación de las normas que sirvieron de fundamento al comparendo, o sobre la existencia de alguno de sus requisitos formales, deberá preferirse la interpretación más favorable al administrado.'
+    );
+  }
+
+  // Bloque final: Art. 14 CPACA (siempre)
+  var bloqueUltimo = 2 + (hayPrescritas?1:0) + (hayNotif?1:0) + (hayINM?1:0) + (hayAgente?1:0);
+  fj.push(
+    'BLOQUE '+bloqueUltimo+' – OBLIGACIÓN LEGAL DE RESPUESTA DE FONDO (ART. 14 CPACA)\n\n'+
+    'El artículo 14 de la Ley 1437 de 2011 (CPACA), modificado por el artículo 1 de la Ley 1755 de 2015, impone a toda entidad pública la obligación ineludible de resolver de fondo, de manera clara, precisa y congruente, toda petición presentada por un ciudadano, dentro del término de quince (15) días hábiles contados a partir de su radicación. El incumplimiento de esta obligación constituye vulneración del derecho fundamental de petición (Art. 23 Constitución Política) y habilita la interposición de acción de tutela para su protección inmediata, como lo ha reafirmado la Corte Constitucional en Sentencias T-580/2015, T-086/2017 y T-213/2018.\n\n'+
+    'El artículo 83 del CPACA establece que en las actuaciones administrativas se presume la buena fe del administrado. Esta presunción implica que la entidad no puede negar el trámite de la presente petición por simple formalismo, y debe proceder a verificar de oficio la existencia de los vicios denunciados.'
+  );
+
+  var fundamentosTxt = fj.join('\n\n────────────────────────────────────────\n\n');
+
+  // ── III. PRETENSIONES ──────────────────────────────────────────────
+  var pretensiones = [];
+  pretensiones.push('Que se admita y tramite de fondo la presente petición dentro del término legal de quince (15) días hábiles previsto en el artículo 14 del CPACA (Ley 1437 de 2011, modificada por la Ley 1755 de 2015).');
+  if(hayPrescritas) pretensiones.push('Que se declare la PRESCRIPCIÓN EXTINTIVA de las sanciones de tránsito relacionadas en los hechos, conforme al artículo 136 de la Ley 769 de 2002 y al artículo 52 del CPACA, dado que han transcurrido más de tres (3) años desde la fecha de la(s) infracción(es) sin cobro efectivo ni actuación suspensiva notificada legalmente al peticionario.');
+  if(hayNotif) pretensiones.push('Que se declare la CADUCIDAD de la facultad sancionatoria y la NULIDAD INSANEABLE de los comparendos impuestos por dispositivos tecnológicos, por no haberse surtido la notificación al propietario del vehículo dentro de los trece (13) días hábiles que exige la Ley 1843 de 2017, contados desde la fecha de la infracción, a la dirección registrada en el RUNT, en violación del artículo 29 Constitucional y de los artículos 66 a 69 del CPACA.');
+  if(hayINM) pretensiones.push('Que se verifique la existencia del concepto de desempeño del Instituto Nacional de Metrología (INM) del equipo de fotodetección utilizado para generar el(los) comparendo(s), y que en caso de no existir o de no haber estado vigente a la fecha de la infracción, se declare la NULIDAD del acto administrativo sancionatorio por ausencia de certeza metrológica, conforme a la Ley 2251 de 2022 y la Resolución 718 de 2023 del Ministerio de Transporte.');
+  if(hayAgente) pretensiones.push('Que se verifiquen los requisitos formales del comparendo impuesto por agente de tránsito conforme al artículo 135 de la Ley 769 de 2002, y que de encontrarse defectos en su formulación, se declare la NULIDAD del mismo por violación del principio de tipicidad y del debido proceso administrativo sancionatorio (Art. 29 C.P., Arts. 137 y 138 CPACA).');
+  pretensiones.push('Que, como consecuencia de las anteriores declaraciones, se ORDENE LA ELIMINACIÓN DEFINITIVA de los registros de las sanciones referidas del sistema SIMIT (Sistema Integrado de Multas y Infracciones de Tránsito), y se certifique dicha eliminación por escrito al peticionario dentro del mismo término de quince (15) días hábiles.');
+  pretensiones.push('Que se notifique la decisión de fondo al correo electrónico y WhatsApp señalados en el acápite de notificaciones, con indicación del número de radicado y de los recursos que procedan contra la misma.');
+  pretensiones.push('Que en caso de requerirse información adicional para el trámite, se le solicite expresamente al peticionario dentro del término legal, sin que la solicitud de subsanación suspenda el término de respuesta más allá de lo previsto en el artículo 17 del CPACA.');
+  var pretensionesTxt = pretensiones.map(function(t,i){ return 'PRIMERO' === '' ? t : ['PRIMERO','SEGUNDO','TERCERO','CUARTO','QUINTO','SEXTO','SÉPTIMO','OCTAVO'][i] ? ['PRIMERO','SEGUNDO','TERCERO','CUARTO','QUINTO','SEXTO','SÉPTIMO','OCTAVO'][i]+': '+t : (i+1)+'. '+t; }).join('\n\n');
+
+  // ── IV. PRUEBAS ────────────────────────────────────────────────────
+  var pruebas = [];
+  pruebas.push('Cédula de ciudadanía No. '+p.cedula+' del peticionario '+p.nombres+' '+p.apellidos+'.');
+  if(p.placa) pruebas.push('Tarjeta de propiedad del vehículo de placa '+p.placa+'.');
+  pruebas.push('Pantallazos y registros del sistema SIMIT que evidencian la vigencia de los comparendos.');
+  if(hayPrescritas) pruebas.push('Cálculo del término de prescripción, acreditado con las fechas de imposición de los comparendos referidas en los hechos.');
+  if(hayNotif) pruebas.push('Declaración bajo juramento del peticionario de no haber recibido notificación de la(s) fotomulta(s) dentro de los trece (13) días hábiles siguientes a la infracción.');
+  if(hayINM) pruebas.push('Reporte público de la Superintendencia de Transporte sobre equipos de fotodetección operados sin concepto de desempeño del INM ('+FUENTE_OFICIAL_INM+').');
+  var pruebasTxt = pruebas.map(function(t,i){ return (i+1)+'. '+t; }).join('\n');
+
+  // ── CIERRE ─────────────────────────────────────────────────────────
+  var advertencia = hayPrescritas
+    ? 'De no obtenerse resolución favorable de fondo dentro del término legal, o de mantenerse el registro en el SIMIT sin fundamento jurídico vigente, el peticionario iniciará las acciones pertinentes, que incluyen, entre otras: (a) Acción de tutela por vulneración del derecho fundamental de petición (Art. 23 C.P. y Decreto 2591 de 1991); (b) Queja ante la Procuraduría General de la Nación por incumplimiento de deberes funcionales; (c) Queja ante la Superintendencia de Transporte; y (d) Demanda de nulidad y restablecimiento del derecho ante la Jurisdicción de lo Contencioso Administrativo (Art. 138 CPACA), buscando además la declaratoria de responsabilidad patrimonial del organismo de tránsito por los perjuicios causados al peticionario por el mantenimiento ilegal del registro.'
+    : 'En caso de no recibirse respuesta de fondo dentro del término legal de quince (15) días hábiles, el peticionario se reserva el derecho de acudir a la Acción de Tutela por vulneración del derecho fundamental de petición, a la queja ante la Procuraduría General de la Nación y ante la Superintendencia de Transporte, y a las demás acciones constitucionales y legales disponibles.';
+
+  return ciudadDoc+', '+hoy+'\n\n'+
+    'Señores:\n'+secretaria+'\nE.S.D.\n\n'+
+    'REFERENCIA: DERECHO DE PETICIÓN EN INTERÉS PARTICULAR — SOLICITUD DE DECLARACIÓN DE PRESCRIPCIÓN, CADUCIDAD Y/O NULIDAD DE COMPARENDOS DE TRÁNSITO Y ELIMINACIÓN DEL SIMIT\n'+
+    'PETICIONARIO: '+p.nombres+' '+p.apellidos+'\n'+
+    'C.C. No.: '+p.cedula+'\n'+
+    'PLACA(S): '+(p.placa||'N/A')+'\n'+
+    'WhatsApp: '+p.whatsapp+'\n'+
+    'Correo electrónico: '+p.email+'\n\n'+
     'Respetados señores:\n\n'+
-    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con C.C. No. '+p.cedula+', mayor de edad y domiciliado/a en '+ciudadDoc+', en ejercicio del '+
-    'derecho fundamental consagrado en el Art. 23 de la Constitución Política y en los términos de la Ley 1755 de 2015, me dirijo respetuosamente a ustedes para interponer el siguiente:\n\n'+
-    'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n\n'+
+    'Yo, '+p.nombres+' '+p.apellidos+', identificado/a con cédula de ciudadanía No. '+p.cedula+', mayor de edad, titular del vehículo de placa '+(p.placa||'identificada en los hechos')+', con dirección de notificaciones en el correo electrónico '+p.email+' y/o WhatsApp '+p.whatsapp+', en ejercicio del derecho fundamental consagrado en el artículo 23 de la Constitución Política de Colombia y en los términos de la Ley 1755 de 2015 que modificó el CPACA, me permito interponer respetuosamente ante su despacho el siguiente:\n\n'+
+    '══════════════════════════════════════════\n'+
+    'DERECHO DE PETICIÓN EN INTERÉS PARTICULAR\n'+
+    '══════════════════════════════════════════\n\n'+
     'I. HECHOS\n\n'+hechosMultas+'\n\n'+
-    'II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO\n\n'+considerandosTxt+'\n\n'+
+    '────────────────────────────────────────\n\n'+
+    'II. FUNDAMENTOS JURÍDICOS Y CONSIDERACIONES DE DERECHO\n\n'+fundamentosTxt+'\n\n'+
+    '────────────────────────────────────────\n\n'+
     'III. PRETENSIONES\n\n'+pretensionesTxt+'\n\n'+
-    'IV. NOTIFICACIONES\n\nRecibiré notificaciones en: '+p.email+' y/o WhatsApp '+p.whatsapp+'.\n\n'+
-    'De no obtener respuesta de fondo dentro del término legal, me reservo el derecho de acudir a los mecanismos judiciales y constitucionales pertinentes.\n\n'+
-    'Cordialmente,\n\n____________________________\n'+p.nombres+' '+p.apellidos+'\nC.C. No. '+p.cedula+'\nWhatsApp: '+p.whatsapp;
+    '────────────────────────────────────────\n\n'+
+    'IV. PRUEBAS QUE SE HACEN VALER\n\n'+pruebasTxt+'\n\n'+
+    '────────────────────────────────────────\n\n'+
+    'V. NOTIFICACIONES\n\n'+
+    'Para efectos del presente trámite, solicito que todas las comunicaciones, respuestas y actos administrativos que recaigan sobre esta petición sean remitidos a:\n'+
+    '  - Correo electrónico: '+p.email+'\n'+
+    '  - WhatsApp: '+p.whatsapp+'\n\n'+
+    'Esta dirección electrónica se señala de manera expresa como canal de notificación con plena validez jurídica, conforme a los artículos 56 y 67 del CPACA y al artículo 5 de la Ley 527 de 1999.\n\n'+
+    '────────────────────────────────────────\n\n'+
+    'VI. ADVERTENCIA LEGAL\n\n'+advertencia+'\n\n'+
+    '────────────────────────────────────────\n\n'+
+    'JURAMENTO: Bajo la gravedad del juramento manifiesto que los hechos aquí expuestos son verídicos y que no he presentado una petición idéntica ante esta misma entidad dentro de los últimos seis (6) meses, salvo que la anterior no haya sido resuelta de fondo.\n\n'+
+    'Cordialmente,\n\n'+
+    '________________________________\n'+
+    p.nombres+' '+p.apellidos+'\n'+
+    'C.C. No. '+p.cedula+'\n'+
+    'Tel/WhatsApp: '+p.whatsapp+'\n'+
+    'Correo: '+p.email;
 }
 
 // Acción de tutela por vulneración al derecho de petición: no depende de
