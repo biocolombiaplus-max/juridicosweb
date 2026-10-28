@@ -1908,35 +1908,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <!-- Panel: Llave breve (oculto hasta que el usuario toque) -->
         <div id="panel-llave" style="display:none;">
-          <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <div style="width:8px;height:8px;background:#0ea5e9;border-radius:50%;animation:pulseGreen 1.5s infinite;flex-shrink:0;"></div>
-              <p style="font-size:0.68rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:1px;margin:0;">Transfiya · Llave breve</p>
+
+          <!-- Llave para copiar -->
+          <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+              <div style="width:7px;height:7px;background:#0ea5e9;border-radius:50%;animation:pulseGreen 1.5s infinite;flex-shrink:0;"></div>
+              <p style="font-size:0.65rem;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:1px;margin:0;">Transfiya · Llave breve — funciona con Nequi, Daviplata y cualquier banco</p>
             </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:8px 10px;border:1px solid #bae6fd;margin-bottom:6px;">
+              <div>
+                <div style="font-size:0.6rem;color:#64748b;font-weight:600;margin-bottom:1px;">LLAVE BREVE</div>
+                <span style="font-size:1.35rem;font-weight:900;color:#0c4a6e;letter-spacing:2px;font-family:monospace;">@OTO262</span>
+              </div>
+              <button onclick="copiarLlave(this)" style="background:#0369a1;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:0.78rem;font-weight:800;cursor:pointer;white-space:nowrap;">📋 Copiar</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#475569;padding:0 2px;">
+              <span>Titular: <strong style="color:#0c4a6e;">Ju... Cac...</strong> <span style="color:#94a3b8;">(verifica al pagar)</span></span>
+            </div>
+          </div>
+
+          <!-- Pasos detallados -->
+          <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+            <p style="font-size:0.7rem;font-weight:800;color:#92400e;margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px;">📱 Cómo pagar paso a paso</p>
             <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #bae6fd;">
-                <span style="font-size:0.78rem;color:#0369a1;font-weight:600;">Llave breve</span>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <span style="font-size:1.2rem;font-weight:900;color:#0c4a6e;letter-spacing:2px;font-family:monospace;">@OTO262</span>
-                  <button onclick="copiarLlave(this)" style="background:#0369a1;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:0.7rem;font-weight:700;cursor:pointer;">Copiar</button>
-                </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">1</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;"><strong>Abre tu app</strong> de Nequi, Daviplata, Bancolombia, Davivienda o cualquier banco.</p>
               </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #bae6fd;">
-                <span style="font-size:0.78rem;color:#0369a1;font-weight:600;">Titular</span>
-                <span style="font-size:0.8rem;font-weight:700;color:#0c4a6e;">Ju... Cac... <span style="font-size:0.68rem;color:#64748b;">(verifica al pagar)</span></span>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">2</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;">Busca la opción <strong>"Enviar plata"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</p>
               </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;">
-                <span style="font-size:0.78rem;color:#0369a1;font-weight:600;">Funciona con</span>
-                <span style="font-size:0.78rem;font-weight:700;color:#0c4a6e;">Nequi · Daviplata · Cualquier banco</span>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">3</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;">Selecciona <strong>"Llave breve"</strong> o <strong>"Transfiya"</strong> como tipo de destino.</p>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">4</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;">Escribe o pega la llave: <strong style="font-family:monospace;font-size:0.9rem;color:#0369a1;">@OTO262</strong> — y verifica que el titular empiece por <strong>Ju... Cac...</strong></p>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#f59e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">5</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;">Ingresa el <strong>monto exacto</strong> que aparece en tu documento y confirma la transferencia.</p>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="min-width:22px;height:22px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;color:#fff;flex-shrink:0;">6</div>
+                <p style="margin:0;font-size:0.8rem;color:#1e293b;line-height:1.4;"><strong>Guarda el comprobante</strong> (captura de pantalla) y luego toca el botón verde de abajo para enviárnoslo por WhatsApp.</p>
               </div>
             </div>
           </div>
+
           <button onclick="yaHiceElPago()"
             style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;padding:16px;font-size:0.95rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 24px rgba(22,163,74,0.5);margin-bottom:6px;animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;">
             <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — CONFIRMAR POR WHATSAPP</span>
             <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
           </button>
-          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Abrirás WhatsApp con el equipo — adjunta el comprobante y radicamos ese mismo día.</p>
+          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Adjunta el comprobante por WhatsApp y radicamos ese mismo día.</p>
         </div>
 
         <!-- Panel: ePayco -->
