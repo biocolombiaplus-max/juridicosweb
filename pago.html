@@ -12,49 +12,100 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
 .logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-0.5px;}
 .logo span{color:#f97316;}
 .logo-sub{font-size:0.72rem;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;}
-.hero{background:linear-gradient(135deg,#0a1628 0%,#1e3a8a 100%);padding:48px 20px 56px;text-align:center;position:relative;overflow:hidden;}
+.hero{background:linear-gradient(135deg,#0a1628 0%,#1e3a8a 100%);padding:44px 20px 52px;text-align:center;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
 .badge{display:inline-block;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.4);color:#fb923c;padding:6px 16px;border-radius:999px;font-size:0.75rem;font-weight:700;letter-spacing:1px;margin-bottom:20px;}
-.hero h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff;line-height:1.2;margin-bottom:14px;max-width:480px;margin-left:auto;margin-right:auto;}
-.hero p{color:#94a3b8;font-size:0.9rem;max-width:400px;margin:0 auto 24px;line-height:1.6;}
-.arrow-down{font-size:1.5rem;animation:bounceDown 1.4s infinite;}
+.hero h1{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:#fff;line-height:1.2;margin-bottom:14px;max-width:480px;margin-left:auto;margin-right:auto;}
+.hero p{color:#94a3b8;font-size:0.88rem;max-width:400px;margin:0 auto 24px;line-height:1.6;}
+.arrow-down{font-size:1.4rem;animation:bounceDown 1.4s infinite;}
 @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
-.section{padding:40px 20px;max-width:560px;margin:0 auto;}
-.section-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#0a1628;margin-bottom:24px;text-align:center;}
-.steps{display:flex;flex-direction:column;gap:16px;}
+.section{padding:36px 20px;max-width:560px;margin:0 auto;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:#0a1628;margin-bottom:24px;text-align:center;}
+.steps{display:flex;flex-direction:column;gap:12px;}
 @media(min-width:600px){.steps{flex-direction:row;}}
-.step{background:#fff;border-radius:14px;padding:20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);flex:1;}
-.step-icon{font-size:2rem;margin-bottom:8px;}
-.step h3{font-size:0.9rem;font-weight:700;color:#0a1628;margin-bottom:4px;}
-.step p{font-size:0.78rem;color:#64748b;line-height:1.4;}
-.plans{display:flex;flex-direction:column;gap:16px;}
-.plan-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:2px solid #e2e8f0;position:relative;}
+.step{background:#fff;border-radius:14px;padding:18px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);flex:1;}
+.step-icon{font-size:1.8rem;margin-bottom:8px;}
+.step h3{font-size:0.88rem;font-weight:700;color:#0a1628;margin-bottom:4px;}
+.step p{font-size:0.75rem;color:#64748b;line-height:1.4;}
+.plans{display:flex;flex-direction:column;gap:18px;}
+.plan-card{background:#fff;border-radius:18px;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,0.07);border:2px solid #e2e8f0;position:relative;}
 .plan-card.recommended{border-color:#1e3a8a;box-shadow:0 4px 28px rgba(30,58,138,0.18);}
 .plan-card.defer{border-color:#7c3aed;}
-.rec-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1e3a8a;color:#fff;font-size:0.65rem;font-weight:800;padding:4px 14px;border-radius:999px;letter-spacing:1px;white-space:nowrap;}
-.plan-title{font-size:1rem;font-weight:800;color:#0a1628;margin-bottom:4px;}
-.plan-price{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:#1e3a8a;margin-bottom:6px;}
-.plan-price.defer{color:#7c3aed;}
-.plan-desc{font-size:0.78rem;color:#64748b;margin-bottom:16px;line-height:1.4;}
-.btn-plan{display:block;width:100%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;}
-.btn-plan:hover{background:linear-gradient(135deg,#ea580c,#c2410c);}
-.payment-methods{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
-.method{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f1f5f9;}
+.rec-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:#1e3a8a;color:#fff;font-size:0.64rem;font-weight:800;padding:4px 14px;border-radius:999px;letter-spacing:1px;white-space:nowrap;}
+/* Etiqueta PAGO ÚNICO */
+.pago-unico-tag{display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:10px;}
+/* Etiqueta PAGA AL ELIMINAR */
+.defer-tag{display:inline-flex;align-items:center;gap:5px;background:#faf5ff;border:1px solid #c4b5fd;color:#7c3aed;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:10px;}
+.plan-title{font-size:1.05rem;font-weight:800;color:#0a1628;margin-bottom:4px;}
+.plan-price{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#1e3a8a;margin-bottom:2px;line-height:1;}
+.plan-price.purple{color:#7c3aed;}
+.plan-price-note{font-size:0.72rem;color:#64748b;margin-bottom:4px;}
+.plan-desc{font-size:0.78rem;color:#64748b;margin-bottom:16px;line-height:1.5;}
+/* Advertencia costo total plan 10k */
+.defer-warning{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.76rem;color:#92400e;line-height:1.4;}
+.defer-warning strong{color:#78350f;font-size:0.8rem;}
+/* Comparación visual */
+.compare-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.75rem;color:#7c2d12;}
+.compare-box .line{display:flex;justify-content:space-between;align-items:center;padding:3px 0;}
+.compare-box .line:first-child{border-bottom:1px solid #fed7aa;padding-bottom:6px;margin-bottom:6px;}
+.btn-plan{display:block;width:100%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:14px;font-size:0.92rem;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;transition:opacity 0.15s;}
+.btn-plan:hover{opacity:0.92;}
+.btn-plan.purple{background:linear-gradient(135deg,#7c3aed,#6d28d9);}
+.payment-methods{background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.method{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f1f5f9;}
 .method:last-child{border-bottom:none;}
-.method-label{font-weight:700;color:#0a1628;font-size:0.9rem;}
-.method-value{color:#1e3a8a;font-weight:600;font-size:0.9rem;}
-.btn-copy{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:6px 12px;font-size:0.75rem;font-weight:700;cursor:pointer;margin-left:8px;}
-.guarantee{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:16px;padding:24px;text-align:center;}
+.method-label{font-weight:700;color:#0a1628;font-size:0.88rem;}
+.method-value{color:#1e3a8a;font-weight:600;font-size:0.88rem;}
+.btn-copy{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:6px 12px;font-size:0.72rem;font-weight:700;cursor:pointer;margin-left:8px;}
+.guarantee{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:16px;padding:22px;text-align:center;}
 .guarantee h3{color:#15803d;font-size:1rem;font-weight:800;margin-bottom:8px;}
-.guarantee p{color:#166534;font-size:0.82rem;line-height:1.5;}
+.guarantee p{color:#166534;font-size:0.8rem;line-height:1.5;}
 .cta-final{background:linear-gradient(135deg,#0a1628,#1e3a8a);padding:40px 20px;text-align:center;}
-.cta-final h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.3rem;margin-bottom:8px;}
-.cta-final p{color:#94a3b8;font-size:0.82rem;margin-bottom:24px;}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px 28px;border-radius:14px;font-size:1rem;font-weight:800;box-shadow:0 6px 28px rgba(22,163,74,0.45);animation:pulseGreen 1.6s infinite;}
+.cta-final h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.25rem;margin-bottom:8px;}
+.cta-final p{color:#94a3b8;font-size:0.8rem;margin-bottom:24px;}
+.btn-wa{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px 28px;border-radius:14px;font-size:0.95rem;font-weight:800;box-shadow:0 6px 28px rgba(22,163,74,0.45);animation:pulseGreen 1.6s infinite;}
 @keyframes pulseGreen{0%,100%{box-shadow:0 6px 28px rgba(22,163,74,0.45);}50%{box-shadow:0 8px 40px rgba(22,163,74,0.7);}}
-.wa-sub{display:block;font-size:0.7rem;font-weight:500;opacity:0.85;margin-top:4px;}
-.footer{background:#0a1628;padding:20px;text-align:center;color:#475569;font-size:0.75rem;}
-.divider{height:1px;background:#e2e8f0;margin:0;}
+.wa-sub{display:block;font-size:0.68rem;font-weight:500;opacity:0.85;margin-top:4px;}
+.footer{background:#0a1628;padding:20px;text-align:center;color:#475569;font-size:0.72rem;}
+.divider{height:1px;background:#e2e8f0;}
+
+/* ═══ MODAL ACUERDO DE PAGO ═══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;overflow-y:auto;padding:16px;}
+.modal-overlay.active{display:flex;align-items:flex-start;justify-content:center;}
+.modal{background:#fff;border-radius:20px;padding:24px;max-width:480px;width:100%;margin:auto;position:relative;}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#94a3b8;line-height:1;}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:#0a1628;margin-bottom:4px;}
+.modal .modal-sub{font-size:0.75rem;color:#64748b;margin-bottom:20px;}
+/* Selector multas */
+.multas-label{font-size:0.8rem;font-weight:700;color:#0a1628;margin-bottom:10px;}
+.multas-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.multa-btn{padding:10px 16px;border-radius:10px;border:2px solid #ddd6fe;background:#fff;color:#6b7280;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.15s;flex:1;min-width:48px;}
+.multa-btn.active{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:#7c3aed;box-shadow:0 4px 14px rgba(124,58,237,0.4);}
+/* Resumen financiero */
+.resumen-fin{background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:14px;padding:16px;margin-bottom:16px;}
+.resumen-fin .row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+.resumen-fin .row + .row{border-top:1px solid #ddd6fe;}
+.resumen-fin .row-label{font-size:0.78rem;color:#6b7280;}
+.resumen-fin .row-val{font-weight:800;color:#7c3aed;font-size:0.9rem;}
+.resumen-fin .row-val.today{color:#0a1628;}
+.resumen-fin .row-val.big{font-size:1.05rem;}
+/* Campos del formulario */
+.campo{margin-bottom:14px;}
+.campo label{display:block;font-size:0.78rem;font-weight:700;color:#374151;margin-bottom:5px;}
+.campo input{width:100%;border:1.5px solid #d1d5db;border-radius:10px;padding:11px 14px;font-size:0.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.15s;}
+.campo input:focus{border-color:#7c3aed;}
+/* Canvas firma */
+.firma-wrap{border:2px dashed #c4b5fd;border-radius:14px;background:#faf5ff;padding:10px;margin-bottom:14px;position:relative;}
+.firma-label{font-size:0.78rem;font-weight:700;color:#374151;margin-bottom:8px;}
+.firma-wrap canvas{width:100%;height:130px;display:block;cursor:crosshair;touch-action:none;}
+.firma-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c4b5fd;font-size:0.78rem;text-align:center;pointer-events:none;}
+.btn-limpiar{background:none;border:1px solid #ddd6fe;color:#7c3aed;border-radius:7px;padding:5px 12px;font-size:0.72rem;font-weight:600;cursor:pointer;margin-bottom:14px;}
+/* Texto del acuerdo */
+.acuerdo-txt{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:0.72rem;color:#475569;line-height:1.55;margin-bottom:16px;max-height:120px;overflow-y:auto;}
+.acuerdo-txt strong{color:#0a1628;}
+/* Botón firmar */
+.btn-firmar{width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;padding:15px;font-size:0.95rem;font-weight:800;cursor:pointer;margin-bottom:8px;}
+.nota-modal{font-size:0.68rem;color:#94a3b8;text-align:center;}
 </style>
 </head>
 <body>
@@ -77,7 +128,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
     <div class="step">
       <div class="step-icon">💳</div>
       <h3>Realizas tu pago</h3>
-      <p>Por Nequi o transferencia bancaria. Rápido y seguro.</p>
+      <p>Por Nequi o transferencia. Rápido y seguro.</p>
     </div>
     <div class="step">
       <div class="step-icon">📤</div>
@@ -87,7 +138,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
     <div class="step">
       <div class="step-icon">📋</div>
       <h3>Recibes el radicado</h3>
-      <p>Te enviamos el número de radicado por WhatsApp como soporte.</p>
+      <p>Te enviamos el número oficial por WhatsApp como soporte.</p>
     </div>
   </div>
 </div>
@@ -98,26 +149,78 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
   <div class="section-title">Elige tu plan</div>
   <div class="plans">
 
+    <!-- PLAN 1 MULTA -->
     <div class="plan-card">
+      <div class="pago-unico-tag">✅ PAGO ÚNICO · Sin cobros adicionales</div>
       <div class="plan-title">1 Multa</div>
       <div class="plan-price">$49.000</div>
-      <div class="plan-desc">Eliminar una multa o fotomulta. Pago único, incluye radicación y seguimiento.</div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+quiero+pagar+el+plan+de+1+multa+por+%2449.000.+Necesito+ayuda+para+radicar." class="btn-plan">Pagar 1 multa — $49.000</a>
+      <div class="plan-price-note">Pago único · No pagas nada más</div>
+      <div class="plan-desc">Eliminar una multa o fotomulta. Incluye radicación, seguimiento y soporte hasta resolver.</div>
+      <a id="btn-plan-49" href="#" onclick="abrirWa49(event)" class="btn-plan">Pagar 1 multa — $49.000</a>
     </div>
 
+    <!-- PLAN TODAS LAS MULTAS (RECOMENDADO) -->
     <div class="plan-card recommended">
-      <div class="rec-badge">⭐ RECOMENDADO</div>
+      <div class="rec-badge">⭐ RECOMENDADO · MEJOR VALOR</div>
+      <div class="pago-unico-tag" style="margin-top:6px;">✅ PAGO ÚNICO · Sin cobros adicionales</div>
       <div class="plan-title">Todas las Multas</div>
       <div class="plan-price">$79.000</div>
-      <div class="plan-desc">Todas las multas que apliquen para eliminación. El mejor valor si tienes más de una multa.</div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+quiero+pagar+el+plan+de+todas+las+multas+por+%2479.000.+Necesito+ayuda+para+radicar." class="btn-plan">Pagar todas mis multas — $79.000</a>
+      <div class="plan-price-note">Pago único · Cubre TODAS tus multas elegibles</div>
+      <div class="plan-desc">Todas las multas que apliquen para eliminación en un solo pago. Si tienes 2 o más multas, este plan siempre es más económico que pagar por separado.</div>
+      <a id="btn-plan-79" href="#" onclick="abrirWa79(event)" class="btn-plan">Pagar todas mis multas — $79.000</a>
     </div>
 
+    <!-- PLAN PAGA AL ELIMINAR -->
     <div class="plan-card defer">
+      <div class="defer-tag">⏳ PAGA SOLO SI SE ELIMINA</div>
       <div class="plan-title">Paga al Eliminar</div>
-      <div class="plan-price defer">$10.000 <span style="font-size:1rem;font-weight:600;">hoy</span></div>
-      <div class="plan-desc">Pagas $10.000 para iniciar la radicación. El resto ($95.000 por multa) solo lo pagas cuando la multa se elimine oficialmente.</div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+quiero+pagar+el+plan+%22Paga+al+Eliminar%22+%2410.000+hoy+y+el+resto+al+eliminar.+Necesito+ayuda+para+radicar." class="btn-plan" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">Iniciar con $10.000</a>
+      <div class="plan-price purple">$10.000 <span style="font-size:1rem;font-weight:600;color:#6b7280;">hoy</span></div>
+      <div class="plan-price-note" style="color:#7c3aed;font-weight:700;">+ $95.000 por multa al eliminar</div>
+
+      <!-- Aviso costo total (para que prefieran el de $79k) -->
+      <div class="defer-warning">
+        ⚠️ <strong>Importante:</strong> Con este plan pagas <strong>$10.000 por cada multa</strong> para iniciar, y cuando la multa se elimine oficialmente debes pagar <strong>$95.000 por cada una</strong>. Si tienes 2 multas el total sería <strong>$210.000</strong> vs <strong>$79.000</strong> con el plan Todo Incluido.
+      </div>
+
+      <!-- Comparación -->
+      <div class="compare-box">
+        <div class="line">
+          <span>🟢 Plan Todo Incluido (recomendado)</span>
+          <strong>$79.000 total</strong>
+        </div>
+        <div class="line">
+          <span>🟣 Este plan (2 multas)</span>
+          <span>$210.000 total</span>
+        </div>
+      </div>
+
+      <div class="plan-desc">Selecciona cuántas multas quieres iniciar y firma el acuerdo de pago.</div>
+
+      <!-- Selector de multas -->
+      <div class="multas-label">¿Cuántas multas quieres iniciar?</div>
+      <div class="multas-btns" id="multas-btns-plan">
+        <!-- generado por JS -->
+      </div>
+
+      <!-- Resumen financiero actualizado -->
+      <div class="resumen-fin" id="resumen-defer">
+        <div class="row">
+          <span class="row-label">Pagas <strong>hoy</strong> para iniciar:</span>
+          <span class="row-val today" id="rd-hoy">$10.000</span>
+        </div>
+        <div class="row">
+          <span class="row-label">Pagas al eliminar cada multa:</span>
+          <span class="row-val">$95.000 c/u</span>
+        </div>
+        <div class="row">
+          <span class="row-label">Total al eliminar <span id="rd-n">1</span> multa(s):</span>
+          <span class="row-val big" id="rd-total">$95.000</span>
+        </div>
+      </div>
+
+      <button class="btn-plan purple" onclick="abrirAcuerdo()">
+        Firmar acuerdo y continuar
+      </button>
     </div>
 
   </div>
@@ -131,7 +234,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
     <div class="method">
       <div>
         <div class="method-label">📱 Nequi</div>
-        <div style="font-size:0.72rem;color:#94a3b8;margin-top:2px;">Enviar al número o alias</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">Enviar al número o alias</div>
       </div>
       <div style="display:flex;align-items:center;">
         <span class="method-value" id="nequi-val">@OTO262</span>
@@ -141,12 +244,12 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
     <div class="method">
       <div>
         <div class="method-label">🏦 Transferencia bancaria</div>
-        <div style="font-size:0.72rem;color:#94a3b8;margin-top:2px;">Datos disponibles por WhatsApp</div>
+        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">Datos disponibles por WhatsApp</div>
       </div>
-      <a href="https://wa.me/573159318400?text=Hola%2C+necesito+los+datos+bancarios+para+transferencia." style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:6px 12px;font-size:0.75rem;font-weight:700;text-decoration:none;">Solicitar</a>
+      <a href="https://wa.me/573159318400?text=Hola%2C+necesito+los+datos+bancarios+para+transferencia." style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:6px 12px;font-size:0.72rem;font-weight:700;text-decoration:none;">Solicitar</a>
     </div>
   </div>
-  <p style="text-align:center;color:#94a3b8;font-size:0.72rem;margin-top:14px;">Después de pagar, envíanos el comprobante por WhatsApp para iniciar inmediatamente.</p>
+  <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin-top:12px;">Después de pagar, envíanos el comprobante por WhatsApp para iniciar de inmediato.</p>
 </div>
 
 <div class="section" style="padding-top:0;">
@@ -158,8 +261,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
 
 <div class="cta-final">
   <h2>¿Ya realizaste tu pago?</h2>
-  <p>Escríbenos ahora · Enviamos el comprobante · Radicamos el mismo día</p>
-  <a href="https://wa.me/573159318400?text=Hola%2C+ya+realicé+el+pago.+Quiero+iniciar+el+trámite+de+eliminación+de+mi+multa." class="btn-wa">
+  <p>Escríbenos · Envíanos el comprobante · Radicamos hoy</p>
+  <a href="https://wa.me/573159318400?text=Hola%2C+ya+realicé+mi+pago.+Quiero+iniciar+el+trámite+de+eliminación+de+mi+multa.+Adjunto+comprobante." class="btn-wa">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     ✅ Ya pagué — Escribir al WhatsApp
     <span class="wa-sub">Envíanos el comprobante y radicamos hoy</span>
@@ -170,11 +273,254 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
   JurídicosWeb © 2026 · juridicosweb.com · juridicoswebcasos@gmail.com
 </div>
 
+<!-- ═══ MODAL ACUERDO DE PAGO (Plan 10k) ═══ -->
+<div class="modal-overlay" id="modal-acuerdo">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarAcuerdo()">✕</button>
+    <h2>📋 Acuerdo de Pago</h2>
+    <p class="modal-sub">Plan Paga al Eliminar · Firma para continuar</p>
+
+    <!-- Selector multas dentro del modal -->
+    <div class="multas-label">¿Cuántas multas inicias?</div>
+    <div class="multas-btns" id="multas-btns-modal"></div>
+
+    <!-- Resumen dentro del modal -->
+    <div class="resumen-fin" style="margin-bottom:16px;">
+      <div class="row">
+        <span class="row-label">Pagas <strong>ahora</strong>:</span>
+        <span class="row-val today" id="rm-hoy">$10.000</span>
+      </div>
+      <div class="row">
+        <span class="row-label">Al eliminar cada multa:</span>
+        <span class="row-val">$95.000 c/u</span>
+      </div>
+      <div class="row">
+        <span class="row-label">Total al eliminar <span id="rm-n">1</span> multa(s):</span>
+        <span class="row-val big" id="rm-total">$95.000</span>
+      </div>
+    </div>
+
+    <!-- Datos personales -->
+    <div class="campo">
+      <label>Nombre completo</label>
+      <input type="text" id="ac-nombre" placeholder="Ej: Juan Carlos Cáceres" autocomplete="name">
+    </div>
+    <div class="campo">
+      <label>Número de cédula</label>
+      <input type="tel" id="ac-cedula" placeholder="Ej: 88262856" inputmode="numeric">
+    </div>
+    <div class="campo">
+      <label>Correo electrónico</label>
+      <input type="email" id="ac-correo" placeholder="tu@correo.com" autocomplete="email">
+    </div>
+
+    <!-- Texto del acuerdo -->
+    <div class="acuerdo-txt" id="ac-texto">
+      <!-- generado por JS -->
+    </div>
+
+    <!-- Firma -->
+    <div class="firma-label">✍️ Firma aquí con el dedo o el mouse</div>
+    <div class="firma-wrap">
+      <canvas id="ac-canvas" width="600" height="160"></canvas>
+      <div class="firma-hint" id="ac-hint">Firma aquí</div>
+    </div>
+    <button class="btn-limpiar" onclick="limpiarFirmaAc()">🗑️ Borrar firma</button>
+
+    <button class="btn-firmar" onclick="enviarAcuerdo()">
+      ✅ Firmar acuerdo y escribir al WhatsApp
+    </button>
+    <p class="nota-modal">Al firmar confirmas que leíste y aceptas el acuerdo de pago.</p>
+  </div>
+</div>
+
 <script>
+// ═══ Estado ═══
+var _nMultas = 1;
+var _firmaVacia = true;
+var _ctx = null;
+var _dibujando = false;
+
+// ═══ Inicializar selector de multas ═══
+function renderBotones(contenedor, n, onClick){
+  var html = '';
+  for(var i=1;i<=6;i++){
+    html += '<button class="multa-btn'+(i===n?' active':'')+'" onclick="'+onClick+'('+i+')">'+i+(i===1?' multa':' multas')+'</button>';
+  }
+  contenedor.innerHTML = html;
+}
+
+function actualizarResumen(n){
+  _nMultas = n;
+  var hoy = (10000*n).toLocaleString('es-CO');
+  var total = (95000*n).toLocaleString('es-CO');
+  // Panel principal
+  var rh=document.getElementById('rd-hoy'), rn=document.getElementById('rd-n'), rt=document.getElementById('rd-total');
+  if(rh) rh.textContent='$'+hoy;
+  if(rn) rn.textContent=n;
+  if(rt) rt.textContent='$'+total;
+  // Modal
+  var mh=document.getElementById('rm-hoy'), mn=document.getElementById('rm-n'), mt=document.getElementById('rm-total');
+  if(mh) mh.textContent='$'+hoy;
+  if(mn) mn.textContent=n;
+  if(mt) mt.textContent='$'+total;
+  // Actualizar texto acuerdo
+  actualizarTextoAcuerdo();
+}
+
+function seleccionarMultas(n){
+  actualizarResumen(n);
+  // Actualizar estilos botones panel
+  document.querySelectorAll('#multas-btns-plan .multa-btn').forEach(function(b,i){
+    b.className='multa-btn'+(i+1===n?' active':'');
+  });
+  // Actualizar estilos botones modal
+  document.querySelectorAll('#multas-btns-modal .multa-btn').forEach(function(b,i){
+    b.className='multa-btn'+(i+1===n?' active':'');
+  });
+}
+
+function actualizarTextoAcuerdo(){
+  var n=_nMultas;
+  var hoy='$'+(10000*n).toLocaleString('es-CO');
+  var porMulta='$95.000';
+  var total='$'+(95000*n).toLocaleString('es-CO');
+  var nombre=document.getElementById('ac-nombre')?document.getElementById('ac-nombre').value||'______________':'______________';
+  var cedula=document.getElementById('ac-cedula')?document.getElementById('ac-cedula').value||'______________':'______________';
+  var el=document.getElementById('ac-texto');
+  if(!el) return;
+  el.innerHTML='<strong>ACUERDO DE PAGO — JurídicosWeb</strong><br><br>'
+    +'Yo, <strong>'+nombre+'</strong>, C.C. <strong>'+cedula+'</strong>, mediante la presente firma digital declaro que:<br><br>'
+    +'1. He solicitado el servicio de eliminación de <strong>'+n+' multa(s)</strong> a JurídicosWeb.<br>'
+    +'2. Pagaré <strong>'+hoy+'</strong> hoy para iniciar la radicación ('+10000+' × '+n+' multa(s)).<br>'
+    +'3. Al momento de eliminarse oficialmente cada multa, me comprometo a pagar <strong>'+porMulta+' por cada una</strong>, para un total de <strong>'+total+'</strong>.<br>'
+    +'4. Si la multa NO se elimina, NO debo el pago al eliminar y JurídicosWeb devolverá el pago inicial.<br>'
+    +'5. Acepto los términos del servicio de JurídicosWeb (www.juridicosweb.com).';
+}
+
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', function(){
+  var bp = document.getElementById('multas-btns-plan');
+  if(bp) renderBotones(bp, _nMultas, 'seleccionarMultas');
+  var bm = document.getElementById('multas-btns-modal');
+  if(bm) renderBotones(bm, _nMultas, 'seleccionarMultas');
+  actualizarResumen(1);
+  // Listeners nombre/cedula para actualizar texto
+  ['ac-nombre','ac-cedula'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.addEventListener('input', actualizarTextoAcuerdo);
+  });
+});
+
+// ═══ Modal ═══
+function abrirAcuerdo(){
+  var bm = document.getElementById('multas-btns-modal');
+  if(bm) renderBotones(bm, _nMultas, 'seleccionarMultas');
+  actualizarTextoAcuerdo();
+  document.getElementById('modal-acuerdo').classList.add('active');
+  document.body.style.overflow='hidden';
+  setTimeout(initFirmaModal, 100);
+}
+function cerrarAcuerdo(){
+  document.getElementById('modal-acuerdo').classList.remove('active');
+  document.body.style.overflow='';
+}
+
+// ═══ Canvas firma modal ═══
+function initFirmaModal(){
+  var canvas=document.getElementById('ac-canvas');
+  if(!canvas||canvas.dataset.init) return;
+  canvas.dataset.init='1';
+  var ctx=canvas.getContext('2d');
+  _ctx=ctx;
+  ctx.strokeStyle='#0a1628'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round';
+  function pos(e){
+    var r=canvas.getBoundingClientRect();
+    var t=e.touches&&e.touches[0];
+    return{x:(((t?t.clientX:e.clientX)-r.left)*(canvas.width/r.width)),
+           y:(((t?t.clientY:e.clientY)-r.top)*(canvas.height/r.height))};
+  }
+  function start(e){
+    e.preventDefault(); _dibujando=true;
+    if(_firmaVacia){_firmaVacia=false;var h=document.getElementById('ac-hint');if(h)h.style.display='none';}
+    var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);
+  }
+  function move(e){if(!_dibujando)return;e.preventDefault();var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}
+  function end(){_dibujando=false;}
+  canvas.addEventListener('mousedown',start);
+  canvas.addEventListener('mousemove',move);
+  window.addEventListener('mouseup',end);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',end);
+}
+
+function limpiarFirmaAc(){
+  var canvas=document.getElementById('ac-canvas');
+  if(!canvas||!_ctx) return;
+  _ctx.clearRect(0,0,canvas.width,canvas.height);
+  _firmaVacia=true;
+  var h=document.getElementById('ac-hint');if(h)h.style.display='';
+}
+
+// ═══ Enviar acuerdo firmado ═══
+function enviarAcuerdo(){
+  var nombre=document.getElementById('ac-nombre').value.trim();
+  var cedula=document.getElementById('ac-cedula').value.trim();
+  var correo=document.getElementById('ac-correo').value.trim();
+  if(!nombre){alert('Por favor ingresa tu nombre completo.');document.getElementById('ac-nombre').focus();return;}
+  if(!cedula){alert('Por favor ingresa tu número de cédula.');document.getElementById('ac-cedula').focus();return;}
+  if(_firmaVacia){alert('Por favor firma el acuerdo antes de continuar.');return;}
+  var n=_nMultas;
+  var hoy='$'+(10000*n).toLocaleString('es-CO');
+  var total='$'+(95000*n).toLocaleString('es-CO');
+  var msg='✅ *Acuerdo de Pago Firmado — JurídicosWeb*\n\n'
+    +'Hola, acabo de firmar el acuerdo de pago del Plan Paga al Eliminar.\n\n'
+    +'*Mis datos:*\n'
+    +'👤 Nombre: *'+nombre+'*\n'
+    +'🪪 Cédula: *'+cedula+'*\n'
+    +(correo?'📧 Correo: '+correo+'\n':'')
+    +'\n*Detalle del acuerdo:*\n'
+    +'• Multas a iniciar: *'+n+' multa(s)*\n'
+    +'• Pago de hoy: *'+hoy+'*\n'
+    +'• Al eliminar cada multa: *$95.000 c/u*\n'
+    +'• Total al eliminar: *'+total+'*\n\n'
+    +'Adjunto el comprobante del pago inicial de '+hoy+'. Quedo atento/a a las instrucciones. 🙏';
+  cerrarAcuerdo();
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ═══ Botones WA planes 49k y 79k ═══
+function abrirWa49(e){
+  e.preventDefault();
+  var msg='💳 *Quiero el Plan 1 Multa — $49.000*\n\n'
+    +'Hola, quiero iniciar el proceso de eliminación con el plan de 1 multa.\n\n'
+    +'*Pago único: $49.000 · Sin cobros adicionales*\n\n'
+    +'Adjunto el comprobante de pago. ¿Cuáles son los siguientes pasos? 🙏';
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
+}
+function abrirWa79(e){
+  e.preventDefault();
+  var msg='💳 *Quiero el Plan Todas las Multas — $79.000*\n\n'
+    +'Hola, quiero iniciar el proceso de eliminación con el plan de todas las multas.\n\n'
+    +'*Pago único: $79.000 · Cubre TODAS mis multas elegibles · Sin cobros adicionales*\n\n'
+    +'Adjunto el comprobante de pago. ¿Cuáles son los siguientes pasos? 🙏';
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ═══ Copiar Nequi ═══
 function copiarNequi(){
-  var val = document.getElementById('nequi-val').textContent;
-  if(navigator.clipboard){ navigator.clipboard.writeText(val).then(function(){ alert('¡Copiado! Número Nequi: '+val); }); }
-  else{ var ta=document.createElement('textarea');ta.value=val;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('¡Copiado!'); }
+  var val=document.getElementById('nequi-val').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(val).then(function(){
+      var btn=event.target;btn.textContent='¡Copiado!';setTimeout(function(){btn.textContent='Copiar';},2000);
+    }).catch(function(){ fallbackCopy(val); });
+  } else { fallbackCopy(val); }
+}
+function fallbackCopy(val){
+  var ta=document.createElement('textarea');ta.value=val;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  alert('¡Copiado! Nequi: '+val);
 }
 </script>
 </body>
