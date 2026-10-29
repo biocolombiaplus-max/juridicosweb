@@ -363,6 +363,27 @@ function actualizarEstadoPago(datos) {
 
   escribirFila(hoja, fila, valores);
   aplicarFormatoCondicional(hoja);
+
+  // Notificación al admin por correo (WhatsApp se abre desde el cliente)
+  try {
+    var nombres = datos.nombres || obtenerValorFila(hoja, fila, 'Nombres');
+    var apellidos = obtenerValorFila(hoja, fila, 'Apellidos');
+    var whatsapp = obtenerValorFila(hoja, fila, 'WhatsApp');
+    var numMultas = datos.multasSeleccionadas || '';
+    var planInfo = datos.plan || '';
+    var asunto = '🔔 Nuevo pago — ' + (nombres||'') + ' ' + (apellidos||'') + ' | JurídicosWeb';
+    var cuerpo = 'Nuevo pago confirmado por Wompi:\n\n'
+      + 'Cliente: ' + (nombres||'') + ' ' + (apellidos||'') + '\n'
+      + 'Cédula: ' + (datos.cedula||'') + '\n'
+      + 'WhatsApp: ' + (whatsapp||'') + '\n'
+      + 'Plan: ' + planInfo + '\n'
+      + 'Multas: ' + numMultas + '\n'
+      + 'Estado: ' + (datos.estadoPago||'') + '\n\n'
+      + '⚠️ Ingresar al SIMIT con la cédula del cliente y agregar los datos de las multas en el panel admin.\n\n'
+      + 'Panel: https://biocolombiaplus-max.github.io/juridicosweb/admin.html';
+    GmailApp.sendEmail(EMAIL_DESPACHO, asunto, cuerpo, { name: 'JurídicosWeb Pagos', replyTo: EMAIL_DESPACHO });
+  } catch(e) { /* no rompe el flujo si falla el correo */ }
+
   return respuestaJson({ ok: true });
 }
 

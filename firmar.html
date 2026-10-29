@@ -207,7 +207,18 @@ body.pad-sticky{padding-bottom:92px;}
       <button class="btn btn-outline" id="btn-descargar-borrador" onclick="descargarBorrador()" style="width:100%;margin-bottom:8px;background:#fff;"><i class="fas fa-file-pdf" style="color:#dc2626;"></i> Descargar borrador en PDF</button>
       <p style="text-align:center;font-size:0.68rem;color:#6b7280;margin:0;">El borrador lleva marca de agua "PENDIENTE DE PAGO". Al completar el pago se genera el documento final sin marca.</p>
     </div>
-    <div style="border-top:2px dashed #e2e8f0;padding-top:16px;">
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 14px 10px;margin:12px 0 4px;">
+      <p style="font-weight:700;font-size:0.88rem;color:var(--navy);margin:0 0 3px;"><i class="fas fa-signature" style="color:#15803d;"></i> Firma aquí — se usará en tu documento final</p>
+      <p style="font-size:0.75rem;color:#6b7280;margin:0 0 8px;">Tu firma quedará en el Derecho de Petición que radicamos. Dibuja con el dedo dentro del recuadro.</p>
+      <div class="firma-box" id="firma-box-borrador">
+        <canvas id="firma-canvas-borrador" width="600" height="180"></canvas>
+        <div class="firma-placeholder" id="firma-placeholder-borrador"><i class="fas fa-hand-point-down"></i>Firma aquí con el dedo</div>
+      </div>
+      <div class="firma-actions">
+        <button class="btn btn-outline btn-sm" onclick="limpiarFirmaBorrador()"><i class="fas fa-eraser"></i> Borrar</button>
+      </div>
+    </div>
+    <div style="border-top:2px dashed #e2e8f0;padding-top:16px;margin-top:16px;">
       <p style="font-weight:800;color:var(--navy);font-size:0.95rem;margin:0 0 4px;">¿Quieres radicarlo ante la secretaría?</p>
       <p class="lead" style="margin-bottom:14px;">Elige tu plan y lo radicamos hoy mismo.</p>
       <div id="planes-borrador-wrap"></div>
@@ -972,6 +983,58 @@ function limpiarFirma(){
   actualizarFirmaSticky();
 }
 
+// ── FIRMA EN BORRADOR ────────────────────────────────────────────────────────
+var _firmaBorradorDataUrl = null;
+var _firmaBorradorCtx = null;
+var _firmaBorradorVacia = true;
+var _firmaBorradorDibujando = false;
+
+function initFirmaPadBorrador(){
+  var canvas = document.getElementById('firma-canvas-borrador');
+  if(!canvas || canvas.dataset.init) return;
+  canvas.dataset.init='1';
+  var ctx = canvas.getContext('2d');
+  _firmaBorradorCtx = ctx;
+  ctx.strokeStyle='#2e1065'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  function posicion(e){
+    var rect=canvas.getBoundingClientRect();
+    var t=e.touches&&e.touches[0];
+    var clientX=t?t.clientX:e.clientX, clientY=t?t.clientY:e.clientY;
+    return { x:(clientX-rect.left)*(canvas.width/rect.width), y:(clientY-rect.top)*(canvas.height/rect.height) };
+  }
+  function iniciar(e){
+    e.preventDefault(); _firmaBorradorDibujando=true;
+    if(_firmaBorradorVacia){
+      _firmaBorradorVacia=false;
+      var ph=document.getElementById('firma-placeholder-borrador'); if(ph) ph.style.display='none';
+      var box=document.getElementById('firma-box-borrador'); if(box) box.classList.add('tiene-firma');
+    }
+    var pt=posicion(e); ctx.beginPath(); ctx.moveTo(pt.x,pt.y);
+  }
+  function mover(e){ if(!_firmaBorradorDibujando) return; e.preventDefault(); var pt=posicion(e); ctx.lineTo(pt.x,pt.y); ctx.stroke(); }
+  function terminar(){
+    if(!_firmaBorradorDibujando) return;
+    _firmaBorradorDibujando=false;
+    if(!_firmaBorradorVacia) _firmaBorradorDataUrl = canvas.toDataURL('image/png');
+  }
+  canvas.addEventListener('mousedown', iniciar);
+  canvas.addEventListener('mousemove', mover);
+  window.addEventListener('mouseup', terminar);
+  canvas.addEventListener('touchstart', iniciar, {passive:false});
+  canvas.addEventListener('touchmove', mover, {passive:false});
+  canvas.addEventListener('touchend', terminar);
+}
+
+function limpiarFirmaBorrador(){
+  var canvas=document.getElementById('firma-canvas-borrador');
+  if(!canvas||!_firmaBorradorCtx) return;
+  _firmaBorradorCtx.clearRect(0,0,canvas.width,canvas.height);
+  _firmaBorradorVacia=true;
+  _firmaBorradorDataUrl=null;
+  var ph=document.getElementById('firma-placeholder-borrador'); if(ph) ph.style.display='';
+  var box=document.getElementById('firma-box-borrador'); if(box) box.classList.remove('tiene-firma');
+}
+
 // Sin membrete ni logo: el documento debe verse como lo redactó y radicó
 // la propia persona, no como un producto de un bufete de abogados.
 function dibujarEncabezadoPDF(doc){
@@ -1056,6 +1119,7 @@ function irABorrador(){
   var totalIndividual = 45000 * n;
   document.getElementById('planes-borrador-wrap').innerHTML = renderPlanesFirmar(n, totalIndividual, 'borrador');
   mostrar('v-borrador');
+  initFirmaPadBorrador();
 }
 
 function generarPDFBorrador(){
@@ -1376,19 +1440,69 @@ function onPagoAprobadoFirmar(txData, plan, monto){
     diferido: 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u',
   }[plan];
 
+  var estadoPago = 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : '');
+  var numSeleccionadas = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; }).length;
+
+  // Si el cliente ya firmó en la vista borrador, generamos el PDF firmado,
+  // lo enviamos a GAS (marcar_firmado) y luego radicamos — todo automático.
+  var firmaDataUrl = _firmaBorradorDataUrl || null;
+
+  function _notificarAdmin(){
+    var nombre = (_caso['Nombres']||'').split(' ')[0] || 'Cliente';
+    var cedula = _caso['Cédula'] || '';
+    var wa = _caso['WhatsApp'] || '';
+    var msg = '🔔 Nuevo pago JurídicosWeb\n'+nombre+' '+(_caso['Apellidos']||'')+' pagó '+planTexto+'\nCédula: '+cedula+' | WA: '+wa+'\n\nAgregar datos SIMIT y verificar radicado.';
+    try { window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank'); } catch(e){}
+  }
+
+  function _mostrarExitoRadicado(numDocs, radicado){
+    document.querySelector('#v-exito h2').textContent = '¡Pago confirmado! 🎉';
+    document.querySelector('#v-exito p.lead').textContent = 'En unos minutos te llega el correo con la confirmación de radicación. '+(numDocs>1
+      ? 'Estamos radicando tus '+numDocs+' Derechos de Petición ante cada secretaría correspondiente.'
+      : 'Estamos radicando tu Derecho de Petición ante la secretaría de tránsito.');
+    mostrar('v-exito');
+  }
+
+  // Confirmar pago en el registro
   postConReintentos({
     _accion:'confirmar_pago', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
     plan: planTexto, montoTotal: monto,
-    multasSeleccionadas: _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; }).length,
-    estadoPago: 'PAGADO – Wompi APPROVED' + (txData && txData.id ? ' (' + txData.id + ')' : ''),
+    multasSeleccionadas: numSeleccionadas,
+    estadoPago: estadoPago,
   }).then(function(){
-    return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] });
-  }).then(function(radicado){
-    document.querySelector('#v-exito h2').textContent = '¡Pago confirmado y radicado! 🎉';
-    document.querySelector('#v-exito p.lead').textContent = (radicado && radicado.ok)
-      ? 'Tu Derecho de Petición ya quedó radicado ante la secretaría de tránsito. Desde hoy corre el plazo legal de 15 días hábiles para que te respondan — te avisaremos apenas se cumpla.'
-      : 'Tu pago quedó confirmado. Estamos radicando tu documento ante la secretaría — te avisamos apenas quede listo.';
-    mostrar('v-exito');
+    _notificarAdmin();
+
+    if(firmaDataUrl && _documentosGenerados.length){
+      // Firma disponible → generar PDFs firmados y radicar automáticamente
+      var pdfs;
+      try{ pdfs = generarPDFsPorSecretaria(_documentosGenerados, firmaDataUrl); }catch(e){ pdfs=null; }
+      if(!pdfs || !pdfs.length){
+        // Fallback: radicar sin pdf (el admin lo generará desde el panel)
+        return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
+          .then(function(r){ _mostrarExitoRadicado(1, r); });
+      }
+      var apellido = _caso['Apellidos']||'cliente', cedulaTxt = _caso['Cédula']||'';
+      var documentosParaEnviar = pdfs.map(function(p){
+        var sufijo = pdfs.length>1 ? '_'+p.ciudad.replace(/[^a-zA-Z0-9]+/g,'') : '';
+        var nombreArchivo = 'DerechoPeticion_Firmado_'+apellido+'_'+cedulaTxt+sufijo+'.pdf';
+        try{ p.doc.save(nombreArchivo); }catch(e){}
+        return { ciudad: p.ciudad, archivoBase64: p.doc.output('datauristring'), archivoNombre: nombreArchivo };
+      });
+      return postConReintentos({
+        _accion:'marcar_firmado', cedula:_caso['Cédula'], email:_caso['Email'], nombres:_caso['Nombres'],
+        documentos: documentosParaEnviar,
+      }).then(function(){
+        return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] });
+      }).then(function(r){ _mostrarExitoRadicado(pdfs.length, r); });
+    }
+
+    // Sin firma previa → solo radicar (el cliente deberá firmar después desde v-documento)
+    return postConReintentos({ _accion:'radicar_por_correo', cedula:_caso['Cédula'], email:_caso['Email'] })
+      .then(function(radicado){
+        document.querySelector('#v-exito h2').textContent = '¡Pago confirmado! 🎉';
+        document.querySelector('#v-exito p.lead').textContent = 'En unos minutos te llega el correo con la confirmación de radicación. Nuestro equipo ya tiene tu caso activo.';
+        mostrar('v-exito');
+      });
   }).catch(function(){
     alert('Tu pago fue aprobado por Wompi, pero no pudimos registrarlo por una falla de conexión. Escríbenos por WhatsApp para activarlo al momento.');
   });
