@@ -2203,23 +2203,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- ÉXITO GARANTIA -->
       <div class="step-panel" id="sp-exito-garantia">
-        <div style="text-align:center;padding:10px 0 16px;">
-          <div style="font-size:3.5rem;margin-bottom:8px;">🎉</div>
-          <p style="font-size:1.15rem;font-weight:900;color:#4c1d95;margin:0 0 6px;line-height:1.3;">¡Todo listo! Tu caso está activo</p>
-          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibirás copia del compromiso firmado por correo. Solo pagas los $95.000 cuando la multa se elimine.</p>
+        <!-- Cabecera éxito -->
+        <div style="text-align:center;padding:8px 0 10px;">
+          <div style="font-size:3rem;margin-bottom:6px;">🎉</div>
+          <p style="font-size:1.1rem;font-weight:900;color:#4c1d95;margin:0 0 3px;line-height:1.2;">¡Trámite iniciado!</p>
+          <p style="font-size:0.75rem;color:#64748b;margin:0;line-height:1.5;">Compromiso firmado · Copia enviada a tu correo</p>
         </div>
-        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
-          <p style="font-size:0.78rem;font-weight:800;color:#4c1d95;margin:0 0 10px;">¿Qué pasa ahora?</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">1</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Preparamos tu Derecho de Petición y lo radicamos ante la Secretaría de Tránsito — sin que muevas un dedo.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">2</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">La Secretaría tiene <strong>15 días hábiles</strong> para responder. Te avisamos al instante cuando tengamos resultado.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;"><strong>Si se elimina ✅</strong> → te pedimos los $95.000 del compromiso. <strong>Si NO se elimina ❌</strong> → no pagas nada más.</p></div>
+
+        <!-- Resumen financiero claro -->
+        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+          <p style="font-size:0.68rem;font-weight:800;color:#6d28d9;text-transform:uppercase;letter-spacing:.8px;margin:0 0 8px;">Resumen de tu compromiso</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #ddd6fe;">
+            <span style="font-size:0.72rem;color:#374151;">💳 Pagas <strong>ahora</strong> (radicación)</span>
+            <span id="exito-gar-pago-hoy" style="font-size:0.9rem;font-weight:900;color:#4c1d95;">$10.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.72rem;color:#374151;">✅ Pagas <strong>solo si se elimina</strong></span>
+            <span id="exito-gar-pago-despues" style="font-size:0.9rem;font-weight:900;color:#16a34a;">$95.000</span>
+          </div>
+          <p style="font-size:0.63rem;color:#7c3aed;margin:6px 0 0;font-weight:600;">Si la multa NO se elimina → no pagas los $95.000 ✦ Garantía real</p>
+        </div>
+
+        <!-- Pasos qué sigue -->
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+          <p style="font-size:0.68rem;font-weight:800;color:#1e293b;margin:0 0 8px;">¿Qué sigue?</p>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;gap:9px;align-items:flex-start;">
+              <span style="background:#7c3aed;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">1</span>
+              <p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">Envíanos el comprobante de <strong>$<span id="exito-gar-paso1-monto">10.000</span></strong> por WhatsApp — te activamos el caso al instante.</p>
+            </div>
+            <div style="display:flex;gap:9px;align-items:flex-start;">
+              <span style="background:#7c3aed;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">2</span>
+              <p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">Radicamos tu Derecho de Petición. La Secretaría tiene <strong>15 días hábiles</strong> para responder.</p>
+            </div>
+            <div style="display:flex;gap:9px;align-items:flex-start;">
+              <span style="background:#16a34a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">3</span>
+              <p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">¡Multa eliminada! Te avisamos y solo entonces pagas <strong>$95.000 c/u</strong>.</p>
+            </div>
           </div>
         </div>
-        <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-size:0.97rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
-          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Confirmar por WhatsApp al equipo
+
+        <!-- CTA WhatsApp — grande y urgente -->
+        <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:17px;border-radius:14px;font-size:1rem;font-weight:900;box-shadow:0 6px 26px rgba(22,163,74,0.5);margin-bottom:6px;animation:pulseGreen 1.8s infinite;">
+          <i class="fab fa-whatsapp" style="font-size:1.4rem;"></i>
+          <span>Enviar comprobante por WhatsApp →</span>
         </a>
-        <p style="text-align:center;font-size:0.7rem;color:#94a3b8;margin:0;">Ya tienes el compromiso firmado en tu correo · Guardamos todo</p>
+        <p style="text-align:center;font-size:0.64rem;color:#94a3b8;margin:0;">📧 Copia del compromiso enviada a tu correo · Guardamos todo</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -2305,25 +2334,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </details>
       </div>
 
-      <!-- ══ ÉXITO GARANTIA ══ -->
+      <!-- ══ ÉXITO GARANTIA (segunda instancia — idéntica a la primera) ══ -->
       <div class="step-panel" id="sp-exito-garantia">
-        <div style="text-align:center;padding:10px 0 16px;">
-          <div style="font-size:3.5rem;margin-bottom:8px;">🎉</div>
-          <p style="font-size:1.15rem;font-weight:900;color:#4c1d95;margin:0 0 6px;line-height:1.3;">¡Todo listo! Tu caso está activo</p>
-          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibiste copia del compromiso firmado por correo. Solo pagas los $95.000 cuando la multa se elimine.</p>
+        <div style="text-align:center;padding:8px 0 10px;">
+          <div style="font-size:3rem;margin-bottom:6px;">🎉</div>
+          <p style="font-size:1.1rem;font-weight:900;color:#4c1d95;margin:0 0 3px;line-height:1.2;">¡Trámite iniciado!</p>
+          <p style="font-size:0.75rem;color:#64748b;margin:0;line-height:1.5;">Compromiso firmado · Copia enviada a tu correo</p>
         </div>
-        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
-          <p style="font-size:0.78rem;font-weight:800;color:#4c1d95;margin:0 0 10px;">¿Qué pasa ahora?</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">1</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Nuestro equipo prepara tu Derecho de Petición personalizado y lo radica ante la Secretaría de Tránsito.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">2</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">La Secretaría tiene <strong>15 días hábiles</strong> para responder. Te avisamos cuando tengamos resultado.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Si se elimina ✅ → te pedimos los $95.000 que firmaste. Si NO se elimina ❌ → no pagas nada más.</p></div>
+        <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+          <p style="font-size:0.68rem;font-weight:800;color:#6d28d9;text-transform:uppercase;letter-spacing:.8px;margin:0 0 8px;">Resumen de tu compromiso</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #ddd6fe;">
+            <span style="font-size:0.72rem;color:#374151;">💳 Pagas <strong>ahora</strong> (radicación)</span>
+            <span id="exito-gar-pago-hoy" style="font-size:0.9rem;font-weight:900;color:#4c1d95;">$10.000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.72rem;color:#374151;">✅ Pagas <strong>solo si se elimina</strong></span>
+            <span id="exito-gar-pago-despues" style="font-size:0.9rem;font-weight:900;color:#16a34a;">$95.000</span>
+          </div>
+          <p style="font-size:0.63rem;color:#7c3aed;margin:6px 0 0;font-weight:600;">Si la multa NO se elimina → no pagas los $95.000 ✦ Garantía real</p>
+        </div>
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+          <p style="font-size:0.68rem;font-weight:800;color:#1e293b;margin:0 0 8px;">¿Qué sigue?</p>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;gap:9px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">1</span><p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">Envíanos el comprobante de <strong>$<span id="exito-gar-paso1-monto">10.000</span></strong> por WhatsApp — activamos el caso.</p></div>
+            <div style="display:flex;gap:9px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">2</span><p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">Radicamos tu Derecho de Petición. La Secretaría tiene <strong>15 días hábiles</strong> para responder.</p></div>
+            <div style="display:flex;gap:9px;align-items:flex-start;"><span style="background:#16a34a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.7rem;color:#374151;margin:0;line-height:1.5;">¡Multa eliminada! Solo entonces pagas <strong>$95.000 c/u</strong>.</p></div>
           </div>
         </div>
-        <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-size:0.97rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
-          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Confirmar por WhatsApp al equipo
+        <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:17px;border-radius:14px;font-size:1rem;font-weight:900;box-shadow:0 6px 26px rgba(22,163,74,0.5);margin-bottom:6px;animation:pulseGreen 1.8s infinite;">
+          <i class="fab fa-whatsapp" style="font-size:1.4rem;"></i><span>Enviar comprobante por WhatsApp →</span>
         </a>
-        <p style="text-align:center;font-size:0.7rem;color:#94a3b8;margin:0;">Ya tienes el compromiso firmado en tu correo · Guardamos todo</p>
+        <p style="text-align:center;font-size:0.64rem;color:#94a3b8;margin:0;">📧 Copia del compromiso enviada a tu correo · Guardamos todo</p>
       </div>
 
       <div class="step-panel" id="sp-consulta">
@@ -4916,37 +4957,50 @@ function confirmarFirmaComp(){
   var badge=document.getElementById('comp-sel-badge');
   if(badge) badge.style.display='block';
   var btn=document.getElementById('btn-confirmar-comp');
-  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Guardando y enviando copia...'; }
+  if(btn){ btn.disabled=true; btn.innerHTML='✅ Compromiso firmado — abriendo WhatsApp...'; }
   var nombres=document.getElementById('comp-nombre'); var cedula=document.getElementById('comp-cedula');
-  var emailVal=(function(){ try{return document.getElementById('frm-email').value.trim();}catch(e){return '';} })();
+  var emailVal=(function(){ try{return document.getElementById('frm-email').value.trim();}catch(e){return _correoConsultante||'';} })();
+  var n=_numMultasGarantia||1;
   var payload={
     _accion:'guardar_compromiso_garantia',
     nombres: nombres?nombres.textContent:'',
     cedula: cedula?cedula.textContent:'',
-    numMultas: _numMultasGarantia||1,
+    numMultas: n,
+    pagoHoy: 10000*n,
+    pagoAlEliminar: 95000*n,
     firmaBase64: _compData,
     email: emailVal,
     whatsapp: _waConsultante||''
   };
-  fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
-    .catch(function(){})
-    .finally(function(){ mostrarExitoGarantia(); });
+  // Avanzar INMEDIATAMENTE — no esperar el fetch
+  mostrarExitoGarantia();
+  // Enviar a GAS en background (correo + registro)
+  try{ fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)}).catch(function(){}); }catch(e){}
 }
 
 function mostrarExitoGarantia(){
   var n=_numMultasGarantia||1;
-  var emailVal=(function(){ try{return document.getElementById('frm-email').value.trim();}catch(e){return '';} })();
-  var nombreTxt=(document.getElementById('comp-nombre')||{}).textContent||'';
-  var cedulaTxt=(document.getElementById('comp-cedula')||{}).textContent||'';
-  var msg='*¡Hice el pago del plan Garantía! ✅*\n\n'+
-    '👤 '+nombreTxt+'\n'+
-    '🧑 Cédula: '+cedulaTxt+'\n'+
-    '💜 Plan: Paga Solo al Eliminar — $'+(10000*n).toLocaleString('es-CO')+' pagados hoy\n'+
-    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $95.000 al eliminar\n'+
-    '📧 Email: '+emailVal+'\n\n'+
-    'Adjunto comprobante de pago. Quedo esperando el radicado. ✅';
-  var waLink=document.getElementById('btn-wa-exito-garantia');
-  if(waLink) waLink.href='https://wa.me/573159318400?text='+encodeURIComponent(msg);
+  var emailVal=(function(){ try{return document.getElementById('frm-email').value.trim();}catch(e){return _correoConsultante||'';} })();
+  var nombreTxt=(document.getElementById('comp-nombre')||{}).textContent||_nombreConsultante||'';
+  var cedulaTxt=(document.getElementById('comp-cedula')||{}).textContent||_valorConsultado||'';
+  var pagoHoy=(10000*n).toLocaleString('es-CO');
+  var pagoAlEliminar=(95000*n).toLocaleString('es-CO');
+  var msg='*✅ Inicié el trámite de eliminación con JurídicosWeb*\n\n'+
+    '👤 *'+nombreTxt+'*\n'+
+    '🪪 Cédula: '+cedulaTxt+'\n'+
+    '📱 WhatsApp: '+(_waConsultante?'(+57) '+_waConsultante:'—')+'\n'+
+    '📧 Correo: '+emailVal+'\n\n'+
+    '💜 *Plan Paga Solo al Eliminar*\n'+
+    '• Multas a eliminar: *'+n+' multa'+(n!==1?'s':'')+' *\n'+
+    '• Pago hoy (radicación): *$'+pagoHoy+'*\n'+
+    '• Al eliminar cada multa: *$95.000 c/u = $'+pagoAlEliminar+' total*\n\n'+
+    '📎 *Adjunto el comprobante de pago de $'+pagoHoy+' (Nequi/transferencia)*\n\n'+
+    'Quedo esperando confirmación de radicado. 🙏';
+  // Poblar todos los elementos de la pantalla de éxito
+  document.querySelectorAll('#btn-wa-exito-garantia').forEach(function(el){ el.href='https://wa.me/573159318400?text='+encodeURIComponent(msg); });
+  document.querySelectorAll('#exito-gar-pago-hoy').forEach(function(el){ el.textContent='$'+pagoHoy; });
+  document.querySelectorAll('#exito-gar-pago-despues').forEach(function(el){ el.textContent='$95.000 × '+n+' = $'+pagoAlEliminar; });
+  document.querySelectorAll('#exito-gar-paso1-monto').forEach(function(el){ el.textContent=pagoHoy; });
   goToStepNombre('sp-exito-garantia');
 }
 
@@ -4993,50 +5047,7 @@ function limpiarFirmaComp(){
   if(prev){var pc=prev.getContext('2d');pc.clearRect(0,0,prev.width,prev.height);}
   var badge=document.getElementById('comp-sel-badge');if(badge)badge.style.display='none';
 }
-function confirmarFirmaComp(){
-  if(!_compCanvas){alert('Error al cargar el lienzo. Recarga la página.');return;}
-  var pix=_compCtx.getImageData(0,0,_compCanvas.width,_compCanvas.height).data;
-  var tiene=false;for(var i=3;i<pix.length;i+=4){if(pix[i]>10){tiene=true;break;}}
-  if(!tiene){alert('Por favor firma antes de continuar.');return;}
-  _compData=_compCanvas.toDataURL('image/png');
-  var prev=document.getElementById('comp-firma-preview');
-  if(prev){var pc=prev.getContext('2d');pc.clearRect(0,0,prev.width,prev.height);var img=new Image();img.onload=function(){pc.drawImage(img,0,0,prev.width,prev.height);};img.src=_compData;}
-  var badge=document.getElementById('comp-sel-badge');if(badge)badge.style.display='block';
-  var btn=document.getElementById('btn-confirmar-comp');
-  if(btn){btn.disabled=true;btn.innerHTML='⏳ Guardando y enviando copia...';}
-  var compNombre=document.getElementById('comp-nombre');
-  var compCedula=document.getElementById('comp-cedula');
-  var emailEl=document.getElementById('frm-email');
-  var payload={
-    _accion:'guardar_compromiso_garantia',
-    nombres:compNombre?compNombre.textContent:'',
-    cedula:compCedula?compCedula.textContent:'',
-    numMultas:_numMultasGarantia||1,
-    firmaBase64:_compData,
-    email:emailEl?emailEl.value.trim():'',
-    whatsapp:_waConsultante||''
-  };
-  fetch(GOOGLE_SHEET_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
-    .catch(function(){})
-    .finally(function(){mostrarExitoGarantia();});
-}
-function mostrarExitoGarantia(){
-  var emailEl=document.getElementById('frm-email');
-  var email=emailEl?emailEl.value.trim():'';
-  var n=_numMultasGarantia||1;
-  var compNombre=document.getElementById('comp-nombre');
-  var compCedula=document.getElementById('comp-cedula');
-  var nombre=compNombre?compNombre.textContent:'';
-  var cedula=compCedula?compCedula.textContent:'';
-  var msg='*¡Hice el pago del plan Garantía! ✅*\n\n'+
-    '👤 '+nombre+'\n🪪 Cédula: '+cedula+'\n'+
-    '💜 Plan: Paga Solo al Eliminar — $'+(10000*n).toLocaleString('es-CO')+' pagados hoy\n'+
-    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $95.000 al eliminar\n'+
-    '📧 Email: '+email+'\n\nAdjunto comprobante de pago. ✅';
-  var waLink=document.getElementById('btn-wa-exito-garantia');
-  if(waLink)waLink.href='https://wa.me/573159318400?text='+encodeURIComponent(msg);
-  goToStepNombre('sp-exito-garantia');
-}
+// Segunda instancia — delegamos a la función principal definida arriba
 function abrirCompromisoGarantia(){
   var nombresEl=document.getElementById('frm-nombres');
   var apellidosEl=document.getElementById('frm-apellidos');
