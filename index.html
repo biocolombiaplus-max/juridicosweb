@@ -4812,20 +4812,40 @@ function renderPlanes(aplican){
     '<p style="font-size:0.65rem;color:#9333ea;font-weight:700;margin:2px 0 0;">hoy para iniciar</p>'+
     '</div>'+
     '</div>'+
-    '<div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:12px;padding:12px 14px;margin-bottom:12px;">'+
-    '<p style="font-size:0.72rem;font-weight:700;color:#5b21b6;margin:0 0 10px;">¿Cuántas multas o fotomultas quieres eliminar?</p>'+
-    '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">'+
-    '<div style="display:flex;align-items:center;border:2px solid #c4b5fd;border-radius:10px;overflow:hidden;">'+
-    '<button onclick="garCambiarN(-1)" style="background:#ede9fe;border:none;padding:9px 16px;font-size:1.2rem;font-weight:700;color:#7c3aed;cursor:pointer;line-height:1;">−</button>'+
-    '<span id="gar-num" style="padding:9px 18px;font-size:1.15rem;font-weight:800;color:#4c1d95;min-width:44px;text-align:center;">'+n+'</span>'+
-    '<button onclick="garCambiarN(1)" style="background:#ede9fe;border:none;padding:9px 16px;font-size:1.2rem;font-weight:700;color:#7c3aed;cursor:pointer;line-height:1;">+</button>'+
-    '</div>'+
-    '<div>'+
-    '<p id="gar-hoy-txt" style="font-size:0.82rem;font-weight:700;color:#16a34a;margin:0;">Pagas hoy: $'+(10000*n).toLocaleString('es-CO')+'</p>'+
-    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#6b7280;margin:3px 0 0;">Al eliminar: $'+(95000*n).toLocaleString('es-CO')+' total</p>'+
-    '</div>'+
-    '</div>'+
-    '</div>'+
+    // ── Selector de multas ──
+    (function(){
+      var max = Math.max(aplican.length, 1);
+      var btns = '';
+      for(var i=1;i<=max;i++){
+        var activo = i===n;
+        btns += '<button onclick="garCambiarN('+(i-n)+')" style="'+
+          'flex:1;min-width:48px;padding:13px 6px;font-size:'+(max<=3?'1.1':'0.95')+'rem;font-weight:900;'+
+          'border:2.5px solid '+(activo?'#7c3aed':'#ddd6fe')+';'+
+          'background:'+(activo?'linear-gradient(135deg,#7c3aed,#6d28d9)':'#fff')+';'+
+          'color:'+(activo?'#fff':'#6b7280')+';'+
+          'border-radius:12px;cursor:pointer;'+
+          'box-shadow:'+(activo?'0 4px 16px rgba(124,58,237,0.4)':'none')+';'+
+          'transition:.15s;">'+
+          i+(i===1?' multa':' multas')+
+          '</button>';
+      }
+      return '<div style="background:#f5f3ff;border:2px solid #ddd6fe;border-radius:14px;padding:14px;margin-bottom:12px;">'+
+        '<p style="font-size:0.72rem;font-weight:800;color:#5b21b6;text-align:center;margin:0 0 10px;text-transform:uppercase;letter-spacing:.6px;">¿Cuántas multas quieres eliminar?</p>'+
+        '<div style="display:flex;gap:8px;margin-bottom:12px;">'+btns+'</div>'+
+        // Desglose visual
+        '<div style="background:#fff;border:1.5px solid #e9d5ff;border-radius:10px;padding:10px 12px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'+
+        '<span style="font-size:0.72rem;color:#374151;">💳 Pagas <strong>hoy</strong> (radicación):</span>'+
+        '<span id="gar-precio-hoy" style="font-size:1.15rem;font-weight:900;color:#7c3aed;">$'+(10000*n).toLocaleString('es-CO')+'</span>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:5px;border-top:1px solid #f3e8ff;">'+
+        '<span style="font-size:0.7rem;color:#374151;">✅ Pagas <strong>al eliminar</strong> c/u:</span>'+
+        '<span style="font-size:0.82rem;font-weight:800;color:#16a34a;">$95.000 × <span id="gar-num">'+n+'</span> = <span id="gar-despues-txt">$'+(95000*n).toLocaleString('es-CO')+'</span></span>'+
+        '</div>'+
+        '<div id="gar-hoy-txt" style="display:none;"></div>'+
+        '</div>'+
+        '</div>';
+    })()+
     '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:11px;padding:11px 13px;margin-bottom:14px;">'+
     '<p style="font-size:0.73rem;color:#14532d;font-weight:700;margin:0;line-height:1.65;">'+
     '✅ <strong>Si la multa NO se elimina, no pagas los $95.000.</strong> Solo los $10.000 del trámite administrativo y radicación. Sin letra pequeña — esa es nuestra garantía real.'+
@@ -5073,16 +5093,24 @@ function garCambiarN(delta){
   var max = Math.max(aplican.length, 1);
   _numMultasGarantia = Math.min(max, Math.max(1, (_numMultasGarantia||1) + delta));
   var n = _numMultasGarantia;
+  // Actualizar número y precios
   var el = document.getElementById('gar-num');
   var precioEl = document.getElementById('gar-precio-hoy');
-  var hoyEl = document.getElementById('gar-hoy-txt');
   var despEl = document.getElementById('gar-despues-txt');
   if(el) el.textContent = n;
   if(precioEl) precioEl.textContent = '$'+(10000*n).toLocaleString('es-CO');
-  if(hoyEl) hoyEl.textContent = 'Pagas hoy: $'+(10000*n).toLocaleString('es-CO');
-  if(despEl) despEl.textContent = 'Al eliminar: $'+(95000*n).toLocaleString('es-CO')+' total ($95.000 c/u)';
+  if(despEl) despEl.textContent = '$'+(95000*n).toLocaleString('es-CO');
+  // Resaltar botón activo en el selector visual
+  var selectorBtns = document.querySelectorAll('#sp-resultados button[onclick^="garCambiarN"]');
+  selectorBtns.forEach(function(b, idx){
+    var isActive = (idx+1) === n;
+    b.style.background = isActive ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : '#fff';
+    b.style.color = isActive ? '#fff' : '#6b7280';
+    b.style.borderColor = isActive ? '#7c3aed' : '#ddd6fe';
+    b.style.boxShadow = isActive ? '0 4px 16px rgba(124,58,237,0.4)' : 'none';
+  });
   var btn = document.getElementById('btn-garantia');
-  if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i>Empezar — Solo pago $'+(10000*n).toLocaleString('es-CO')+' hoy';
+  if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i> Empezar — pago inicial $'+(10000*n).toLocaleString('es-CO');
 }
 
 // ===================== FORM VALIDATION =====================
