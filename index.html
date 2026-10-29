@@ -1684,62 +1684,118 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- Documento oficial premium -->
-        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(30,58,138,0.22);">
-          <!-- Header azul con sello -->
+        <div id="doc-preview-card" style="background:#fff;border:2px solid #1e3a8a;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 6px 24px rgba(30,58,138,0.22);position:relative;">
+
+          <!-- Marca de agua BORRADOR diagonal -->
+          <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:3.5rem;font-weight:900;color:rgba(30,58,138,0.07);letter-spacing:6px;white-space:nowrap;user-select:none;font-family:serif;">BORRADOR</div>
+          </div>
+
+          <!-- Header oficial colombia -->
           <div style="background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 60%,#1d4ed8 100%);color:#fff;padding:9px 14px;position:relative;overflow:hidden;">
-            <!-- Franjas bandera colombia -->
-            <div style="position:absolute;top:0;right:0;width:5px;height:100%;display:flex;flex-direction:column;">
+            <div style="position:absolute;top:0;right:0;width:6px;height:100%;display:flex;flex-direction:column;">
               <div style="flex:2;background:#FCD116;"></div>
               <div style="flex:1;background:#003087;"></div>
               <div style="flex:1;background:#CE1126;"></div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;padding-right:16px;">
-              <div style="width:30px;height:30px;background:rgba(255,255,255,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">📜</div>
+            <div style="display:flex;align-items:center;gap:9px;padding-right:18px;">
+              <div style="width:32px;height:32px;background:rgba(255,255,255,0.13);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;border:1.5px solid rgba(255,255,255,0.25);">📜</div>
               <div>
-                <p style="font-size:0.52rem;opacity:0.7;margin:0;letter-spacing:2px;text-transform:uppercase;">República de Colombia · Ministerio de Transporte</p>
-                <p style="font-size:0.82rem;font-weight:900;margin:1px 0 0;letter-spacing:.4px;">DERECHO DE PETICIÓN</p>
-                <p style="font-size:0.55rem;opacity:0.75;margin:1px 0 0;">Ley 1755/2015 · Art. 23 Constitución Política · SIMIT</p>
+                <p style="font-size:0.5rem;opacity:0.72;margin:0;letter-spacing:2px;text-transform:uppercase;">República de Colombia — Ministerio de Transporte</p>
+                <p style="font-size:0.85rem;font-weight:900;margin:1px 0 0;letter-spacing:.5px;">DERECHO DE PETICIÓN</p>
+                <p style="font-size:0.54rem;opacity:0.78;margin:1px 0 0;">Ley 1755/2015 · Art. 23 Constitución Política · Código Nacional de Tránsito</p>
               </div>
             </div>
           </div>
 
-          <!-- Cuerpo compacto -->
-          <div style="padding:8px 12px 6px;font-size:0.73rem;color:#1e293b;">
+          <!-- Cuerpo del documento -->
+          <div style="padding:9px 12px 7px;font-size:0.7rem;color:#1e293b;position:relative;z-index:3;">
+
+            <!-- Fecha y ciudad -->
+            <p style="text-align:right;font-size:0.63rem;color:#64748b;margin:0 0 5px;" id="dp-fecha-doc">—</p>
+
+            <!-- Dirigido a -->
             <div style="background:#eff6ff;border-radius:7px;padding:5px 9px;margin-bottom:7px;border-left:3px solid #2563eb;">
-              <p style="font-size:0.58rem;color:#64748b;margin:0 0 1px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Dirigido a:</p>
-              <p style="color:#1e40af;font-weight:800;margin:0;font-size:0.75rem;" id="dp-secretaria-nombre">Secretaría de Tránsito y Movilidad</p>
+              <p style="font-size:0.56rem;color:#64748b;margin:0 0 1px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">Señores:</p>
+              <p style="color:#1e40af;font-weight:800;margin:0;font-size:0.73rem;" id="dp-secretaria-nombre">Secretaría de Tránsito y Movilidad</p>
+              <p style="font-size:0.58rem;color:#3b82f6;margin:1px 0 0;font-style:italic;">Ciudad</p>
             </div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-bottom:7px;line-height:1.45;">
-              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">Peticionario:</span>
-              <span id="dp-nombre-cliente" style="font-weight:800;color:#0f172a;font-size:0.72rem;">—</span>
-              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">C.C. / Placa:</span>
-              <span id="dp-cedula-cliente" style="font-weight:700;color:#1e40af;font-size:0.72rem;">—</span>
-              <span style="color:#64748b;font-size:0.63rem;font-weight:600;">WhatsApp:</span>
-              <span id="dp-wa-preview" style="font-weight:600;color:#15803d;font-size:0.72rem;">—</span>
-            </div>
-            <!-- Texto del documento (blurred) -->
-            <div style="position:relative;margin-bottom:4px;">
-              <div style="filter:blur(3px);user-select:none;pointer-events:none;background:#f1f5f9;border-radius:6px;padding:6px 9px;font-size:0.64rem;color:#475569;line-height:1.5;font-style:italic;">
-                <strong>ARTÍCULO PRIMERO:</strong> Que se declare la prescripción de la acción sancionatoria conforme al Art. 136 Ley 769/2002 por haber transcurrido más de tres (3) años sin cobro efectivo...
+
+            <!-- Apertura legal -->
+            <p style="font-size:0.64rem;color:#334155;line-height:1.55;margin:0 0 6px;">Yo, <strong id="dp-nombre-cliente" style="color:#0f172a;">—</strong>, identificado/a con C.C. <strong id="dp-cedula-cliente" style="color:#1e40af;">—</strong>, contacto WhatsApp <span id="dp-wa-preview" style="color:#15803d;font-weight:600;">—</span>, con fundamento en el <strong>Art. 23 de la Constitución Política</strong> y la <strong>Ley 1755 de 2015</strong>, me dirijo respetuosamente a su despacho para:</p>
+
+            <!-- Sección HECHOS con campos SIMIT borrosos -->
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:6px 9px;margin-bottom:6px;">
+              <p style="font-size:0.57rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.8px;margin:0 0 5px;">HECHOS:</p>
+
+              <!-- Fila comparendo — BORROSA (dato SIMIT) -->
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+                <span style="font-size:0.6rem;color:#64748b;white-space:nowrap;min-width:110px;">No. Comparendo:</span>
+                <div style="flex:1;background:#dbeafe;border-radius:4px;padding:2px 7px;position:relative;overflow:hidden;">
+                  <span style="font-size:0.6rem;filter:blur(4px);user-select:none;color:#1e40af;font-weight:700;">54001-00032092975</span>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.53rem;font-weight:800;color:#1e40af;background:rgba(219,234,254,0.95);">✏️ Se completa en el siguiente paso</span>
+                </div>
               </div>
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                <span style="background:rgba(30,58,138,0.93);color:#fff;font-size:0.65rem;font-weight:800;padding:4px 12px;border-radius:7px;display:flex;align-items:center;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,0.25);">🔒 Visible al activar el caso</span>
+
+              <!-- Fila artículo infracción — BORROSO (dato SIMIT) -->
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+                <span style="font-size:0.6rem;color:#64748b;white-space:nowrap;min-width:110px;">Art. infracción:</span>
+                <div style="flex:1;background:#dbeafe;border-radius:4px;padding:2px 7px;position:relative;overflow:hidden;">
+                  <span style="font-size:0.6rem;filter:blur(4px);user-select:none;color:#1e40af;">C.28 — Exceso de velocidad</span>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.53rem;font-weight:800;color:#1e40af;background:rgba(219,234,254,0.95);">✏️ Se completa en el siguiente paso</span>
+                </div>
+              </div>
+
+              <!-- Fila fecha infracción — BORROSA (dato SIMIT) -->
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+                <span style="font-size:0.6rem;color:#64748b;white-space:nowrap;min-width:110px;">Fecha infracción:</span>
+                <div style="flex:1;background:#dbeafe;border-radius:4px;padding:2px 7px;position:relative;overflow:hidden;">
+                  <span style="font-size:0.6rem;filter:blur(4px);user-select:none;color:#1e40af;">06/12/2021</span>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.53rem;font-weight:800;color:#1e40af;background:rgba(219,234,254,0.95);">✏️ Se completa en el siguiente paso</span>
+                </div>
+              </div>
+
+              <!-- Fila valor multa — BORROSO (dato SIMIT) -->
+              <div style="display:flex;align-items:center;gap:5px;">
+                <span style="font-size:0.6rem;color:#64748b;white-space:nowrap;min-width:110px;">Valor multa SIMIT:</span>
+                <div style="flex:1;background:#dbeafe;border-radius:4px;padding:2px 7px;position:relative;overflow:hidden;">
+                  <span style="font-size:0.6rem;filter:blur(4px);user-select:none;color:#1e40af;font-weight:700;">$ 841.539</span>
+                  <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.53rem;font-weight:800;color:#1e40af;background:rgba(219,234,254,0.95);">✏️ Se completa en el siguiente paso</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fundamentos derecho — VISIBLE (texto genérico legal) -->
+            <div style="margin-bottom:6px;">
+              <p style="font-size:0.57rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.8px;margin:0 0 3px;">FUNDAMENTOS DE DERECHO:</p>
+              <p style="font-size:0.61rem;color:#475569;line-height:1.5;margin:0;">• <strong>Art. 136 Ley 769/2002</strong> — Prescripción de la acción sancionatoria por más de 3 años sin cobro efectivo.<br>• <strong>Art. 83 C.C.A.</strong> — Notificación irregular invalida el acto administrativo.<br>• <strong>Circular 008/2012 MINTRANSPORTE</strong> — Caducidad del comparendo electrónico sin certificación INM.</p>
+            </div>
+
+            <!-- Petición — VISIBLE -->
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:5px 9px;margin-bottom:5px;">
+              <p style="font-size:0.57rem;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:.8px;margin:0 0 3px;">PETICIÓN CONCRETA:</p>
+              <p style="font-size:0.62rem;color:#15803d;line-height:1.5;margin:0;"><strong>1.</strong> DECLARAR la prescripción / nulidad del comparendo.<br><strong>2.</strong> ARCHIVAR la actuación sancionatoria.<br><strong>3.</strong> CERTIFICAR la eliminación de la multa del SIMIT.</p>
+            </div>
+
+            <!-- Zona de firma -->
+            <div style="border-top:1.5px dashed #cbd5e1;padding-top:6px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;">
+              <div style="flex:1;">
+                <div style="border-bottom:1.5px solid #1e3a8a;height:22px;position:relative;" id="dp-firma-preview">
+                  <span style="position:absolute;bottom:2px;left:0;font-size:0.54rem;color:#94a3b8;font-style:italic;">← Aquí va tu firma</span>
+                </div>
+                <p style="font-size:0.56rem;color:#94a3b8;margin:2px 0 0;">Firma del peticionario</p>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <p style="font-size:0.63rem;font-weight:700;color:#1e293b;margin:0;" id="dp-nombre-firma">—</p>
+                <p style="font-size:0.56rem;color:#64748b;margin:1px 0 0;">C.C. <span id="dp-cc-firma">—</span></p>
               </div>
             </div>
           </div>
 
-          <!-- Zona de firma dentro del documento -->
-          <div style="border-top:1.5px dashed #cbd5e1;padding:7px 12px;background:linear-gradient(90deg,#f8fafc,#eff6ff);display:flex;align-items:center;justify-content:space-between;gap:8px;">
-            <div style="flex:1;">
-              <div style="border-bottom:1.5px solid #1e3a8a;height:18px;position:relative;" id="dp-firma-preview">
-                <span style="position:absolute;bottom:2px;left:0;font-size:0.55rem;color:#94a3b8;font-style:italic;">← Aquí va tu firma</span>
-              </div>
-              <p style="font-size:0.58rem;color:#94a3b8;margin:2px 0 0;">Firma del peticionario</p>
-            </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <p style="font-size:0.65rem;font-weight:700;color:#1e293b;margin:0;" id="dp-nombre-firma">Pendiente</p>
-              <p style="font-size:0.57rem;color:#94a3b8;margin:1px 0 0;" id="dp-fecha-doc">—</p>
-            </div>
+          <!-- Pie: radicación oficial -->
+          <div style="background:#f0fdf4;border-top:1px solid #bbf7d0;padding:5px 12px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:0.55rem;color:#166534;font-weight:700;">📋 Listo para radicar ante la Secretaría</span>
+            <span style="font-size:0.52rem;color:#86efac;font-style:italic;">JurídicosWeb · juridicosweb.com</span>
           </div>
         </div>
 
@@ -3257,6 +3313,8 @@ function generarDocPreview(){
   document.getElementById('dp-nombre-cliente').textContent  = nombre;
   document.getElementById('dp-cedula-cliente').textContent  = (_tipoConsultado==='cedula'?'C.C. ':'')+_valorConsultado;
   document.getElementById('dp-nombre-firma').textContent    = nombre;
+  var ccFirmaEl = document.getElementById('dp-cc-firma');
+  if(ccFirmaEl){ ccFirmaEl.textContent = _valorConsultado || '—'; }
   document.getElementById('dp-secretaria-nombre').textContent = 'Secretaría de Tránsito y Movilidad';
   var waEl = document.getElementById('dp-wa-preview');
   if(waEl){ waEl.textContent = wa ? '(+57) '+wa : '—'; }
