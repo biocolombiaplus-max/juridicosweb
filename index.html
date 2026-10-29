@@ -1915,8 +1915,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.9;">Documento completo · 4 páginas · Con tu firma</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <!-- Botón secundario WhatsApp -->
-        <a href="https://wa.me/573159318400?text=Hola%2C+descargué+mi+Derecho+de+Petición+firmado+y+quiero+que+lo+radiquen" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-size:0.95rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
+        <!-- Botón secundario WhatsApp — href generado dinámicamente con datos del cliente -->
+        <a id="btn-wa-radicar-pdf" href="#" target="_blank" onclick="this.href=generarWaRadicar()" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-size:0.95rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
           <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Quiero que lo radiquen → WhatsApp
         </a>
         <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">📄 Descarga el PDF completo · Lee el documento · Luego contáctanos para radicarlo</p>
@@ -5406,6 +5406,22 @@ function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
   dibujarPiePDF(doc);
 }
 
+function generarWaRadicar(){
+  var nombre = _nombreConsultante || '';
+  var cedula = _valorConsultado || '';
+  var correo = _correoConsultante || '';
+  var wa = _waConsultante || '';
+  var msg = '📋 *Solicitud de Radicación — JurídicosWeb*\n\n'
+    + 'Buenos días, acabo de descargar y firmar mi Derecho de Petición y deseo iniciar el proceso de radicación.\n\n'
+    + '*Datos del solicitante:*\n'
+    + '👤 Nombre: *'+nombre+'*\n'
+    + '🪪 Cédula: *'+cedula+'*\n'
+    + (wa ? '📱 WhatsApp: (+57) '+wa+'\n' : '')
+    + (correo ? '📧 Correo: '+correo+'\n' : '')
+    + '\nAdjunto el comprobante de pago. Quedo atento/a a las instrucciones para radicar. 🙏';
+  return 'https://wa.me/573159318400?text='+encodeURIComponent(msg);
+}
+
 function descargarDerechoPeticionPDF(){
   if(!window.jspdf){ alert('Error: PDF no disponible. Recarga la página.'); return; }
   var jsPDF = window.jspdf.jsPDF;
@@ -5418,24 +5434,41 @@ function descargarDerechoPeticionPDF(){
   var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   var ahora = new Date();
   var fechaLarga = ahora.getDate()+' de '+MESES[ahora.getMonth()]+' de '+ahora.getFullYear();
-  var W = 210, H = 297, ML = 18, MR = 18, MT = 20;
+  var W = 210, H = 297, ML = 20, MR = 20, MT = 22;
   var TW = W - ML - MR;
+  // Marca de agua profesional: texto grande, rotado, muy translúcido, centrado en la página
   function addWatermark(d){
-    d.setFontSize(72); d.setTextColor(220,220,220); d.setFont('times','bold');
-    d.text('BORRADOR', W/2, H/2, {angle:45, align:'center'});
+    var cx = W/2, cy = H/2;
+    // Líneas paralelas del watermark (efecto sello)
+    d.setFont('helvetica','bold');
+    d.setTextColor(210,210,215);
+    // Texto principal grande rotado
+    d.setFontSize(56);
+    d.text('BORRADOR', cx, cy-6, {angle:45, align:'center'});
+    d.setFontSize(11);
+    d.text('PENDIENTE DE RADICACIÓN', cx, cy+14, {angle:45, align:'center'});
     d.setTextColor(0,0,0);
   }
   function addHeader(d, pageNum){
-    d.setFont('helvetica','normal'); d.setFontSize(7); d.setTextColor(120,120,120);
-    d.text('REPÚBLICA DE COLOMBIA  ·  MINISTERIO DE TRANSPORTE  ·  DERECHO DE PETICIÓN', W/2, 10, {align:'center'});
-    d.setDrawColor(30,58,138); d.setLineWidth(0.4); d.line(ML, 12, W-MR, 12);
+    // Franja azul oscura superior
+    d.setFillColor(15,40,100);
+    d.rect(0, 0, W, 14, 'F');
+    d.setFont('helvetica','bold'); d.setFontSize(7); d.setTextColor(255,255,255);
+    d.text('REPÚBLICA DE COLOMBIA', ML, 6);
+    d.setFont('helvetica','normal'); d.setFontSize(6.5);
+    d.text('MINISTERIO DE TRANSPORTE — DERECHO DE PETICIÓN OFICIAL', ML, 11);
+    // Número de expediente / folio a la derecha
+    d.setFont('helvetica','normal'); d.setFontSize(6.5); d.setTextColor(180,200,255);
+    d.text('Folio '+pageNum+' de 4', W-MR, 8.5, {align:'right'});
     d.setTextColor(0,0,0);
   }
   function addFooter(d, pageNum){
-    d.setFont('helvetica','italic'); d.setFontSize(7); d.setTextColor(120,120,120);
-    d.line(ML, H-14, W-MR, H-14);
-    d.text('Elaborado por JurídicosWeb · www.juridicosweb.com · Confidencial', ML, H-10);
-    d.text('Página '+pageNum, W-MR, H-10, {align:'right'});
+    d.setDrawColor(200,210,230); d.setLineWidth(0.3);
+    d.line(ML, H-12, W-MR, H-12);
+    d.setFont('helvetica','normal'); d.setFontSize(6.5); d.setTextColor(130,140,160);
+    d.text('JurídicosWeb · www.juridicosweb.com · juridicoswebcasos@gmail.com · (+57) 315 931 8400', ML, H-8);
+    d.setFont('helvetica','bold'); d.setFontSize(6.5);
+    d.text('Página '+pageNum+' / 4', W-MR, H-8, {align:'right'});
     d.setTextColor(0,0,0);
   }
   function splitAndWrite(d, text, x, yStart, maxW, lineH, maxY, fontSize, style, color){
@@ -5451,16 +5484,24 @@ function descargarDerechoPeticionPDF(){
     if(color) d.setTextColor(0,0,0);
     return y;
   }
-  // PÁGINA 1
-  addWatermark(doc); addHeader(doc, 1);
-  var y = MT + 4;
-  doc.setFont('times','bold'); doc.setFontSize(14); doc.setTextColor(30,58,138);
-  doc.text('DERECHO DE PETICIÓN', W/2, y, {align:'center'}); y += 6;
-  doc.setFont('times','normal'); doc.setFontSize(9); doc.setTextColor(60,60,60);
-  var refLines = doc.splitTextToSize('Ref.: Solicitud de Prescripción, Anulación por Notificación Irregular y Eliminación de Comparendo del Sistema Integrado de Multas y Sanciones — SIMIT',TW);
+  // PÁGINA 1 — primero header (franja) y luego watermark encima del contenido
+  addHeader(doc, 1); addWatermark(doc);
+  var y = MT + 8;
+  // Badge de tipo de documento
+  doc.setFillColor(237,242,255); doc.setDrawColor(99,102,241); doc.setLineWidth(0.3);
+  doc.roundedRect(W/2-32, y-4, 64, 8, 2, 2, 'FD');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(67,56,202);
+  doc.text('DERECHO DE PETICIÓN OFICIAL — ART. 23 C.P.', W/2, y+0.5, {align:'center'}); y+=10;
+  // Título principal
+  doc.setFont('times','bold'); doc.setFontSize(17); doc.setTextColor(15,40,100);
+  doc.text('DERECHO DE PETICIÓN', W/2, y, {align:'center'}); y += 7;
+  // Línea decorativa doble
+  doc.setDrawColor(15,40,100); doc.setLineWidth(1.2); doc.line(ML+20,y,W-MR-20,y);
+  doc.setDrawColor(180,190,220); doc.setLineWidth(0.4); doc.line(ML+20,y+2,W-MR-20,y+2); y+=8;
+  doc.setFont('times','italic'); doc.setFontSize(8.5); doc.setTextColor(80,90,120);
+  var refLines = doc.splitTextToSize('Ref.: Solicitud de Prescripción, Anulación por Notificación Irregular y Eliminación de Comparendo del Sistema Integrado de Multas y Sanciones — SIMIT',TW-20);
   refLines.forEach(function(l){ doc.text(l,W/2,y,{align:'center'}); y+=5; });
-  doc.setDrawColor(30,58,138); doc.setLineWidth(0.5); doc.line(ML,y,W-MR,y); y+=7;
-  doc.setTextColor(0,0,0);
+  y+=5; doc.setTextColor(0,0,0);
   doc.setFont('times','normal'); doc.setFontSize(10);
   doc.text('Ciudad, '+fechaLarga, W-MR, y, {align:'right'}); y+=8;
   doc.setFillColor(239,246,255); doc.setDrawColor(37,99,235); doc.setLineWidth(0.3);
@@ -5576,18 +5617,33 @@ function descargarDerechoPeticionPDF(){
   doc.text('Elaborado y radicado por: JurídicosWeb', ML, y); y+=5;
   doc.text('www.juridicosweb.com | juridicoswebcasos@gmail.com', ML, y); y+=16;
   doc.setTextColor(0,0,0);
-  var boxH = 48;
-  doc.setFillColor(220,38,38); doc.setDrawColor(185,28,28); doc.setLineWidth(0.5);
-  doc.roundedRect(ML, y, TW, boxH, 4, 4, 'FD');
+  // Recuadro rojo CTA — diseño premium con borde interior
+  var boxH = 58;
+  // Sombra / borde exterior oscuro
+  doc.setFillColor(153,27,27); doc.setDrawColor(153,27,27); doc.setLineWidth(0);
+  doc.roundedRect(ML+1, y+1, TW, boxH, 5, 5, 'F');
+  // Recuadro principal rojo
+  doc.setFillColor(220,38,38); doc.setDrawColor(255,255,255); doc.setLineWidth(0.8);
+  doc.roundedRect(ML, y, TW, boxH, 5, 5, 'FD');
+  // Borde interior blanco fino
+  doc.setDrawColor(255,200,200); doc.setLineWidth(0.3);
+  doc.roundedRect(ML+3, y+3, TW-6, boxH-6, 3, 3, 'D');
   doc.setTextColor(255,255,255);
-  doc.setFont('helvetica','bold'); doc.setFontSize(13);
-  doc.text('DESEA QUE RADIQUEMOS ESTE DOCUMENTO?', W/2, y+12, {align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(10);
-  doc.text('Contáctenos por WhatsApp y le explicamos el proceso', W/2, y+21, {align:'center'});
-  doc.text('para radicarlo ante la Secretaría de Tránsito.', W/2, y+28, {align:'center'});
-  doc.text('Radicamos el mismo día del pago. 100% legal.', W/2, y+35, {align:'center'});
+  // Ícono + título
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('¿DESEA QUE RADIQUEMOS ESTE DOCUMENTO?', W/2, y+14, {align:'center'});
+  // Separador
+  doc.setDrawColor(255,180,180); doc.setLineWidth(0.4);
+  doc.line(ML+12, y+18, W-MR-12, y+18);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  doc.text('Comuníquese con nosotros y radicamos el mismo día del pago', W/2, y+26, {align:'center'});
+  doc.text('ante la Secretaría de Tránsito o Movilidad correspondiente.', W/2, y+33, {align:'center'});
+  doc.text('Proceso 100% legal · Con número de radicado oficial garantizado', W/2, y+40, {align:'center'});
+  // Línea separadora
+  doc.setDrawColor(255,150,150); doc.setLineWidth(0.3);
+  doc.line(ML+20, y+44, W-MR-20, y+44);
   doc.setFont('helvetica','bold'); doc.setFontSize(11);
-  doc.text('+57 315 931 8400  |  www.juridicosweb.com', W/2, y+44, {align:'center'});
+  doc.text('WhatsApp: +57 315 931 8400   |   www.juridicosweb.com', W/2, y+52, {align:'center'});
   doc.setTextColor(0,0,0);
   addFooter(doc, 4);
   var apellido = (nombre.split(' ')[1] || nombre.split(' ')[0] || 'cliente').replace(/[^a-zA-Z]/g,'');
