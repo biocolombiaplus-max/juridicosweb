@@ -229,6 +229,7 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulseGreen{0%,100%{box-shadow:0 4px 24px rgba(34,197,94,0.4);}50%{box-shadow:0 4px 40px rgba(34,197,94,0.75);}}
 @keyframes pulseOrange{0%,100%{box-shadow:0 6px 32px rgba(249,115,22,0.6),0 2px 8px rgba(0,0,0,0.3);transform:scale(1);}50%{box-shadow:0 8px 48px rgba(249,115,22,0.85),0 2px 12px rgba(0,0,0,0.35);transform:scale(1.02);}}
+@keyframes pulseBlue{0%,100%{box-shadow:0 6px 32px rgba(30,64,175,0.55),0 2px 8px rgba(0,0,0,0.2);}50%{box-shadow:0 8px 48px rgba(30,64,175,0.8),0 2px 12px rgba(0,0,0,0.25);}}
 @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
 @keyframes shimmerBtn{0%{left:-100%;}100%{left:200%;}}
 .hero h1{font-family:'Playfair Display',serif;font-size:3.1rem;color:#fff;line-height:1.08;margin-bottom:10px;letter-spacing:-0.5px;}
@@ -1908,12 +1909,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- CTA radicar -->
-        <button onclick="goToStepNombre('sp-post-firma')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;margin-bottom:8px;">
-          <span style="position:relative;z-index:1;">✅ CLIC AQUÍ PARA TERMINAR EL TRÁMITE Y RADICAR →</span>
+        <!-- Botón descargar PDF — CTA principal -->
+        <button onclick="descargarDerechoPeticionPDF()" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(30,64,175,0.55);animation:pulseBlue 1.6s infinite;position:relative;overflow:hidden;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span style="position:relative;z-index:1;font-size:1.05rem;">⬇️ DESCARGAR MI DERECHO DE PETICIÓN (PDF)</span>
+          <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.9;">Documento completo · 4 páginas · Con tu firma</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <p style="text-align:center;color:#64748b;font-size:0.72rem;margin:0;">El documento no se puede descargar hasta que esté radicado · Proceso 100% legal</p>
+        <!-- Botón secundario WhatsApp -->
+        <a href="https://wa.me/573159318400?text=Hola%2C+descargué+mi+Derecho+de+Petición+firmado+y+quiero+que+lo+radiquen" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-size:0.95rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
+          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Quiero que lo radiquen → WhatsApp
+        </a>
+        <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">📄 Descarga el PDF completo · Lee el documento · Luego contáctanos para radicarlo</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -5398,6 +5404,194 @@ function escribirDocumentoEnPDF(doc, texto, firmaDataUrl){
     doc.text(l,14,y);y+=5.2;
   });
   dibujarPiePDF(doc);
+}
+
+function descargarDerechoPeticionPDF(){
+  if(!window.jspdf){ alert('Error: PDF no disponible. Recarga la página.'); return; }
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var nombre = _nombreConsultante || 'Nombre del Peticionario';
+  var cedula = _valorConsultado || '—';
+  var wa = _waConsultante || '—';
+  var correo = _correoConsultante || '—';
+  var firma = _firmaDataUrl || null;
+  var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var ahora = new Date();
+  var fechaLarga = ahora.getDate()+' de '+MESES[ahora.getMonth()]+' de '+ahora.getFullYear();
+  var W = 210, H = 297, ML = 18, MR = 18, MT = 20;
+  var TW = W - ML - MR;
+  function addWatermark(d){
+    d.setFontSize(72); d.setTextColor(220,220,220); d.setFont('times','bold');
+    d.text('BORRADOR', W/2, H/2, {angle:45, align:'center'});
+    d.setTextColor(0,0,0);
+  }
+  function addHeader(d, pageNum){
+    d.setFont('helvetica','normal'); d.setFontSize(7); d.setTextColor(120,120,120);
+    d.text('REPÚBLICA DE COLOMBIA  ·  MINISTERIO DE TRANSPORTE  ·  DERECHO DE PETICIÓN', W/2, 10, {align:'center'});
+    d.setDrawColor(30,58,138); d.setLineWidth(0.4); d.line(ML, 12, W-MR, 12);
+    d.setTextColor(0,0,0);
+  }
+  function addFooter(d, pageNum){
+    d.setFont('helvetica','italic'); d.setFontSize(7); d.setTextColor(120,120,120);
+    d.line(ML, H-14, W-MR, H-14);
+    d.text('Elaborado por JurídicosWeb · www.juridicosweb.com · Confidencial', ML, H-10);
+    d.text('Página '+pageNum, W-MR, H-10, {align:'right'});
+    d.setTextColor(0,0,0);
+  }
+  function splitAndWrite(d, text, x, yStart, maxW, lineH, maxY, fontSize, style, color){
+    if(fontSize) d.setFontSize(fontSize);
+    if(style) d.setFont('times', style);
+    if(color) d.setTextColor(color[0],color[1],color[2]);
+    var lines = d.splitTextToSize(text, maxW);
+    var y = yStart;
+    lines.forEach(function(line){
+      if(y > maxY){ d.addPage(); addWatermark(d); addHeader(d, doc.internal.getNumberOfPages()); y = MT + 8; }
+      d.text(line, x, y); y += lineH;
+    });
+    if(color) d.setTextColor(0,0,0);
+    return y;
+  }
+  // PÁGINA 1
+  addWatermark(doc); addHeader(doc, 1);
+  var y = MT + 4;
+  doc.setFont('times','bold'); doc.setFontSize(14); doc.setTextColor(30,58,138);
+  doc.text('DERECHO DE PETICIÓN', W/2, y, {align:'center'}); y += 6;
+  doc.setFont('times','normal'); doc.setFontSize(9); doc.setTextColor(60,60,60);
+  var refLines = doc.splitTextToSize('Ref.: Solicitud de Prescripción, Anulación por Notificación Irregular y Eliminación de Comparendo del Sistema Integrado de Multas y Sanciones — SIMIT',TW);
+  refLines.forEach(function(l){ doc.text(l,W/2,y,{align:'center'}); y+=5; });
+  doc.setDrawColor(30,58,138); doc.setLineWidth(0.5); doc.line(ML,y,W-MR,y); y+=7;
+  doc.setTextColor(0,0,0);
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  doc.text('Ciudad, '+fechaLarga, W-MR, y, {align:'right'}); y+=8;
+  doc.setFillColor(239,246,255); doc.setDrawColor(37,99,235); doc.setLineWidth(0.3);
+  doc.rect(ML, y-4, TW, 18, 'FD');
+  doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(30,58,138);
+  doc.text('Señores:', ML+4, y+1); y+=6;
+  doc.setFont('times','bold'); doc.setFontSize(11);
+  doc.text('SECRETARÍA DE TRÁNSITO Y MOVILIDAD', ML+4, y); y+=6;
+  doc.setFont('times','italic'); doc.setFontSize(9); doc.setTextColor(100,100,100);
+  doc.text('Ciudad', ML+4, y); y+=10; doc.setTextColor(0,0,0);
+  var apertura = 'Yo, '+nombre+', identificado/a con Cédula de Ciudadanía No. '+cedula+', domiciliado/a en esta ciudad, con contacto WhatsApp (+57) '+wa+', actuando en nombre propio y con fundamento en el ARTÍCULO 23 de la Constitución Política de Colombia y la Ley 1755 de 2015 (Estatutaria del Derecho de Petición), respetuosamente me dirijo a su despacho para impetrar el siguiente:';
+  y = splitAndWrite(doc, apertura, ML, y, TW, 6, H-22, 10, 'normal', null); y+=6;
+  doc.setFont('times','bold'); doc.setFontSize(12); doc.setTextColor(30,58,138);
+  doc.text('DERECHO DE PETICIÓN', W/2, y, {align:'center'}); y+=8; doc.setTextColor(0,0,0);
+  doc.setFont('times','bold'); doc.setFontSize(11);
+  doc.text('I. HECHOS', ML, y); y+=7;
+  y = splitAndWrite(doc,'1. Que tengo registrado(s) comparendo(s) en el Sistema Integrado de Multas y Sanciones de Tránsito — SIMIT, con los siguientes datos:',ML,y,TW,5.5,H-22,10,'normal',null); y+=5;
+  var campos = [
+    ['No. de Comparendo:', '[Se completa al radicar por JurídicosWeb]'],
+    ['Artículo de Infracción:', '[Se completa al radicar]'],
+    ['Fecha de la Infracción:', '[Se completa al radicar]'],
+    ['Organismo de Tránsito:', '[Se completa al radicar]'],
+    ['Valor según SIMIT:', '[Se completa al radicar]'],
+  ];
+  doc.setFillColor(248,250,252); doc.setDrawColor(203,213,225); doc.setLineWidth(0.3);
+  doc.rect(ML, y-3, TW, campos.length*8+4, 'FD');
+  campos.forEach(function(c){
+    doc.setFont('times','bold'); doc.setFontSize(9.5); doc.text(c[0], ML+4, y);
+    doc.setFont('times','italic'); doc.setTextColor(100,100,150); doc.text(c[1], ML+60, y);
+    doc.setTextColor(0,0,0); y+=8;
+  }); y+=4;
+  y = splitAndWrite(doc,'2. Que a la fecha de presentación de este escrito han transcurrido más de tres (3) años desde la ocurrencia de los hechos, sin que la administración haya adelantado el proceso sancionatorio en debida forma y dentro de los términos legales establecidos.',ML,y,TW,5.5,H-22,10,'normal',null); y+=4;
+  y = splitAndWrite(doc,'3. Que me asiste el derecho legal a impugnar dicho comparendo por las causales que a continuación se exponen, con fundamento en la normativa vigente y la jurisprudencia del Consejo de Estado y la Corte Constitucional.',ML,y,TW,5.5,H-22,10,'normal',null);
+  addFooter(doc, 1);
+  // PÁGINA 2
+  doc.addPage(); addWatermark(doc); addHeader(doc, 2); y = MT+8;
+  doc.setFont('times','bold'); doc.setFontSize(12); doc.setTextColor(30,58,138);
+  doc.text('II. CAUSALES DE ELIMINACIÓN DEL COMPARENDO', ML, y); y+=9; doc.setTextColor(0,0,0);
+  doc.setDrawColor(37,99,235); doc.setLineWidth(0.8); doc.line(ML, y-3, ML+1.5, y+8);
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(30,58,138);
+  doc.text('PRIMERA CAUSAL: PRESCRIPCIÓN DE LA ACCIÓN SANCIONATORIA', ML+5, y); y+=7; doc.setTextColor(0,0,0);
+  var c1 = 'De conformidad con el ARTÍCULO 136 de la Ley 769 de 2002 — Código Nacional de Tránsito Terrestre, la acción sancionatoria prescribe en el término de TRES (3) años contados a partir de la ocurrencia del hecho. Cuando la administración no notifica el comparendo dentro de este plazo o no adelanta el cobro coactivo en forma oportuna, opera de pleno derecho la prescripción, lo que obliga a la Secretaría de Tránsito a declarar extinguida la obligación y proceder a la eliminación del registro en el SIMIT.\n\nFundamento jurisprudencial: El Consejo de Estado, Sección Primera, en sentencia del 28 de julio de 2016 (Exp. 11001-03-24-000-2012-00228-00) reiteró que la prescripción de las sanciones administrativas de tránsito es de orden público, irrenunciable e improrrogable, y que la administración no puede cobrar sanciones prescritas so pena de incurrir en una vía de hecho susceptible de amparo constitucional.';
+  y = splitAndWrite(doc,c1,ML+5,y,TW-5,5.5,H-22,10,'normal',null); y+=8;
+  doc.setDrawColor(37,99,235); doc.setLineWidth(0.8); doc.line(ML, y-3, ML+1.5, y+8);
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(30,58,138);
+  doc.text('SEGUNDA CAUSAL: IRREGULARIDAD EN LA NOTIFICACIÓN DEL COMPARENDO', ML+5, y); y+=7; doc.setTextColor(0,0,0);
+  var c2 = 'El ARTÍCULO 67 de la Ley 769 de 2002 y el ARTÍCULO 47 del Decreto 1703 de 2019 establecen que el comparendo debe ser notificado al infractor dentro de los TRES (3) DÍAS HÁBILES siguientes a su imposición, en alguna de las siguientes formas: (i) personalmente en el momento de la infracción; (ii) por correo certificado a la dirección registrada en el RUNT; o (iii) por aviso en el sitio visible del bien.\n\nLa omisión o irregularidad en la notificación acarrea la NULIDAD ABSOLUTA del acto administrativo sancionatorio, de conformidad con el ARTÍCULO 137 del C.P.A.C.A. (Ley 1437 de 2011), por violación del debido proceso consagrado en el ARTÍCULO 29 de la Constitución Política.\n\nLa Corte Constitucional, en Sentencia T-1028 de 2010 y T-330 de 2012, estableció que la notificación irregular del comparendo constituye una vulneración directa del derecho fundamental al debido proceso, que puede ser corregida vía acción de tutela cuando la administración persiste en el cobro de la obligación anulada.';
+  y = splitAndWrite(doc,c2,ML+5,y,TW-5,5.5,H-22,10,'normal',null); y+=8;
+  doc.setDrawColor(37,99,235); doc.setLineWidth(0.8); doc.line(ML, y-3, ML+1.5, y+8);
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(30,58,138);
+  doc.text('TERCERA CAUSAL: FOTOMULTA SIN CERTIFICACIÓN DEL INM', ML+5, y); y+=7; doc.setTextColor(0,0,0);
+  var c3 = 'La Ley 1843 de 2017 y su Decreto Reglamentario 342 de 2019 establecen que los sistemas de detección automática de infracciones (fotomultas, radares de velocidad) deben contar con: (i) Certificado de calibración vigente expedido por el Instituto Nacional de Metrología — INM o por laboratorio acreditado por el ONAC; (ii) Aprobación técnica del Ministerio de Transporte; (iii) Instalación en sitios previamente aprobados mediante resolución motivada de la Secretaría de Tránsito; (iv) Publicación previa de la ubicación de los dispositivos en el Diario Oficial.\n\nEl incumplimiento de cualquiera de estos requisitos conlleva la NULIDAD ABSOLUTA del comparendo electrónico, toda vez que el medio de prueba fue obtenido con violación de las normas técnicas y legales que lo sustentan. La Circular 0006 de 2020 del Ministerio de Transporte reiteró que las Secretarías de Tránsito deben verificar la validez del certificado INM antes de imponer la sanción.\n\nEsta causal aplica especialmente para FOTOMULTAS capturadas por cámaras cuya documentación técnica no pueda ser acreditada por el organismo de tránsito correspondiente.';
+  y = splitAndWrite(doc,c3,ML+5,y,TW-5,5.5,H-22,10,'normal',null);
+  addFooter(doc, 2);
+  // PÁGINA 3
+  doc.addPage(); addWatermark(doc); addHeader(doc, 3); y = MT+8;
+  doc.setFont('times','bold'); doc.setFontSize(12); doc.setTextColor(30,58,138);
+  doc.text('III. FUNDAMENTOS DE DERECHO', ML, y); y+=8; doc.setTextColor(0,0,0);
+  var fundamentos = [
+    '• Art. 23 Constitución Política de Colombia — Derecho fundamental de petición',
+    '• Art. 29 Constitución Política de Colombia — Derecho al debido proceso',
+    '• Ley 1755 de 2015 — Estatuto del Derecho de Petición',
+    '• Art. 136 Ley 769/2002 — Prescripción de la acción sancionatoria (3 años)',
+    '• Art. 67 Ley 769/2002 — Obligación de notificación del comparendo (3 días hábiles)',
+    '• Art. 47 Decreto 1703/2019 — Procedimiento sancionatorio de tránsito',
+    '• Art. 137 Ley 1437/2011 (C.P.A.C.A.) — Nulidades de los actos administrativos',
+    '• Ley 1843/2017 — Sistemas automáticos de detección de infracciones (fotomultas)',
+    '• Decreto 342/2019 — Reglamentación técnica de fotomultas y requisitos INM',
+    '• Circular 0006/2020 Mintransporte — Validez de comparendos electrónicos',
+    '• Sentencia T-1028/2010 Corte Constitucional — Nulidad por notificación irregular',
+    '• Sentencia T-330/2012 Corte Constitucional — Debido proceso en sanciones de tránsito',
+    '• Sentencia Consejo de Estado, Secc. Primera, Exp. 11001-03-24-000-2012-00228-00',
+    '• Ley 734/2002 (C.D.U.) — Régimen Disciplinario Único, responsabilidad de funcionarios',
+  ];
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  fundamentos.forEach(function(f){ doc.text(f, ML, y); y+=6; }); y+=6;
+  doc.setFont('times','bold'); doc.setFontSize(12); doc.setTextColor(30,58,138);
+  doc.text('IV. PETICIÓN CONCRETA', ML, y); y+=8; doc.setTextColor(0,0,0);
+  var peticiones = [
+    {n:'PRIMERO:', t:'DECLARAR la prescripción de la acción sancionatoria y/o la nulidad del comparendo por las causales expuestas, de conformidad con el Art. 136 de la Ley 769 de 2002 y el Art. 137 del C.P.A.C.A.'},
+    {n:'SEGUNDO:', t:'ORDENAR la eliminación inmediata del comparendo del Sistema Integrado de Multas y Sanciones de Tránsito — SIMIT, una vez declarada la prescripción o nulidad.'},
+    {n:'TERCERO:', t:'CERTIFICAR mediante acto administrativo motivado la eliminación del registro y remitir copia al peticionario en el correo electrónico y WhatsApp informados.'},
+    {n:'CUARTO:', t:'ABSTENERSE de adelantar cualquier proceso de cobro coactivo sobre una obligación prescrita o nulamente impuesta, bajo pena de incurrir en falta disciplinaria grave conforme a la Ley 734 de 2002.'},
+    {n:'QUINTO:', t:'Dar respuesta de fondo a la presente petición dentro del término legal de QUINCE (15) DÍAS HÁBILES, so pena de Acción de Tutela por vulneración del derecho fundamental de petición (Art. 23 C.P.).'},
+  ];
+  peticiones.forEach(function(p){
+    doc.setFont('times','bold'); doc.setFontSize(10); doc.text(p.n, ML, y);
+    var lines = doc.splitTextToSize(p.t, TW-18);
+    doc.setFont('times','normal'); doc.setFontSize(10); doc.text(lines[0], ML+18, y); y+=5.5;
+    for(var i=1;i<lines.length;i++){ doc.text(lines[i],ML+18,y); y+=5.5; } y+=3;
+  }); y+=4;
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.setTextColor(30,58,138);
+  doc.text('V. NOTIFICACIONES', ML, y); y+=7; doc.setTextColor(0,0,0);
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  doc.text('Recibiré notificaciones en:', ML, y); y+=6;
+  doc.text('WhatsApp: (+57) '+wa, ML+8, y); y+=6;
+  doc.text('Correo electrónico: '+correo, ML+8, y); y+=6;
+  addFooter(doc, 3);
+  // PÁGINA 4
+  doc.addPage(); addWatermark(doc); addHeader(doc, 4); y = MT+10;
+  doc.setFont('times','normal'); doc.setFontSize(11);
+  doc.text('Suscrito con respeto,', ML, y); y+=16;
+  if(firma){ try{ doc.addImage(firma,'PNG',ML,y-10,60,18); }catch(e){} }
+  doc.setDrawColor(30,58,138); doc.setLineWidth(0.4); doc.line(ML, y+10, ML+80, y+10); y+=14;
+  doc.setFont('times','bold'); doc.setFontSize(11); doc.text(nombre, ML, y); y+=6;
+  doc.setFont('times','normal'); doc.setFontSize(10);
+  doc.text('C.C. No. '+cedula, ML, y); y+=6;
+  doc.text('Fecha: '+fechaLarga, ML, y); y+=14;
+  doc.line(ML, y+10, ML+80, y+10); y+=14;
+  doc.setFont('times','bold'); doc.setFontSize(10);
+  doc.text('JurídicosWeb — Asesoría Legal Especializada', ML, y); y+=6;
+  doc.setFont('times','italic'); doc.setFontSize(9); doc.setTextColor(80,80,80);
+  doc.text('Elaborado y radicado por: JurídicosWeb', ML, y); y+=5;
+  doc.text('www.juridicosweb.com | juridicoswebcasos@gmail.com', ML, y); y+=16;
+  doc.setTextColor(0,0,0);
+  var boxH = 48;
+  doc.setFillColor(220,38,38); doc.setDrawColor(185,28,28); doc.setLineWidth(0.5);
+  doc.roundedRect(ML, y, TW, boxH, 4, 4, 'FD');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('DESEA QUE RADIQUEMOS ESTE DOCUMENTO?', W/2, y+12, {align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text('Contáctenos por WhatsApp y le explicamos el proceso', W/2, y+21, {align:'center'});
+  doc.text('para radicarlo ante la Secretaría de Tránsito.', W/2, y+28, {align:'center'});
+  doc.text('Radicamos el mismo día del pago. 100% legal.', W/2, y+35, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('+57 315 931 8400  |  www.juridicosweb.com', W/2, y+44, {align:'center'});
+  doc.setTextColor(0,0,0);
+  addFooter(doc, 4);
+  var apellido = (nombre.split(' ')[1] || nombre.split(' ')[0] || 'cliente').replace(/[^a-zA-Z]/g,'');
+  doc.save('DerechoPeticion_JuridicosWeb_'+apellido+'_'+cedula+'.pdf');
 }
 
 function generarPDFDoc(p, texto, ciudad){
