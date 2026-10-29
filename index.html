@@ -1289,7 +1289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Cuáles multas o fotomultas aplican para eliminar?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">No importa el año de tu multa. Verificamos 3 causales reales: <strong>prescripción</strong> (más de 3 años sin cobro efectivo, Art. 136 Ley 769/2002), <strong>notificación defectuosa</strong> (no te avisaron formalmente a tiempo, Ley 1843/2017), y si es una <strong>fotomulta 2018–2024 sin certificación INM</strong> (investigación Supertransporte 2026, para los organismos confirmados en esa lista). Consulta gratis y te decimos exactamente cuáles de tus multas aplican y por qué.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué pasa si tengo multas o fotomultas en varias ciudades?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Se genera un derecho de petición independiente por cada secretaría competente, sin costo adicional en el plan de $79.000 (elimina todas las que apliquen). Si prefieres pagar por multa individual, son $49.000 por cada una sin importar la ciudad.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿En cuánto tiempo me llega el documento?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Tu documento aparece en pantalla al instante — sin esperas. Lo firmas ahí mismo con el dedo en tu celular, sin imprimir nada. En minutos lo recibes en tu WhatsApp ya firmado. Nosotros lo radicamos ese mismo día y te enviamos el número de radicado. La secretaría tiene 15 días hábiles para responder — en ese tiempo la multa o fotomulta desaparece del SIMIT.</div></div>
-      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué hago si niegan la solicitud?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Interponemos Acción de Tutela ($19.800 por multa o fotomulta adicional). Un juez la resuelve en 10 días. Cuando la negativa es ilegal —como suele ocurrir con cámaras sin certificación o multas prescritas— el juez ordena la eliminación. Efectividad muy alta.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué hago si niegan la solicitud?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">Interponemos Acción de Tutela ($10.000 por multa o fotomulta adicional). Un juez la resuelve en 10 días. Cuando la negativa es ilegal —como suele ocurrir con cámaras sin certificación o multas prescritas— el juez ordena la eliminación. Efectividad muy alta.</div></div>
       <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Necesito ir a alguna oficina?<div class="faq-chevron"><i class="fas fa-chevron-down"></i></div></div><div class="faq-a">No. Todo es 100% digital. Consultas, formulario, pago, documento PDF, firma y radicación, todo se hace desde tu celular o computador. Recibes el número de radicado y el seguimiento por correo y WhatsApp.</div></div>
     </div>
   </div>
@@ -2691,7 +2691,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
             <div style="display:flex;gap:10px;align-items:flex-start;">
               <div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:#d97706;color:#fff;font-size:0.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;">!</div>
-              <p style="font-size:0.78rem;color:#7c2d12;line-height:1.55;margin:0;"><strong>Si no responden a tiempo, o responden en contra sin fundamento:</strong> procede una Acción de Tutela ($19.800 por multa o fotomulta) para exigir la respuesta y proteger tu derecho. Si tu caso llegó hasta aquí es porque el análisis legal indicó que sí aplica — una negativa sin sustento no cambia eso.</p>
+              <p style="font-size:0.78rem;color:#7c2d12;line-height:1.55;margin:0;"><strong>Si no responden a tiempo, o responden en contra sin fundamento:</strong> procede una Acción de Tutela ($10.000 por multa o fotomulta) para exigir la respuesta y proteger tu derecho. Si tu caso llegó hasta aquí es porque el análisis legal indicó que sí aplica — una negativa sin sustento no cambia eso.</p>
             </div>
           </div>
         </div>
@@ -2892,7 +2892,7 @@ var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
 // La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
 var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
-var WOMPI_LINK_SALDO      = 'https://checkout.wompi.co/l/ealA8Z'; // $95.500 — saldo restante, cuando ya resulta positivo
+var WOMPI_LINK_SALDO      = 'https://checkout.wompi.co/l/ealA8Z'; // $95.000 — saldo restante, cuando ya resulta positivo
 // URL de un Apps Script (mismo patrón que GOOGLE_SHEET_URL) que reciba el PDF firmado en base64
 // y lo reenvíe a la secretaría de tránsito correspondiente + lo guarde en Drive.
 var RADICAR_UPLOAD_URL  = '';
@@ -4757,7 +4757,7 @@ var _totalPago = 49000;
 function calcularTotalPago(){
   var aplicanSeleccionadas = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; });
   if(pagoSel==='masivo') return { total:79000, multas:_multasReportadas.filter(function(m){return m.estado==='aplica';}) };
-  if(pagoSel==='diferido') return { total:19800, multas:aplicanSeleccionadas };
+  if(pagoSel==='diferido') return { total:10000, multas:aplicanSeleccionadas };
   if(pagoSel==='garantia'){
     var n = _numMultasGarantia||1;
     var garMultas = _multasReportadas.filter(function(m){return m.estado==='aplica';});
@@ -5121,16 +5121,7 @@ function renderPagoOpcionesSp5(){
     '</div>'+
     '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="elegirPagoFinal(\'individual\')"><i class="fas fa-bolt"></i> Pagar $'+totalInmediato.toLocaleString('es-CO')+' y activar</button>'+
     '</div>'+
-    '<div style="border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 16px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">'+
-    '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar al Eliminar</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">Adelanto hoy, resto solo cuando se elimine</p></div>'+
-    '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$19.800</p>'+
-    '</div>'+
-    '<div style="background:#fef2f2;border:1px solid rgba(220,38,38,0.25);border-radius:9px;padding:9px 11px;margin-bottom:12px;">'+
-    '<p style="font-size:0.72rem;color:#dc2626;font-weight:700;margin:0;line-height:1.5;">⚠️ Con este plan terminas pagando <b>$'+(19800+95500*n).toLocaleString('es-CO')+'</b> en total ($19.800 hoy + $95.500'+(n>1?' por multa o fotomulta':'')+' al eliminar). Pagando de una vez pagas solo <b>$'+totalInmediato.toLocaleString('es-CO')+'</b>.</p>'+
-    '</div>'+
-    '<button class="btn btn-navy btn-full" style="padding:14px;font-size:0.9rem;" onclick="elegirPagoFinal(\'diferido\')"><i class="fas fa-file-invoice-dollar"></i> Pagar adelanto $19.800</button>'+
-    '</div>';
+    '';
 }
 
 function elegirPagoFinal(plan){
