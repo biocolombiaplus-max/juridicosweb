@@ -768,16 +768,21 @@ body{padding-bottom:env(safe-area-inset-bottom);}
   .fg-full{grid-column:1;}
   .pay-opts{grid-template-columns:1fr;}
 }
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr!important;}
+  .hero-card{order:2;margin-top:16px;}
+  .hero-inner > div:first-child{order:1;}
+}
 @media(max-width:600px){
-  .hero h1{font-size:1.85rem;line-height:1.1;letter-spacing:-.3px;}
+  .hero h1{font-size:1.95rem;line-height:1.1;letter-spacing:-.3px;}
   .hero-h1-sub{font-size:0.88rem;margin-bottom:14px;}
   .hero{padding:52px 5% 60px;}
   .hero-ctas-row{flex-direction:column;}
   .hero-ctas-row .btn{width:100%;}
   .hero-badge{font-size:0.6rem;padding:4px 10px;letter-spacing:1px;max-width:100%;overflow:hidden;}
-  .hero-consult-card{padding:22px 16px 16px;border-radius:16px;}
-  .hero-consult-input{font-size:1.1rem;padding:15px 14px;letter-spacing:2px;}
-  .hero-consult-btn{width:54px;font-size:1.1rem;}
+  .hero-consult-card{padding:20px 16px 16px;border-radius:16px;}
+  .hero-consult-input{font-size:1.1rem;padding:16px 14px;letter-spacing:2px;height:56px!important;}
+  .hero-consult-btn{width:56px!important;height:56px!important;font-size:1.1rem;}
   .hero-stats{grid-template-columns:1fr 1fr 1fr;}
   .norma-grid{grid-template-columns:1fr;}
   h2.title{font-size:1.9rem;}
@@ -875,15 +880,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-inner">
     <div>
       <div class="hero-badge"><span class="dot"></span><span class="hero-badge-text">Bufete de Tránsito · Colombia</span></div>
-      <h1>¿Tienes <span class="hl">multas</span><br>o <span class="hl">fotomultas</span><br>sin pagar?</h1>
-      <p class="hero-h1-sub">Muchas ya no son válidas por ley. Verifica en 10 segundos — gratis, sin registro.</p>
+      <h1>Ingresa tu cédula y<br>te decimos si puedes<br><span class="hl">eliminar tus multas</span></h1>
+      <p class="hero-h1-sub">Miles de colombianos ya eliminaron las suyas. La consulta es 100% gratis — resultado en segundos.</p>
 
       <!-- Gatillos visuales bajo el título -->
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
         <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#4ade80;">✓ 100% GRATIS consultar</span>
-        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#e8bc3a;">⚡ Resultado en 10 seg</span>
-        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#93c5fd;">🔒 Sin registro ni datos</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#e8bc3a;">⭐ 4.8/5 · 847 multas eliminadas</span>
         <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);">$0 si no aplica tu caso</span>
+      </div>
+
+      <!-- Flecha indicadora hacia el input -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;animation:bounceDown 1.4s ease-in-out infinite;">
+        <i class="fas fa-arrow-down" style="color:var(--gold);font-size:1.3rem;"></i>
+        <span style="color:var(--gold2);font-size:0.85rem;font-weight:800;letter-spacing:.3px;">Escribe tu cédula aquí:</span>
       </div>
       <div class="hero-ctas">
 
@@ -898,26 +908,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
               <p style="font-size:0.76rem;font-weight:800;color:rgba(201,162,39,0.95);margin:0;letter-spacing:.8px;text-transform:uppercase;">Número de cédula</p>
               <div style="display:flex;align-items:center;gap:5px;">
-                <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 5px #22c55e;animation:ping 1.5s ease-in-out infinite;flex-shrink:0;"></span>
-                <span style="font-size:0.65rem;color:rgba(255,255,255,0.55);font-weight:600;white-space:nowrap;"><span id="hero-contador">4.193</span> consultas hoy</span>
+                <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 7px #22c55e;animation:ping 1.5s ease-in-out infinite;flex-shrink:0;"></span>
+                <span style="font-size:0.68rem;color:rgba(255,255,255,0.75);font-weight:700;white-space:nowrap;"><span id="hero-contador">4.193</span> consultas hoy</span>
               </div>
             </div>
 
-            <!-- Input + botón -->
+            <!-- Input + botón ícono -->
             <div class="hero-consult-row" style="gap:10px;margin-bottom:10px;">
-              <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Ej. 1234567890" inputmode="numeric" maxlength="12" style="font-size:1.15rem;padding:17px 18px;letter-spacing:2px;border:2px solid rgba(201,162,39,0.5);border-radius:12px;box-shadow:none;" onkeydown="if(event.key==='Enter')consultarDesdeHero()" onfocus="this.style.borderColor='#c9a227';this.style.boxShadow='0 0 0 3px rgba(201,162,39,0.18)'" onblur="this.style.borderColor='rgba(201,162,39,0.5)';this.style.boxShadow='none'">
-              <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar" style="width:60px;font-size:1.3rem;border-radius:12px;flex-shrink:0;">
+              <input type="text" id="hero-cedula" class="hero-consult-input" placeholder="Ej. 1234567890" inputmode="numeric" maxlength="12" style="font-size:1.2rem;padding:18px 18px;letter-spacing:3px;border:2px solid rgba(201,162,39,0.6);border-radius:13px;box-shadow:none;height:58px;" onkeydown="if(event.key==='Enter')consultarDesdeHero()" onfocus="this.style.borderColor='#c9a227';this.style.boxShadow='0 0 0 4px rgba(201,162,39,0.22)'" onblur="this.style.borderColor='rgba(201,162,39,0.6)';this.style.boxShadow='none'">
+              <button type="button" class="hero-consult-btn" onclick="consultarDesdeHero()" aria-label="Consultar" style="width:58px;height:58px;font-size:1.3rem;border-radius:13px;flex-shrink:0;">
                 <i class="fas fa-search"></i>
               </button>
             </div>
 
-            <!-- Botón texto consultar GRATIS destacado -->
-            <button type="button" onclick="consultarDesdeHero()" style="width:100%;padding:15px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1rem;font-weight:900;border:none;border-radius:12px;cursor:pointer;letter-spacing:.3px;margin-bottom:12px;box-shadow:0 4px 20px rgba(201,162,39,0.4);">
-              Consultar GRATIS ahora →
+            <!-- Botón CTA principal grande -->
+            <button type="button" onclick="consultarDesdeHero()" style="width:100%;padding:17px;background:linear-gradient(135deg,#c9a227,#e8bc3a);color:#0a1628;font-size:1.05rem;font-weight:900;border:none;border-radius:13px;cursor:pointer;letter-spacing:.3px;margin-bottom:10px;box-shadow:0 4px 24px rgba(201,162,39,0.5);min-height:54px;">
+              🔍 Consultar mis multas GRATIS →
             </button>
 
-            <!-- Microtexto tranquilizador -->
-            <p style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.38);margin:0 0 10px;font-weight:500;">Sin registro · Sin contraseña · $0 si tu caso no aplica</p>
+            <!-- Microtexto tranquilizador + garantía -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
+              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#4ade80;"></i>Sin registro</span>
+              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-check" style="color:#4ade80;"></i>Datos seguros</span>
+              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-ban" style="color:#4ade80;"></i>$0 si no aplica</span>
+            </div>
 
             <!-- SIMIT oficial + link placa -->
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
@@ -1098,6 +1112,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <div style="text-align:center;margin-top:36px;">
     <button class="btn btn-gold btn-xl btn-pulse" onclick="openSimitModal(event)"><i class="fas fa-search"></i> Consultar si mis multas o fotomultas aplican – Gratis</button>
+  </div>
+</section>
+
+<!-- POR QUÉ SE PUEDEN ELIMINAR -->
+<section style="background:#fff;padding:60px 5%;">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:36px;">
+      <span style="display:inline-block;padding:5px 16px;border-radius:30px;font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;background:rgba(230,57,70,0.1);color:#e63946;margin-bottom:12px;">Base Legal</span>
+      <h2 style="font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--navy);line-height:1.2;margin-bottom:12px;">¿Por qué se pueden <span style="color:var(--gold);">eliminar</span>?</h2>
+      <p style="color:var(--gray);font-size:0.97rem;max-width:580px;margin:0 auto;">No es un truco ni promesa vacía. Son causales de nulidad reconocidas por la ley colombiana — si tu multa encaja, tienes derecho a exigir su eliminación.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;">
+      <!-- Causal 1 -->
+      <div style="background:linear-gradient(135deg,#fff7ed,#fff);border:2px solid #fed7aa;border-radius:16px;padding:22px 20px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #f97316;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <i class="fas fa-camera" style="color:#f97316;font-size:1.1rem;"></i>
+        </div>
+        <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 8px;">Fotomulta sin INM válido</h3>
+        <p style="font-size:0.83rem;color:#6b7280;line-height:1.65;margin:0 0 12px;">La Ley 2251/2022 y el Decreto 1074 exigen que cada cámara tenga "concepto de desempeño" vigente. <strong style="color:#1a1a2e;">Más de 37 secretarías</strong> usaron cámaras sin esta certificación.</p>
+        <div style="background:#fff7ed;border-radius:8px;padding:8px 10px;">
+          <p style="font-size:0.72rem;color:#9a3412;font-weight:700;margin:0;">⚖️ Base: Ley 1843/2017 · Dto. 1074 · Res. 20213040015655</p>
+        </div>
+      </div>
+      <!-- Causal 2 -->
+      <div style="background:linear-gradient(135deg,#fef2f2,#fff);border:2px solid #fca5a5;border-radius:16px;padding:22px 20px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#fef2f2;border:1.5px solid #ef4444;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <i class="fas fa-envelope-open-text" style="color:#ef4444;font-size:1.1rem;"></i>
+        </div>
+        <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 8px;">Multa mal notificada</h3>
+        <p style="font-size:0.83rem;color:#6b7280;line-height:1.65;margin:0 0 12px;">La notificación debe llegar dentro de los <strong style="color:#1a1a2e;">13 días hábiles</strong> siguientes a la infracción. Si llegó tarde, fue al lugar equivocado o nunca llegó, la sanción es nula.</p>
+        <div style="background:#fef2f2;border-radius:8px;padding:8px 10px;">
+          <p style="font-size:0.72rem;color:#991b1b;font-weight:700;margin:0;">⚖️ Base: Art. 135 CNT · Ley 769/2002 · Sentencia C-980/10</p>
+        </div>
+      </div>
+      <!-- Causal 3 -->
+      <div style="background:linear-gradient(135deg,#f0fdf4,#fff);border:2px solid #86efac;border-radius:16px;padding:22px 20px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#f0fdf4;border:1.5px solid #22c55e;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <i class="fas fa-hourglass-end" style="color:#22c55e;font-size:1.1rem;"></i>
+        </div>
+        <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:0 0 8px;">Multa prescrita (+3 años)</h3>
+        <p style="font-size:0.83rem;color:#6b7280;line-height:1.65;margin:0 0 12px;">Si han pasado <strong style="color:#1a1a2e;">más de 3 años</strong> desde la infracción sin que haya habido cobro coactivo, la multa ha prescrito. Jurídicamente ya no debes pagarla.</p>
+        <div style="background:#f0fdf4;border-radius:8px;padding:8px 10px;">
+          <p style="font-size:0.72rem;color:#166534;font-weight:700;margin:0;">⚖️ Base: Art. 136 Ley 769/2002 · Resolución 3781 de 2023</p>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <button class="btn btn-gold btn-xl btn-pulse" onclick="openSimitModal(event)" style="padding:16px 32px;font-size:1rem;">
+        <i class="fas fa-search"></i> Revisar si mis multas aplican — GRATIS
+      </button>
+      <p style="color:var(--gray);font-size:0.76rem;margin:10px 0 0;">$0 si tu caso no aplica · Resultado en segundos</p>
+    </div>
   </div>
 </section>
 
@@ -1482,14 +1548,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Pasos de verificación estilo portal gov.co -->
-        <div id="sim-log-panel" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;">
-          <p style="color:#374151;font-size:0.72rem;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#003087;"></span>Consultando base de datos oficial SIMIT...</p>
+        <!-- Pasos de verificación estilo IA -->
+        <div id="sim-log-panel" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px;margin-bottom:10px;">
+          <p style="color:#0c4a6e;font-size:0.72rem;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:7px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0284c7;box-shadow:0 0 6px #0284c7;animation:ping 1.2s infinite;"></span>
+            🤖 Analizando tu caso con IA — SIMIT oficial...
+          </p>
           <div id="sim-log" style="display:flex;flex-direction:column;gap:6px;"></div>
           <!-- Spinner activo -->
-          <div id="sim-cursor" style="display:flex;align-items:center;gap:8px;margin-top:8px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
-            <div id="sim-spinner" style="width:16px;height:16px;border:2px solid #e2e8f0;border-top-color:#003087;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
-            <span id="sim-msg" style="color:#6b7280;font-size:0.72rem;font-style:italic;"></span>
+          <div id="sim-cursor" style="display:flex;align-items:center;gap:8px;margin-top:8px;background:#fff;border:1px solid #e0f2fe;border-radius:8px;padding:8px 10px;">
+            <div id="sim-spinner" style="width:16px;height:16px;border:2px solid #bae6fd;border-top-color:#0284c7;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
+            <span id="sim-msg" style="color:#0369a1;font-size:0.72rem;font-weight:600;"></span>
           </div>
         </div>
 
@@ -1859,7 +1928,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(30,58,138,0.5);">
           <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,0.025) 18px,rgba(255,255,255,0.025) 36px);pointer-events:none;"></div>
           <p style="color:#93c5fd;font-size:0.65rem;margin:0 0 4px;font-weight:700;letter-spacing:2px;text-transform:uppercase;position:relative;">VALOR TOTAL DEL SERVICIO</p>
-          <p style="color:#fff;font-size:2.4rem;font-weight:900;margin:0 0 2px;position:relative;text-shadow:0 2px 12px rgba(96,165,250,0.4);" id="pr-monto">$49.000</p>
+          <p style="color:#fff;font-size:2.4rem;font-weight:900;margin:0 0 2px;position:relative;text-shadow:0 2px 12px rgba(96,165,250,0.4);" id="pr-monto">$79.000</p>
           <p style="color:#93c5fd;font-size:0.72rem;margin:0;position:relative;" id="pr-plan-desc">Activación + radicación de una multa</p>
           <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;">
             <div style="height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(147,197,253,0.3));"></div>
@@ -2555,7 +2624,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div id="pago-wrap">
           <div style="background:linear-gradient(135deg,#0a1628,#1e3a5f);border-radius:14px;padding:16px 18px;margin-bottom:18px;text-align:center;">
             <div style="font-size:1.7rem;margin-bottom:6px;">🔒</div>
-            <p style="color:#c9a227;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $45.000</p>
+            <p style="color:#c9a227;font-weight:800;font-size:1rem;margin-bottom:3px;" id="pago-titulo">Confirma tu pago — $49.000</p>
             <p style="color:#94a3b8;font-size:0.8rem;">Al aprobarse, tu documento final se genera automáticamente</p>
           </div>
           <div id="pago-btns" style="display:flex;flex-direction:column;gap:14px;">
@@ -3627,14 +3696,14 @@ function iniciarSimulacion(){
   var id = _tipoConsultado === 'cedula' ? _valorConsultado : _valorConsultado;
 
   var pasos = [
-    { pct:10, ok:false, msg:'Conectando con el SIMIT oficial...', log:'Iniciando conexión con simit.org.co' },
-    { pct:22, ok:true,  msg:'Conexión segura establecida...', log:'Conexión verificada con el servidor SIMIT' },
-    { pct:38, ok:true,  msg:'Consultando comparendos registrados...', log:'Búsqueda enviada · Cédula: '+id.slice(0,4)+'****' },
-    { pct:54, ok:true,  msg:'Infracciones localizadas — revisando fechas...', log:'Registros encontrados en la base de datos' },
-    { pct:67, ok:false, msg:'Calculando prescripción (Art. 136 Ley 769/2002)...', log:'Verificando límite legal: 3 años sin cobro efectivo' },
-    { pct:79, ok:true,  msg:'Verificando certificación INM de cámaras...', log:'Cruzando con lista Supertransporte vigente 2026' },
-    { pct:90, ok:false, msg:'Aplicando normativa: Ley 1843/2017 · Dto. 1074...', log:'Analizando causales: prescripción · notificación · INM' },
-    { pct:100, ok:true, msg:'¡Análisis completado!', log:'Informe jurídico generado · 3 causales detectadas' }
+    { pct:10, ok:false, msg:'Consultando SIMIT...', log:'🔍 Buscando cédula '+id.slice(0,3)+'****'+' en base de datos oficial' },
+    { pct:22, ok:true,  msg:'Conexión segura con SIMIT establecida ✓', log:'✓ Conexión verificada · simit.org.co en línea' },
+    { pct:38, ok:true,  msg:'Recuperando comparendos registrados...', log:'✓ Registros encontrados · Procesando datos de multas' },
+    { pct:54, ok:true,  msg:'Verificando fechas de notificación...', log:'⚖️ Analizando fechas · Art. 135 CNT · Ley 769/2002' },
+    { pct:67, ok:false, msg:'Revisando caducidad legal (prescripción +3 años)...', log:'⏳ Calculando tiempo transcurrido por multa' },
+    { pct:79, ok:true,  msg:'Verificando certificación INM de cámaras de foto...', log:'📷 Cruzando con lista Supertransporte 2026 · INM inválidos' },
+    { pct:90, ok:false, msg:'Calculando ahorro potencial...', log:'💰 Estimando valor de multas vs. costo del trámite' },
+    { pct:100, ok:true, msg:'¡Análisis completado!', log:'✅ Informe jurídico listo · Causales de eliminación detectadas' }
   ];
 
   var i = 0;
@@ -4027,7 +4096,7 @@ function mostrarResultadosPagados(multas, nombre, wa){
       'Mi nombre: '+nombre+'\n'+
       (_tipoConsultado==='cedula'?'Cédula: ':'Placa: ')+_valorConsultado+'\n'+
       'Multa: '+(m.comparendo||m.numero||'#'+(idx+1))+' — '+(fechaStr||'')+'\n'+
-      'Quiero eliminar esta multa — acepto el pago de $45.000'
+      'Quiero eliminar esta multa — acepto el pago de $49.000'
     );
 
     cards +=
@@ -4039,7 +4108,7 @@ function mostrarResultadosPagados(multas, nombre, wa){
       (valor?'<p style="font-size:0.85rem;font-weight:800;color:#dc2626;margin:0;">$'+valor.toLocaleString('es-CO')+'</p>':'') +
       '</div>'+
       '<p style="font-size:0.74rem;color:#475569;line-height:1.55;margin:0 0 10px;">'+razonTxt+'</p>'+
-      (aplica?'<a href="https://wa.me/573159318400?text='+waUna+'" target="_blank" class="btn-elim btn-elim-una"><i class="fab fa-whatsapp"></i> Eliminar esta multa — $45.000</a>':'') +
+      (aplica?'<a href="https://wa.me/573159318400?text='+waUna+'" target="_blank" class="btn-elim btn-elim-una"><i class="fab fa-whatsapp"></i> Eliminar esta multa — $49.000</a>':'') +
       '</div>';
   });
 
@@ -4642,15 +4711,15 @@ function renderPlanes(aplican){
       '<div style="background:linear-gradient(135deg,#fef2f2,#fff7f0);border:1px solid rgba(220,38,38,0.2);border-radius:9px;padding:10px 12px;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
       '<div style="text-align:center;"><p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;">'+(numSel>1?'Tus '+numSel+' multas valen':'Esta multa vale')+'</p><p style="font-size:1.2rem;font-weight:900;color:#dc2626;margin:0;line-height:1;">$'+totalValorSel.toLocaleString('es-CO')+'</p></div>'+
       '<div style="font-size:1.3rem;color:#94a3b8;">vs</div>'+
-      '<div style="text-align:center;"><p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;">Las eliminas por</p><p style="font-size:1.2rem;font-weight:900;color:#16a34a;margin:0;line-height:1;">$'+(numSel*45000).toLocaleString('es-CO')+'</p></div>'+
+      '<div style="text-align:center;"><p style="font-size:0.62rem;color:#64748b;margin:0 0 2px;">Las eliminas por</p><p style="font-size:1.2rem;font-weight:900;color:#16a34a;margin:0;line-height:1;">$'+(numSel*49000).toLocaleString('es-CO')+'</p></div>'+
       '</div>'
     :'')+
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
-    '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 2px;">Derecho de Petición</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$45.000 por cada multa o fotomulta</p></div>'+
-    '<p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+(numSel*45000||45000).toLocaleString('es-CO')+'</p>'+
+    '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 2px;">Derecho de Petición</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$49.000 por cada multa o fotomulta</p></div>'+
+    '<p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+(numSel*49000||49000).toLocaleString('es-CO')+'</p>'+
     '</div>'+
     '<button onclick="elegirPlan(\'individual\')" '+(numSel===0?'disabled':'')+' class="btn-shimmer" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;color:#0a1628;padding:15px;border:none;border-radius:11px;cursor:pointer;font-size:0.95rem;font-weight:800;opacity:'+(numSel===0?'0.5':'1')+';">'+
-    '<i class="fas fa-file-signature"></i>'+(numSel===0?'Toca "agregar al trámite" arriba primero':'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' — $'+(numSel*45000).toLocaleString('es-CO'))+'</button>'+
+    '<i class="fas fa-file-signature"></i>'+(numSel===0?'Toca "agregar al trámite" arriba primero':'Continuar con '+numSel+' multa'+(numSel!==1?'s':'')+' — $'+(numSel*49000).toLocaleString('es-CO'))+'</button>'+
     '</div></div>'+
 
     // ── PLAN MASIVO (solo si ≥2 multas) ──
@@ -4660,10 +4729,10 @@ function renderPlanes(aplican){
       '<div style="padding:14px 16px;">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">'+
       '<div><p style="font-size:0.95rem;font-weight:800;color:var(--navy);margin:0 0 2px;">Eliminar TODAS las que apliquen</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">Las '+aplican.length+' multas, un solo pago</p></div>'+
-      '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$69.000</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:2px 0 0;">ahorras $'+(aplican.length*45000-69000).toLocaleString('es-CO')+'</p></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><p style="font-size:1.7rem;font-weight:900;color:var(--navy);margin:0;line-height:1;">$79.000</p><p style="font-size:0.65rem;color:#16a34a;font-weight:700;margin:2px 0 0;">ahorras $'+(aplican.length*49000-79000).toLocaleString('es-CO')+'</p></div>'+
       '</div>'+
       '<button onclick="seleccionarTodasAplicables();elegirPlan(\'masivo\')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:15px;border:none;border-radius:11px;cursor:pointer;font-size:0.95rem;font-weight:800;">'+
-      '<i class="fas fa-bolt"></i>Eliminar las '+aplican.length+' — $69.000</button>'+
+      '<i class="fas fa-bolt"></i>Eliminar las '+aplican.length+' — $79.000</button>'+
       '</div></div>'
     :'')+
 
@@ -4683,18 +4752,18 @@ var _numMultasGarantia = 1;
 // Multas efectivamente incluidas en el trámite (snapshot al elegir el plan) y el
 // monto total a cobrar — se usan en el borrador, el pago y la generación de documentos.
 var _multasParaTramite = [];
-var _totalPago = 45000;
+var _totalPago = 49000;
 
 function calcularTotalPago(){
   var aplicanSeleccionadas = _multasReportadas.filter(function(m){ return m.estado==='aplica' && m.seleccionada; });
-  if(pagoSel==='masivo') return { total:69000, multas:_multasReportadas.filter(function(m){return m.estado==='aplica';}) };
+  if(pagoSel==='masivo') return { total:79000, multas:_multasReportadas.filter(function(m){return m.estado==='aplica';}) };
   if(pagoSel==='diferido') return { total:19800, multas:aplicanSeleccionadas };
   if(pagoSel==='garantia'){
     var n = _numMultasGarantia||1;
     var garMultas = _multasReportadas.filter(function(m){return m.estado==='aplica';});
     return { total: 10000*n, multas: garMultas.slice(0,n) };
   }
-  return { total: 45000 * aplicanSeleccionadas.length, multas: aplicanSeleccionadas };
+  return { total: 49000 * aplicanSeleccionadas.length, multas: aplicanSeleccionadas };
 }
 
 function elegirPlan(plan){
@@ -4951,10 +5020,10 @@ function recogerDatosFormulario(){
 }
 
 function nombrePlan(sel){
-  if(sel==='masivo') return 'Eliminar todas las que apliquen — $69.000';
+  if(sel==='masivo') return 'Eliminar todas las que apliquen — $79.000';
   if(sel==='diferido') return 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u';
   if(sel==='garantia') return 'Garantia Pago al Eliminar — Adelanto $'+(10000*(_numMultasGarantia||1)).toLocaleString('es-CO')+' + $98.900 c/u al eliminar';
-  return 'Pago individual — $45.000 c/u';
+  return 'Pago individual — $49.000 c/u';
 }
 
 // Datos + documentos (uno por secretaría) generados tras aprobar el pago
@@ -5038,16 +5107,16 @@ function renderPagoOpcionesSp5(){
     wrap.innerHTML =
       '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;">'+
       '<div><p style="font-size:0.78rem;color:var(--gray);margin:0 0 2px;">'+n+' multas o fotomultas incluidas en tu trámite</p><p style="font-size:0.7rem;color:#15803d;margin:0;">Pago verificado automáticamente</p></div>'+
-      '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;">$69.000</p>'+
+      '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;">$79.000</p>'+
       '</div>'+
-      '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-bolt"></i> Activar mi caso — $69.000</button>';
+      '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="irAPago()"><i class="fas fa-bolt"></i> Activar mi caso — $79.000</button>';
     return;
   }
-  var totalInmediato = n * 45000;
+  var totalInmediato = n * 49000;
   wrap.innerHTML =
     '<div style="border:2px solid #c9a227;border-radius:14px;padding:14px 16px;margin-bottom:12px;">'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">'+
-    '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar de inmediato</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$45.000 por '+(n>1?'cada una de tus '+n+' multas o fotomultas':'tu multa o fotomulta')+'</p></div>'+
+    '<div><p style="font-size:0.92rem;font-weight:800;color:var(--navy);margin:0 0 3px;">Pagar de inmediato</p><p style="font-size:0.72rem;color:var(--gray);margin:0;">$49.000 por '+(n>1?'cada una de tus '+n+' multas o fotomultas':'tu multa o fotomulta')+'</p></div>'+
     '<p style="font-size:1.5rem;font-weight:900;color:var(--navy);margin:0;flex-shrink:0;">$'+totalInmediato.toLocaleString('es-CO')+'</p>'+
     '</div>'+
     '<button class="btn btn-shimmer btn-full btn-xl btn-pulse" onclick="elegirPagoFinal(\'individual\')"><i class="fas fa-bolt"></i> Pagar $'+totalInmediato.toLocaleString('es-CO')+' y activar</button>'+
@@ -5558,9 +5627,9 @@ function copiarNequiNumero(){
     setTimeout(function(){ btn.innerHTML = original; btn.classList.remove('copied'); }, 2000);
   });
 }
-var _nequiMontoActual = 45000;
+var _nequiMontoActual = 49000;
 function abrirNequi(montoFijo){
-  _nequiMontoActual = montoFijo || _totalPago || 45000;
+  _nequiMontoActual = montoFijo || _totalPago || 49000;
   var el = document.getElementById('nequi-monto-info');
   if(el) el.textContent = 'Monto a transferir: $'+_nequiMontoActual.toLocaleString('es-CO');
   var btn = document.getElementById('nequi-btn-comprobante');
@@ -5888,7 +5957,7 @@ function _retencionDatosMultas(){
     // No hay datos de multas: ofrecer plan masivo a precio fijo
     return { n: 0, conocemos: false, totalResto: 79000, label: 'Todas tus multas eliminadas', sub: '$79.000 solo si se eliminan — $0 si no aplica' };
   }
-  var totalResto = n * 45000; // $45k por multa al eliminar
+  var totalResto = n * 49000; // $49k por multa al eliminar
   return {
     n: n,
     conocemos: true,
@@ -6018,7 +6087,7 @@ function elegirDesdeRetencion(){
   var elMonto = document.getElementById('pr-monto');
   var elDesc  = document.getElementById('pr-plan-desc');
   if(elMonto) elMonto.textContent = '$10.000';
-  if(elDesc)  elDesc.textContent  = 'Adelanto · $45.000 × ' + n + ' multa' + (n !== 1 ? 's' : '') + ' solo si se eliminan';
+  if(elDesc)  elDesc.textContent  = 'Adelanto · $49.000 × ' + n + ' multa' + (n !== 1 ? 's' : '') + ' solo si se eliminan';
   jwTrack && jwTrack('plan_elegido', { plan:'garantia', via:'retencion', multas: n });
   goToStepNombre('sp-pago-radicar');
 }
