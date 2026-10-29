@@ -1799,22 +1799,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Pasos: firma → radicar → multa eliminada -->
-        <div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:10px;padding:7px 10px;background:#fafafa;border-radius:9px;border:1px solid #e2e8f0;">
-          <span style="font-size:0.62rem;font-weight:800;color:#f97316;">✍️ Firmas</span>
-          <span style="color:#cbd5e1;font-size:0.7rem;">→</span>
-          <span style="font-size:0.62rem;font-weight:700;color:#475569;">📤 Radicamos</span>
-          <span style="color:#cbd5e1;font-size:0.7rem;">→</span>
-          <span style="font-size:0.62rem;font-weight:700;color:#475569;">🚫 Multa eliminada</span>
-        </div>
+        <!-- Spacer para que el contenido no quede bajo la barra sticky -->
+        <div style="height:90px;"></div>
+      </div>
 
-        <!-- CTA firmar — mejorado -->
-        <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:14px;padding:16px 18px;font-size:0.98rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.6);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;margin-bottom:6px;display:flex;flex-direction:column;align-items:center;gap:3px;">
-          <span style="position:relative;z-index:1;font-size:1rem;">✍️ FIRMA CON EL DEDO — ES GRATIS</span>
-          <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.92;">Tu documento queda listo para radicar en 30 segundos</span>
-          <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
-        </button>
-        <p style="text-align:center;color:#94a3b8;font-size:0.65rem;margin:0;">🔒 Sin costo · Sin compromisos · Solo si tu caso procede pagas</p>
+      <!-- ══ BARRA STICKY — solo visible en sp-doc-preview ══ -->
+      <div id="dp-sticky-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,0.18) 100%);padding:0;">
+        <!-- Pasos mini -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 16px 0;background:#fff;border-top:1px solid #e2e8f0;">
+          <span style="font-size:0.6rem;font-weight:800;color:#f97316;">✍️ Firmas</span>
+          <span style="color:#cbd5e1;">→</span>
+          <span style="font-size:0.6rem;font-weight:600;color:#94a3b8;">📤 Radicamos</span>
+          <span style="color:#cbd5e1;">→</span>
+          <span style="font-size:0.6rem;font-weight:600;color:#94a3b8;">🚫 Multa eliminada</span>
+        </div>
+        <!-- Botón grande -->
+        <div style="padding:8px 16px 12px;background:#fff;">
+          <button onclick="goToStepNombre('sp-firma-canvas')" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:16px;padding:18px 20px;font-size:1.05rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 8px 32px rgba(249,115,22,0.55);animation:pulseOrange 1.6s infinite;position:relative;overflow:hidden;letter-spacing:0.3px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:64px;justify-content:center;">
+            <span style="position:relative;z-index:1;font-size:1.08rem;">✍️ FIRMA CON EL DEDO — ES GRATIS</span>
+            <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.9;">Listo para radicar en 30 segundos · Sin costo</span>
+            <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;"></span>
+          </button>
+        </div>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -3940,6 +3946,10 @@ function goToStepNombre(id){
       bar.classList.remove('show');
     }
   }
+  // Barra sticky CTA para doc-preview
+  var dpBar = document.getElementById('dp-sticky-bar');
+  if(dpBar){ dpBar.style.display = (id === 'sp-doc-preview') ? 'block' : 'none'; }
+
   // Notificar al módulo de retención
   try{ document.dispatchEvent(new CustomEvent('jwPanelChange',{detail:{id:id}})); }catch(e){}
 }
