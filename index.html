@@ -5021,8 +5021,8 @@ function recogerDatosFormulario(){
 
 function nombrePlan(sel){
   if(sel==='masivo') return 'Eliminar todas las que apliquen — $79.000';
-  if(sel==='diferido') return 'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u';
-  if(sel==='garantia') return 'Garantia Pago al Eliminar — Adelanto $'+(10000*(_numMultasGarantia||1)).toLocaleString('es-CO')+' + $98.900 c/u al eliminar';
+  if(sel==='diferido') return 'Pago al Eliminar — Adelanto $10.000 + $95.000 c/u al eliminar';
+  if(sel==='garantia') return 'Pago al Eliminar — Adelanto $'+(10000*(_numMultasGarantia||1)).toLocaleString('es-CO')+' + $95.000 c/u al eliminar';
   return 'Pago individual — $49.000 c/u';
 }
 
@@ -5957,13 +5957,13 @@ function _retencionDatosMultas(){
     // No hay datos de multas: ofrecer plan masivo a precio fijo
     return { n: 0, conocemos: false, totalResto: 79000, label: 'Todas tus multas eliminadas', sub: '$79.000 solo si se eliminan — $0 si no aplica' };
   }
-  var totalResto = n * 49000; // $49k por multa al eliminar
+  var totalResto = n * 95000; // $95k por multa al eliminar (plan pago al eliminar)
   return {
     n: n,
     conocemos: true,
     totalResto: totalResto,
     label: n === 1 ? '1 multa detectada' : n + ' multas detectadas',
-    sub: '$10.000 ahora · $' + (totalResto/1000).toFixed(0) + '.000 solo si se eliminan'
+    sub: '$10.000 ahora · $' + (n * 95).toLocaleString('es-CO') + '.000 solo si se eliminan'
   };
 }
 
@@ -6038,12 +6038,14 @@ function mostrarPopupRetencion(origen){
     +'<div style="font-size:13px;color:#4ade80;font-weight:900;">Solo si se elimina</div>'
     +'</div>'
     +'</div>'
-    +'<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">'
-    +'Es mínimo comparado con lo que te ahorras al eliminar la multa. Y si no funciona — <strong style="color:#f87171;">no pagas nada más.</strong>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);">'
+    +'<span style="font-size:11px;color:rgba(255,255,255,0.45);">Resto al eliminar (por multa)</span>'
+    +'<span style="font-size:15px;font-weight:900;color:#f87171;">$95.000</span>'
     +'</div>'
+    +'<p style="font-size:12px;color:rgba(255,255,255,0.4);margin:8px 0 0;line-height:1.5;">Si no se elimina — <strong style="color:#f87171;">no pagas nada más.</strong></p>'
     +'</div>'
     +'<button onclick="elegirDesdeRetencion()" style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:14px;padding:17px;font-size:16px;font-weight:900;cursor:pointer;margin-bottom:10px;box-shadow:0 6px 28px rgba(22,163,74,0.45);letter-spacing:.1px;">'
-    +'✅ Sí, quiero garantizar mi trámite →'
+    +'✅ Empezar con $10.000 ahora →'
     +'</button>'
     +'<div style="text-align:center;">'
     +'<button onclick="cerrarRetencion()" style="background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;cursor:pointer;padding:8px;text-decoration:underline;">Espera, quiero pensarlo mejor</button>'
@@ -6087,7 +6089,7 @@ function elegirDesdeRetencion(){
   var elMonto = document.getElementById('pr-monto');
   var elDesc  = document.getElementById('pr-plan-desc');
   if(elMonto) elMonto.textContent = '$10.000';
-  if(elDesc)  elDesc.textContent  = 'Adelanto · $49.000 × ' + n + ' multa' + (n !== 1 ? 's' : '') + ' solo si se eliminan';
+  if(elDesc)  elDesc.textContent  = 'Adelanto · $95.000 × ' + n + ' multa' + (n !== 1 ? 's' : '') + ' solo si se eliminan';
   jwTrack && jwTrack('plan_elegido', { plan:'garantia', via:'retencion', multas: n });
   goToStepNombre('sp-pago-radicar');
 }
