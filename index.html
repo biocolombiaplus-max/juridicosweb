@@ -1185,9 +1185,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span style="font-size:2.4rem;font-weight:900;color:#fff;">$10.000</span>
           <span style="font-size:0.8rem;color:#c4b5fd;line-height:1.3;">hoy<br>por multa</span>
         </div>
-        <div style="font-size:0.78rem;color:#a78bfa;margin-bottom:14px;">+ $98.900 por multa <strong style="color:#86efac;">solo si se elimina</strong></div>
+        <div style="font-size:0.78rem;color:#a78bfa;margin-bottom:14px;">+ $95.000 por multa <strong style="color:#86efac;">solo si se elimina</strong></div>
         <div style="background:rgba(134,239,172,0.15);border:1px solid rgba(134,239,172,0.4);border-radius:10px;padding:10px 12px;margin-bottom:14px;">
-          <p style="margin:0;font-size:0.78rem;color:#bbf7d0;line-height:1.6;"><strong style="color:#4ade80;">Garantía real:</strong> si la multa NO se elimina, <strong>no pagas los $98.900</strong>. Solo los $10.000 del trámite.</p>
+          <p style="margin:0;font-size:0.78rem;color:#bbf7d0;line-height:1.6;"><strong style="color:#4ade80;">Garantía real:</strong> si la multa NO se elimina, <strong>no pagas los $95.000</strong>. Solo los $10.000 del trámite.</p>
         </div>
         <ul class="pc-features" style="color:#ddd6fe;">
           <li><i class="fas fa-check-circle" style="color:#4ade80;"></i> Solo $10.000 para empezar</li>
@@ -2124,46 +2124,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- COMPROMISO DE PAGO — plan garantia -->
       <div class="step-panel" id="sp-compromiso-pago">
-        <div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:14px;box-shadow:0 6px 24px rgba(109,40,217,0.4);">
-          <p style="color:#c4b5fd;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;font-weight:700;">Último paso — gratuito y obligatorio</p>
-          <p style="color:#fff;font-size:1.1rem;font-weight:900;margin:0 0 3px;line-height:1.2;">✍️ Firma tu Compromiso de Pago</p>
-          <p style="color:#ddd6fe;font-size:0.72rem;margin:0;line-height:1.5;">Confirmas que pagarás $98.900 por multa <em>solo cuando sea eliminada</em></p>
+        <!-- Header compacto -->
+        <div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);border-radius:12px;padding:11px 14px;text-align:center;margin-bottom:10px;box-shadow:0 5px 20px rgba(109,40,217,0.38);">
+          <p style="color:#c4b5fd;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 2px;font-weight:700;">Último paso — gratuito y obligatorio</p>
+          <p style="color:#fff;font-size:1rem;font-weight:900;margin:0;line-height:1.2;">✍️ Firma tu Compromiso de Pago</p>
+          <p style="color:#ddd6fe;font-size:0.68rem;margin:3px 0 0;">Pagas $95.000 por multa <em>solo cuando sea eliminada</em></p>
         </div>
-        <!-- Documento -->
-        <div style="background:#fff;border:2px solid #e9d5ff;border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 18px rgba(109,40,217,0.12);">
-          <div style="background:#3c3c3c;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.72rem;color:#e5e7eb;font-weight:600;">📄 Compromiso_Pago_JuridicosWeb.pdf</span>
-            <span style="background:#7c3aed;color:#fff;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:999px;">PARA FIRMAR</span>
+
+        <!-- Resumen rápido de lo que firma -->
+        <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:0.72rem;line-height:1.6;color:#1e293b;">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;">
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Nombre:</span>
+            <span id="comp-nombre" style="color:#4c1d95;font-weight:800;">—</span>
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Cédula:</span>
+            <span id="comp-cedula" style="color:#4c1d95;font-weight:700;">—</span>
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Compromiso:</span>
+            <span style="color:#15803d;font-weight:700;font-size:0.68rem;">$95.000 × <span id="comp-multas-n">—</span> multa(s) — <em>solo si se eliminan</em></span>
           </div>
+        </div>
+
+        <!-- Canvas firma — PRIMERO, visible sin scroll -->
+        <div style="background:#fff;border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 4px 20px rgba(124,58,237,0.25);">
+          <div style="background:linear-gradient(90deg,#f5f3ff,#ede9fe);padding:7px 12px;border-bottom:1.5px solid #ddd6fe;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;animation:ping 1.5s ease-in-out infinite;display:inline-block;"></span>
+            <p style="color:#6d28d9;font-size:0.75rem;font-weight:800;margin:0;">Dibuja tu firma aquí con el dedo</p>
+          </div>
+          <canvas id="comp-canvas" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:130px;" width="600" height="130"></canvas>
+        </div>
+
+        <!-- Botones -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button onclick="limpiarFirmaComp()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:13px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
+          <button onclick="confirmarFirmaComp()" id="btn-confirmar-comp" style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 5px 18px rgba(124,58,237,0.45);">✅ Firmar y recibir copia →</button>
+        </div>
+        <p style="text-align:center;color:#64748b;font-size:0.65rem;margin:0 0 10px;">🔒 Firma con validez legal · Recibirás copia por correo</p>
+
+        <!-- Documento completo colapsado -->
+        <details style="border:1px solid #e9d5ff;border-radius:10px;overflow:hidden;">
+          <summary style="background:#f8f5ff;padding:9px 14px;font-size:0.7rem;font-weight:700;color:#6d28d9;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+            <span>📄</span> Ver documento completo · Compromiso_Pago_JuridicosWeb.pdf
+            <span style="margin-left:auto;font-size:0.65rem;color:#94a3b8;">↓ expandir</span>
+          </summary>
           <div style="background:#f8f5ff;padding:10px;">
-            <div style="background:#fff;border-radius:6px;padding:18px 16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);font-family:'Times New Roman',Times,serif;position:relative;">
+            <div style="background:#fff;border-radius:6px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.07);font-family:'Times New Roman',Times,serif;position:relative;">
               <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0.03;z-index:0;overflow:hidden;"><p style="font-size:2.8rem;font-weight:900;color:#4c1d95;transform:rotate(-30deg);white-space:nowrap;">JurídicosWeb</p></div>
               <div style="position:relative;z-index:1;">
-                <div style="text-align:center;border-bottom:2px solid #7c3aed;padding-bottom:10px;margin-bottom:12px;">
-                  <p style="font-size:0.58rem;color:#6b7280;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">República de Colombia · JurídicosWeb.com</p>
-                  <p style="font-size:0.95rem;font-weight:900;color:#4c1d95;margin:4px 0 2px;letter-spacing:.5px;">COMPROMISO DE PAGO</p>
-                  <p style="font-size:0.62rem;color:#6b7280;margin:0;">Plan Paga Solo al Eliminar — Garantía de resultado</p>
+                <div style="text-align:center;border-bottom:2px solid #7c3aed;padding-bottom:10px;margin-bottom:10px;">
+                  <p style="font-size:0.56rem;color:#6b7280;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">República de Colombia · JurídicosWeb.com</p>
+                  <p style="font-size:0.9rem;font-weight:900;color:#4c1d95;margin:3px 0 2px;">COMPROMISO DE PAGO</p>
+                  <p style="font-size:0.6rem;color:#6b7280;margin:0;">Plan Paga Solo al Eliminar — Garantía de resultado</p>
                 </div>
-                <p style="font-size:0.72rem;color:#1e293b;line-height:1.7;margin:0 0 8px;">Entre <strong>JurídicosWeb</strong> (en adelante <em>"el Prestador"</em>) y el peticionario:</p>
-                <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:0.72rem;line-height:1.6;color:#1e293b;">
-                  <p style="margin:0 0 3px;"><strong>Nombre:</strong> <span id="comp-nombre" style="color:#4c1d95;font-weight:700;">—</span></p>
-                  <p style="margin:0 0 3px;"><strong>Cédula:</strong> <span id="comp-cedula" style="color:#4c1d95;font-weight:700;">—</span></p>
-                  <p style="margin:0;"><strong>Multas incluidas:</strong> <span id="comp-multas-n" style="color:#4c1d95;font-weight:700;">—</span> multa(s) detectadas en el SIMIT</p>
-                </div>
-                <p style="font-size:0.72rem;font-weight:800;color:#1e293b;margin:0 0 6px;">EL PETICIONARIO SE COMPROMETE A:</p>
-                <ol style="margin:0 0 10px;padding-left:16px;font-size:0.7rem;color:#374151;line-height:1.75;">
-                  <li>Pagar la suma de <strong>$98.900 por cada multa o fotomulta que sea efectivamente eliminada</strong> del SIMIT o de los registros de la Secretaría de Tránsito correspondiente.</li>
-                  <li>Realizar dicho pago dentro de los <strong>5 días hábiles</strong> siguientes a la notificación de la resolución favorable o confirmación de eliminación enviada por JurídicosWeb.</li>
-                  <li>En caso de que la multa sea eliminada y posteriormente reingresada al SIMIT por error administrativo, notificar a JurídicosWeb para su gestión sin costo adicional.</li>
+                <p style="font-size:0.7rem;color:#1e293b;line-height:1.7;margin:0 0 8px;">Entre <strong>JurídicosWeb</strong> (en adelante <em>"el Prestador"</em>) y el peticionario identificado arriba:</p>
+                <p style="font-size:0.7rem;font-weight:800;color:#1e293b;margin:0 0 5px;">EL PETICIONARIO SE COMPROMETE A:</p>
+                <ol style="margin:0 0 8px;padding-left:16px;font-size:0.68rem;color:#374151;line-height:1.75;">
+                  <li>Pagar <strong>$95.000 por cada multa efectivamente eliminada</strong> del SIMIT o de los registros de la Secretaría de Tránsito.</li>
+                  <li>Realizar dicho pago dentro de los <strong>5 días hábiles</strong> siguientes a la confirmación de eliminación enviada por JurídicosWeb.</li>
+                  <li>En caso de reingreso por error administrativo, notificar a JurídicosWeb para gestión sin costo adicional.</li>
                 </ol>
-                <p style="font-size:0.72rem;font-weight:800;color:#16a34a;margin:0 0 5px;">GARANTÍA DEL PRESTADOR:</p>
-                <p style="font-size:0.7rem;color:#374151;margin:0 0 10px;line-height:1.7;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 10px;"><strong>Si la multa NO es eliminada</strong> dentro del plazo legal, el peticionario <strong>NO pagará los $98.900</strong>. El único costo no reembolsable es el pago administrativo inicial de <strong>$10.000</strong> por gastos de radicación.</p>
-                <div style="border-top:1px solid #e9d5ff;padding-top:10px;margin-top:4px;">
-                  <p style="font-size:0.68rem;color:#6b7280;margin:0 0 8px;">Suscrito electrónicamente en <span id="comp-fecha">—</span></p>
+                <p style="font-size:0.7rem;font-weight:800;color:#16a34a;margin:0 0 4px;">GARANTÍA DEL PRESTADOR:</p>
+                <p style="font-size:0.68rem;color:#374151;margin:0 0 10px;line-height:1.7;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px 9px;"><strong>Si la multa NO es eliminada</strong> dentro del plazo legal, el peticionario <strong>NO pagará los $95.000</strong>. El único costo fijo es el pago administrativo de <strong>$10.000</strong> por radicación.</p>
+                <div style="border-top:1px solid #e9d5ff;padding-top:8px;">
+                  <p style="font-size:0.64rem;color:#6b7280;margin:0 0 6px;">Suscrito electrónicamente en <span id="comp-fecha">—</span></p>
                   <div style="display:flex;align-items:flex-end;gap:12px;">
                     <div style="flex:1;">
                       <canvas id="comp-firma-preview" width="240" height="50" style="display:block;width:100%;max-width:200px;border-bottom:1px solid #334155;"></canvas>
-                      <p style="font-size:0.6rem;color:#6b7280;margin:2px 0 0;">Firma del peticionario</p>
+                      <p style="font-size:0.58rem;color:#6b7280;margin:2px 0 0;">Firma del peticionario</p>
                     </div>
                     <div id="comp-sel-badge" style="display:none;text-align:right;flex-shrink:0;">
                       <div style="background:#f0fdf4;border:1px solid #22c55e;border-radius:6px;padding:4px 8px;"><p style="font-size:0.6rem;color:#15803d;font-weight:700;margin:0;">✅ FIRMADO</p></div>
@@ -2173,19 +2198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Canvas firma -->
-        <div style="background:#fff;border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 4px 16px rgba(124,58,237,0.2);">
-          <div style="background:#f5f3ff;padding:6px 12px;border-bottom:1px solid #ddd6fe;text-align:center;">
-            <p style="color:#6d28d9;font-size:0.72rem;font-weight:700;margin:0;">👆 Toca aquí y firma con el dedo</p>
-          </div>
-          <canvas id="comp-canvas" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:130px;" width="600" height="130"></canvas>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <button onclick="limpiarFirmaComp()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
-          <button onclick="confirmarFirmaComp()" id="btn-confirmar-comp" style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.4);">✅ Firmar y recibir mi copia →</button>
-        </div>
-        <p style="text-align:center;color:#64748b;font-size:0.7rem;margin:0;">🔒 La firma tiene validez legal · Recibirás copia por correo electrónico</p>
+        </details>
       </div>
 
       <!-- ÉXITO GARANTIA -->
@@ -2193,14 +2206,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div style="text-align:center;padding:10px 0 16px;">
           <div style="font-size:3.5rem;margin-bottom:8px;">🎉</div>
           <p style="font-size:1.15rem;font-weight:900;color:#4c1d95;margin:0 0 6px;line-height:1.3;">¡Todo listo! Tu caso está activo</p>
-          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibirás copia del compromiso firmado por correo. Solo pagas los $98.900 cuando la multa se elimine.</p>
+          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibirás copia del compromiso firmado por correo. Solo pagas los $95.000 cuando la multa se elimine.</p>
         </div>
         <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
           <p style="font-size:0.78rem;font-weight:800;color:#4c1d95;margin:0 0 10px;">¿Qué pasa ahora?</p>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">1</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Preparamos tu Derecho de Petición y lo radicamos ante la Secretaría de Tránsito — sin que muevas un dedo.</p></div>
             <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">2</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">La Secretaría tiene <strong>15 días hábiles</strong> para responder. Te avisamos al instante cuando tengamos resultado.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;"><strong>Si se elimina ✅</strong> → te pedimos los $98.900 del compromiso. <strong>Si NO se elimina ❌</strong> → no pagas nada más.</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;"><strong>Si se elimina ✅</strong> → te pedimos los $95.000 del compromiso. <strong>Si NO se elimina ❌</strong> → no pagas nada más.</p></div>
           </div>
         </div>
         <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-size:0.97rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
@@ -2213,47 +2226,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Compromiso de Pago (plan garantia)
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-compromiso-pago">
-        <!-- Header -->
-        <div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:14px;box-shadow:0 6px 24px rgba(109,40,217,0.4);">
-          <p style="color:#c4b5fd;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;font-weight:700;">Último paso — gratuito y obligatorio</p>
-          <p style="color:#fff;font-size:1.1rem;font-weight:900;margin:0;line-height:1.2;">✍️ Firma tu Compromiso de Pago</p>
-          <p style="color:#ddd6fe;font-size:0.72rem;margin:6px 0 0;line-height:1.5;">Confirmas que pagarás $98.900 por multa <em>solo cuando sea eliminada</em></p>
+        <!-- Header compacto -->
+        <div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);border-radius:12px;padding:11px 14px;text-align:center;margin-bottom:10px;box-shadow:0 5px 20px rgba(109,40,217,0.38);">
+          <p style="color:#c4b5fd;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;margin:0 0 2px;font-weight:700;">Último paso — gratuito y obligatorio</p>
+          <p style="color:#fff;font-size:1rem;font-weight:900;margin:0;line-height:1.2;">✍️ Firma tu Compromiso de Pago</p>
+          <p style="color:#ddd6fe;font-size:0.68rem;margin:3px 0 0;">Pagas $95.000 por multa <em>solo cuando sea eliminada</em></p>
         </div>
-        <!-- Documento legal -->
-        <div style="background:#fff;border:2px solid #e9d5ff;border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 18px rgba(109,40,217,0.12);">
-          <div style="background:#3c3c3c;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:0.72rem;color:#e5e7eb;font-weight:600;">📄 Compromiso_Pago_JuridicosWeb.pdf</span>
-            <span style="background:#7c3aed;color:#fff;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:999px;">PARA FIRMAR</span>
+
+        <!-- Resumen rápido -->
+        <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:0.72rem;line-height:1.6;color:#1e293b;">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;">
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Nombre:</span>
+            <span id="comp-nombre" style="color:#4c1d95;font-weight:800;">—</span>
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Cédula:</span>
+            <span id="comp-cedula" style="color:#4c1d95;font-weight:700;">—</span>
+            <span style="color:#6b7280;font-size:0.63rem;font-weight:600;">Compromiso:</span>
+            <span style="color:#15803d;font-weight:700;font-size:0.68rem;">$95.000 × <span id="comp-multas-n">—</span> multa(s) — <em>solo si se eliminan</em></span>
           </div>
+        </div>
+
+        <!-- Canvas firma — PRIMERO, visible sin scroll -->
+        <div style="background:#fff;border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 4px 20px rgba(124,58,237,0.25);">
+          <div style="background:linear-gradient(90deg,#f5f3ff,#ede9fe);padding:7px 12px;border-bottom:1.5px solid #ddd6fe;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;animation:ping 1.5s ease-in-out infinite;display:inline-block;"></span>
+            <p style="color:#6d28d9;font-size:0.75rem;font-weight:800;margin:0;">Dibuja tu firma aquí con el dedo</p>
+          </div>
+          <canvas id="comp-canvas" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:130px;" width="600" height="130"></canvas>
+        </div>
+
+        <!-- Botones -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button onclick="limpiarFirmaComp()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:13px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
+          <button onclick="confirmarFirmaComp()" id="btn-confirmar-comp" style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 5px 18px rgba(124,58,237,0.45);">✅ Firmar y recibir copia →</button>
+        </div>
+        <p style="text-align:center;color:#64748b;font-size:0.65rem;margin:0 0 10px;">🔒 Firma con validez legal · Recibirás copia por correo</p>
+
+        <!-- Documento completo colapsado -->
+        <details style="border:1px solid #e9d5ff;border-radius:10px;overflow:hidden;">
+          <summary style="background:#f8f5ff;padding:9px 14px;font-size:0.7rem;font-weight:700;color:#6d28d9;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;">
+            <span>📄</span> Ver documento completo · Compromiso_Pago_JuridicosWeb.pdf
+            <span style="margin-left:auto;font-size:0.65rem;color:#94a3b8;">↓ expandir</span>
+          </summary>
           <div style="background:#f8f5ff;padding:10px;">
-            <div style="background:#fff;border-radius:6px;padding:18px 16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);font-family:'Times New Roman',Times,serif;position:relative;">
+            <div style="background:#fff;border-radius:6px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.07);font-family:'Times New Roman',Times,serif;position:relative;">
               <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0.03;z-index:0;overflow:hidden;"><p style="font-size:2.8rem;font-weight:900;color:#4c1d95;transform:rotate(-30deg);white-space:nowrap;">JurídicosWeb</p></div>
               <div style="position:relative;z-index:1;">
-                <div style="text-align:center;border-bottom:2px solid #7c3aed;padding-bottom:10px;margin-bottom:12px;">
-                  <p style="font-size:0.58rem;color:#6b7280;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">República de Colombia · JurídicosWeb.com</p>
-                  <p style="font-size:0.95rem;font-weight:900;color:#4c1d95;margin:4px 0 2px;letter-spacing:.5px;">COMPROMISO DE PAGO</p>
-                  <p style="font-size:0.62rem;color:#6b7280;margin:0;">Plan Paga Solo al Eliminar — Garantía de resultado</p>
+                <div style="text-align:center;border-bottom:2px solid #7c3aed;padding-bottom:10px;margin-bottom:10px;">
+                  <p style="font-size:0.56rem;color:#6b7280;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">República de Colombia · JurídicosWeb.com</p>
+                  <p style="font-size:0.9rem;font-weight:900;color:#4c1d95;margin:3px 0 2px;">COMPROMISO DE PAGO</p>
+                  <p style="font-size:0.6rem;color:#6b7280;margin:0;">Plan Paga Solo al Eliminar — Garantía de resultado</p>
                 </div>
-                <p style="font-size:0.72rem;color:#1e293b;line-height:1.7;margin:0 0 8px;">Entre <strong>JurídicosWeb</strong> (en adelante <em>"el Prestador"</em>) y el peticionario:</p>
-                <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:0.72rem;line-height:1.6;color:#1e293b;">
-                  <p style="margin:0 0 3px;"><strong>Nombre:</strong> <span id="comp-nombre" style="color:#4c1d95;font-weight:700;">—</span></p>
-                  <p style="margin:0 0 3px;"><strong>Cédula:</strong> <span id="comp-cedula" style="color:#4c1d95;font-weight:700;">—</span></p>
-                  <p style="margin:0;"><strong>Multas incluidas:</strong> <span id="comp-multas-n" style="color:#4c1d95;font-weight:700;">—</span> multa(s) detectadas en el SIMIT</p>
-                </div>
-                <p style="font-size:0.72rem;font-weight:800;color:#1e293b;margin:0 0 6px;">EL PETICIONARIO SE COMPROMETE A:</p>
-                <ol style="margin:0 0 10px;padding-left:16px;font-size:0.7rem;color:#374151;line-height:1.75;">
-                  <li>Pagar la suma de <strong>$98.900 (noventa y ocho mil novecientos pesos) por cada multa o fotomulta que sea efectivamente eliminada</strong> del SIMIT o de los registros de la Secretaría de Tránsito correspondiente.</li>
-                  <li>Realizar dicho pago dentro de los <strong>5 días hábiles</strong> siguientes a la notificación de la resolución favorable o confirmación de eliminación enviada por JurídicosWeb.</li>
-                  <li>En caso de que la multa sea eliminada y posteriormente <strong>reingresada al SIMIT por error administrativo</strong>, notificar a JurídicosWeb para su gestión sin costo adicional; este evento no exime del pago del compromiso si la primera eliminación fue exitosa.</li>
+                <p style="font-size:0.7rem;color:#1e293b;line-height:1.7;margin:0 0 8px;">Entre <strong>JurídicosWeb</strong> (en adelante <em>"el Prestador"</em>) y el peticionario identificado arriba:</p>
+                <p style="font-size:0.7rem;font-weight:800;color:#1e293b;margin:0 0 5px;">EL PETICIONARIO SE COMPROMETE A:</p>
+                <ol style="margin:0 0 8px;padding-left:16px;font-size:0.68rem;color:#374151;line-height:1.75;">
+                  <li>Pagar <strong>$95.000 (noventa y cinco mil pesos) por cada multa o fotomulta efectivamente eliminada</strong> del SIMIT o de los registros de la Secretaría de Tránsito.</li>
+                  <li>Realizar dicho pago dentro de los <strong>5 días hábiles</strong> siguientes a la confirmación de eliminación enviada por JurídicosWeb.</li>
+                  <li>En caso de reingreso por error administrativo, notificar a JurídicosWeb para gestión sin costo adicional.</li>
                 </ol>
-                <p style="font-size:0.72rem;font-weight:800;color:#16a34a;margin:0 0 6px;">GARANTÍA DEL PRESTADOR:</p>
-                <p style="font-size:0.7rem;color:#374151;margin:0 0 10px;line-height:1.7;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 10px;"><strong>Si la multa NO es eliminada</strong> del SIMIT dentro del plazo legal (15 días hábiles + proceso de tutela si aplica), el peticionario <strong>NO pagará los $98.900</strong>. El único costo no reembolsable en ningún caso es el pago administrativo inicial de <strong>$10.000</strong> por gastos de radicación.</p>
-                <div style="border-top:1px solid #e9d5ff;padding-top:10px;margin-top:4px;">
-                  <p style="font-size:0.68rem;color:#6b7280;margin:0 0 8px;">Suscrito electrónicamente en <span id="comp-fecha">—</span></p>
+                <p style="font-size:0.7rem;font-weight:800;color:#16a34a;margin:0 0 4px;">GARANTÍA DEL PRESTADOR:</p>
+                <p style="font-size:0.68rem;color:#374151;margin:0 0 10px;line-height:1.7;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px 9px;"><strong>Si la multa NO es eliminada</strong> dentro del plazo legal (15 días hábiles + proceso de tutela si aplica), el peticionario <strong>NO pagará los $95.000</strong>. El único costo fijo es el pago administrativo de <strong>$10.000</strong> por radicación.</p>
+                <div style="border-top:1px solid #e9d5ff;padding-top:8px;">
+                  <p style="font-size:0.64rem;color:#6b7280;margin:0 0 6px;">Suscrito electrónicamente en <span id="comp-fecha">—</span></p>
                   <div style="display:flex;align-items:flex-end;gap:12px;">
                     <div style="flex:1;">
                       <canvas id="comp-firma-preview" width="240" height="50" style="display:block;width:100%;max-width:200px;border-bottom:1px solid #334155;"></canvas>
-                      <p style="font-size:0.6rem;color:#6b7280;margin:2px 0 0;">Firma del peticionario</p>
+                      <p style="font-size:0.58rem;color:#6b7280;margin:2px 0 0;">Firma del peticionario</p>
                     </div>
                     <div style="text-align:right;flex-shrink:0;display:none;" id="comp-sel-badge">
                       <div style="background:#f0fdf4;border:1px solid #22c55e;border-radius:6px;padding:4px 8px;">
@@ -2265,19 +2302,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Canvas firma -->
-        <div style="background:#fff;border:2.5px solid #7c3aed;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 4px 16px rgba(124,58,237,0.2);">
-          <div style="background:#f5f3ff;padding:6px 12px;border-bottom:1px solid #ddd6fe;text-align:center;">
-            <p style="color:#6d28d9;font-size:0.72rem;font-weight:700;margin:0;">👆 Toca aquí y firma con el dedo para comprometerte</p>
-          </div>
-          <canvas id="comp-canvas" style="display:block;touch-action:none;cursor:crosshair;width:100%;height:130px;" width="600" height="130"></canvas>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:12px;">
-          <button onclick="limpiarFirmaComp()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:12px;font-size:0.85rem;font-weight:700;cursor:pointer;">🗑️ Borrar</button>
-          <button onclick="confirmarFirmaComp()" id="btn-confirmar-comp" style="flex:2;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.4);">✅ Firmar y enviar copia →</button>
-        </div>
-        <p style="text-align:center;color:#64748b;font-size:0.7rem;margin:0;">🔒 La firma tiene validez legal · Recibirás copia por correo electrónico</p>
+        </details>
       </div>
 
       <!-- ══ ÉXITO GARANTIA ══ -->
@@ -2285,14 +2310,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div style="text-align:center;padding:10px 0 16px;">
           <div style="font-size:3.5rem;margin-bottom:8px;">🎉</div>
           <p style="font-size:1.15rem;font-weight:900;color:#4c1d95;margin:0 0 6px;line-height:1.3;">¡Todo listo! Tu caso está activo</p>
-          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibiste copia del compromiso firmado por correo. Solo pagas los $98.900 cuando la multa se elimine.</p>
+          <p style="font-size:0.8rem;color:#64748b;margin:0;line-height:1.6;">Recibiste copia del compromiso firmado por correo. Solo pagas los $95.000 cuando la multa se elimine.</p>
         </div>
         <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
           <p style="font-size:0.78rem;font-weight:800;color:#4c1d95;margin:0 0 10px;">¿Qué pasa ahora?</p>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">1</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Nuestro equipo prepara tu Derecho de Petición personalizado y lo radica ante la Secretaría de Tránsito.</p></div>
             <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">2</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">La Secretaría tiene <strong>15 días hábiles</strong> para responder. Te avisamos cuando tengamos resultado.</p></div>
-            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Si se elimina ✅ → te pedimos los $98.900 que firmaste. Si NO se elimina ❌ → no pagas nada más.</p></div>
+            <div style="display:flex;gap:10px;align-items:flex-start;"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;">3</span><p style="font-size:0.75rem;color:#374151;margin:0;line-height:1.5;">Si se elimina ✅ → te pedimos los $95.000 que firmaste. Si NO se elimina ❌ → no pagas nada más.</p></div>
           </div>
         </div>
         <a id="btn-wa-exito-garantia" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:16px;border-radius:12px;font-size:0.97rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
@@ -3508,7 +3533,7 @@ function irAPagoFinal(){
   if(pagoSel==='garantia'){
     var n=_numMultasGarantia||1;
     document.getElementById('pr-monto').textContent = '$'+(10000*n).toLocaleString('es-CO');
-    document.getElementById('pr-plan-desc').textContent = 'Adelanto garantía · $98.900 × '+n+' multa'+(n!==1?'s':'')+' solo al eliminar';
+    document.getElementById('pr-plan-desc').textContent = 'Adelanto garantía · $95.000 × '+n+' multa'+(n!==1?'s':'')+' solo al eliminar';
   } else {
     var esUna  = _planFinal==='una';
     document.getElementById('pr-monto').textContent    = esUna ? '$49.000' : '$79.000';
@@ -4739,7 +4764,7 @@ function renderPlanes(aplican){
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;">'+
     '<div>'+
     '<p style="font-size:1.05rem;font-weight:900;color:#4c1d95;margin:0 0 3px;line-height:1.2;">Paga Solo al Eliminar</p>'+
-    '<p style="font-size:0.72rem;color:#6b21a8;margin:0;line-height:1.5;font-weight:600;">Solo $10.000 hoy · el resto ($98.900 c/multa) <em>únicamente si se elimina</em></p>'+
+    '<p style="font-size:0.72rem;color:#6b21a8;margin:0;line-height:1.5;font-weight:600;">Solo $10.000 hoy · el resto ($95.000 c/multa) <em>únicamente si se elimina</em></p>'+
     '</div>'+
     '<div style="text-align:right;flex-shrink:0;">'+
     '<p id="gar-precio-hoy" style="font-size:2rem;font-weight:900;color:#7c3aed;margin:0;line-height:1;">$'+(10000*n).toLocaleString('es-CO')+'</p>'+
@@ -4756,19 +4781,19 @@ function renderPlanes(aplican){
     '</div>'+
     '<div>'+
     '<p id="gar-hoy-txt" style="font-size:0.82rem;font-weight:700;color:#16a34a;margin:0;">Pagas hoy: $'+(10000*n).toLocaleString('es-CO')+'</p>'+
-    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#6b7280;margin:3px 0 0;">Al eliminar: $'+(98900*n).toLocaleString('es-CO')+' total</p>'+
+    '<p id="gar-despues-txt" style="font-size:0.75rem;color:#6b7280;margin:3px 0 0;">Al eliminar: $'+(95000*n).toLocaleString('es-CO')+' total</p>'+
     '</div>'+
     '</div>'+
     '</div>'+
     '<div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:11px;padding:11px 13px;margin-bottom:14px;">'+
     '<p style="font-size:0.73rem;color:#14532d;font-weight:700;margin:0;line-height:1.65;">'+
-    '✅ <strong>Si la multa NO se elimina, no pagas los $98.900.</strong> Solo los $10.000 del trámite administrativo y radicación. Sin letra pequeña — esa es nuestra garantía real.'+
+    '✅ <strong>Si la multa NO se elimina, no pagas los $95.000.</strong> Solo los $10.000 del trámite administrativo y radicación. Sin letra pequeña — esa es nuestra garantía real.'+
     '</p>'+
     '</div>'+
     '<button onclick="elegirPlan(\'garantia\')" id="btn-garantia" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:17px;border:none;border-radius:12px;cursor:pointer;font-size:1rem;font-weight:800;box-shadow:0 5px 22px rgba(124,58,237,0.45);letter-spacing:.2px;">'+
     '<i class="fas fa-shield-alt"></i>Empezar — Solo pago $'+(10000*n).toLocaleString('es-CO')+' hoy'+
     '</button>'+
-    '<p style="font-size:0.68rem;color:#7c3aed;text-align:center;margin:8px 0 0;font-weight:600;">Firmas un compromiso de pago de $98.900 c/multa al eliminarla ✦ 100% legal</p>'+
+    '<p style="font-size:0.68rem;color:#7c3aed;text-align:center;margin:8px 0 0;font-weight:600;">Firmas un compromiso de pago de $95.000 c/multa al eliminarla ✦ 100% legal</p>'+
     '</div></div>'+
 
     // ── PLAN INDIVIDUAL ──
@@ -4917,7 +4942,7 @@ function mostrarExitoGarantia(){
     '👤 '+nombreTxt+'\n'+
     '🧑 Cédula: '+cedulaTxt+'\n'+
     '💜 Plan: Paga Solo al Eliminar — $'+(10000*n).toLocaleString('es-CO')+' pagados hoy\n'+
-    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $98.900 al eliminar\n'+
+    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $95.000 al eliminar\n'+
     '📧 Email: '+emailVal+'\n\n'+
     'Adjunto comprobante de pago. Quedo esperando el radicado. ✅';
   var waLink=document.getElementById('btn-wa-exito-garantia');
@@ -5006,7 +5031,7 @@ function mostrarExitoGarantia(){
   var msg='*¡Hice el pago del plan Garantía! ✅*\n\n'+
     '👤 '+nombre+'\n🪪 Cédula: '+cedula+'\n'+
     '💜 Plan: Paga Solo al Eliminar — $'+(10000*n).toLocaleString('es-CO')+' pagados hoy\n'+
-    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $98.900 al eliminar\n'+
+    '📋 Compromiso firmado: '+n+' multa'+(n!==1?'s':'')+' × $95.000 al eliminar\n'+
     '📧 Email: '+email+'\n\nAdjunto comprobante de pago. ✅';
   var waLink=document.getElementById('btn-wa-exito-garantia');
   if(waLink)waLink.href='https://wa.me/573159318400?text='+encodeURIComponent(msg);
@@ -5044,7 +5069,7 @@ function garCambiarN(delta){
   if(el) el.textContent = n;
   if(precioEl) precioEl.textContent = '$'+(10000*n).toLocaleString('es-CO');
   if(hoyEl) hoyEl.textContent = 'Pagas hoy: $'+(10000*n).toLocaleString('es-CO');
-  if(despEl) despEl.textContent = 'Al eliminar: $'+(98900*n).toLocaleString('es-CO')+' total ($98.900 c/u)';
+  if(despEl) despEl.textContent = 'Al eliminar: $'+(95000*n).toLocaleString('es-CO')+' total ($95.000 c/u)';
   var btn = document.getElementById('btn-garantia');
   if(btn) btn.innerHTML = '<i class="fas fa-shield-alt"></i>Empezar — Solo pago $'+(10000*n).toLocaleString('es-CO')+' hoy';
 }
