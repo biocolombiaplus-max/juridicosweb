@@ -231,16 +231,43 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;}
 <div class="section">
   <div class="section-title">Medios de pago</div>
   <div class="payment-methods">
-    <div class="method">
-      <div>
-        <div class="method-label">📱 Nequi</div>
-        <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">Enviar al número o alias</div>
+
+    <!-- Llave Breve -->
+    <div class="method" style="flex-direction:column;align-items:flex-start;gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+        <div>
+          <div class="method-label">🔑 Llave Breve (Bancolombia)</div>
+          <div style="font-size:0.7rem;color:#94a3b8;margin-top:2px;">Acepta pagos desde Nequi, Bancolombia App y más</div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="method-value" id="nequi-val">@OTO262</span>
+          <button class="btn-copy" onclick="copiarNequi()">Copiar</button>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;">
-        <span class="method-value" id="nequi-val">@OTO262</span>
-        <button class="btn-copy" onclick="copiarNequi()">Copiar</button>
+      <!-- Pasos Nequi -->
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:14px;width:100%;">
+        <div style="font-size:0.75rem;font-weight:700;color:#0369a1;margin-bottom:10px;">📱 Cómo pagar desde Nequi:</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="background:#0369a1;color:#fff;border-radius:999px;width:20px;height:20px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+            <span style="font-size:0.76rem;color:#0c4a6e;line-height:1.4;">Abre Nequi → toca <strong>Enviar dinero</strong></span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="background:#0369a1;color:#fff;border-radius:999px;width:20px;height:20px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+            <span style="font-size:0.76rem;color:#0c4a6e;line-height:1.4;">Selecciona <strong>Llave Breve</strong> como método</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="background:#0369a1;color:#fff;border-radius:999px;width:20px;height:20px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+            <span style="font-size:0.76rem;color:#0c4a6e;line-height:1.4;">Ingresa la llave <strong id="nequi-val2">@OTO262</strong> y el monto de tu plan</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="background:#16a34a;color:#fff;border-radius:999px;width:20px;height:20px;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</span>
+            <span style="font-size:0.76rem;color:#0c4a6e;line-height:1.4;">Confirma el pago y <strong>envíanos el comprobante</strong> por WhatsApp</span>
+          </div>
+        </div>
       </div>
     </div>
+
     <div class="method">
       <div>
         <div class="method-label">🏦 Transferencia bancaria</div>
