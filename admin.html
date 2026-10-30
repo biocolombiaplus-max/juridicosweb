@@ -171,6 +171,8 @@ tr:hover td{background:#f8faff;cursor:pointer}
 .modal-header h2{font-size:17px;font-weight:700;color:var(--navy)}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray400);line-height:1;padding:4px 8px}
 .modal-close:hover{color:var(--gray800)}
+.nc-mb{padding:9px 14px;border-radius:9px;border:2px solid #ddd6fe;background:#fff;color:#6b7280;font-weight:700;font-size:0.82rem;cursor:pointer;flex:1;min-width:56px;transition:all 0.15s;}
+.nc-mb.active{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:#7c3aed;box-shadow:0 3px 10px rgba(124,58,237,0.35);}
 .modal-body{padding:24px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 .detail-item label{font-size:11px;font-weight:700;color:var(--gray600);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
@@ -766,7 +768,7 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <select id="filtro-plan" onchange="filtrarTabla()">
           <option value="">Todos los planes</option>
           <option value="45.000">Plan $45.000 (individual)</option>
-          <option value="19.800">Plan $19.800 (Pago al Eliminar)</option>
+          <option value="10.000">Plan $10.000 (Paga al Eliminar — por multa)</option>
           <option value="69.000">Plan $69.000 (todas)</option>
         </select>
         <button class="btn-refresh" onclick="loadData()">🔄 Actualizar</button>
@@ -1454,10 +1456,10 @@ function syncCampanaLoad() {
           <div style="font-size:1.1rem;font-weight:900;color:#7c3aed;">$10.000</div>
           <div style="font-size:0.65rem;color:#64748b;">adelanto plan garantía</div>
         </button>
-        <button class="cp-plan-btn" data-plan="diferido" data-monto="19800" onclick="seleccionarPlanRapido(this)">
-          <div style="font-size:0.8rem;font-weight:700;">Pago al Eliminar</div>
-          <div style="font-size:1.1rem;font-weight:900;color:#d97706;">$19.800</div>
-          <div style="font-size:0.65rem;color:#64748b;">adelanto diferido</div>
+        <button class="cp-plan-btn" data-plan="diferido" data-monto="10000" onclick="seleccionarPlanRapido(this)">
+          <div style="font-size:0.8rem;font-weight:700;">Paga al Eliminar</div>
+          <div style="font-size:1.1rem;font-weight:900;color:#d97706;">$10.000</div>
+          <div style="font-size:0.65rem;color:#64748b;">adelanto por multa</div>
         </button>
       </div>
 
@@ -1629,11 +1631,29 @@ function syncCampanaLoad() {
         </div>
         <div class="form-group-m">
           <label>Plan</label>
-          <select id="nc-plan">
-            <option value="Pago individual — $45.000 c/u">Plan Completo $45.000</option>
-            <option value="Eliminar todas las que apliquen — $69.000">Plan Elimina Todas $69.000</option>
-            <option value="Pago al Eliminar — Adelanto $19.800 + $95.500 c/u">Plan Pago al Eliminar $19.800</option>
+          <select id="nc-plan" onchange="toggleMultasPlanModal()">
+            <option value="Pago individual — $49.000 c/u">Plan 1 Multa — $49.000</option>
+            <option value="Eliminar todas las que apliquen — $79.000">Plan Todas las Multas — $79.000</option>
+            <option value="diferido">Plan Paga al Eliminar — $10.000 hoy + $95.000 c/u</option>
           </select>
+        </div>
+        <!-- Selector de multas y resumen — solo visible en Plan Paga al Eliminar -->
+        <div class="form-group-m full-col" id="nc-diferido-wrap" style="display:none;background:#faf5ff;border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;">
+          <label style="color:#7c3aed;margin-bottom:8px;">Cantidad de multas a iniciar</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;" id="nc-multas-btns">
+            <button type="button" class="nc-mb active" onclick="ncSelMultas(1)">1 multa</button>
+            <button type="button" class="nc-mb" onclick="ncSelMultas(2)">2 multas</button>
+            <button type="button" class="nc-mb" onclick="ncSelMultas(3)">3 multas</button>
+            <button type="button" class="nc-mb" onclick="ncSelMultas(4)">4 multas</button>
+            <button type="button" class="nc-mb" onclick="ncSelMultas(5)">5 multas</button>
+            <button type="button" class="nc-mb" onclick="ncSelMultas(6)">6 multas</button>
+          </div>
+          <input type="hidden" id="nc-num-multas" value="1">
+          <div style="background:#ede9fe;border-radius:8px;padding:10px 12px;font-size:0.8rem;line-height:1.7;">
+            <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Pago inicial hoy:</span><strong id="nc-res-hoy" style="color:#0a1628;">$10.000</strong></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Al eliminar c/u:</span><strong style="color:#7c3aed;">$95.000</strong></div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid #c4b5fd;margin-top:6px;padding-top:6px;"><span style="color:#6b7280;">Total al eliminar <span id="nc-res-n">1</span> multa(s):</span><strong id="nc-res-total" style="color:#7c3aed;font-size:0.9rem;">$95.000</strong></div>
+          </div>
         </div>
         <div class="form-group-m">
           <label>¿Cómo llegó este caso? *</label>
@@ -4771,11 +4791,32 @@ function openNuevoCaso(){
   document.getElementById('modal-nuevo').classList.add('show');
 }
 
+function toggleMultasPlanModal(){
+  var sel = document.getElementById('nc-plan').value;
+  var wrap = document.getElementById('nc-diferido-wrap');
+  if(wrap) wrap.style.display = sel === 'diferido' ? 'block' : 'none';
+  if(sel === 'diferido') ncSelMultas(parseInt(document.getElementById('nc-num-multas').value)||1);
+}
+function ncSelMultas(n){
+  document.getElementById('nc-num-multas').value = n;
+  document.querySelectorAll('.nc-mb').forEach(function(b,i){ b.className='nc-mb'+(i+1===n?' active':''); });
+  var hoy = '$'+(10000*n).toLocaleString('es-CO');
+  var total = '$'+(95000*n).toLocaleString('es-CO');
+  var rh=document.getElementById('nc-res-hoy'), rn=document.getElementById('nc-res-n'), rt=document.getElementById('nc-res-total');
+  if(rh) rh.textContent=hoy;
+  if(rn) rn.textContent=n;
+  if(rt) rt.textContent=total;
+}
+
 function guardarNuevoCaso(){
   var btn = document.getElementById('btn-guardar-nc');
   var yaPago = document.getElementById('nc-ya-pago').checked;
   var monto = document.getElementById('nc-monto').value.trim();
-  var plan = document.getElementById('nc-plan').value;
+  var planSel = document.getElementById('nc-plan').value;
+  var nMultas = parseInt(document.getElementById('nc-num-multas').value) || 1;
+  var plan = planSel === 'diferido'
+    ? 'Pago al Eliminar — Adelanto $'+(10000*nMultas).toLocaleString('es-CO')+' + $95.000 c/u ('+nMultas+' multa'+(nMultas>1?'s':'')+')'
+    : planSel;
   var datos = {
     nombres:    document.getElementById('nc-nombres').value.trim(),
     apellidos:  document.getElementById('nc-apellidos').value.trim(),
@@ -4786,7 +4827,7 @@ function guardarNuevoCaso(){
     ciudad:     valorCiudadNuevoCaso(),
     dpto:       document.getElementById('nc-dpto').value,
     plan:       plan,
-    multasSeleccionadas: 1,
+    multasSeleccionadas: planSel === 'diferido' ? nMultas : 1,
     montoTotal: monto || '',
     estadoPago: yaPago ? 'PAGADO — Confirmado manualmente' : 'PENDIENTE',
     fuente:     document.getElementById('nc-fuente').value,
