@@ -585,6 +585,41 @@ tr:hover td{background:#f8faff;cursor:pointer}
         <div id="resultados-busqueda" style="margin-top:6px;"></div>
       </div>
 
+      <!-- LINKS DE REGISTRO -->
+      <div style="background:#1e293b;border:1.5px solid #334155;border-radius:14px;padding:18px 18px 14px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <span style="font-size:1.1rem;">🔗</span>
+          <span style="font-size:0.8rem;font-weight:800;color:#f1f5f9;letter-spacing:.4px;text-transform:uppercase;">Links de Registro para Clientes</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <!-- Plan Paga al Eliminar -->
+          <div style="background:#2d1b69;border:1.5px solid #5b21b6;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <div style="font-weight:800;font-size:0.82rem;color:#c4b5fd;">🟣 Plan Paga al Eliminar</div>
+              <div style="font-size:0.7rem;color:#a78bfa;margin-top:2px;">$10.000 hoy · $95.000 al eliminar c/u · Con acuerdo de pago</div>
+            </div>
+            <button onclick="copiarLink('diferido')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-diferido">📋 Copiar Link</button>
+          </div>
+          <!-- Plan 49k -->
+          <div style="background:#1e3a5f;border:1.5px solid #1d4ed8;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <div style="font-weight:800;font-size:0.82rem;color:#93c5fd;">💳 Plan 1 Multa — $49.000</div>
+              <div style="font-size:0.7rem;color:#60a5fa;margin-top:2px;">Pago único · Sin cobros adicionales · Incluye radicación</div>
+            </div>
+            <button onclick="copiarLink('49000')" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-49">📋 Copiar Link</button>
+          </div>
+          <!-- Plan 79k -->
+          <div style="background:#052e16;border:1.5px solid #15803d;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <div style="font-weight:800;font-size:0.82rem;color:#86efac;">⭐ Plan Todas las Multas — $79.000</div>
+              <div style="font-size:0.7rem;color:#4ade80;margin-top:2px;">Pago único · Cubre todas las multas elegibles</div>
+            </div>
+            <button onclick="copiarLink('79000')" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-79">📋 Copiar Link</button>
+          </div>
+        </div>
+        <div style="font-size:0.68rem;color:#475569;margin-top:10px;">Copia el link y envíalo al cliente por WhatsApp. El cliente completa su información y descarga su Derecho de Petición.</div>
+      </div>
+
       <div class="stats-grid">
         <div class="stat-card navy">
           <div class="stat-label">Total Leads</div>
@@ -4884,6 +4919,26 @@ function exportCSV(){
   a.href=url; a.download='casos-juridicos-'+new Date().toISOString().substring(0,10)+'.csv';
   a.click(); URL.revokeObjectURL(url);
   showToast('📥 CSV exportado','success');
+}
+
+function copiarLink(plan){
+  var base = window.location.origin + window.location.pathname.replace('admin.html','') + 'registro.html?plan=' + plan;
+  var btnId = plan==='diferido' ? 'btn-copy-diferido' : (plan==='49000' ? 'btn-copy-49' : 'btn-copy-79');
+  var btn = document.getElementById(btnId);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(base).then(function(){
+      if(btn){ var orig=btn.textContent; btn.textContent='✅ ¡Copiado!'; setTimeout(function(){ btn.textContent=orig; },2000); }
+      showToast('🔗 Link copiado al portapapeles','success');
+    }).catch(function(){ fallbackCopyText(base, btn); });
+  } else { fallbackCopyText(base, btn); }
+}
+function fallbackCopyText(txt, btn){
+  var ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); if(btn){ var orig=btn.textContent; btn.textContent='✅ ¡Copiado!'; setTimeout(function(){ btn.textContent=orig; },2000); } showToast('🔗 Link copiado','success'); }
+  catch(e){ showToast('No se pudo copiar. Link: '+txt,'error'); }
+  document.body.removeChild(ta);
 }
 
 // ══════════════════════════════════════════════════
