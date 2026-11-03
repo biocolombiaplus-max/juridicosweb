@@ -596,25 +596,25 @@ tr:hover td{background:#f8faff;cursor:pointer}
           <div style="background:#2d1b69;border:1.5px solid #5b21b6;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <div style="flex:1;min-width:160px;">
               <div style="font-weight:800;font-size:0.82rem;color:#c4b5fd;">🟣 Plan Paga al Eliminar</div>
-              <div style="font-size:0.7rem;color:#a78bfa;margin-top:2px;">$10.000 hoy · $95.000 al eliminar c/u · Con acuerdo de pago</div>
+              <div style="font-size:0.7rem;color:#a78bfa;margin-top:2px;">$10.000 hoy · $19.000 al eliminar c/u · Con acuerdo de pago</div>
             </div>
             <button onclick="copiarLink('diferido')" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-diferido">📋 Copiar Link</button>
           </div>
           <!-- Plan 49k -->
           <div style="background:#1e3a5f;border:1.5px solid #1d4ed8;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <div style="flex:1;min-width:160px;">
-              <div style="font-weight:800;font-size:0.82rem;color:#93c5fd;">💳 Plan 1 Multa — $49.000</div>
+              <div style="font-weight:800;font-size:0.82rem;color:#93c5fd;">💳 Plan 1 Multa — $19.000</div>
               <div style="font-size:0.7rem;color:#60a5fa;margin-top:2px;">Pago único · Sin cobros adicionales · Incluye radicación</div>
             </div>
-            <button onclick="copiarLink('49000')" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-49">📋 Copiar Link</button>
+            <button onclick="copiarLink('19000')" style="background:linear-gradient(135deg,#1e40af,#1d4ed8);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-49">📋 Copiar Link</button>
           </div>
           <!-- Plan 79k -->
           <div style="background:#052e16;border:1.5px solid #15803d;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <div style="flex:1;min-width:160px;">
-              <div style="font-weight:800;font-size:0.82rem;color:#86efac;">⭐ Plan Todas las Multas — $79.000</div>
+              <div style="font-weight:800;font-size:0.82rem;color:#86efac;">⭐ Plan Todas las Multas — $19.000</div>
               <div style="font-size:0.7rem;color:#4ade80;margin-top:2px;">Pago único · Cubre todas las multas elegibles</div>
             </div>
-            <button onclick="copiarLink('79000')" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-79">📋 Copiar Link</button>
+            <button onclick="copiarLink('19000')" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;" id="btn-copy-79">📋 Copiar Link</button>
           </div>
         </div>
         <div style="font-size:0.68rem;color:#475569;margin-top:10px;">Copia el link y envíalo al cliente por WhatsApp. El cliente completa su información y descarga su Derecho de Petición.</div>
@@ -1476,7 +1476,7 @@ function syncCampanaLoad() {
       <!-- Selección rápida de plan -->
       <div style="font-size:0.72rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">¿Qué plan pagó?</div>
       <div id="cp-planes-rapidos" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-        <button class="cp-plan-btn" data-plan="individual" data-monto="45000" onclick="seleccionarPlanRapido(this)">
+        <button class="cp-plan-btn" data-plan="individual" data-monto="19000" onclick="seleccionarPlanRapido(this)">
           <div style="font-size:0.8rem;font-weight:700;">Plan Individual</div>
           <div style="font-size:1.1rem;font-weight:900;color:#1d4ed8;">$45.000</div>
           <div style="font-size:0.65rem;color:#64748b;">por multa</div>
@@ -1502,7 +1502,7 @@ function syncCampanaLoad() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
         <div class="form-group-m" style="margin:0;">
           <label>Monto recibido <span style="color:#ef4444;">*</span></label>
-          <input type="number" id="cp-monto" inputmode="numeric" placeholder="Ej. 45000" oninput="limpiarSeleccionPlanRapido()" style="font-size:1rem;font-weight:700;">
+          <input type="number" id="cp-monto" inputmode="numeric" placeholder="Ej. 19000" oninput="limpiarSeleccionPlanRapido()" style="font-size:1rem;font-weight:700;">
         </div>
         <div class="form-group-m" style="margin:0;">
           <label>Canal de pago</label>
@@ -1587,10 +1587,10 @@ function syncCampanaLoad() {
         <p style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin:0 0 7px;">Plan del cliente</p>
         <div style="display:flex;gap:8px;">
           <label style="flex:1;display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #cbd5e1;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--gray800);" id="lbl-plan-una">
-            <input type="radio" name="mm-plan" value="una" id="mm-plan-una" style="accent-color:#1e3a8a;"> $49.000 — Una multa
+            <input type="radio" name="mm-plan" value="una" id="mm-plan-una" style="accent-color:#1e3a8a;"> $19.000 — Una multa
           </label>
           <label style="flex:1;display:flex;align-items:center;gap:7px;background:#fff;border:2px solid #22c55e;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;color:#15803d;" id="lbl-plan-todas">
-            <input type="radio" name="mm-plan" value="todas" id="mm-plan-todas" checked style="accent-color:#16a34a;"> $79.000 — Todas las que apliquen
+            <input type="radio" name="mm-plan" value="todas" id="mm-plan-todas" checked style="accent-color:#16a34a;"> $19.000 — Todas las que apliquen
           </label>
         </div>
       </div>
@@ -1667,9 +1667,9 @@ function syncCampanaLoad() {
         <div class="form-group-m">
           <label>Plan</label>
           <select id="nc-plan" onchange="toggleMultasPlanModal()">
-            <option value="Pago individual — $49.000 c/u">Plan 1 Multa — $49.000</option>
-            <option value="Eliminar todas las que apliquen — $79.000">Plan Todas las Multas — $79.000</option>
-            <option value="diferido">Plan Paga al Eliminar — $10.000 hoy + $95.000 c/u</option>
+            <option value="Pago individual — $19.000 c/u">Plan 1 Multa — $19.000</option>
+            <option value="Eliminar todas las que apliquen — $19.000">Plan Todas las Multas — $19.000</option>
+            <option value="diferido">Plan Paga al Eliminar — $10.000 hoy + $19.000 c/u</option>
           </select>
         </div>
         <!-- Selector de multas y resumen — solo visible en Plan Paga al Eliminar -->
@@ -1686,8 +1686,8 @@ function syncCampanaLoad() {
           <input type="hidden" id="nc-num-multas" value="1">
           <div style="background:#ede9fe;border-radius:8px;padding:10px 12px;font-size:0.8rem;line-height:1.7;">
             <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Pago inicial hoy:</span><strong id="nc-res-hoy" style="color:#0a1628;">$10.000</strong></div>
-            <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Al eliminar c/u:</span><strong style="color:#7c3aed;">$95.000</strong></div>
-            <div style="display:flex;justify-content:space-between;border-top:1px solid #c4b5fd;margin-top:6px;padding-top:6px;"><span style="color:#6b7280;">Total al eliminar <span id="nc-res-n">1</span> multa(s):</span><strong id="nc-res-total" style="color:#7c3aed;font-size:0.9rem;">$95.000</strong></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:#6b7280;">Al eliminar c/u:</span><strong style="color:#7c3aed;">$19.000</strong></div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid #c4b5fd;margin-top:6px;padding-top:6px;"><span style="color:#6b7280;">Total al eliminar <span id="nc-res-n">1</span> multa(s):</span><strong id="nc-res-total" style="color:#7c3aed;font-size:0.9rem;">$19.000</strong></div>
           </div>
         </div>
         <div class="form-group-m">
@@ -1706,7 +1706,7 @@ function syncCampanaLoad() {
         </div>
         <div class="form-group-m" id="nc-monto-wrap" style="display:none;">
           <label>Monto pagado</label>
-          <input type="number" id="nc-monto" placeholder="Ej: 45000">
+          <input type="number" id="nc-monto" placeholder="Ej: 19000">
         </div>
         <div class="form-group-m full-col">
           <label>Multas / Detalles</label>
@@ -1984,9 +1984,9 @@ function loadVisitas(evtBtn){
       if(elConv) elConv.textContent = convRate + '%';
 
       // KPI Ingresos
-      var ingresosMes = totalPagados * 79000;
+      var ingresosMes = totalPagados * 19000;
       var ticketProm  = totalPagados > 0 ? Math.round(ingresosMes / totalPagados) : 0;
-      var potencial   = totalSinPagar * 79000;
+      var potencial   = totalSinPagar * 19000;
       var fmtCOP = function(n){ return '$'+(n>=1000000?(n/1000000).toFixed(1)+'M':(n/1000).toFixed(0)+'K'); };
       var elIng = document.getElementById('vis-ingresos-mes');
       var elTick = document.getElementById('vis-ticket-prom');
@@ -2237,8 +2237,8 @@ function getDemoRows(){
   var limiteVencido = new Date(hoy); limiteVencido.setDate(limiteVencido.getDate()-3);
   var fmt = function(d){ return d.toISOString().slice(0,10); };
   return [
-    {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace10),'Fecha Límite 15d':fmt(limiteProximo),'Respuesta Secretaría':'','Tutela Requerida':'FALSE',Cerrado:'FALSE',Notas:'Demo'},
-    {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':45000,'Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Cerrado:'FALSE',Notas:'Demo — remarketing'},
+    {Fecha:'2025-06-01 10:00:00',Nombres:'Carlos',Apellidos:'Martínez',Cédula:'1234567',Placa:'ABC123',WhatsApp:'3001234567',Email:'carlos@demo.com',Ciudad:'Bogotá',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':19000,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace10),'Fecha Límite 15d':fmt(limiteProximo),'Respuesta Secretaría':'','Tutela Requerida':'FALSE',Cerrado:'FALSE',Notas:'Demo'},
+    {Fecha:'2025-06-02 11:30:00',Nombres:'María',Apellidos:'González',Cédula:'7654321',Placa:'XYZ789',WhatsApp:'3109876543',Email:'maria@demo.com',Ciudad:'Medellín',Plan:'Pago individual — $45.000 c/u','Multas Seleccionadas':1,'Monto Total':19000,'Pago OK':'FALSE',Autorizar:'FALSE','Doc Enviado':'FALSE',Cerrado:'FALSE',Notas:'Demo — remarketing'},
     {Fecha:'2025-06-03 09:00:00',Nombres:'Andrés',Apellidos:'Ruiz',Cédula:'5551234',Placa:'JKL456',WhatsApp:'3201234567',Email:'andres@demo.com',Ciudad:'Cali',Plan:'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u','Multas Seleccionadas':1,'Monto Total':19800,'Pago OK':'TRUE',Autorizar:'TRUE','Doc Enviado':'TRUE','Fecha Radicación':fmt(hace20),'Fecha Límite 15d':fmt(limiteVencido),'Respuesta Secretaría':'Negativa','Tutela Requerida':'TRUE','Tutela Enviada':'FALSE',Cerrado:'FALSE',Notas:'Demo — tutela'},
   ];
 }
@@ -4178,8 +4178,8 @@ function guardarMultasAdmin(){
       var plan      = planEl ? planEl.value : 'todas';
       var numMultas = document.querySelectorAll('#mm-lista .mm-row').length;
       var planTexto = plan === 'una'
-        ? 'la multa seleccionada ($49.000)'
-        : numMultas > 1 ? 'tus ' + numMultas + ' multas ($79.000)' : 'tu multa ($49.000)';
+        ? 'la multa seleccionada ($19.000)'
+        : numMultas > 1 ? 'tus ' + numMultas + ' multas ($19.000)' : 'tu multa ($19.000)';
 
       var msg = '¡Hola ' + nombre + '! 👋 Soy de *JurídicosWeb*.\n\n' +
         '✅ *Tu documento legal está listo.*\n\n' +
@@ -4255,7 +4255,7 @@ function guardarMultasAdmin(){
           var planEl2  = document.querySelector('input[name="mm-plan"]:checked');
           var plan2    = planEl2 ? planEl2.value : 'todas';
           var numM2    = document.querySelectorAll('#mm-lista .mm-row').length;
-          var planTxt2 = plan2 === 'una' ? 'la multa seleccionada ($49.000)' : numM2>1?'tus '+numM2+' multas ($79.000)':'tu multa ($49.000)';
+          var planTxt2 = plan2 === 'una' ? 'la multa seleccionada ($19.000)' : numM2>1?'tus '+numM2+' multas ($19.000)':'tu multa ($19.000)';
           var msg2 = '¡Hola '+nombre2+'! 👋 Soy de *JurídicosWeb*.\n\n✅ *Tu documento legal está listo.*\n\nYa revisamos tu caso en el SIMIT oficial y preparamos el Derecho de Petición para eliminar '+planTxt2+'.\n\n👇 *Abre este link, revisa el documento y fírmalo con el dedo — toma menos de 2 minutos:*\n'+linkFirma2+'\n\n⚖️ Una vez firmes, nosotros lo radicamos el mismo día ante la secretaría de tránsito. Sin más trámites de tu parte.\n\n_JurídicosWeb — Trámite 100% legal · Sin engaños · Sin esperas_';
           var panel2 = document.getElementById('mm-success-panel');
           var waLink2 = document.getElementById('mm-wa-link');
@@ -4531,7 +4531,7 @@ var _cpCasoRow = null;
 
 // Mapa de planes: clave interna → {label, monto, planBtn}
 var CP_PLANES = {
-  'individual':        { label:'Pago individual — $45.000 c/u',                      monto:45000,  btn:'individual' },
+  'individual':        { label:'Pago individual — $45.000 c/u',                      monto:19000,  btn:'individual' },
   'masivo':            { label:'Eliminar todas las que apliquen — $69.000',           monto:69000,  btn:'masivo' },
   'garantia_adelanto': { label:'Plan Garantía — Adelanto $10.000',                    monto:10000,  btn:'garantia_adelanto' },
   'diferido':          { label:'Pago al Eliminar — Adelanto $19.800 + $95.500 c/u',  monto:19800,  btn:'diferido' },
@@ -4552,7 +4552,7 @@ function seleccionarPlanRapido(btn){
   btn.classList.add('selected');
   var key = btn.dataset.plan;
   var n = Number((_cpCasoRow||{})['Multas Seleccionadas']) || 1;
-  var monto = key==='individual' ? 45000*n : Number(btn.dataset.monto);
+  var monto = key==='individual' ? 19000*n : Number(btn.dataset.monto);
   document.getElementById('cp-monto').value = monto;
   document.getElementById('cp-plan').value = CP_PLANES[key] ? CP_PLANES[key].label : key;
 }
@@ -4836,7 +4836,7 @@ function ncSelMultas(n){
   document.getElementById('nc-num-multas').value = n;
   document.querySelectorAll('.nc-mb').forEach(function(b,i){ b.className='nc-mb'+(i+1===n?' active':''); });
   var hoy = '$'+(10000*n).toLocaleString('es-CO');
-  var total = '$'+(95000*n).toLocaleString('es-CO');
+  var total = '$'+(19000*n).toLocaleString('es-CO');
   var rh=document.getElementById('nc-res-hoy'), rn=document.getElementById('nc-res-n'), rt=document.getElementById('nc-res-total');
   if(rh) rh.textContent=hoy;
   if(rn) rn.textContent=n;
@@ -4850,7 +4850,7 @@ function guardarNuevoCaso(){
   var planSel = document.getElementById('nc-plan').value;
   var nMultas = parseInt(document.getElementById('nc-num-multas').value) || 1;
   var plan = planSel === 'diferido'
-    ? 'Pago al Eliminar — Adelanto $'+(10000*nMultas).toLocaleString('es-CO')+' + $95.000 c/u ('+nMultas+' multa'+(nMultas>1?'s':'')+')'
+    ? 'Pago al Eliminar — Adelanto $'+(10000*nMultas).toLocaleString('es-CO')+' + $19.000 c/u ('+nMultas+' multa'+(nMultas>1?'s':'')+')'
     : planSel;
   var datos = {
     nombres:    document.getElementById('nc-nombres').value.trim(),
@@ -4923,7 +4923,7 @@ function exportCSV(){
 
 function copiarLink(plan){
   var base = window.location.origin + window.location.pathname.replace('admin.html','') + 'registro.html?plan=' + plan;
-  var btnId = plan==='diferido' ? 'btn-copy-diferido' : (plan==='49000' ? 'btn-copy-49' : 'btn-copy-79');
+  var btnId = plan==='diferido' ? 'btn-copy-diferido' : (plan==='19000' ? 'btn-copy-49' : 'btn-copy-79');
   var btn = document.getElementById(btnId);
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(base).then(function(){
@@ -5147,7 +5147,7 @@ function renderRemarketing(filtro){
     return (r['Notas']&&r['Notas'].toLowerCase().indexOf('firmado')!==-1)||(r['Ultimo Paso']&&r['Ultimo Paso'].toLowerCase().indexOf('firma')!==-1);
   }).length;
   var conWA = all.filter(function(r){ return r['WhatsApp']||r['Celular']||r['Teléfono']; }).length;
-  var valorPerdido = all.length * 79000;
+  var valorPerdido = all.length * 19000;
 
   // Render stats — usa rmk-kpi en móvil, stat-card en desktop
   var statsData = [

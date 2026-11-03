@@ -247,8 +247,8 @@ body{font-family:'Inter',sans-serif;background:#f1f5f9;color:#1e293b;min-height:
 
       <div class="resumen-fin">
         <div class="res-row"><span class="res-lbl">Pagas <strong>hoy</strong> para iniciar:</span><span class="res-val dark" id="ac-res-hoy">$10.000</span></div>
-        <div class="res-row"><span class="res-lbl">Al eliminar cada multa:</span><span class="res-val">$95.000 c/u</span></div>
-        <div class="res-row"><span class="res-lbl">Total al eliminar <span id="ac-res-n">1</span> multa(s):</span><span class="res-val big" id="ac-res-total">$95.000</span></div>
+        <div class="res-row"><span class="res-lbl">Al eliminar cada multa:</span><span class="res-val">$19.000 c/u</span></div>
+        <div class="res-row"><span class="res-lbl">Total al eliminar <span id="ac-res-n">1</span> multa(s):</span><span class="res-val big" id="ac-res-total">$19.000</span></div>
       </div>
 
       <div class="acuerdo-txt" id="ac-texto"><!-- generado por JS --></div>
@@ -270,7 +270,7 @@ body{font-family:'Inter',sans-serif;background:#f1f5f9;color:#1e293b;min-height:
 <script src="vendor/jspdf.umd.min.js"></script>
 <script>
 // ═══ Estado global ═══
-var urlPlan = new URLSearchParams(window.location.search).get('plan') || '49000';
+var urlPlan = new URLSearchParams(window.location.search).get('plan') || '19000';
 var _nombre='', _cedula='', _wa='', _correo='', _ciudad='';
 var _nMultas = 1;
 var _docFirmaVacia = true, _docCtx = null, _docDibujando = false;
@@ -286,20 +286,20 @@ var MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','se
 
   if(urlPlan==='diferido'){
     badge.className='plan-badge diferido';
-    badge.textContent='Plan Paga al Eliminar — $10.000 hoy + $95.000 c/u al eliminar';
-    infoCard.innerHTML = '<div class="plan-strip diferido"><div class="plan-strip-icon">🟣</div><div><div class="plan-strip-title">Plan Paga al Eliminar</div><div class="plan-strip-sub">$10.000 por multa hoy · $95.000 al eliminar c/u · Firma el acuerdo de pago</div></div></div>';
+    badge.textContent='Plan Paga al Eliminar — $10.000 hoy + $19.000 c/u al eliminar';
+    infoCard.innerHTML = '<div class="plan-strip diferido"><div class="plan-strip-icon">🟣</div><div><div class="plan-strip-title">Plan Paga al Eliminar</div><div class="plan-strip-sub">$10.000 por multa hoy · $19.000 al eliminar c/u · Firma el acuerdo de pago</div></div></div>';
     // Mostrar paso 3
     document.getElementById('dot3-wrap').style.display='flex';
     document.getElementById('line-2').style.display='block';
     pasoLabel = '3 pasos';
-  } else if(urlPlan==='79000'){
+  } else if(urlPlan==='19000'){
     badge.className='plan-badge p79';
-    badge.textContent='Plan Todas las Multas — $79.000 · Pago único';
-    infoCard.innerHTML = '<div class="plan-strip p79"><div class="plan-strip-icon">⭐</div><div><div class="plan-strip-title">Plan Todas las Multas — $79.000</div><div class="plan-strip-sub">Pago único · Sin cobros adicionales · Cubre todas tus multas elegibles</div></div></div>';
+    badge.textContent='Plan Todas las Multas — $19.000 · Pago único';
+    infoCard.innerHTML = '<div class="plan-strip p79"><div class="plan-strip-icon">⭐</div><div><div class="plan-strip-title">Plan Todas las Multas — $19.000</div><div class="plan-strip-sub">Pago único · Sin cobros adicionales · Cubre todas tus multas elegibles</div></div></div>';
   } else {
     badge.className='plan-badge p49';
-    badge.textContent='Plan 1 Multa — $49.000 · Pago único';
-    infoCard.innerHTML = '<div class="plan-strip p49"><div class="plan-strip-icon">💳</div><div><div class="plan-strip-title">Plan 1 Multa — $49.000</div><div class="plan-strip-sub">Pago único · Sin cobros adicionales · Incluye radicación y seguimiento</div></div></div>';
+    badge.textContent='Plan 1 Multa — $19.000 · Pago único';
+    infoCard.innerHTML = '<div class="plan-strip p49"><div class="plan-strip-icon">💳</div><div><div class="plan-strip-title">Plan 1 Multa — $19.000</div><div class="plan-strip-sub">Pago único · Sin cobros adicionales · Incluye radicación y seguimiento</div></div></div>';
   }
 
   // Botón CTA paso 2
@@ -417,7 +417,7 @@ function acSelMultas(n){
   _nMultas=n;
   document.querySelectorAll('#ac-multas-btns .mb').forEach(function(b,i){ b.className='mb'+(i+1===n?' active':''); });
   var hoy='$'+(10000*n).toLocaleString('es-CO');
-  var total='$'+(95000*n).toLocaleString('es-CO');
+  var total='$'+(19000*n).toLocaleString('es-CO');
   document.getElementById('ac-res-hoy').textContent=hoy;
   document.getElementById('ac-res-n').textContent=n;
   document.getElementById('ac-res-total').textContent=total;
@@ -430,20 +430,20 @@ function actualizarTextoAcuerdo(){
   var nom=_nombre||'______________';
   var ced=_cedula||'______________';
   var hoy='$'+(10000*n).toLocaleString('es-CO');
-  var total='$'+(95000*n).toLocaleString('es-CO');
+  var total='$'+(19000*n).toLocaleString('es-CO');
   el.innerHTML='<strong>ACUERDO DE PAGO — JurídicosWeb</strong><br><br>'
     +'Yo, <strong>'+nom+'</strong>, C.C. <strong>'+ced+'</strong>, mediante la presente firma digital acepto:<br><br>'
     +'1. He solicitado el servicio de eliminación de <strong>'+n+' multa(s)</strong>.<br>'
     +'2. Pagaré <strong>'+hoy+'</strong> hoy para iniciar la radicación ('+10000+' × '+n+' multa(s)).<br>'
-    +'3. Al eliminarse cada multa me comprometo a pagar <strong>$95.000 por c/u</strong>, total <strong>'+total+'</strong>.<br>'
+    +'3. Al eliminarse cada multa me comprometo a pagar <strong>$19.000 por c/u</strong>, total <strong>'+total+'</strong>.<br>'
     +'4. Si la multa NO se elimina, NO pago el saldo y JurídicosWeb devuelve el adelanto.<br>'
     +'5. Acepto los términos de servicio de JurídicosWeb (www.juridicosweb.com).';
 }
 
 // ═══ Botón WA planes 49k/79k ═══
 function abrirWaFinal(){
-  var precio = urlPlan==='79000' ? '$79.000' : '$49.000';
-  var planNom = urlPlan==='79000' ? 'Todas las Multas' : '1 Multa';
+  var precio = urlPlan==='19000' ? '$19.000' : '$19.000';
+  var planNom = urlPlan==='19000' ? 'Todas las Multas' : '1 Multa';
   var msg='💳 *Quiero iniciar mi trámite — Plan '+planNom+' ('+precio+')*\n\n'
     +'*Mis datos:*\n'
     +'👤 Nombre: *'+_nombre+'*\n'
@@ -461,7 +461,7 @@ function enviarAcuerdo(){
   if(_acFirmaVacia){ alert('Por favor firma el acuerdo con el dedo antes de continuar.'); return; }
   var n=_nMultas;
   var hoy='$'+(10000*n).toLocaleString('es-CO');
-  var total='$'+(95000*n).toLocaleString('es-CO');
+  var total='$'+(19000*n).toLocaleString('es-CO');
   var msg='✅ *Acuerdo Firmado — Plan Paga al Eliminar*\n\n'
     +'Hola, firmé el acuerdo de pago y quiero iniciar el proceso.\n\n'
     +'*Mis datos:*\n'
@@ -473,7 +473,7 @@ function enviarAcuerdo(){
     +'\n*Acuerdo firmado:*\n'
     +'• Multas: *'+n+' multa(s)*\n'
     +'• Pago hoy: *'+hoy+'*\n'
-    +'• Al eliminar c/u: *$95.000*\n'
+    +'• Al eliminar c/u: *$19.000*\n'
     +'• Total al eliminar: *'+total+'*\n\n'
     +'Adjunto el comprobante de pago de '+hoy+'. Quedo atento/a. 🙏';
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
