@@ -279,6 +279,41 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 .sel-sub{font-size:0.75rem;color:rgba(245,158,11,0.7);text-align:center;margin-bottom:24px;font-weight:700;letter-spacing:.5px;}
 .multas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
 @media(min-width:380px){.multas-grid{grid-template-columns:repeat(6,1fr);}}
+
+/* ═══ MOBILE: hero compacto para que el botón entre sin scroll ═══ */
+@media(max-width:700px){
+  /* Hero: menos padding, quita flecha */
+  .hero{padding:18px 16px 20px;}
+  .arrow-hero{display:none;}
+
+  /* Badge más pequeño */
+  .badge-oferta{font-size:0.7rem;padding:7px 16px;margin-bottom:14px;}
+
+  /* Título más compacto */
+  .hero h1{font-size:1.65rem;margin-bottom:10px;}
+
+  /* Ocultar subtexto largo — ya está el precio y el botón */
+  .hero-sub{display:none;}
+
+  /* Stats en fila muy compacta */
+  .hero-stats{gap:14px;margin-bottom:14px;}
+  .hero-stat-num{font-size:1.3rem;}
+  .hero-stat-lbl{font-size:0.55rem;}
+  .stat-div{height:28px;}
+
+  /* Bloque de precio compacto */
+  .precio-hero{padding:14px 18px;margin-bottom:16px;border-radius:16px;}
+  .precio-tachado{font-size:0.82rem;margin-bottom:3px;}
+  .precio-desde{font-size:0.65rem;margin-bottom:2px;}
+  .precio-val{font-size:2.4rem;}
+  .precio-sub{font-size:0.68rem;margin-top:4px;}
+  .ahorro-strip{padding:6px 10px;margin-top:8px;}
+  .ahorro-strip span{font-size:0.72rem;}
+
+  /* Botón hero compacto pero bien visible */
+  .btn-hero{padding:15px;font-size:0.98rem;border-radius:14px;max-width:100%;}
+  .btn-hero .sub{font-size:0.68rem;}
+}
 .multa-btn{
   padding:16px 4px;border-radius:16px;
   border:2px solid rgba(245,158,11,0.2);
