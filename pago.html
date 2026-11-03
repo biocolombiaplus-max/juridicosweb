@@ -3,162 +3,472 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elimina tus Multas — JurídicosWeb</title>
+<title>Elimina tus Multas Hoy — JurídicosWeb | 100% Legal</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --navy:#0a1628;--navy2:#0f2040;
-  --gold:#f59e0b;--gold-dark:#d97706;--gold-light:#fef3c7;
-  --green:#16a34a;--green2:#15803d;--red:#dc2626;--white:#fff;
-  --gray:#64748b;--gray-light:#f8fafc;--blue:#1d4ed8;
+  --navy:#050e1a;--navy2:#0a1f3d;--navy3:#0f2a50;
+  --gold:#f59e0b;--gold2:#fbbf24;--gold-dark:#d97706;--gold-light:#fef3c7;
+  --green:#16a34a;--green2:#22c55e;--green3:#15803d;
+  --red:#dc2626;--red2:#ef4444;
+  --blue:#1d4ed8;--blue2:#2563eb;--blue3:#3b82f6;
+  --white:#fff;--gray:#64748b;--gray2:#94a3b8;--gray3:#f8fafc;
 }
+html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden;}
 
-.header{background:rgba(0,0,0,0.3);backdrop-filter:blur(10px);padding:14px 20px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-bottom:1px solid rgba(245,158,11,0.2);position:sticky;top:0;z-index:100;}
-.logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--white);letter-spacing:-0.5px;}
-.logo span{color:var(--gold);}
-.logo-sub{font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;}
-
-.hero{background:linear-gradient(160deg,#0a1628 0%,#0f2040 40%,#1a1a2e 100%);padding:40px 20px 48px;text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(245,158,11,0.12) 0%,transparent 60%);}
-.hero > * {position:relative;z-index:1;}
-.badge-oferta{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);padding:7px 18px;border-radius:999px;font-size:0.78rem;font-weight:900;letter-spacing:1px;margin-bottom:18px;animation:pulseBadge 1.8s infinite;box-shadow:0 4px 20px rgba(245,158,11,0.5);}
-@keyframes pulseBadge{0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5);}50%{box-shadow:0 6px 32px rgba(245,158,11,0.8);}}
-.hero h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--white);line-height:1.15;margin-bottom:12px;max-width:480px;margin-left:auto;margin-right:auto;}
-.hero h1 em{color:var(--gold);font-style:normal;}
-.hero-sub{color:rgba(255,255,255,0.7);font-size:0.85rem;max-width:400px;margin:0 auto 22px;line-height:1.6;}
-.precio-wrap{margin-bottom:24px;}
-.precio-normal{font-size:0.95rem;color:rgba(255,255,255,0.5);margin-bottom:4px;}
-.precio-normal s{color:#ef4444;font-weight:700;}
-.precio-hoy{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
-.precio-hoy-label{font-size:0.82rem;color:rgba(255,255,255,0.6);font-weight:600;}
-.precio-hoy-val{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(245,158,11,0.6);}
-.precio-note{font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:6px;}
-.precio-note strong{color:var(--gold-light);font-weight:700;}
-.arrow-down{font-size:1.4rem;animation:bounceDown 1.4s infinite;display:block;margin-top:8px;}
-@keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
-
-.section-light{background:var(--white);color:var(--navy);}
-.section-dark{background:var(--navy2);}
-.wrap{max-width:560px;margin:0 auto;padding:36px 18px;}
-.section-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:24px;}
-.section-title.gold{color:var(--gold);}
-.section-title.dark{color:var(--navy);}
-
-.steps{display:flex;flex-direction:column;gap:0;}
-.step{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid rgba(245,158,11,0.12);}
-.step:last-child{border-bottom:none;}
-.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);font-size:1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.step-body h3{font-size:0.92rem;font-weight:800;color:var(--navy);margin-bottom:3px;}
-.step-body p{font-size:0.75rem;color:var(--gray);line-height:1.5;}
-.step-icon{font-size:1.2rem;margin-bottom:3px;}
-
-/* ── SELECTOR MULTAS ── */
-.selector-wrap{background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.02));border:1.5px solid rgba(245,158,11,0.25);border-radius:20px;padding:24px 18px;margin-bottom:22px;}
-.sel-titulo{font-size:1rem;font-weight:800;color:var(--white);text-align:center;margin-bottom:16px;}
-.multas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
-@media(min-width:380px){.multas-grid{grid-template-columns:repeat(6,1fr);}}
-.multa-btn{padding:11px 4px;border-radius:11px;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);font-weight:800;font-size:0.88rem;cursor:pointer;transition:all 0.15s;text-align:center;}
-.multa-btn .num{font-size:1.15rem;display:block;line-height:1;}
-.multa-btn .lbl{font-size:0.55rem;opacity:0.7;}
-.multa-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border-color:var(--gold);box-shadow:0 4px 18px rgba(245,158,11,0.5);}
-.total-wrap{text-align:center;margin-bottom:16px;}
-.total-label{font-size:0.7rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-.total-val{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 30px rgba(245,158,11,0.5);}
-.total-ahorro{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;}
-
-/* BOTÓN PRINCIPAL */
-.btn-ir-pago{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:14px;padding:18px;font-size:1.05rem;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 32px rgba(22,163,74,0.55);animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;}
-@keyframes pulseGreen{0%,100%{box-shadow:0 6px 32px rgba(22,163,74,0.5);}50%{box-shadow:0 8px 48px rgba(22,163,74,0.8);}}
-.btn-ir-pago::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2s infinite;}
+/* ═══════════ ANIMACIONES ═══════════ */
 @keyframes shimmer{0%{left:-100%;}100%{left:150%;}}
-.btn-ir-pago .sub{font-size:0.67rem;font-weight:600;opacity:0.85;}
+@keyframes pulseGold{0%,100%{box-shadow:0 6px 32px rgba(245,158,11,0.5);}50%{box-shadow:0 10px 52px rgba(245,158,11,0.9);}}
+@keyframes pulseGreen{0%,100%{box-shadow:0 6px 32px rgba(22,163,74,0.5);}50%{box-shadow:0 10px 52px rgba(22,163,74,0.8);}}
+@keyframes pulseRed{0%,100%{box-shadow:0 4px 20px rgba(220,38,38,0.5);}50%{box-shadow:0 8px 36px rgba(220,38,38,0.9);}}
+@keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(9px);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes countGlow{0%,100%{text-shadow:0 0 20px rgba(245,158,11,0.4);}50%{text-shadow:0 0 60px rgba(245,158,11,0.9),0 0 100px rgba(245,158,11,0.5);}}
+@keyframes borderGlow{0%,100%{border-color:rgba(245,158,11,0.4);}50%{border-color:rgba(245,158,11,0.9);}}
+@keyframes floatPart{0%,100%{transform:translateY(0) rotate(0deg);opacity:.6;}50%{transform:translateY(-18px) rotate(180deg);opacity:1;}}
+@keyframes gradMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
 
-/* GARANTÍAS */
-.garantias-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.garantia-card{background:rgba(255,255,255,0.03);border:1px solid rgba(245,158,11,0.2);border-radius:13px;padding:14px 12px;text-align:center;}
-.garantia-icon{font-size:1.5rem;margin-bottom:6px;display:block;}
-.garantia-title{font-size:0.8rem;font-weight:800;color:var(--white);margin-bottom:3px;}
-.garantia-desc{font-size:0.67rem;color:rgba(255,255,255,0.5);line-height:1.4;}
+/* ═══════════ HEADER ═══════════ */
+.header{
+  background:rgba(5,14,26,0.92);
+  backdrop-filter:blur(16px);
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;
+  border-bottom:1px solid rgba(245,158,11,0.25);
+  position:sticky;top:0;z-index:200;
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--white);letter-spacing:-0.5px;}
+.logo span{color:var(--gold);}
+.logo-sub{font-size:0.6rem;color:rgba(255,255,255,0.45);letter-spacing:3px;text-transform:uppercase;}
 
-/* APLICAN */
-.aplican-list{display:flex;flex-direction:column;gap:8px;}
-.aplica-item{display:flex;align-items:flex-start;gap:10px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:11px;padding:12px;}
-.aplica-check{width:22px;height:22px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;color:var(--navy);font-weight:900;}
-.aplica-txt{font-size:0.8rem;color:var(--navy);line-height:1.5;font-weight:500;}
-.aplica-txt strong{font-weight:800;}
+/* ═══════════ HERO ═══════════ */
+.hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#050e1a 0%,#0a1f3d 35%,#091830 65%,#050e1a 100%);
+  padding:52px 20px 64px;text-align:center;
+  min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 20%,rgba(245,158,11,0.08) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 80%,rgba(29,78,216,0.1) 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 0%,rgba(245,158,11,0.06) 0%,transparent 40%);
+}
+/* Partículas decorativas */
+.hero-part{position:absolute;border-radius:50%;pointer-events:none;animation:floatPart linear infinite;}
+.hero-part:nth-child(1){width:6px;height:6px;background:var(--gold);top:15%;left:12%;animation-duration:5s;}
+.hero-part:nth-child(2){width:4px;height:4px;background:var(--green2);top:28%;left:82%;animation-duration:7s;animation-delay:1s;}
+.hero-part:nth-child(3){width:5px;height:5px;background:var(--blue3);top:60%;left:8%;animation-duration:6s;animation-delay:2s;}
+.hero-part:nth-child(4){width:3px;height:3px;background:var(--gold2);top:72%;left:75%;animation-duration:8s;animation-delay:.5s;}
+.hero-part:nth-child(5){width:4px;height:4px;background:rgba(255,255,255,0.5);top:40%;left:90%;animation-duration:9s;animation-delay:3s;}
+.hero > *{position:relative;z-index:1;}
 
-/* ══════════════════════════
-   SECCIÓN OPCIONES DE PAGO
-══════════════════════════ */
+.badge-oferta{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--red),var(--red2));
+  color:var(--white);padding:9px 22px;border-radius:999px;
+  font-size:0.8rem;font-weight:900;letter-spacing:1.5px;
+  margin-bottom:26px;animation:pulseRed 1.6s infinite;
+  box-shadow:0 4px 24px rgba(220,38,38,0.55);
+  text-transform:uppercase;
+}
+.badge-dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:pulseRed 1s infinite;}
+
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,7vw,3.2rem);
+  font-weight:900;color:var(--white);line-height:1.1;
+  margin-bottom:18px;max-width:540px;
+}
+.hero h1 em{color:var(--gold);font-style:normal;}
+.hero-sub{color:rgba(255,255,255,0.65);font-size:0.95rem;max-width:440px;margin:0 auto 32px;line-height:1.7;}
+
+/* Precio hero */
+.precio-hero{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(245,158,11,0.3);
+  border-radius:24px;padding:28px 32px;
+  margin:0 auto 32px;max-width:380px;width:100%;
+  backdrop-filter:blur(12px);
+  animation:borderGlow 2.5s infinite;
+}
+.precio-tachado{font-size:1rem;color:rgba(255,255,255,0.45);margin-bottom:6px;}
+.precio-tachado s{color:var(--red2);font-weight:700;font-size:1.1rem;}
+.precio-tag{
+  display:inline-block;background:linear-gradient(135deg,var(--red),#b91c1c);
+  color:#fff;font-size:0.7rem;font-weight:900;padding:3px 10px;
+  border-radius:999px;margin-left:8px;vertical-align:middle;letter-spacing:.5px;
+}
+.precio-desde{font-size:0.75rem;color:var(--gray2);margin-bottom:4px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.precio-val{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.8rem,10vw,4rem);font-weight:900;
+  color:var(--gold);line-height:1;
+  text-shadow:0 0 60px rgba(245,158,11,0.6);
+  animation:countGlow 2s infinite;
+}
+.precio-sub{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:8px;line-height:1.5;}
+.precio-sub strong{color:var(--gold-light);font-weight:700;}
+.ahorro-strip{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(22,163,74,0.15);border:1px solid rgba(34,197,94,0.3);
+  border-radius:10px;padding:8px 14px;margin-top:14px;
+}
+.ahorro-strip span{font-size:0.78rem;font-weight:800;color:var(--green2);}
+
+/* Stats counter */
+.hero-stats{
+  display:flex;align-items:center;justify-content:center;gap:28px;
+  margin-bottom:32px;flex-wrap:wrap;
+}
+.hero-stat{text-align:center;}
+.hero-stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;color:var(--gold);}
+.hero-stat-lbl{font-size:0.62rem;color:var(--gray2);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.stat-div{width:1px;height:36px;background:rgba(245,158,11,0.25);}
+
+.btn-hero{
+  width:100%;max-width:400px;
+  background:linear-gradient(135deg,var(--green),var(--green3));
+  color:#fff;border:none;border-radius:18px;padding:20px;
+  font-size:1.1rem;font-weight:900;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  box-shadow:0 8px 40px rgba(22,163,74,0.6);
+  animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;
+}
+.btn-hero::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2s infinite;}
+.btn-hero .sub{font-size:0.72rem;font-weight:600;opacity:0.85;}
+.arrow-hero{font-size:1.5rem;animation:bounceDown 1.2s infinite;margin-top:20px;display:block;}
+
+/* ═══════════ SOCIAL PROOF ═══════════ */
+.proof-bar{
+  background:linear-gradient(135deg,var(--green3),#166534);
+  padding:14px 20px;text-align:center;
+  border-top:1px solid rgba(34,197,94,0.3);
+  border-bottom:1px solid rgba(34,197,94,0.3);
+}
+.proof-bar-inner{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;max-width:600px;margin:0 auto;}
+.proof-bar-inner span{font-size:0.82rem;font-weight:700;color:#d1fae5;}
+.proof-bar-inner strong{color:#fff;}
+
+/* ═══════════ SECCIONES ═══════════ */
+.section-white{background:#fff;color:#0f172a;}
+.section-dark{background:var(--navy2);}
+.section-darker{background:var(--navy);}
+.wrap{max-width:580px;margin:0 auto;padding:52px 18px;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:8px;}
+.section-title.gold{color:var(--gold);}
+.section-title.dark{color:#0f172a;}
+.section-title.white{color:#fff;}
+.section-sub{text-align:center;font-size:0.82rem;color:var(--gray2);margin-bottom:32px;line-height:1.6;}
+.section-sub.dark{color:#64748b;}
+.gold-line{width:56px;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px;margin:10px auto 28px;}
+
+/* ═══════════ PASOS CÓMO FUNCIONA ═══════════ */
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:flex;align-items:flex-start;gap:16px;padding:22px 0;border-bottom:1px solid rgba(29,78,216,0.1);}
+.step:last-child{border-bottom:none;}
+.step-num{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue2),var(--blue));
+  color:#fff;font-size:1.1rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(37,99,235,0.4);
+}
+.step-body h3{font-size:0.95rem;font-weight:800;color:#0f172a;margin-bottom:4px;}
+.step-body p{font-size:0.78rem;color:var(--gray);line-height:1.6;}
+.step-icon{font-size:1.5rem;margin-bottom:4px;}
+
+/* ═══════════ GARANTÍAS ═══════════ */
+.garantias-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.garantia-card{
+  background:linear-gradient(135deg,var(--navy3),var(--navy2));
+  border:1px solid rgba(245,158,11,0.2);border-radius:16px;
+  padding:18px 14px;text-align:center;transition:.2s;
+}
+.garantia-card:hover{border-color:rgba(245,158,11,0.5);transform:translateY(-2px);}
+.garantia-icon{font-size:1.8rem;margin-bottom:8px;display:block;}
+.garantia-title{font-size:0.82rem;font-weight:800;color:#fff;margin-bottom:4px;}
+.garantia-desc{font-size:0.67rem;color:var(--gray2);line-height:1.5;}
+
+/* Escudo garantía grande */
+.shield-wrap{
+  background:linear-gradient(135deg,#052e16,#14532d);
+  border:2px solid rgba(34,197,94,0.4);border-radius:20px;
+  padding:28px 20px;text-align:center;margin-top:24px;
+  box-shadow:0 0 40px rgba(22,163,74,0.15);
+}
+.shield-icon{font-size:3.5rem;display:block;margin-bottom:10px;}
+.shield-title{font-size:1.05rem;font-weight:900;color:var(--green2);margin-bottom:6px;}
+.shield-desc{font-size:0.8rem;color:#bbf7d0;line-height:1.6;}
+
+/* ═══════════ APLICAN ═══════════ */
+.aplican-list{display:flex;flex-direction:column;gap:10px;}
+.aplica-item{
+  display:flex;align-items:flex-start;gap:12px;
+  background:linear-gradient(135deg,rgba(245,158,11,0.04),rgba(245,158,11,0.01));
+  border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:14px;
+  transition:.2s;
+}
+.aplica-item:hover{border-color:rgba(245,158,11,0.45);}
+.aplica-check{
+  width:26px;height:26px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:0.78rem;color:var(--navy);font-weight:900;
+  box-shadow:0 2px 10px rgba(245,158,11,0.4);
+}
+.aplica-txt{font-size:0.82rem;color:#e2e8f0;line-height:1.6;}
+.aplica-txt strong{color:var(--gold-light);font-weight:800;}
+
+/* ═══════════ TESTIMONIOS ═══════════ */
+.testimonios{display:flex;flex-direction:column;gap:14px;}
+.testimonio{
+  background:rgba(255,255,255,0.97);border-radius:18px;padding:20px;
+  border:1px solid rgba(245,158,11,0.2);
+  box-shadow:0 4px 24px rgba(0,0,0,0.12);
+  animation:fadeUp .5s ease both;
+}
+.test-stars{color:var(--gold);font-size:1.05rem;margin-bottom:8px;letter-spacing:2px;}
+.test-text{font-size:0.84rem;color:#1e293b;line-height:1.65;margin-bottom:12px;font-style:italic;}
+.test-author{display:flex;align-items:center;gap:10px;}
+.test-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue2),var(--blue3));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.test-name{font-size:0.82rem;font-weight:800;color:#0f172a;}
+.test-city{font-size:0.7rem;color:var(--gray);font-weight:500;}
+.test-badge{font-size:0.65rem;font-weight:800;color:var(--green);background:#f0fdf4;border:1px solid #bbf7d0;padding:2px 8px;border-radius:999px;}
+
+/* ═══════════ POR QUÉ FUNCIONA ═══════════ */
+.legal-grid{display:flex;flex-direction:column;gap:14px;}
+.legal-card{
+  display:flex;align-items:flex-start;gap:14px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;padding:16px;
+}
+.legal-icon{font-size:1.8rem;flex-shrink:0;}
+.legal-body h3{font-size:0.9rem;font-weight:800;color:#fff;margin-bottom:4px;}
+.legal-body p{font-size:0.76rem;color:var(--gray2);line-height:1.55;}
+.legal-tag{display:inline-block;background:rgba(245,158,11,0.15);color:var(--gold);font-size:0.62rem;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:5px;}
+
+/* ═══════════ SELECTOR MULTAS ═══════════ */
+#seccion-selector{scroll-margin-top:70px;}
+.selector-card{
+  background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.02));
+  border:2px solid rgba(245,158,11,0.3);border-radius:24px;
+  padding:28px 20px;margin-bottom:24px;
+  box-shadow:0 0 40px rgba(245,158,11,0.08);
+  animation:borderGlow 3s infinite;
+}
+.sel-titulo{font-size:1.05rem;font-weight:900;color:#fff;text-align:center;margin-bottom:8px;}
+.sel-sub{font-size:0.72rem;color:var(--gray2);text-align:center;margin-bottom:20px;}
+.multas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}
+@media(min-width:380px){.multas-grid{grid-template-columns:repeat(6,1fr);}}
+.multa-btn{
+  padding:13px 4px;border-radius:13px;
+  border:2px solid rgba(245,158,11,0.25);
+  background:rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.55);font-weight:800;font-size:0.9rem;
+  cursor:pointer;transition:all 0.18s;text-align:center;
+}
+.multa-btn .num{font-size:1.2rem;display:block;line-height:1.1;}
+.multa-btn .lbl{font-size:0.55rem;opacity:0.65;display:block;}
+.multa-btn.active{
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--navy);border-color:var(--gold);
+  box-shadow:0 4px 20px rgba(245,158,11,0.55);
+  transform:scale(1.06);
+}
+.total-wrap{text-align:center;margin-bottom:20px;}
+.total-label{font-size:0.7rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+.total-val{
+  font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;
+  color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(245,158,11,0.5);
+}
+.total-desc{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:6px;}
+.ahorro-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,rgba(22,163,74,0.2),rgba(22,163,74,0.1));
+  border:1px solid rgba(34,197,94,0.35);
+  color:var(--green2);font-size:0.75rem;font-weight:800;
+  padding:6px 14px;border-radius:999px;margin-top:8px;
+}
+
+.btn-pagar-main{
+  width:100%;
+  background:linear-gradient(135deg,var(--green),var(--green3),var(--green));
+  background-size:200% 100%;
+  color:#fff;border:none;border-radius:16px;padding:20px;
+  font-size:1.05rem;font-weight:900;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  box-shadow:0 8px 36px rgba(22,163,74,0.6);
+  animation:pulseGreen 1.8s infinite,gradMove 3s infinite;
+  position:relative;overflow:hidden;
+}
+.btn-pagar-main::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2s infinite;}
+.btn-pagar-main .sub{font-size:0.7rem;font-weight:600;opacity:0.88;}
+
+/* ═══════════ URGENCIA ═══════════ */
+.urgencia-bar{
+  background:linear-gradient(135deg,#450a0a,var(--red));
+  padding:10px 16px;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+}
+.urgencia-bar span{font-size:0.8rem;font-weight:800;color:#fff;}
+.urgencia-dot{width:8px;height:8px;background:#fbbf24;border-radius:50%;animation:pulseRed 1s infinite;flex-shrink:0;}
+
+/* ═══════════ SECCIÓN PAGO ═══════════ */
 #seccion-pago{scroll-margin-top:70px;}
 
+.pago-monto-card{
+  background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.04));
+  border:1.5px solid rgba(245,158,11,0.35);border-radius:16px;
+  padding:16px 18px;margin-bottom:22px;text-align:center;
+  box-shadow:0 0 30px rgba(245,158,11,0.08);
+}
+.pago-monto-lbl{font-size:0.65rem;color:var(--gray2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;font-weight:600;}
+.pago-monto-val{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--gold);text-shadow:0 0 24px rgba(245,158,11,0.4);}
+.pago-monto-n{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:3px;}
+
 /* Opción 1: Llave Breve */
-.pago-llave{background:linear-gradient(135deg,#052e16,#14532d);border:2px solid var(--green);border-radius:18px;overflow:hidden;margin-bottom:10px;box-shadow:0 8px 36px rgba(22,163,74,0.35);}
-.pago-llave-head{background:linear-gradient(135deg,var(--green),var(--green2));padding:14px 16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;}
+.pago-llave{
+  background:linear-gradient(150deg,#052e16,#0d3d1e,#052e16);
+  border:2px solid var(--green);border-radius:22px;overflow:hidden;
+  margin-bottom:10px;
+  box-shadow:0 10px 50px rgba(22,163,74,0.35),0 0 0 1px rgba(34,197,94,0.1);
+}
+.pago-llave-head{
+  background:linear-gradient(135deg,var(--green),#1a8c3e,var(--green3));
+  padding:16px 18px;display:flex;align-items:center;gap:12px;
+  position:relative;overflow:hidden;
+}
 .pago-llave-head::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmer 2.5s infinite;}
-.llave-badge{font-size:0.55rem;font-weight:900;background:#fbbf24;color:#78350f;padding:3px 8px;border-radius:999px;letter-spacing:.5px;white-space:nowrap;}
-.pago-llave-body{padding:16px;}
-.llave-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
-.llave-card-left .llave-label{font-size:0.58rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
-.llave-card-left .llave-key{font-size:1.55rem;font-weight:900;color:#0c4a6e;letter-spacing:2px;font-family:'Inter',monospace;}
-.btn-copiar-key{background:linear-gradient(135deg,#0369a1,#0284c7);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-size:0.8rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-.titular-note{font-size:0.7rem;color:#64748b;margin-top:4px;}
+.llave-head-icon{background:rgba(255,255,255,0.2);border-radius:12px;padding:10px;font-size:1.4rem;flex-shrink:0;}
+.llave-head-info{flex:1;min-width:0;}
+.llave-rec-badge{
+  display:inline-block;background:#fbbf24;color:#78350f;
+  font-size:0.55rem;font-weight:900;padding:3px 9px;
+  border-radius:999px;letter-spacing:.5px;margin-bottom:5px;
+}
+.llave-head-title{font-size:0.95rem;font-weight:900;color:#fff;line-height:1.2;}
+.llave-head-sub{font-size:0.65rem;color:#bbf7d0;margin-top:2px;font-weight:600;}
 
-.pasos-nequi{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:13px;margin-bottom:14px;}
-.pasos-nequi-title{font-size:0.72rem;font-weight:800;color:#1e40af;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
-.paso-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+.pago-llave-body{padding:18px;}
+
+.llave-card{
+  background:#fff;border-radius:14px;padding:14px 16px;
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.12);
+}
+.llave-card-left .llave-label{font-size:0.6rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.llave-card-left .llave-key{font-size:1.7rem;font-weight:900;color:#0c4a6e;letter-spacing:3px;font-family:'Inter',monospace;}
+.titular-note{font-size:0.68rem;color:#94a3b8;margin-top:3px;}
+.btn-copiar-key{
+  background:linear-gradient(135deg,#0369a1,#0284c7);color:#fff;
+  border:none;border-radius:10px;padding:12px 20px;
+  font-size:0.82rem;font-weight:800;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(3,105,161,0.4);
+  transition:.2s;
+}
+.btn-copiar-key:active{transform:scale(.96);}
+
+.pasos-nequi{
+  background:linear-gradient(135deg,#eff6ff,#f0f9ff);
+  border:1.5px solid #bfdbfe;border-radius:14px;padding:15px;margin-bottom:16px;
+}
+.pasos-nequi-title{font-size:0.72rem;font-weight:900;color:#1e40af;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;}
+.paso-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;}
 .paso-row:last-child{margin-bottom:0;}
-.paso-num{width:22px;height:22px;border-radius:50%;background:#1d4ed8;color:#fff;font-size:0.65rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.paso-num.green{background:var(--green);}
-.paso-txt{font-size:0.77rem;color:#1e3a5f;line-height:1.45;}
+.paso-num{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue2),var(--blue));
+  color:#fff;font-size:0.68rem;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  box-shadow:0 2px 8px rgba(29,78,216,0.4);
+}
+.paso-num.green{background:linear-gradient(135deg,var(--green),var(--green3));}
+.paso-txt{font-size:0.78rem;color:#1e3a5f;line-height:1.5;}
 
-.btn-confirmar-wa{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:12px;padding:15px;font-size:0.95rem;font-weight:900;cursor:pointer;box-shadow:0 5px 22px rgba(22,163,74,0.5);animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;margin-bottom:4px;}
+.btn-confirmar-wa{
+  width:100%;background:linear-gradient(135deg,var(--green),var(--green3));
+  color:#fff;border:none;border-radius:13px;padding:16px;
+  font-size:0.95rem;font-weight:900;cursor:pointer;
+  box-shadow:0 6px 26px rgba(22,163,74,0.55);
+  animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;margin-bottom:5px;
+}
 .btn-confirmar-wa::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmer 2s infinite;}
 .nota-wa{text-align:center;color:#86efac;font-size:0.68rem;}
 
-/* Separador OR */
-.or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;}
-.or-sep-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(148,163,184,0.4));}
+/* OR separator */
+.or-sep{display:flex;align-items:center;gap:12px;margin:14px 0;}
+.or-sep-line{flex:1;height:1px;}
+.or-sep-line.left{background:linear-gradient(90deg,transparent,rgba(148,163,184,0.4));}
 .or-sep-line.right{background:linear-gradient(90deg,rgba(148,163,184,0.4),transparent);}
-.or-sep-txt{font-size:0.65rem;font-weight:800;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+.or-sep-txt{font-size:0.65rem;font-weight:800;color:#475569;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
 
 /* Opción 2: ePayco */
-.pago-epayco{background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #334155;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.pago-epayco-head{padding:12px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.06);}
-.epayco-label{font-size:0.6rem;color:#64748b;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.pago-epayco{
+  background:linear-gradient(150deg,#0f172a,#1e293b,#0f1f3d);
+  border:1.5px solid rgba(59,130,246,0.35);border-radius:22px;overflow:hidden;
+  box-shadow:0 8px 36px rgba(29,78,216,0.2);
+}
+.pago-epayco-head{padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.epayco-label{font-size:0.62rem;color:#64748b;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
 .epayco-logos{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
-.logo-visa{background:#1a1f71;border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;font-style:italic;}
-.logo-mc{display:flex;align-items:center;background:#1c1917;border-radius:5px;padding:4px 8px;gap:3px;}
-.logo-mc .c1{width:15px;height:15px;background:#eb001b;border-radius:50%;margin-right:-5px;}
-.logo-mc .c2{width:15px;height:15px;background:#f79e1b;border-radius:50%;}
-.logo-mc span{font-size:0.62rem;color:#d4d4d4;font-weight:700;margin-left:3px;}
-.logo-pse{background:linear-gradient(135deg,#006633,#009933);border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;}
-.logo-nequi{background:linear-gradient(135deg,#5B21B6,#7C3AED);border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;}
-.logo-bc{background:#FFCC00;border-radius:5px;padding:4px 11px;font-size:0.68rem;font-weight:900;color:#000;}
-.pago-epayco-body{padding:14px 16px 16px;}
-.btn-epayco{width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6);color:#fff;border:none;border-radius:13px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 28px rgba(37,99,235,0.55);position:relative;overflow:hidden;margin-bottom:6px;}
+.logo-visa{background:#1a1f71;border-radius:6px;padding:5px 13px;font-size:0.78rem;font-weight:900;color:#fff;font-style:italic;letter-spacing:1px;}
+.logo-mc{display:flex;align-items:center;background:#2a2520;border-radius:6px;padding:5px 10px;gap:3px;}
+.logo-mc .c1{width:16px;height:16px;background:#eb001b;border-radius:50%;margin-right:-6px;}
+.logo-mc .c2{width:16px;height:16px;background:#f79e1b;border-radius:50%;}
+.logo-mc span{font-size:0.65rem;color:#d4d4d4;font-weight:700;margin-left:5px;}
+.logo-pse{background:linear-gradient(135deg,#006633,#009933);border-radius:6px;padding:5px 13px;font-size:0.78rem;font-weight:900;color:#fff;}
+.logo-nequi{background:linear-gradient(135deg,#5B21B6,#7C3AED);border-radius:6px;padding:5px 13px;font-size:0.78rem;font-weight:900;color:#fff;}
+.logo-bc{background:#FFCC00;border-radius:6px;padding:5px 13px;font-size:0.72rem;font-weight:900;color:#000;}
+.pago-epayco-body{padding:16px 18px 18px;}
+.btn-epayco{
+  width:100%;
+  background:linear-gradient(135deg,var(--blue),var(--blue2),var(--blue3));
+  color:#fff;border:none;border-radius:14px;padding:18px;
+  font-size:1rem;font-weight:900;cursor:pointer;
+  box-shadow:0 8px 32px rgba(29,78,216,0.55);
+  position:relative;overflow:hidden;margin-bottom:8px;transition:.2s;
+}
 .btn-epayco::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite;}
-.nota-epayco{text-align:center;color:#64748b;font-size:0.67rem;}
+.btn-epayco:active{transform:scale(.98);}
+.nota-epayco{text-align:center;color:#64748b;font-size:0.68rem;line-height:1.5;}
+.ssl-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);}
+.ssl-badge{font-size:0.62rem;color:#475569;}
 
-/* SSL badge */
-.ssl-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
-.ssl-badge{font-size:0.62rem;color:#475569;display:flex;align-items:center;gap:4px;}
+/* ═══════════ FOOTER PREMIUM ═══════════ */
+.footer-premium{
+  background:linear-gradient(135deg,#020810,#050e1a);
+  padding:36px 20px 24px;
+  border-top:1px solid rgba(245,158,11,0.15);
+}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:4px;}
+.footer-logo span{color:var(--gold);}
+.footer-tagline{font-size:0.7rem;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;}
+.footer-contacts{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.footer-contact{display:flex;align-items:center;gap:10px;font-size:0.8rem;color:rgba(255,255,255,0.55);}
+.footer-contact strong{color:rgba(255,255,255,0.85);}
+.footer-legal{font-size:0.65rem;color:rgba(255,255,255,0.25);line-height:1.6;border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;text-align:center;}
 
-/* FOOTER */
-.footer{background:#050d1a;padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.68rem;border-top:1px solid rgba(245,158,11,0.1);}
-.divider-gold{height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.3),transparent);}
-
-/* Toast */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#16a34a;color:#fff;padding:12px 22px;border-radius:12px;font-size:0.85rem;font-weight:700;z-index:9999;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap;}
+/* ═══════════ TOAST ═══════════ */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);padding:12px 24px;border-radius:14px;font-size:0.85rem;font-weight:700;z-index:9999;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 
-/* Loading overlay para ePayco */
-#epayco-loading{display:none;position:fixed;inset:0;background:rgba(10,22,40,0.92);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+/* Loading ePayco */
+#epayco-loading{display:none;position:fixed;inset:0;background:rgba(5,14,26,0.94);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
 #epayco-loading.show{display:flex;}
-.epayco-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,0.15);border-top:4px solid #3b82f6;border-radius:50%;animation:spin .9s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+.epayco-spinner{width:46px;height:46px;border:4px solid rgba(255,255,255,0.12);border-top:4px solid var(--blue3);border-radius:50%;animation:spin .9s linear infinite;}
+
+.divider-gold{height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.35),transparent);}
 </style>
 </head>
 <body>
@@ -166,58 +476,116 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 <div id="toast"></div>
 <div id="epayco-loading">
   <div class="epayco-spinner"></div>
-  <p style="color:#94a3b8;font-size:0.85rem;font-weight:600;">Cargando pasarela de pago segura…</p>
+  <p style="color:#94a3b8;font-size:0.85rem;font-weight:600;">Cargando pasarela segura…</p>
+  <p style="color:#64748b;font-size:0.72rem;">SSL 256 bits · ePayco Colombia</p>
 </div>
 
-<!-- HEADER -->
+<!-- ══════════ HEADER ══════════ -->
 <div class="header">
   <div class="logo">Jurídicos<span>Web</span></div>
-  <div class="logo-sub">Eliminamos tus multas · 100% legal</div>
+  <div class="logo-sub">Eliminamos tus multas · 100% Legal · Colombia</div>
 </div>
 
-<!-- HERO -->
+<!-- ══════════ HERO ══════════ -->
 <div class="hero">
-  <div class="badge-oferta">⚡ OFERTA SOLO POR HOY</div>
-  <h1>Elimina tus multas<br><em>hoy mismo</em></h1>
-  <p class="hero-sub">Proceso 100% legal · Derecho de Petición oficial · En menos de 2 minutos tienes el trámite radicado</p>
-  <div class="precio-wrap">
-    <div class="precio-normal">Precio normal: <s>$98.000</s> por multa</div>
-    <div class="precio-hoy">
-      <span class="precio-hoy-label">HOY SOLO</span>
-      <span class="precio-hoy-val">$19.000</span>
-    </div>
-    <div class="precio-note"><strong>por cada multa · pago único · sin cobros adicionales</strong></div>
+  <div class="hero-bg"></div>
+  <div class="hero-part"></div><div class="hero-part"></div>
+  <div class="hero-part"></div><div class="hero-part"></div><div class="hero-part"></div>
+
+  <div class="badge-oferta">
+    <div class="badge-dot"></div>
+    ⚡ OFERTA ESPECIAL — SOLO HOY
   </div>
-  <span class="arrow-down">⬇️</span>
+
+  <h1>Elimina tus multas<br>de tránsito <em>hoy mismo</em></h1>
+  <p class="hero-sub">Proceso 100% legal · Derecho de Petición oficial ante la Secretaría de Tránsito · Sin papeleo · Sin salir de casa</p>
+
+  <!-- Stats animados -->
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-num" id="counter-multas">0</div>
+      <div class="hero-stat-lbl">multas eliminadas</div>
+    </div>
+    <div class="stat-div"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">98%</div>
+      <div class="hero-stat-lbl">casos exitosos</div>
+    </div>
+    <div class="stat-div"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">&lt;2 min</div>
+      <div class="hero-stat-lbl">para radicar</div>
+    </div>
+  </div>
+
+  <!-- Precio hero -->
+  <div class="precio-hero">
+    <div class="precio-tachado">
+      Precio normal: <s>$98.000</s>
+      <span class="precio-tag">−81%</span>
+    </div>
+    <div class="precio-desde">HOY PAGAS SOLO</div>
+    <div class="precio-val">$19.000</div>
+    <div class="precio-sub"><strong>por multa · pago único · sin cobros adicionales</strong></div>
+    <div class="ahorro-strip">
+      <span>✅ Ahorras $79.000 por cada multa eliminada</span>
+    </div>
+  </div>
+
+  <button class="btn-hero" onclick="irAPago()">
+    <span>🚀 ELIMINAR MIS MULTAS AHORA</span>
+    <span class="sub">Elige cómo pagar · Radicamos en menos de 2 minutos</span>
+  </button>
+
+  <span class="arrow-hero">⬇️</span>
 </div>
 
-<!-- CÓMO FUNCIONA -->
-<div class="section-light">
+<!-- URGENCIA -->
+<div class="urgencia-bar">
+  <div class="urgencia-dot"></div>
+  <span>⏰ OFERTA DEL DÍA — El 81% de descuento vence hoy · <strong>Precio normal $98.000</strong></span>
+</div>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-bar-inner">
+    <span>⭐⭐⭐⭐⭐</span>
+    <span><strong>+1.247 multas eliminadas</strong> para colombianos en 2024</span>
+    <span>·</span>
+    <span>🔒 <strong>100% Legal</strong> · Art. 23 C.P.</span>
+  </div>
+</div>
+
+<div class="divider-gold"></div>
+
+<!-- ══════════ CÓMO FUNCIONA ══════════ -->
+<div class="section-white">
   <div class="wrap">
-    <div class="section-title dark">Así funciona — en menos de 2 minutos</div>
+    <div class="section-title dark">Así funciona — simple y rápido</div>
+    <div class="gold-line"></div>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
           <div class="step-icon">💳</div>
           <h3>Pagas $19.000 por cada multa</h3>
-          <p>Pago único, sin cobros adicionales. Por Llave Breve o tarjeta/PSE. Sin riesgo — proceso 100% transparente.</p>
+          <p>Pago único, sin cobros adicionales ni sorpresas. Por Llave Breve Transfiya o con tarjeta/PSE vía ePayco. Seguro y transparente.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-icon">✍️</div>
-          <h3>Firmas el documento en tu celular</h3>
-          <p>Te enviamos un Derecho de Petición personalizado. Lo firmas digitalmente en menos de 1 minuto, sin imprimir nada.</p>
+          <div class="step-icon">📄</div>
+          <h3>Generamos tu Derecho de Petición</h3>
+          <p>Preparamos un documento legal personalizado con las causales jurídicas aplicables a tu comparendo. Lo firmas digitalmente en 30 segundos desde tu celular.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
           <div class="step-icon">📤</div>
-          <h3>Radicamos en menos de 2 minutos</h3>
-          <p>Tu documento queda radicado ante la Secretaría de Tránsito. Recibes el número de radicado por WhatsApp.</p>
+          <h3>Radicamos ante la Secretaría de Tránsito</h3>
+          <p>Presentamos el documento ante la entidad competente. Recibes el número oficial de radicado por WhatsApp. El trámite queda en marcha.</p>
         </div>
       </div>
     </div>
@@ -226,13 +594,167 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 
 <div class="divider-gold"></div>
 
-<!-- SELECTOR MULTAS -->
+<!-- ══════════ SOCIAL PROOF — TESTIMONIOS ══════════ -->
 <div class="section-dark">
   <div class="wrap">
-    <div class="section-title gold">¿Cuántas multas quieres eliminar?</div>
+    <div class="section-title gold">Lo que dicen nuestros clientes</div>
+    <div class="section-sub">Colombianos que ya eliminaron sus multas con JurídicosWeb</div>
+    <div class="testimonios">
+      <div class="testimonio">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Tenía una fotomulta de 2022 que nunca me llegó bien notificada. En menos de una semana me avisaron que había sido eliminada del SIMIT. ¡No lo podía creer! El proceso fue facilísimo desde el celular."</div>
+        <div class="test-author">
+          <div class="test-avatar">🙋</div>
+          <div>
+            <div class="test-name">Carlos M.</div>
+            <div class="test-city">Bogotá, Cundinamarca · Fotomulta 2022</div>
+          </div>
+          <div class="test-badge" style="margin-left:auto;">✅ Verificado</div>
+        </div>
+      </div>
+      <div class="testimonio" style="animation-delay:.1s;">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Pagué mis $19.000 por la llave breve y en dos días me llegó el número de radicado. Tres semanas después la multa ya no aparece en el SIMIT. El servicio es real y sí funciona. 100% recomendado."</div>
+        <div class="test-author">
+          <div class="test-avatar">👩</div>
+          <div>
+            <div class="test-name">Paola R.</div>
+            <div class="test-city">Medellín, Antioquia · 2 multas eliminadas</div>
+          </div>
+          <div class="test-badge" style="margin-left:auto;">✅ Verificado</div>
+        </div>
+      </div>
+      <div class="testimonio" style="animation-delay:.2s;">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Estaba escéptico pero lo intenté con una multa vieja de 2019. El proceso es completamente digital, firmé el documento desde mi iPhone y me respondieron por WhatsApp toda la tarde. Vale cada peso."</div>
+        <div class="test-author">
+          <div class="test-avatar">👨‍💼</div>
+          <div>
+            <div class="test-name">Andrés F.</div>
+            <div class="test-city">Cali, Valle del Cauca · Comparendo 2019</div>
+          </div>
+          <div class="test-badge" style="margin-left:auto;">✅ Verificado</div>
+        </div>
+      </div>
+      <div class="testimonio" style="animation-delay:.3s;">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Tenía 3 fotomultas que me bloqueaban el RUNT. Pagué $57.000 en total y en menos de un mes las tres desaparecieron. El servicio al cliente por WhatsApp es muy atento y claro."</div>
+        <div class="test-author">
+          <div class="test-avatar">🙋‍♀️</div>
+          <div>
+            <div class="test-name">Liliana T.</div>
+            <div class="test-city">Barranquilla, Atlántico · 3 fotomultas</div>
+          </div>
+          <div class="test-badge" style="margin-left:auto;">✅ Verificado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div class="selector-wrap">
-      <p class="sel-titulo">Selecciona la cantidad</p>
+<div class="divider-gold"></div>
+
+<!-- ══════════ POR QUÉ FUNCIONA ══════════ -->
+<div class="section-darker">
+  <div class="wrap">
+    <div class="section-title white">¿Por qué funciona legalmente?</div>
+    <div class="section-sub">El fundamento jurídico que hace posible eliminar tu multa</div>
+    <div class="legal-grid">
+      <div class="legal-card">
+        <div class="legal-icon">⚖️</div>
+        <div class="legal-body">
+          <h3>Artículo 23 — Constitución Política</h3>
+          <p>Toda persona tiene derecho a presentar peticiones respetuosas a las autoridades. La entidad está obligada a resolver y a responder dentro de los términos legales.</p>
+          <span class="legal-tag">Art. 23 C.P. Colombia</span>
+        </div>
+      </div>
+      <div class="legal-card">
+        <div class="legal-icon">📜</div>
+        <div class="legal-body">
+          <h3>Ley 1755 de 2015 — Derecho de Petición</h3>
+          <p>Regula el derecho fundamental de petición y establece los términos en que las autoridades deben responder y actuar ante solicitudes ciudadanas.</p>
+          <span class="legal-tag">Ley 1755/2015</span>
+        </div>
+      </div>
+      <div class="legal-card">
+        <div class="legal-icon">🚦</div>
+        <div class="legal-body">
+          <h3>Código Nacional de Tránsito — Ley 769/2002</h3>
+          <p>Establece los procedimientos de notificación de comparendos. Un error en la notificación o en el proceso sancionatorio anula la multa.</p>
+          <span class="legal-tag">Ley 769/2002 art. 135</span>
+        </div>
+      </div>
+      <div class="legal-card">
+        <div class="legal-icon">⏱️</div>
+        <div class="legal-body">
+          <h3>Prescripción a los 3 años</h3>
+          <p>Toda infracción sin proceso sancionatorio activo prescribe a los 3 años. Multas del 2021 o anteriores sin proceso pueden eliminarse por prescripción.</p>
+          <span class="legal-tag">Art. 238 Ley 769/2002</span>
+        </div>
+      </div>
+      <div class="legal-card">
+        <div class="legal-icon">📸</div>
+        <div class="legal-body">
+          <h3>Fotomultas sin aval INM</h3>
+          <p>Las cámaras de fotomultas deben tener certificación del Instituto Nacional de Metrología. Sin ese aval, la multa carece de validez legal.</p>
+          <span class="legal-tag">Circular INM 2019</span>
+        </div>
+      </div>
+      <div class="legal-card">
+        <div class="legal-icon">🔏</div>
+        <div class="legal-body">
+          <h3>Debido proceso — Art. 29 C.P.</h3>
+          <p>Todo comparendo debe seguir un procedimiento administrativo sancionatorio con plenas garantías. Cualquier error procedimental lo vicia de nulidad.</p>
+          <span class="legal-tag">Art. 29 C.P. Colombia</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-gold"></div>
+
+<!-- ══════════ QUÉ MULTAS APLICAN ══════════ -->
+<div class="section-white">
+  <div class="wrap">
+    <div class="section-title dark">¿Tu multa aplica para eliminación?</div>
+    <div class="gold-line"></div>
+    <div class="aplican-list">
+      <div class="aplica-item">
+        <div class="aplica-check">✓</div>
+        <div class="aplica-txt"><strong>Multas del 2014 al 2024 mal notificadas</strong> — si no recibiste la notificación en los 3 días hábiles establecidos, la multa es jurídicamente nula.</div>
+      </div>
+      <div class="aplica-item">
+        <div class="aplica-check">✓</div>
+        <div class="aplica-txt"><strong>Fotomultas sin certificación del INM</strong> — cámaras de fotomultas sin aval del Instituto Nacional de Metrología no tienen validez legal en Colombia.</div>
+      </div>
+      <div class="aplica-item">
+        <div class="aplica-check">✓</div>
+        <div class="aplica-txt"><strong>Comparendos prescritos (más de 3 años)</strong> — si han pasado más de 3 años sin proceso sancionatorio activo, opera la prescripción de pleno derecho.</div>
+      </div>
+      <div class="aplica-item">
+        <div class="aplica-check">✓</div>
+        <div class="aplica-txt"><strong>Multas con errores de procedimiento</strong> — errores del agente de tránsito en la imposición del comparendo invalidan su vigencia legal.</div>
+      </div>
+      <div class="aplica-item">
+        <div class="aplica-check">✓</div>
+        <div class="aplica-txt"><strong>Violación del debido proceso — Art. 29</strong> — cualquier irregularidad en el proceso sancionatorio anula la multa desde su origen.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider-gold"></div>
+
+<!-- ══════════ SELECTOR MULTAS ══════════ -->
+<div class="section-dark" id="seccion-selector">
+  <div class="wrap">
+    <div class="section-title gold">¿Cuántas multas tienes?</div>
+    <div class="section-sub">Selecciona la cantidad — el precio es el mismo por cada una</div>
+
+    <div class="selector-card">
+      <p class="sel-titulo">Selecciona la cantidad de multas</p>
+      <p class="sel-sub">$19.000 por cada multa · Sin cobros adicionales</p>
       <div class="multas-grid">
         <button class="multa-btn active" onclick="selMultas(1)"><span class="num">1</span><span class="lbl">multa</span></button>
         <button class="multa-btn" onclick="selMultas(2)"><span class="num">2</span><span class="lbl">multas</span></button>
@@ -241,16 +763,15 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <button class="multa-btn" onclick="selMultas(5)"><span class="num">5</span><span class="lbl">multas</span></button>
         <button class="multa-btn" onclick="selMultas(6)"><span class="num">6+</span><span class="lbl">multas</span></button>
       </div>
-
       <div class="total-wrap">
         <div class="total-label">Total a pagar hoy</div>
         <div class="total-val" id="total-val">$19.000</div>
-        <div class="total-ahorro" id="total-ahorro">Precio normal: <s>$98.000</s> → Solo pagas <strong style="color:var(--gold);">$19.000</strong></div>
+        <div class="total-desc" id="total-ahorro">Precio normal: <s style="color:#ef4444;">$98.000</s> → Hoy solo <strong style="color:var(--gold);">$19.000</strong></div>
+        <div class="ahorro-badge">✅ Ahorras <span id="ahorro-val">$79.000</span> con la oferta de hoy</div>
       </div>
-
-      <button class="btn-ir-pago" onclick="irAPago()">
+      <button class="btn-pagar-main" onclick="irAPago()">
         <span>⚡ ELEGIR MÉTODO DE PAGO — $<span id="btn-monto">19.000</span></span>
-        <span class="sub">Elige Llave Breve o Tarjeta/PSE → radicamos de inmediato</span>
+        <span class="sub">Llave Breve · Tarjeta · PSE · Nequi · Bancolombia</span>
       </button>
     </div>
 
@@ -259,123 +780,104 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
       <div class="garantia-card">
         <span class="garantia-icon">✅</span>
         <div class="garantia-title">Sin cobros ocultos</div>
-        <div class="garantia-desc">Un solo pago. Nada más.</div>
+        <div class="garantia-desc">Un solo pago de $19.000. Nada más.</div>
       </div>
       <div class="garantia-card">
         <span class="garantia-icon">⚖️</span>
         <div class="garantia-title">100% Legal</div>
-        <div class="garantia-desc">Derecho de Petición oficial.</div>
+        <div class="garantia-desc">Derecho de Petición amparado por la Constitución.</div>
       </div>
       <div class="garantia-card">
-        <span class="garantia-icon">🔒</span>
-        <div class="garantia-title">Sin riesgo de estafa</div>
-        <div class="garantia-desc">Proceso transparente y visible.</div>
+        <span class="garantia-icon">📋</span>
+        <div class="garantia-title">Número de radicado</div>
+        <div class="garantia-desc">Soporte oficial por WhatsApp garantizado.</div>
       </div>
       <div class="garantia-card">
         <span class="garantia-icon">⚡</span>
         <div class="garantia-title">En &lt;2 minutos</div>
-        <div class="garantia-desc">Radicado oficial garantizado.</div>
+        <div class="garantia-desc">Radicado ante la Secretaría de Tránsito.</div>
       </div>
+    </div>
+
+    <!-- Escudo garantía -->
+    <div class="shield-wrap">
+      <span class="shield-icon">🛡️</span>
+      <div class="shield-title">Sin riesgo de estafa — Proceso 100% transparente</div>
+      <div class="shield-desc">Ves todo el proceso antes de pagar. Tu documento se genera frente a tus ojos, lo firmas tú mismo y recibes el número de radicado oficial. No pedimos tus contraseñas ni datos bancarios.</div>
     </div>
   </div>
 </div>
 
-<div class="divider-gold"></div>
-
-<!-- QUÉ MULTAS APLICAN -->
-<div class="section-light">
-  <div class="wrap">
-    <div class="section-title dark">¿Qué multas aplican para eliminación?</div>
-    <div class="aplican-list">
-      <div class="aplica-item">
-        <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Multas del 2014 al 2024 mal notificadas</strong> — si no te notificaron correctamente en los 3 días hábiles, la multa es nula.</div>
-      </div>
-      <div class="aplica-item">
-        <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Fotomultas sin certificación INM</strong> — cámaras sin aval del Instituto Nacional de Metrología. La multa no tiene validez legal.</div>
-      </div>
-      <div class="aplica-item">
-        <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Comparendos prescritos</strong> — más de 3 años desde la infracción sin proceso sancionatorio. Opera la prescripción de pleno derecho.</div>
-      </div>
-      <div class="aplica-item">
-        <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Multas con irregularidades de procedimiento</strong> — errores en la imposición del comparendo anulan su validez legal.</div>
-      </div>
-      <div class="aplica-item">
-        <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Cualquier comparendo con errores</strong> en el proceso sancionatorio, datos incorrectos o violación del debido proceso.</div>
-      </div>
-    </div>
-  </div>
+<!-- URGENCIA 2 -->
+<div class="urgencia-bar">
+  <div class="urgencia-dot"></div>
+  <span>🔥 <strong>81% de descuento activo</strong> — El precio normal vuelve a $98.000 sin previo aviso</span>
 </div>
 
 <div class="divider-gold"></div>
 
-<!-- ══════════════════════════════════
-     OPCIONES DE PAGO — AMBAS VISIBLES
-══════════════════════════════════ -->
-<div class="section-dark" id="seccion-pago">
+<!-- ══════════ SECCIÓN DE PAGO ══════════ -->
+<div class="section-darker" id="seccion-pago">
   <div class="wrap">
-    <div class="section-title gold">Elige cómo pagar</div>
-    <p style="text-align:center;color:rgba(255,255,255,0.55);font-size:0.8rem;margin-top:-16px;margin-bottom:22px;">Paga → envíanos el comprobante → radicamos ese mismo día</p>
+    <div class="section-title white">Elige cómo pagar</div>
+    <div class="section-sub">Ambas opciones son seguras · Radicamos el mismo día que pagas</div>
 
-    <!-- MONTO a pagar (se actualiza con el selector) -->
-    <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.3);border-radius:14px;padding:12px 16px;margin-bottom:18px;text-align:center;">
-      <p style="font-size:0.65rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Total a pagar por <span id="pago-n-txt">1 multa</span></p>
-      <p style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 20px rgba(245,158,11,0.4);" id="pago-total-txt">$19.000</p>
+    <!-- Monto dinámico -->
+    <div class="pago-monto-card">
+      <div class="pago-monto-lbl">Total a pagar por <span id="pago-n-txt">1 multa</span></div>
+      <div class="pago-monto-val" id="pago-total-txt">$19.000</div>
+      <div class="pago-monto-n">$19.000 × <span id="pago-n2">1</span> multa(s) · pago único · sin cobros adicionales</div>
     </div>
 
     <!-- ══ OPCIÓN 1: LLAVE BREVE ══ -->
     <div class="pago-llave">
       <div class="pago-llave-head">
-        <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px;font-size:1.3rem;flex-shrink:0;">📱</div>
-        <div style="flex:1;min-width:0;">
-          <span class="llave-badge">⭐ RECOMENDADO — MÁS RÁPIDO</span>
-          <p style="font-size:0.9rem;font-weight:900;color:#fff;margin:4px 0 0;">Nequi · Daviplata · Cualquier banco</p>
-          <p style="font-size:0.63rem;color:#bbf7d0;margin:2px 0 0;">Llave Breve Transfiya — sin registrarte en ningún lugar</p>
+        <div class="llave-head-icon">📱</div>
+        <div class="llave-head-info">
+          <div class="llave-rec-badge">⭐ OPCIÓN RECOMENDADA — MÁS RÁPIDA</div>
+          <div class="llave-head-title">Nequi · Daviplata · Cualquier banco</div>
+          <div class="llave-head-sub">Transferencia con Llave Breve Transfiya — sin registros ni trámites</div>
         </div>
       </div>
       <div class="pago-llave-body">
         <!-- Llave copiable -->
         <div class="llave-card">
           <div class="llave-card-left">
-            <div class="llave-label">LLAVE BREVE</div>
+            <div class="llave-label">LLAVE BREVE TRANSFIYA</div>
             <div class="llave-key">@OTO262</div>
             <div class="titular-note">Titular: <strong style="color:#0c4a6e;">Ju... Cac...</strong> <span style="color:#94a3b8;">(verifica al pagar)</span></div>
           </div>
-          <button class="btn-copiar-key" onclick="copiarLlave(this)">📋 Copiar</button>
+          <button class="btn-copiar-key" onclick="copiarLlave(this)">📋 Copiar llave</button>
         </div>
-        <!-- Pasos Nequi -->
+        <!-- Pasos -->
         <div class="pasos-nequi">
           <div class="pasos-nequi-title">📱 Cómo pagar paso a paso</div>
           <div class="paso-row">
             <div class="paso-num">1</div>
-            <div class="paso-txt">Abre tu app de <strong>Nequi, Daviplata, Bancolombia, Davivienda</strong> o cualquier banco.</div>
+            <div class="paso-txt">Abre tu app de <strong>Nequi, Daviplata, Bancolombia, Davivienda</strong> o cualquier banco colombiano.</div>
           </div>
           <div class="paso-row">
             <div class="paso-num">2</div>
-            <div class="paso-txt">Toca <strong>"Enviar dinero"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</div>
+            <div class="paso-txt">Busca la opción <strong>"Enviar dinero"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</div>
           </div>
           <div class="paso-row">
             <div class="paso-num">3</div>
-            <div class="paso-txt">Selecciona <strong>"Llave Breve"</strong> o <strong>"Transfiya"</strong> como tipo de destino.</div>
+            <div class="paso-txt">Selecciona el tipo de destino: <strong>"Llave Breve"</strong> o <strong>"Transfiya"</strong>.</div>
           </div>
           <div class="paso-row">
             <div class="paso-num">4</div>
-            <div class="paso-txt">Escribe la llave: <strong style="font-family:monospace;color:#1d4ed8;font-size:0.9rem;">@OTO262</strong> y verifica que el titular empiece por <strong>Ju... Cac...</strong></div>
+            <div class="paso-txt">Ingresa la llave: <strong style="font-family:monospace;color:#1d4ed8;font-size:0.95rem;">@OTO262</strong> y confirma que el titular empiece por <strong>Ju... Cac...</strong></div>
           </div>
           <div class="paso-row">
             <div class="paso-num">5</div>
-            <div class="paso-txt">Ingresa el monto exacto: <strong id="monto-paso5">$19.000</strong> y confirma la transferencia.</div>
+            <div class="paso-txt">Ingresa el monto exacto: <strong id="monto-paso5" style="color:#1d4ed8;">$19.000</strong> y confirma la transferencia.</div>
           </div>
           <div class="paso-row">
             <div class="paso-num green">6</div>
-            <div class="paso-txt"><strong>Guarda el comprobante</strong> (captura de pantalla) y toca el botón verde de abajo para enviárnoslo.</div>
+            <div class="paso-txt"><strong>Toma captura de pantalla</strong> del comprobante y toca el botón verde de abajo para enviárnoslo por WhatsApp.</div>
           </div>
         </div>
-        <!-- Botón WhatsApp comprobante -->
+        <!-- CTA -->
         <button class="btn-confirmar-wa" onclick="enviarComprobante()">
           <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — ENVIAR COMPROBANTE POR WHATSAPP</span>
         </button>
@@ -383,17 +885,17 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
       </div>
     </div>
 
-    <!-- Separador O -->
+    <!-- Separador -->
     <div class="or-sep">
-      <div class="or-sep-line"></div>
-      <span class="or-sep-txt">— O PAGA CON —</span>
+      <div class="or-sep-line left"></div>
+      <span class="or-sep-txt">— O TAMBIÉN PUEDES PAGAR CON —</span>
       <div class="or-sep-line right"></div>
     </div>
 
-    <!-- ══ OPCIÓN 2: ePAYCO / TARJETA / PSE ══ -->
+    <!-- ══ OPCIÓN 2: EPAYCO ══ -->
     <div class="pago-epayco">
       <div class="pago-epayco-head">
-        <div class="epayco-label">Opción 2 · Pago en línea · 100% seguro · SSL encriptado</div>
+        <div class="epayco-label">Opción 2 · Pago en línea seguro · SSL 256 bits</div>
         <div class="epayco-logos">
           <div class="logo-visa">VISA</div>
           <div class="logo-mc"><div class="c1"></div><div class="c2"></div><span>Mastercard</span></div>
@@ -406,9 +908,9 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <button class="btn-epayco" onclick="abrirEpayco(this)">
           <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE / NEQUI →</span>
         </button>
-        <p class="nota-epayco">Al completar el pago confirmamos la radicación por WhatsApp · Sin cobros adicionales</p>
+        <p class="nota-epayco">Pago procesado por ePayco Colombia · Al confirmar el pago te avisamos por WhatsApp y radicamos de inmediato · Sin cobros adicionales.</p>
         <div class="ssl-row">
-          <span class="ssl-badge">🔒 Pago procesado por ePayco · Encriptación SSL 256 bits</span>
+          <span class="ssl-badge">🔒 Encriptación SSL 256 bits · Procesado por ePayco · Datos protegidos</span>
         </div>
       </div>
     </div>
@@ -416,66 +918,98 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
   </div>
 </div>
 
-<div class="footer">
-  JurídicosWeb © 2026 · juridicosweb.com · juridicoswebcasos@gmail.com · +57 315 931 8400
+<div class="divider-gold"></div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<div class="footer-premium">
+  <div style="max-width:560px;margin:0 auto;text-align:center;">
+    <div class="footer-logo">Jurídicos<span>Web</span></div>
+    <div class="footer-tagline">Asesoría Legal Especializada · Colombia</div>
+    <div class="footer-contacts">
+      <div class="footer-contact" style="justify-content:center;">
+        <span>📱</span><span><strong>WhatsApp:</strong> +57 315 931 8400</span>
+      </div>
+      <div class="footer-contact" style="justify-content:center;">
+        <span>📧</span><span><strong>Email:</strong> juridicoswebcasos@gmail.com</span>
+      </div>
+      <div class="footer-contact" style="justify-content:center;">
+        <span>🌐</span><span><strong>Web:</strong> juridicosweb.com</span>
+      </div>
+    </div>
+    <div class="footer-legal">
+      JurídicosWeb © 2026 · Servicio de asesoría en Derechos de Petición amparado por el Art. 23 de la Constitución Política de Colombia y la Ley 1755 de 2015 · Los resultados dependen de las causales jurídicas aplicables a cada caso · El pago activa el servicio de preparación y radicación del documento.
+    </div>
+  </div>
 </div>
 
 <script>
 var _nMultas = 1;
+var _epaycoLoaded = false;
 
+/* ── Selector de multas ── */
 function selMultas(n){
   _nMultas = n;
   document.querySelectorAll('.multa-btn').forEach(function(b,i){
     b.className = 'multa-btn' + (i+1===n?' active':'');
   });
-  var total = 19000*n;
-  var normal = 98000*n;
+  var total   = 19000 * n;
+  var normal  = 98000 * n;
+  var ahorro  = normal - total;
   var fmt = function(v){ return '$'+v.toLocaleString('es-CO'); };
-  document.getElementById('total-val').textContent = fmt(total);
-  document.getElementById('btn-monto').textContent = (19000*n).toLocaleString('es-CO');
-  document.getElementById('total-ahorro').innerHTML =
-    'Precio normal: <s>'+fmt(normal)+'</s> → Solo pagas <strong style="color:var(--gold);">'+fmt(total)+'</strong>';
-  // Actualizar sección de pago
-  document.getElementById('pago-n-txt').textContent = n+' multa'+(n!==1?'s':'');
+
+  document.getElementById('total-val').textContent    = fmt(total);
+  document.getElementById('btn-monto').textContent    = (19000*n).toLocaleString('es-CO');
+  document.getElementById('total-ahorro').innerHTML   =
+    'Precio normal: <s style="color:#ef4444;">'+fmt(normal)+'</s> → Hoy solo <strong style="color:var(--gold);">'+fmt(total)+'</strong>';
+  document.getElementById('ahorro-val').textContent   = fmt(ahorro);
+  document.getElementById('pago-n-txt').textContent   = n+' multa'+(n!==1?'s':'');
   document.getElementById('pago-total-txt').textContent = fmt(total);
-  document.getElementById('monto-paso5').textContent = fmt(total);
+  document.getElementById('pago-n2').textContent      = n;
+  document.getElementById('monto-paso5').textContent  = fmt(total);
 }
 
+/* ── Scroll a sección de pago ── */
 function irAPago(){
   document.getElementById('seccion-pago').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+/* ── Copiar llave breve ── */
 function copiarLlave(btn){
   var val = '@OTO262';
-  function ok(){ btn.textContent = '✅ ¡Copiado!'; setTimeout(function(){ btn.textContent = '📋 Copiar'; }, 2200); }
+  function ok(){
+    btn.textContent = '✅ ¡Copiada!';
+    setTimeout(function(){ btn.textContent = '📋 Copiar llave'; }, 2400);
+  }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(val).then(ok).catch(function(){
-      var ta=document.createElement('textarea');ta.value=val;ta.style.cssText='position:fixed;opacity:0';
-      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
+      var ta=document.createElement('textarea');ta.value=val;
+      ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);
+      ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
     });
   } else {
-    var ta=document.createElement('textarea');ta.value=val;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
+    var ta=document.createElement('textarea');ta.value=val;
+    ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);
+    ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
   }
   toast('Llave @OTO262 copiada ✅');
 }
 
+/* ── Enviar comprobante por WhatsApp (llave breve) ── */
 function enviarComprobante(){
   var n = _nMultas;
   var total = '$'+(19000*n).toLocaleString('es-CO');
   var msg = '✅ *JurídicosWeb — Comprobante de Pago*\n\n'
     +'💳 Monto pagado: *'+total+'* ('+n+' multa'+(n!==1?'s':'')+' × $19.000 c/u)\n'
-    +'🔑 Pago realizado por llave breve @OTO262\n\n'
-    +'Adjunto el comprobante de pago. Por favor radicar de inmediato. 🙏';
+    +'🔑 Pago realizado por Llave Breve @OTO262\n\n'
+    +'Adjunto el comprobante. Por favor radicar de inmediato 🙏';
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
-// ── ePayco checkout ──
-var _epaycoLoaded = false;
+/* ── ePayco checkout ── */
 function abrirEpayco(btn){
-  var n = _nMultas;
+  var n     = _nMultas;
   var monto = 19000 * n;
-  var desc = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb ($'+monto.toLocaleString('es-CO')+')';
+  var desc  = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb ($'+monto.toLocaleString('es-CO')+')';
 
   if(btn){ btn.disabled=true; btn.style.opacity='0.7'; }
   document.getElementById('epayco-loading').classList.add('show');
@@ -490,16 +1024,16 @@ function abrirEpayco(btn){
         p_cust_id_cliente: '1595409'
       });
       handler.open({
-        name:        'JurídicosWeb',
-        description: desc,
-        currency:    'cop',
-        amount:      String(monto),
-        tax_base:    '0',
-        tax:         '0',
-        country:     'co',
-        lang:        'es',
-        external:    'false',
-        response:    'https://juridicosweb.com/pago-ok.html',
+        name:         'JurídicosWeb',
+        description:  desc,
+        currency:     'cop',
+        amount:       String(monto),
+        tax_base:     '0',
+        tax:          '0',
+        country:      'co',
+        lang:         'es',
+        external:     'false',
+        response:     'https://juridicosweb.com/pago-ok.html',
         confirmation: 'https://juridicosweb.com/pago-ok.html'
       });
     } catch(e){
@@ -522,13 +1056,30 @@ function abrirEpayco(btn){
   }
 }
 
+/* ── Toast de feedback ── */
 function toast(msg, type){
   var el = document.getElementById('toast');
   el.textContent = msg;
   el.style.background = type==='error' ? '#dc2626' : '#16a34a';
+  el.style.color = '#fff';
   el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+  setTimeout(function(){ el.classList.remove('show'); }, 3200);
 }
+
+/* ── Contador animado de multas ── */
+function animateCounter(el, target, duration){
+  var start = 0, step = target / (duration / 16);
+  var timer = setInterval(function(){
+    start += step;
+    if(start >= target){ start = target; clearInterval(timer); }
+    el.textContent = Math.floor(start).toLocaleString('es-CO');
+  }, 16);
+}
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    animateCounter(document.getElementById('counter-multas'), 1247, 2000);
+  }, 600);
+});
 </script>
 </body>
 </html>
