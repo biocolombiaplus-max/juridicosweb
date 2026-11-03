@@ -10,123 +10,164 @@
 :root{
   --navy:#0a1628;--navy2:#0f2040;
   --gold:#f59e0b;--gold-dark:#d97706;--gold-light:#fef3c7;
-  --green:#16a34a;--red:#dc2626;--white:#fff;
-  --gray:#64748b;--gray-light:#f8fafc;
+  --green:#16a34a;--green2:#15803d;--red:#dc2626;--white:#fff;
+  --gray:#64748b;--gray-light:#f8fafc;--blue:#1d4ed8;
 }
 body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden;}
 
-/* ── HEADER ── */
 .header{background:rgba(0,0,0,0.3);backdrop-filter:blur(10px);padding:14px 20px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-bottom:1px solid rgba(245,158,11,0.2);position:sticky;top:0;z-index:100;}
 .logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;color:var(--white);letter-spacing:-0.5px;}
 .logo span{color:var(--gold);}
 .logo-sub{font-size:0.65rem;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;}
 
-/* ── HERO ── */
-.hero{background:linear-gradient(160deg,#0a1628 0%,#0f2040 40%,#1a1a2e 100%);padding:48px 20px 56px;text-align:center;position:relative;overflow:hidden;}
+.hero{background:linear-gradient(160deg,#0a1628 0%,#0f2040 40%,#1a1a2e 100%);padding:40px 20px 48px;text-align:center;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(245,158,11,0.12) 0%,transparent 60%);}
-.hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23f59e0b' fill-opacity='0.03'%3E%3Cpath d='M20 20h20v20H20zM0 0h20v20H0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
 .hero > * {position:relative;z-index:1;}
-
-.badge-oferta{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);padding:7px 18px;border-radius:999px;font-size:0.78rem;font-weight:900;letter-spacing:1px;margin-bottom:22px;animation:pulseBadge 1.8s infinite;box-shadow:0 4px 20px rgba(245,158,11,0.5);}
+.badge-oferta{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);padding:7px 18px;border-radius:999px;font-size:0.78rem;font-weight:900;letter-spacing:1px;margin-bottom:18px;animation:pulseBadge 1.8s infinite;box-shadow:0 4px 20px rgba(245,158,11,0.5);}
 @keyframes pulseBadge{0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5);}50%{box-shadow:0 6px 32px rgba(245,158,11,0.8);}}
-
-.hero h1{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--white);line-height:1.15;margin-bottom:14px;max-width:480px;margin-left:auto;margin-right:auto;}
+.hero h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--white);line-height:1.15;margin-bottom:12px;max-width:480px;margin-left:auto;margin-right:auto;}
 .hero h1 em{color:var(--gold);font-style:normal;}
-.hero-sub{color:rgba(255,255,255,0.7);font-size:0.88rem;max-width:400px;margin:0 auto 28px;line-height:1.6;}
-
-.precio-wrap{margin-bottom:28px;}
-.precio-normal{font-size:1rem;color:rgba(255,255,255,0.5);margin-bottom:4px;}
-.precio-normal s{color:#ef4444;font-weight:700;font-size:1.1rem;}
-.precio-hoy{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;}
-.precio-hoy-label{font-size:0.85rem;color:rgba(255,255,255,0.6);font-weight:600;}
-.precio-hoy-val{font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(245,158,11,0.6);}
-.precio-note{font-size:0.72rem;color:rgba(255,255,255,0.55);margin-top:8px;letter-spacing:0.3px;}
+.hero-sub{color:rgba(255,255,255,0.7);font-size:0.85rem;max-width:400px;margin:0 auto 22px;line-height:1.6;}
+.precio-wrap{margin-bottom:24px;}
+.precio-normal{font-size:0.95rem;color:rgba(255,255,255,0.5);margin-bottom:4px;}
+.precio-normal s{color:#ef4444;font-weight:700;}
+.precio-hoy{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.precio-hoy-label{font-size:0.82rem;color:rgba(255,255,255,0.6);font-weight:600;}
+.precio-hoy-val{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 40px rgba(245,158,11,0.6);}
+.precio-note{font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:6px;}
 .precio-note strong{color:var(--gold-light);font-weight:700;}
-
-.arrow-down{font-size:1.6rem;animation:bounceDown 1.4s infinite;display:block;}
+.arrow-down{font-size:1.4rem;animation:bounceDown 1.4s infinite;display:block;margin-top:8px;}
 @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
 
-/* ── SECCIÓN PASOS ── */
 .section-light{background:var(--white);color:var(--navy);}
 .section-dark{background:var(--navy2);}
-.wrap{max-width:560px;margin:0 auto;padding:44px 20px;}
-.section-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:28px;}
+.wrap{max-width:560px;margin:0 auto;padding:36px 18px;}
+.section-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:24px;}
 .section-title.gold{color:var(--gold);}
 .section-title.dark{color:var(--navy);}
 
 .steps{display:flex;flex-direction:column;gap:0;}
-.step{display:flex;align-items:flex-start;gap:16px;padding:20px 0;border-bottom:1px solid rgba(245,158,11,0.12);}
+.step{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid rgba(245,158,11,0.12);}
 .step:last-child{border-bottom:none;}
-.step-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.step-body h3{font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:4px;}
-.step-body p{font-size:0.78rem;color:var(--gray);line-height:1.5;}
-.step-icon{font-size:1.4rem;margin-bottom:4px;}
+.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);font-size:1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-body h3{font-size:0.92rem;font-weight:800;color:var(--navy);margin-bottom:3px;}
+.step-body p{font-size:0.75rem;color:var(--gray);line-height:1.5;}
+.step-icon{font-size:1.2rem;margin-bottom:3px;}
 
 /* ── SELECTOR MULTAS ── */
-.selector-wrap{background:linear-gradient(135deg,rgba(245,158,11,0.05),rgba(245,158,11,0.02));border:1.5px solid rgba(245,158,11,0.25);border-radius:20px;padding:28px 20px;margin-bottom:24px;}
-.sel-titulo{font-size:1rem;font-weight:800;color:var(--white);text-align:center;margin-bottom:18px;}
-.multas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
-@media(min-width:400px){.multas-grid{grid-template-columns:repeat(6,1fr);}}
-.multa-btn{padding:12px 4px;border-radius:12px;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);font-weight:800;font-size:0.9rem;cursor:pointer;transition:all 0.15s;text-align:center;}
-.multa-btn .num{font-size:1.2rem;display:block;line-height:1;}
-.multa-btn .lbl{font-size:0.58rem;opacity:0.7;}
+.selector-wrap{background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.02));border:1.5px solid rgba(245,158,11,0.25);border-radius:20px;padding:24px 18px;margin-bottom:22px;}
+.sel-titulo{font-size:1rem;font-weight:800;color:var(--white);text-align:center;margin-bottom:16px;}
+.multas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+@media(min-width:380px){.multas-grid{grid-template-columns:repeat(6,1fr);}}
+.multa-btn{padding:11px 4px;border-radius:11px;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);font-weight:800;font-size:0.88rem;cursor:pointer;transition:all 0.15s;text-align:center;}
+.multa-btn .num{font-size:1.15rem;display:block;line-height:1;}
+.multa-btn .lbl{font-size:0.55rem;opacity:0.7;}
 .multa-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border-color:var(--gold);box-shadow:0 4px 18px rgba(245,158,11,0.5);}
+.total-wrap{text-align:center;margin-bottom:16px;}
+.total-label{font-size:0.7rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.total-val{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 30px rgba(245,158,11,0.5);}
+.total-ahorro{font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:4px;}
 
-.total-wrap{text-align:center;margin-bottom:18px;}
-.total-label{font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-.total-val{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 30px rgba(245,158,11,0.5);}
-.total-ahorro{font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:6px;}
-.total-ahorro s{color:#ef4444;}
-
-.btn-pagar{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border:none;border-radius:14px;padding:18px;font-size:1.05rem;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 32px rgba(245,158,11,0.5);animation:pulseGold 1.8s infinite;position:relative;overflow:hidden;}
-@keyframes pulseGold{0%,100%{box-shadow:0 6px 32px rgba(245,158,11,0.5);}50%{box-shadow:0 8px 48px rgba(245,158,11,0.8);}}
-.btn-pagar::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);animation:shimmer 2s infinite;}
+/* BOTÓN PRINCIPAL */
+.btn-ir-pago{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:14px;padding:18px;font-size:1.05rem;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 32px rgba(22,163,74,0.55);animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;}
+@keyframes pulseGreen{0%,100%{box-shadow:0 6px 32px rgba(22,163,74,0.5);}50%{box-shadow:0 8px 48px rgba(22,163,74,0.8);}}
+.btn-ir-pago::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2s infinite;}
 @keyframes shimmer{0%{left:-100%;}100%{left:150%;}}
-.btn-pagar .sub{font-size:0.68rem;font-weight:600;opacity:0.8;}
+.btn-ir-pago .sub{font-size:0.67rem;font-weight:600;opacity:0.85;}
 
-/* ── GARANTÍAS ── */
-.garantias-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.garantia-card{background:rgba(255,255,255,0.03);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:16px 14px;text-align:center;}
-.garantia-icon{font-size:1.6rem;margin-bottom:8px;display:block;}
-.garantia-title{font-size:0.82rem;font-weight:800;color:var(--white);margin-bottom:4px;}
-.garantia-desc{font-size:0.7rem;color:rgba(255,255,255,0.55);line-height:1.4;}
+/* GARANTÍAS */
+.garantias-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.garantia-card{background:rgba(255,255,255,0.03);border:1px solid rgba(245,158,11,0.2);border-radius:13px;padding:14px 12px;text-align:center;}
+.garantia-icon{font-size:1.5rem;margin-bottom:6px;display:block;}
+.garantia-title{font-size:0.8rem;font-weight:800;color:var(--white);margin-bottom:3px;}
+.garantia-desc{font-size:0.67rem;color:rgba(255,255,255,0.5);line-height:1.4;}
 
-/* ── APLICAN ── */
-.aplican-list{display:flex;flex-direction:column;gap:10px;}
-.aplica-item{display:flex;align-items:flex-start;gap:12px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:12px;padding:14px;}
-.aplica-check{width:24px;height:24px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;color:var(--navy);font-weight:900;}
-.aplica-txt{font-size:0.82rem;color:var(--navy);line-height:1.5;font-weight:500;}
-.aplica-txt strong{color:var(--navy);font-weight:800;}
+/* APLICAN */
+.aplican-list{display:flex;flex-direction:column;gap:8px;}
+.aplica-item{display:flex;align-items:flex-start;gap:10px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:11px;padding:12px;}
+.aplica-check{width:22px;height:22px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;color:var(--navy);font-weight:900;}
+.aplica-txt{font-size:0.8rem;color:var(--navy);line-height:1.5;font-weight:500;}
+.aplica-txt strong{font-weight:800;}
 
-/* ── MEDIOS DE PAGO ── */
-.pago-card{background:var(--white);border-radius:16px;padding:22px;margin-bottom:14px;}
-.pago-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.pago-title{font-weight:800;color:var(--navy);font-size:0.95rem;}
-.pago-tag{background:var(--gold-light);color:var(--gold-dark);font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:999px;}
-.llave-val{font-size:1.4rem;font-weight:900;color:var(--navy);letter-spacing:1px;}
-.btn-copiar{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border:none;border-radius:8px;padding:8px 16px;font-size:0.78rem;font-weight:800;cursor:pointer;margin-left:12px;}
-.nequi-steps{background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:14px;margin-top:14px;}
-.nequi-steps-title{font-size:0.75rem;font-weight:800;color:#0369a1;margin-bottom:10px;}
-.nequi-step{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
-.nequi-step:last-child{margin-bottom:0;}
-.nequi-num{width:20px;height:20px;border-radius:50%;background:#0369a1;color:#fff;font-size:0.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.nequi-step-txt{font-size:0.76rem;color:#0c4a6e;line-height:1.4;}
+/* ══════════════════════════
+   SECCIÓN OPCIONES DE PAGO
+══════════════════════════ */
+#seccion-pago{scroll-margin-top:70px;}
 
-/* ── CTA FINAL ── */
-.cta-final{background:linear-gradient(135deg,var(--gold),var(--gold-dark));padding:44px 20px;text-align:center;}
-.cta-final h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:1.5rem;font-weight:900;margin-bottom:8px;}
-.cta-final p{color:rgba(10,22,40,0.7);font-size:0.84rem;margin-bottom:24px;line-height:1.5;}
-.btn-wa{display:inline-flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;background:var(--green);color:var(--white);text-decoration:none;padding:16px 28px;border-radius:14px;font-size:0.95rem;font-weight:800;box-shadow:0 6px 28px rgba(22,163,74,0.45);animation:pulseGreen 1.6s infinite;width:100%;max-width:400px;}
-@keyframes pulseGreen{0%,100%{box-shadow:0 6px 28px rgba(22,163,74,0.4);}50%{box-shadow:0 8px 40px rgba(22,163,74,0.7);}}
-.btn-wa .wa-sub{font-size:0.68rem;font-weight:500;opacity:0.85;}
+/* Opción 1: Llave Breve */
+.pago-llave{background:linear-gradient(135deg,#052e16,#14532d);border:2px solid var(--green);border-radius:18px;overflow:hidden;margin-bottom:10px;box-shadow:0 8px 36px rgba(22,163,74,0.35);}
+.pago-llave-head{background:linear-gradient(135deg,var(--green),var(--green2));padding:14px 16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;}
+.pago-llave-head::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmer 2.5s infinite;}
+.llave-badge{font-size:0.55rem;font-weight:900;background:#fbbf24;color:#78350f;padding:3px 8px;border-radius:999px;letter-spacing:.5px;white-space:nowrap;}
+.pago-llave-body{padding:16px;}
+.llave-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.llave-card-left .llave-label{font-size:0.58rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.llave-card-left .llave-key{font-size:1.55rem;font-weight:900;color:#0c4a6e;letter-spacing:2px;font-family:'Inter',monospace;}
+.btn-copiar-key{background:linear-gradient(135deg,#0369a1,#0284c7);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-size:0.8rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.titular-note{font-size:0.7rem;color:#64748b;margin-top:4px;}
 
-/* ── FOOTER ── */
-.footer{background:#050d1a;padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.7rem;border-top:1px solid rgba(245,158,11,0.1);}
+.pasos-nequi{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:13px;margin-bottom:14px;}
+.pasos-nequi-title{font-size:0.72rem;font-weight:800;color:#1e40af;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.paso-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+.paso-row:last-child{margin-bottom:0;}
+.paso-num{width:22px;height:22px;border-radius:50%;background:#1d4ed8;color:#fff;font-size:0.65rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.paso-num.green{background:var(--green);}
+.paso-txt{font-size:0.77rem;color:#1e3a5f;line-height:1.45;}
 
+.btn-confirmar-wa{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:none;border-radius:12px;padding:15px;font-size:0.95rem;font-weight:900;cursor:pointer;box-shadow:0 5px 22px rgba(22,163,74,0.5);animation:pulseGreen 1.8s infinite;position:relative;overflow:hidden;margin-bottom:4px;}
+.btn-confirmar-wa::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmer 2s infinite;}
+.nota-wa{text-align:center;color:#86efac;font-size:0.68rem;}
+
+/* Separador OR */
+.or-sep{display:flex;align-items:center;gap:10px;margin:12px 0;}
+.or-sep-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(148,163,184,0.4));}
+.or-sep-line.right{background:linear-gradient(90deg,rgba(148,163,184,0.4),transparent);}
+.or-sep-txt{font-size:0.65rem;font-weight:800;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;}
+
+/* Opción 2: ePayco */
+.pago-epayco{background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #334155;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.pago-epayco-head{padding:12px 16px 10px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.epayco-label{font-size:0.6rem;color:#64748b;letter-spacing:1.8px;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.epayco-logos{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
+.logo-visa{background:#1a1f71;border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;font-style:italic;}
+.logo-mc{display:flex;align-items:center;background:#1c1917;border-radius:5px;padding:4px 8px;gap:3px;}
+.logo-mc .c1{width:15px;height:15px;background:#eb001b;border-radius:50%;margin-right:-5px;}
+.logo-mc .c2{width:15px;height:15px;background:#f79e1b;border-radius:50%;}
+.logo-mc span{font-size:0.62rem;color:#d4d4d4;font-weight:700;margin-left:3px;}
+.logo-pse{background:linear-gradient(135deg,#006633,#009933);border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;}
+.logo-nequi{background:linear-gradient(135deg,#5B21B6,#7C3AED);border-radius:5px;padding:4px 11px;font-size:0.72rem;font-weight:900;color:#fff;}
+.logo-bc{background:#FFCC00;border-radius:5px;padding:4px 11px;font-size:0.68rem;font-weight:900;color:#000;}
+.pago-epayco-body{padding:14px 16px 16px;}
+.btn-epayco{width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6);color:#fff;border:none;border-radius:13px;padding:17px;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 28px rgba(37,99,235,0.55);position:relative;overflow:hidden;margin-bottom:6px;}
+.btn-epayco::before{content:'';position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 2s infinite;}
+.nota-epayco{text-align:center;color:#64748b;font-size:0.67rem;}
+
+/* SSL badge */
+.ssl-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+.ssl-badge{font-size:0.62rem;color:#475569;display:flex;align-items:center;gap:4px;}
+
+/* FOOTER */
+.footer{background:#050d1a;padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.68rem;border-top:1px solid rgba(245,158,11,0.1);}
 .divider-gold{height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.3),transparent);}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#16a34a;color:#fff;padding:12px 22px;border-radius:12px;font-size:0.85rem;font-weight:700;z-index:9999;opacity:0;transition:all .35s;pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* Loading overlay para ePayco */
+#epayco-loading{display:none;position:fixed;inset:0;background:rgba(10,22,40,0.92);z-index:9000;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#epayco-loading.show{display:flex;}
+.epayco-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,0.15);border-top:4px solid #3b82f6;border-radius:50%;animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
+
+<div id="toast"></div>
+<div id="epayco-loading">
+  <div class="epayco-spinner"></div>
+  <p style="color:#94a3b8;font-size:0.85rem;font-weight:600;">Cargando pasarela de pago segura…</p>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -139,7 +180,6 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
   <div class="badge-oferta">⚡ OFERTA SOLO POR HOY</div>
   <h1>Elimina tus multas<br><em>hoy mismo</em></h1>
   <p class="hero-sub">Proceso 100% legal · Derecho de Petición oficial · En menos de 2 minutos tienes el trámite radicado</p>
-
   <div class="precio-wrap">
     <div class="precio-normal">Precio normal: <s>$98.000</s> por multa</div>
     <div class="precio-hoy">
@@ -148,11 +188,10 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
     </div>
     <div class="precio-note"><strong>por cada multa · pago único · sin cobros adicionales</strong></div>
   </div>
-
   <span class="arrow-down">⬇️</span>
 </div>
 
-<!-- PROCESO 3 PASOS -->
+<!-- CÓMO FUNCIONA -->
 <div class="section-light">
   <div class="wrap">
     <div class="section-title dark">Así funciona — en menos de 2 minutos</div>
@@ -162,7 +201,7 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div class="step-body">
           <div class="step-icon">💳</div>
           <h3>Pagas $19.000 por cada multa</h3>
-          <p>Pago único, sin cobros adicionales. Por Llave Breve o transferencia. Sin riesgo de estafa — proceso 100% transparente.</p>
+          <p>Pago único, sin cobros adicionales. Por Llave Breve o tarjeta/PSE. Sin riesgo — proceso 100% transparente.</p>
         </div>
       </div>
       <div class="step">
@@ -178,7 +217,7 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div class="step-body">
           <div class="step-icon">📤</div>
           <h3>Radicamos en menos de 2 minutos</h3>
-          <p>Tu documento queda radicado oficialmente ante la Secretaría de Tránsito. Recibes el número de radicado por WhatsApp.</p>
+          <p>Tu documento queda radicado ante la Secretaría de Tránsito. Recibes el número de radicado por WhatsApp.</p>
         </div>
       </div>
     </div>
@@ -187,14 +226,14 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 
 <div class="divider-gold"></div>
 
-<!-- SELECTOR MULTAS + CTA -->
+<!-- SELECTOR MULTAS -->
 <div class="section-dark">
   <div class="wrap">
     <div class="section-title gold">¿Cuántas multas quieres eliminar?</div>
 
     <div class="selector-wrap">
       <p class="sel-titulo">Selecciona la cantidad</p>
-      <div class="multas-grid" id="multas-grid">
+      <div class="multas-grid">
         <button class="multa-btn active" onclick="selMultas(1)"><span class="num">1</span><span class="lbl">multa</span></button>
         <button class="multa-btn" onclick="selMultas(2)"><span class="num">2</span><span class="lbl">multas</span></button>
         <button class="multa-btn" onclick="selMultas(3)"><span class="num">3</span><span class="lbl">multas</span></button>
@@ -206,12 +245,12 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
       <div class="total-wrap">
         <div class="total-label">Total a pagar hoy</div>
         <div class="total-val" id="total-val">$19.000</div>
-        <div class="total-ahorro" id="total-ahorro">Precio normal: <s>$98.000</s> → Solo pagas <strong style="color:var(--gold);">$19.000</strong> × 1 = <strong style="color:var(--gold);">$19.000</strong></div>
+        <div class="total-ahorro" id="total-ahorro">Precio normal: <s>$98.000</s> → Solo pagas <strong style="color:var(--gold);">$19.000</strong></div>
       </div>
 
-      <button class="btn-pagar" onclick="abrirWaPago()">
-        <span>⚡ PAGAR $<span id="btn-monto">19.000</span> Y RADICAR AHORA</span>
-        <span class="sub">Envíanos el comprobante — radicamos en &lt;2 min</span>
+      <button class="btn-ir-pago" onclick="irAPago()">
+        <span>⚡ ELEGIR MÉTODO DE PAGO — $<span id="btn-monto">19.000</span></span>
+        <span class="sub">Elige Llave Breve o Tarjeta/PSE → radicamos de inmediato</span>
       </button>
     </div>
 
@@ -220,32 +259,22 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
       <div class="garantia-card">
         <span class="garantia-icon">✅</span>
         <div class="garantia-title">Sin cobros ocultos</div>
-        <div class="garantia-desc">Un solo pago. Nada más. Sin sorpresas.</div>
+        <div class="garantia-desc">Un solo pago. Nada más.</div>
       </div>
       <div class="garantia-card">
         <span class="garantia-icon">⚖️</span>
         <div class="garantia-title">100% Legal</div>
-        <div class="garantia-desc">Derecho de Petición oficial. Proceso amparado por la ley.</div>
+        <div class="garantia-desc">Derecho de Petición oficial.</div>
       </div>
       <div class="garantia-card">
         <span class="garantia-icon">🔒</span>
         <div class="garantia-title">Sin riesgo de estafa</div>
-        <div class="garantia-desc">Proceso transparente. Ves todo antes de pagar.</div>
+        <div class="garantia-desc">Proceso transparente y visible.</div>
       </div>
       <div class="garantia-card">
         <span class="garantia-icon">⚡</span>
         <div class="garantia-title">En &lt;2 minutos</div>
-        <div class="garantia-desc">Radicado oficial con número garantizado.</div>
-      </div>
-      <div class="garantia-card">
-        <span class="garantia-icon">📋</span>
-        <div class="garantia-title">Número de radicado</div>
-        <div class="garantia-desc">Soporte oficial que llega por WhatsApp.</div>
-      </div>
-      <div class="garantia-card">
-        <span class="garantia-icon">💯</span>
-        <div class="garantia-title">Probado</div>
-        <div class="garantia-desc">Cientos de multas eliminadas para colombianos.</div>
+        <div class="garantia-desc">Radicado oficial garantizado.</div>
       </div>
     </div>
   </div>
@@ -272,7 +301,7 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
       </div>
       <div class="aplica-item">
         <div class="aplica-check">✓</div>
-        <div class="aplica-txt"><strong>Multas por agente con irregularidades</strong> — errores de procedimiento en la imposición del comparendo anulan su validez.</div>
+        <div class="aplica-txt"><strong>Multas con irregularidades de procedimiento</strong> — errores en la imposición del comparendo anulan su validez legal.</div>
       </div>
       <div class="aplica-item">
         <div class="aplica-check">✓</div>
@@ -284,62 +313,106 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 
 <div class="divider-gold"></div>
 
-<!-- MEDIOS DE PAGO -->
-<div class="section-dark">
+<!-- ══════════════════════════════════
+     OPCIONES DE PAGO — AMBAS VISIBLES
+══════════════════════════════════ -->
+<div class="section-dark" id="seccion-pago">
   <div class="wrap">
-    <div class="section-title gold">Medios de pago</div>
+    <div class="section-title gold">Elige cómo pagar</div>
+    <p style="text-align:center;color:rgba(255,255,255,0.55);font-size:0.8rem;margin-top:-16px;margin-bottom:22px;">Paga → envíanos el comprobante → radicamos ese mismo día</p>
 
-    <div class="pago-card">
-      <div class="pago-head">
-        <div class="pago-title">🔑 Llave Breve Bancolombia</div>
-        <span class="pago-tag">Recomendado</span>
+    <!-- MONTO a pagar (se actualiza con el selector) -->
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.3);border-radius:14px;padding:12px 16px;margin-bottom:18px;text-align:center;">
+      <p style="font-size:0.65rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Total a pagar por <span id="pago-n-txt">1 multa</span></p>
+      <p style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--gold);line-height:1;text-shadow:0 0 20px rgba(245,158,11,0.4);" id="pago-total-txt">$19.000</p>
+    </div>
+
+    <!-- ══ OPCIÓN 1: LLAVE BREVE ══ -->
+    <div class="pago-llave">
+      <div class="pago-llave-head">
+        <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px;font-size:1.3rem;flex-shrink:0;">📱</div>
+        <div style="flex:1;min-width:0;">
+          <span class="llave-badge">⭐ RECOMENDADO — MÁS RÁPIDO</span>
+          <p style="font-size:0.9rem;font-weight:900;color:#fff;margin:4px 0 0;">Nequi · Daviplata · Cualquier banco</p>
+          <p style="font-size:0.63rem;color:#bbf7d0;margin:2px 0 0;">Llave Breve Transfiya — sin registrarte en ningún lugar</p>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span class="llave-val" id="llave-val">@OTO262</span>
-        <button class="btn-copiar" onclick="copiarLlave()">📋 Copiar</button>
+      <div class="pago-llave-body">
+        <!-- Llave copiable -->
+        <div class="llave-card">
+          <div class="llave-card-left">
+            <div class="llave-label">LLAVE BREVE</div>
+            <div class="llave-key">@OTO262</div>
+            <div class="titular-note">Titular: <strong style="color:#0c4a6e;">Ju... Cac...</strong> <span style="color:#94a3b8;">(verifica al pagar)</span></div>
+          </div>
+          <button class="btn-copiar-key" onclick="copiarLlave(this)">📋 Copiar</button>
+        </div>
+        <!-- Pasos Nequi -->
+        <div class="pasos-nequi">
+          <div class="pasos-nequi-title">📱 Cómo pagar paso a paso</div>
+          <div class="paso-row">
+            <div class="paso-num">1</div>
+            <div class="paso-txt">Abre tu app de <strong>Nequi, Daviplata, Bancolombia, Davivienda</strong> o cualquier banco.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">2</div>
+            <div class="paso-txt">Toca <strong>"Enviar dinero"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">3</div>
+            <div class="paso-txt">Selecciona <strong>"Llave Breve"</strong> o <strong>"Transfiya"</strong> como tipo de destino.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">4</div>
+            <div class="paso-txt">Escribe la llave: <strong style="font-family:monospace;color:#1d4ed8;font-size:0.9rem;">@OTO262</strong> y verifica que el titular empiece por <strong>Ju... Cac...</strong></div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">5</div>
+            <div class="paso-txt">Ingresa el monto exacto: <strong id="monto-paso5">$19.000</strong> y confirma la transferencia.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num green">6</div>
+            <div class="paso-txt"><strong>Guarda el comprobante</strong> (captura de pantalla) y toca el botón verde de abajo para enviárnoslo.</div>
+          </div>
+        </div>
+        <!-- Botón WhatsApp comprobante -->
+        <button class="btn-confirmar-wa" onclick="enviarComprobante()">
+          <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — ENVIAR COMPROBANTE POR WHATSAPP</span>
+        </button>
+        <p class="nota-wa">Adjunta el comprobante y radicamos ese mismo día ⚡</p>
       </div>
-      <div class="nequi-steps">
-        <div class="nequi-steps-title">📱 Cómo pagar desde Nequi:</div>
-        <div class="nequi-step">
-          <div class="nequi-num">1</div>
-          <div class="nequi-step-txt">Abre Nequi → toca <strong>Enviar dinero</strong></div>
+    </div>
+
+    <!-- Separador O -->
+    <div class="or-sep">
+      <div class="or-sep-line"></div>
+      <span class="or-sep-txt">— O PAGA CON —</span>
+      <div class="or-sep-line right"></div>
+    </div>
+
+    <!-- ══ OPCIÓN 2: ePAYCO / TARJETA / PSE ══ -->
+    <div class="pago-epayco">
+      <div class="pago-epayco-head">
+        <div class="epayco-label">Opción 2 · Pago en línea · 100% seguro · SSL encriptado</div>
+        <div class="epayco-logos">
+          <div class="logo-visa">VISA</div>
+          <div class="logo-mc"><div class="c1"></div><div class="c2"></div><span>Mastercard</span></div>
+          <div class="logo-pse">PSE</div>
+          <div class="logo-nequi">Nequi</div>
+          <div class="logo-bc">Bancolombia</div>
         </div>
-        <div class="nequi-step">
-          <div class="nequi-num">2</div>
-          <div class="nequi-step-txt">Selecciona <strong>Llave Breve</strong> como método</div>
-        </div>
-        <div class="nequi-step">
-          <div class="nequi-num">3</div>
-          <div class="nequi-step-txt">Ingresa la llave <strong>@OTO262</strong> y el monto exacto</div>
-        </div>
-        <div class="nequi-step">
-          <div class="nequi-num" style="background:#16a34a;">4</div>
-          <div class="nequi-step-txt">Confirma y <strong>envíanos el comprobante</strong> por WhatsApp →</div>
+      </div>
+      <div class="pago-epayco-body">
+        <button class="btn-epayco" onclick="abrirEpayco(this)">
+          <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE / NEQUI →</span>
+        </button>
+        <p class="nota-epayco">Al completar el pago confirmamos la radicación por WhatsApp · Sin cobros adicionales</p>
+        <div class="ssl-row">
+          <span class="ssl-badge">🔒 Pago procesado por ePayco · Encriptación SSL 256 bits</span>
         </div>
       </div>
     </div>
 
-    <div class="pago-card">
-      <div class="pago-head">
-        <div class="pago-title">🏦 Transferencia bancaria</div>
-      </div>
-      <p style="font-size:0.8rem;color:var(--gray);margin-bottom:12px;">Solicita los datos bancarios por WhatsApp. Te respondemos de inmediato.</p>
-      <a href="https://wa.me/573159318400?text=Hola%2C+necesito+los+datos+bancarios+para+transferencia." style="display:inline-block;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:8px;padding:8px 16px;font-size:0.8rem;font-weight:700;text-decoration:none;">Solicitar datos →</a>
-    </div>
-
-    <p style="text-align:center;color:rgba(255,255,255,0.4);font-size:0.7rem;margin-top:4px;">Después de pagar envíanos el comprobante · Radicamos de inmediato</p>
-  </div>
-</div>
-
-<!-- CTA FINAL -->
-<div class="cta-final">
-  <div style="max-width:480px;margin:0 auto;">
-    <h2>¿Ya realizaste tu pago?</h2>
-    <p>Envíanos el comprobante ahora y en menos de 2 minutos tienes el trámite radicado con número oficial.</p>
-    <a href="https://wa.me/573159318400?text=Hola%2C+ya+realicé+mi+pago+de+%2419.000.+Quiero+radicar+mi+multa+de+inmediato.+Adjunto+el+comprobante." class="btn-wa">
-      <span>✅ Ya pagué — Enviar comprobante al WhatsApp</span>
-      <span class="wa-sub">Radicamos en menos de 2 minutos · Número de radicado garantizado</span>
-    </a>
   </div>
 </div>
 
@@ -361,36 +434,100 @@ function selMultas(n){
   document.getElementById('total-val').textContent = fmt(total);
   document.getElementById('btn-monto').textContent = (19000*n).toLocaleString('es-CO');
   document.getElementById('total-ahorro').innerHTML =
-    'Precio normal: <s>'+fmt(normal)+'</s> → Solo pagas <strong style="color:var(--gold);">$19.000</strong> × '+n+' = <strong style="color:var(--gold);">'+fmt(total)+'</strong>';
+    'Precio normal: <s>'+fmt(normal)+'</s> → Solo pagas <strong style="color:var(--gold);">'+fmt(total)+'</strong>';
+  // Actualizar sección de pago
+  document.getElementById('pago-n-txt').textContent = n+' multa'+(n!==1?'s':'');
+  document.getElementById('pago-total-txt').textContent = fmt(total);
+  document.getElementById('monto-paso5').textContent = fmt(total);
 }
 
-function abrirWaPago(){
+function irAPago(){
+  document.getElementById('seccion-pago').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copiarLlave(btn){
+  var val = '@OTO262';
+  function ok(){ btn.textContent = '✅ ¡Copiado!'; setTimeout(function(){ btn.textContent = '📋 Copiar'; }, 2200); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(ok).catch(function(){
+      var ta=document.createElement('textarea');ta.value=val;ta.style.cssText='position:fixed;opacity:0';
+      document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
+    });
+  } else {
+    var ta=document.createElement('textarea');ta.value=val;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok();
+  }
+  toast('Llave @OTO262 copiada ✅');
+}
+
+function enviarComprobante(){
   var n = _nMultas;
   var total = '$'+(19000*n).toLocaleString('es-CO');
-  var msg = '⚡ *Quiero eliminar mis multas — JurídicosWeb*\n\n'
-    +'Hola, quiero aprovechar la oferta de hoy.\n\n'
-    +'📋 *Mi pedido:*\n'
-    +'• Multas a eliminar: *'+n+' multa(s)*\n'
-    +'• Precio por multa: *$19.000* (oferta del día)\n'
-    +'• Total: *'+total+'*\n\n'
-    +'Adjunto el comprobante de pago. ¿Cuáles son los pasos? 🙏';
-  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
+  var msg = '✅ *JurídicosWeb — Comprobante de Pago*\n\n'
+    +'💳 Monto pagado: *'+total+'* ('+n+' multa'+(n!==1?'s':'')+' × $19.000 c/u)\n'
+    +'🔑 Pago realizado por llave breve @OTO262\n\n'
+    +'Adjunto el comprobante de pago. Por favor radicar de inmediato. 🙏';
+  window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
-function copiarLlave(){
-  var val = document.getElementById('llave-val').textContent;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(val).then(function(){
-      var btn=event.target; btn.textContent='¡Copiado!';
-      setTimeout(function(){ btn.textContent='📋 Copiar'; },2000);
-    }).catch(fb);
-  } else { fb(val); }
+// ── ePayco checkout ──
+var _epaycoLoaded = false;
+function abrirEpayco(btn){
+  var n = _nMultas;
+  var monto = 19000 * n;
+  var desc = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb ($'+monto.toLocaleString('es-CO')+')';
+
+  if(btn){ btn.disabled=true; btn.style.opacity='0.7'; }
+  document.getElementById('epayco-loading').classList.add('show');
+
+  function lanzar(){
+    document.getElementById('epayco-loading').classList.remove('show');
+    if(btn){ btn.disabled=false; btn.style.opacity=''; }
+    try{
+      var handler = ePayco.checkout.configure({
+        key:               '347e56166b7cbd26c7257d8689033fba',
+        test:              false,
+        p_cust_id_cliente: '1595409'
+      });
+      handler.open({
+        name:        'JurídicosWeb',
+        description: desc,
+        currency:    'cop',
+        amount:      String(monto),
+        tax_base:    '0',
+        tax:         '0',
+        country:     'co',
+        lang:        'es',
+        external:    'false',
+        response:    'https://juridicosweb.com/pago-ok.html',
+        confirmation: 'https://juridicosweb.com/pago-ok.html'
+      });
+    } catch(e){
+      toast('No se pudo cargar la pasarela. Intenta de nuevo.', 'error');
+    }
+  }
+
+  if(_epaycoLoaded){
+    lanzar();
+  } else {
+    var s = document.createElement('script');
+    s.src = 'https://checkout.epayco.co/checkout.js';
+    s.onload = function(){ _epaycoLoaded=true; lanzar(); };
+    s.onerror = function(){
+      document.getElementById('epayco-loading').classList.remove('show');
+      if(btn){ btn.disabled=false; btn.style.opacity=''; }
+      toast('Error al cargar la pasarela. Intenta de nuevo.', 'error');
+    };
+    document.head.appendChild(s);
+  }
 }
-function fb(val){
-  var ta=document.createElement('textarea');ta.value=typeof val==='string'?val:document.getElementById('llave-val').textContent;
-  ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();
-  document.execCommand('copy');document.body.removeChild(ta);
-  var btn=event.target;btn.textContent='¡Copiado!';setTimeout(function(){btn.textContent='📋 Copiar';},2000);
+
+function toast(msg, type){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = type==='error' ? '#dc2626' : '#16a34a';
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
 }
 </script>
 </body>
