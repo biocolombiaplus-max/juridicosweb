@@ -5877,33 +5877,71 @@ function descargarDerechoPeticionPDF(){
   declLines.forEach(function(l){ doc.text(l, W/2, y, {align:'center'}); y+=4.5; });
   y+=10; doc.setTextColor(0,0,0);
 
-  // CTA premium navy+gold
-  var boxH2 = 62;
-  // Sombra
-  doc.setFillColor(5,15,45); doc.rect(ML+1.5, y+1.5, TW, boxH2, 'F');
-  // Cuerpo navy
-  doc.setFillColor(NAVY[0],NAVY[1],NAVY[2]); doc.setDrawColor(GOLD2[0],GOLD2[1],GOLD2[2]); doc.setLineWidth(1);
-  doc.roundedRect(ML, y, TW, boxH2, 3, 3, 'FD');
-  // Franja dorada superior del recuadro
-  doc.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-  doc.roundedRect(ML, y, TW, 11, 3, 3, 'F');
-  doc.rect(ML, y+5, TW, 6, 'F');
-  // Texto en franja
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,24,64);
-  doc.text('PRÓXIMO PASO — RADICACIÓN OFICIAL DEL DOCUMENTO', W/2, y+7.5, {align:'center'});
-  // Contenido
-  doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(200,210,240);
-  doc.text('Este documento ya está listo. El trámite de radicación es inmediato:', W/2, y+19, {align:'center'});
-  var steps = ['① Haga clic en el botón de WhatsApp que aparece en la pantalla', '② Nos envía una foto del documento con su firma', '③ Lo radicamos ante la Secretaría de Tránsito el mismo día', '④ Recibe el número de radicado oficial por WhatsApp'];
-  steps.forEach(function(s, i){
-    doc.setFont('helvetica', i%2===0?'bold':'normal');
-    doc.setTextColor(i%2===0?255:190, i%2===0?215:210, i%2===0?120:240);
-    doc.text(s, W/2, y+27+i*7.5, {align:'center'});
+  // ── CTA REDISEÑADO: Banner rojo + botón clickeable ──
+  var pagoUrl = 'https://juridicosweb.com/pago.html';
+
+  // ① Encabezado rojo de impacto — "¡LISTO PARA RADICAR!"
+  var redH = 22;
+  doc.setFillColor(185,10,10); doc.rect(ML, y, TW, redH, 'F');
+  // Brillo interno superior
+  doc.setFillColor(220,30,30); doc.rect(ML, y, TW, 4, 'F');
+  // Borde blanco fino
+  doc.setDrawColor(255,255,255); doc.setLineWidth(0.8);
+  doc.rect(ML+1, y+1, TW-2, redH-2, 'D');
+  // Texto principal grande
+  doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(255,255,255);
+  doc.text('¡LISTO PARA RADICAR!', W/2, y+10, {align:'center'});
+  // Subtexto pequeño
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(255,200,200);
+  doc.text('Su documento está firmado y listo — el trámite tarda menos de 2 minutos', W/2, y+17, {align:'center'});
+  y += redH;
+
+  // ② Cuerpo navy con instrucciones compactas
+  var bodyH = 38;
+  doc.setFillColor(10,24,64); doc.rect(ML, y, TW, bodyH, 'F');
+  // Separador dorado
+  doc.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]); doc.rect(ML, y, TW, 0.8, 'F');
+
+  var instrucciones = [
+    { ico:'①', txt:'Toque el botón azul de abajo  →  pague $19.000 por multa (pago único)' },
+    { ico:'②', txt:'Envíe el comprobante por WhatsApp al +57 315 931 8400' },
+    { ico:'③', txt:'Radicamos ante la Secretaría de Tránsito ese mismo día y le enviamos el número de radicado' },
+  ];
+  var iy = y + 8;
+  instrucciones.forEach(function(ins){
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
+    doc.text(ins.ico, ML+5, iy);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(210,220,240);
+    var tlines = doc.splitTextToSize(ins.txt, TW-18);
+    tlines.forEach(function(tl){ doc.text(tl, ML+14, iy); iy+=5; });
+    iy+=1;
   });
-  doc.setDrawColor(GOLD2[0],GOLD2[1],GOLD2[2]); doc.setLineWidth(0.3);
-  doc.line(ML+12, y+57, W-MR-12, y+57);
-  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-  doc.text('WhatsApp: +57 315 931 8400   ·   www.juridicosweb.com', W/2, y+boxH2-4, {align:'center'});
+  y += bodyH;
+
+  // ③ BOTÓN CLICKEABLE — rectángulo azul eléctrico con enlace real
+  var btnH = 20;
+  var btnW = TW;
+  // Sombra del botón
+  doc.setFillColor(0,30,100); doc.rect(ML+2, y+2, btnW, btnH, 'F');
+  // Botón principal
+  doc.setFillColor(30,100,255); doc.rect(ML, y, btnW, btnH, 'F');
+  // Brillo superior
+  doc.setFillColor(60,130,255); doc.rect(ML, y, btnW, 4, 'F');
+  // Texto del botón
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
+  doc.text('▶  PAGAR Y RADICAR AHORA  —  juridicosweb.com/pago.html', W/2, y+12.5, {align:'center'});
+  // ── ENLACE CLICKEABLE (jsPDF link) ──
+  doc.link(ML, y, btnW, btnH, { url: pagoUrl });
+  y += btnH;
+
+  // ④ Franja inferior con datos de contacto
+  var footCtaH = 12;
+  doc.setFillColor(5,15,45); doc.rect(ML, y, TW, footCtaH, 'F');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,180,220);
+  doc.text('Si prefiere: WhatsApp +57 315 931 8400  ·  www.juridicosweb.com  ·  juridicoswebcasos@gmail.com', W/2, y+7.5, {align:'center'});
+  // Enlace en el texto de WhatsApp también
+  doc.link(ML, y, TW, footCtaH, { url: 'https://wa.me/573159318400' });
+
   doc.setTextColor(0,0,0);
   addFooter(doc, 4, TOTAL_PAGS);
 
