@@ -1931,11 +1931,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span style="position:relative;z-index:1;font-size:0.68rem;font-weight:600;opacity:0.9;">Documento completo · 4 páginas · Con tu firma</span>
           <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
         </button>
-        <!-- Botón secundario WhatsApp — href generado dinámicamente con datos del cliente -->
-        <a id="btn-wa-radicar-pdf" href="#" target="_blank" onclick="this.href=generarWaRadicar()" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-size:0.95rem;font-weight:800;box-shadow:0 5px 22px rgba(22,163,74,0.4);margin-bottom:8px;">
-          <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i>Quiero que lo radiquen → WhatsApp
-        </a>
-        <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">📄 Descarga el PDF completo · Lee el documento · Luego contáctanos para radicarlo</p>
+        <!-- Botón pago/radicación — abre el panel de pago con selector de multas -->
+        <button onclick="abrirPagoDesdeDocFirmado()" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:16px;border-radius:12px;font-size:1rem;font-weight:900;box-shadow:0 5px 22px rgba(22,163,74,0.45);margin-bottom:8px;position:relative;overflow:hidden;cursor:pointer;animation:pulseGreen 2s infinite;">
+          <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2s infinite;pointer-events:none;"></span>
+          <i class="fab fa-whatsapp" style="font-size:1.2rem;flex-shrink:0;"></i>
+          <span style="position:relative;">⚡ Quiero que lo radiquen → Pagar y radicar ahora</span>
+        </button>
+        <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">Pago único $19.000/multa · Elige Nequi · Tarjeta · PSE · y te radicamos el mismo día</p>
       </div>
 
       <!-- ══════════════════════════════════════
@@ -2008,15 +2010,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            PASO: Pago final
            ══════════════════════════════════════ -->
       <div class="step-panel" id="sp-pago-radicar">
+
+        <!-- Selector de multas — visible cuando viene del flujo firmado -->
+        <div id="pr-selector-multas" style="display:none;background:linear-gradient(135deg,#0f172a,#1a2744);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+          <p style="font-size:0.7rem;font-weight:800;color:#f59e0b;text-align:center;margin:0 0 10px;text-transform:uppercase;letter-spacing:.6px;">¿Cuántas multas eliminas? — $19.000 c/u</p>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;" id="pr-multas-btns">
+            <button type="button" class="pr-mb pr-mb-act" onclick="prSelMultas(1)">1 multa</button>
+            <button type="button" class="pr-mb" onclick="prSelMultas(2)">2 multas</button>
+            <button type="button" class="pr-mb" onclick="prSelMultas(3)">3 multas</button>
+            <button type="button" class="pr-mb" onclick="prSelMultas(4)">4 multas</button>
+            <button type="button" class="pr-mb" onclick="prSelMultas(5)">5 multas</button>
+            <button type="button" class="pr-mb" onclick="prSelMultas(6)">6+</button>
+          </div>
+          <style>
+          .pr-mb{flex:1;min-width:44px;padding:10px 6px;font-size:0.82rem;font-weight:800;border:2px solid rgba(245,158,11,0.3);background:rgba(255,255,255,0.04);color:#94a3b8;border-radius:9px;cursor:pointer;transition:all .15s;}
+          .pr-mb-act{background:linear-gradient(135deg,#f59e0b,#d97706)!important;color:#0a1628!important;border-color:#f59e0b!important;box-shadow:0 3px 10px rgba(245,158,11,0.4)!important;}
+          </style>
+        </div>
+
         <!-- Header monto -->
         <div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(30,58,138,0.5);">
           <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(255,255,255,0.025) 18px,rgba(255,255,255,0.025) 36px);pointer-events:none;"></div>
-          <p style="color:#93c5fd;font-size:0.65rem;margin:0 0 4px;font-weight:700;letter-spacing:2px;text-transform:uppercase;position:relative;">VALOR TOTAL DEL SERVICIO</p>
-          <p style="color:#fff;font-size:2.4rem;font-weight:900;margin:0 0 2px;position:relative;text-shadow:0 2px 12px rgba(96,165,250,0.4);" id="pr-monto">$19.000</p>
-          <p style="color:#93c5fd;font-size:0.72rem;margin:0;position:relative;" id="pr-plan-desc">Activación + radicación de una multa</p>
+          <p style="color:#93c5fd;font-size:0.65rem;margin:0 0 4px;font-weight:700;letter-spacing:2px;text-transform:uppercase;position:relative;">VALOR TOTAL — PAGO ÚNICO</p>
+          <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:2px;">
+            <span style="font-size:1rem;color:#ef4444;text-decoration:line-through;opacity:0.7;" id="pr-monto-tachado">$98.000</span>
+            <p style="color:#f59e0b;font-size:2.6rem;font-weight:900;margin:0;line-height:1;text-shadow:0 2px 12px rgba(245,158,11,0.4);" id="pr-monto">$19.000</p>
+          </div>
+          <p style="color:#93c5fd;font-size:0.72rem;margin:0;position:relative;" id="pr-plan-desc">Activación + radicación · 1 multa · Sin cobros adicionales</p>
           <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;">
             <div style="height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(147,197,253,0.3));"></div>
-            <span style="font-size:0.65rem;color:#60a5fa;font-weight:600;">PAGO ÚNICO · TODO INCLUIDO</span>
+            <span style="font-size:0.65rem;color:#f59e0b;font-weight:700;">PAGO ÚNICO · SIN COBROS OCULTOS</span>
             <div style="height:1px;flex:1;background:linear-gradient(90deg,rgba(147,197,253,0.3),transparent);"></div>
           </div>
         </div>
@@ -2026,7 +2049,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span style="font-size:1.1rem;flex-shrink:0;">👇</span>
           <div>
             <p style="font-size:0.8rem;font-weight:900;color:#92400e;margin:0;line-height:1.2;">Elige cómo quieres pagar</p>
-            <p style="font-size:0.68rem;color:#78350f;margin:2px 0 0;font-weight:600;">Toca uno de los botones de abajo para ver los pasos</p>
+            <p style="font-size:0.68rem;color:#78350f;margin:2px 0 0;font-weight:600;">Paga → envíanos el comprobante → radicamos el mismo día</p>
           </div>
         </div>
 
@@ -3596,13 +3619,48 @@ function irAPagoFinal(){
   if(pagoSel==='garantia'){
     var n=_numMultasGarantia||1;
     document.getElementById('pr-monto').textContent = '$'+(10000*n).toLocaleString('es-CO');
+    var tach = document.getElementById('pr-monto-tachado');
+    if(tach) tach.textContent = '$'+(98000*n).toLocaleString('es-CO');
     document.getElementById('pr-plan-desc').textContent = 'Adelanto garantía · $19.000 × '+n+' multa'+(n!==1?'s':'')+' solo al eliminar';
   } else {
     var esUna  = _planFinal==='una';
     document.getElementById('pr-monto').textContent    = esUna ? '$19.000' : '$19.000';
-    document.getElementById('pr-plan-desc').textContent = esUna ? 'Activación + radicación de una multa' : 'Activación + radicación de TODAS las multas que apliquen';
+    var tach2 = document.getElementById('pr-monto-tachado');
+    if(tach2) tach2.textContent = esUna ? '$98.000' : '$98.000';
+    document.getElementById('pr-plan-desc').textContent = esUna ? 'Activación + radicación · 1 multa · Sin cobros adicionales' : 'Activación + radicación de TODAS las multas que apliquen';
   }
+  var sel = document.getElementById('pr-selector-multas');
+  if(sel) sel.style.display = 'none';
   goToStepNombre('sp-pago-radicar');
+}
+
+// ── Abre el pago directamente desde el botón del documento firmado ──
+var _prNMultas = 1;
+function abrirPagoDesdeDocFirmado(){
+  // Detectar cuántas multas tiene el cliente
+  var nAplican = (_multasReportadas||[]).filter(function(m){ return m.estado==='aplica'; }).length;
+  _prNMultas = Math.max(1, nAplican || (_multasParaTramite||[]).length || 1);
+  pagoSel = 'individual';
+  // Mostrar el selector de multas
+  var sel = document.getElementById('pr-selector-multas');
+  if(sel) sel.style.display = 'block';
+  // Pintar botones del selector
+  prSelMultas(_prNMultas);
+  goToStepNombre('sp-pago-radicar');
+}
+
+function prSelMultas(n){
+  _prNMultas = n;
+  // Actualizar botones
+  var btns = document.querySelectorAll('.pr-mb');
+  btns.forEach(function(b, i){ b.classList.toggle('pr-mb-act', i===n-1); });
+  // Actualizar monto
+  var total = 19000 * n;
+  var normal = 98000 * n;
+  var el = document.getElementById('pr-monto'); if(el) el.textContent = '$'+total.toLocaleString('es-CO');
+  var el2 = document.getElementById('pr-monto-tachado'); if(el2) el2.textContent = '$'+normal.toLocaleString('es-CO');
+  var el3 = document.getElementById('pr-plan-desc'); if(el3) el3.textContent = 'Activación + radicación · '+n+' multa'+(n!==1?'s':'')+' · Sin cobros adicionales';
+  _totalPago = total;
 }
 
 function copiarLlave(btn){
@@ -3658,20 +3716,19 @@ function _lanzarEpayco(monto, desc){
 }
 
 function abrirEpayco(){
-  var esUna    = _planFinal === 'una';
-  var monto    = esUna ? 19000 : 19000;
-  var planDesc = esUna ? 'Activar y radicar una multa - JurídicosWeb'
-                       : 'Activar y radicar TODAS las multas - JurídicosWeb';
+  var n = _prNMultas || 1;
+  var monto    = 19000 * n;
+  var planDesc = 'Activar y radicar '+n+' multa'+(n!==1?'s':'')+' - JurídicosWeb ($'+monto.toLocaleString('es-CO')+')';
 
   try{
     localStorage.setItem('jw_pago_nombre', _nombreConsultante||'');
     localStorage.setItem('jw_pago_wa',     _waConsultante||'');
     localStorage.setItem('jw_pago_cedula', _valorConsultado||'');
-    localStorage.setItem('jw_pago_monto',  esUna?'$19.000':'$19.000');
-    localStorage.setItem('jw_pago_plan',   esUna?'una multa':'todas las multas');
+    localStorage.setItem('jw_pago_monto',  '$'+monto.toLocaleString('es-CO'));
+    localStorage.setItem('jw_pago_plan',   n+' multa'+(n!==1?'s':''));
     var md = getMultasSeleccionadas();
     localStorage.setItem('jw_multas_json', JSON.stringify(md));
-    localStorage.setItem('jw_num_multas',  md.length);
+    localStorage.setItem('jw_num_multas',  n);
   }catch(e){}
 
   if(window.ePayco){
@@ -3751,25 +3808,23 @@ function getMultasSeleccionadas(){
 function yaHiceElPago(){
   marcarPagoActivo && marcarPagoActivo();
   if(pagoSel==='garantia'){ abrirCompromisoGarantia(); return; }
-  var esUna   = _planFinal==='una';
-  var monto   = esUna ? '$19.000' : '$19.000';
-  var planLbl = esUna ? 'una multa' : 'TODAS las multas';
+  var n       = _prNMultas || 1;
+  var total   = 19000 * n;
+  var monto   = '$'+total.toLocaleString('es-CO');
+  var planLbl = n+' multa'+(n!==1?'s':'');
   var multasData = getMultasSeleccionadas();
   try {
     localStorage.setItem('jw_multas_json', JSON.stringify(multasData));
-    localStorage.setItem('jw_num_multas', multasData.length);
+    localStorage.setItem('jw_num_multas', n);
   } catch(e){}
-  var msg = '*¡Hice el pago! ✅*\n\n'+
+  var msg = '⚡ *JurídicosWeb — Comprobante de Pago*\n\n'+
     '👤 Nombre: '+ (_nombreConsultante||'') +'\n'+
     '🪪 '+(_tipoConsultado==='cedula'?'Cédula':'Placa')+': '+ (_valorConsultado||'') +'\n'+
     '📱 WhatsApp: '+ (_waConsultante||'') +'\n'+
-    '💳 Plan: '+ monto +' — '+ planLbl +'\n'+
-    '📑 Multas a radicar: '+ multasData.length +'\n\n';
-  multasData.forEach(function(m, i){
-    msg += '📌 Multa '+(i+1)+': '+m.infraccion+' → '+m.secretaria+'\n';
-  });
-  msg += '\nAdjunto el comprobante de pago. Quedo esperando que activen el documento y lo radiquen. ✅\n\n'+
-    '_JurídicosWeb — Trámite firmado y listo_';
+    '💳 Monto pagado: *'+ monto +'* ('+planLbl+' × $19.000 c/u)\n'+
+    '📄 Documento firmado digitalmente\n\n'+
+    'Adjunto el comprobante. Por favor activen el trámite y radiquen el Derecho de Petición. ✅\n\n'+
+    '_Pago único — sin cobros adicionales_';
   jwTrack('pago_comprobante_enviado', { plan: _planFinal });
   try {
     var _bp = { _accion:'registrar_paso', paso:'pago_iniciado', cedula: _valorConsultado||'' };
