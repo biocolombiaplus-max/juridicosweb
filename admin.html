@@ -5078,17 +5078,112 @@ function recuperarLead(nombre, waNum, paso){
 }
 
 // ── Mensaje de reenganche pro para leads que dejaron datos pero no pagaron ──
+/* ── Plantillas de mensaje de enganche ── */
+var ENGANCHAR_TEMPLATES = {
+  promo: function(nombre){
+    return (
+      'Hola *'+nombre+'* 👋\n\n'+
+      'Te escribimos de *JurídicosWeb*.\n\n'+
+      'Ya revisamos tu caso y *aplicas para eliminar tu multa* por la vía legal — Derecho de Petición ante la Secretaría de Tránsito. ✅\n\n'+
+      '🔥 *Solo hoy: $19.000 por multa*\n'+
+      '(Un abogado particular cobra $250.000+)\n\n'+
+      '✅ Documento firmado en menos de 2 min\n'+
+      '✅ Radicamos ese mismo día\n'+
+      '✅ Primero ves el doc, luego pagas\n\n'+
+      '👉 *Un solo paso: entra aquí y elige cuántas multas eliminar:*\n'+
+      'https://juridicosweb.com/pago.html\n\n'+
+      '_Sin letra pequeña · Sin cobros ocultos · 100% legal_'
+    );
+  },
+  urgencia: function(nombre){
+    return (
+      '*'+nombre+',* hoy es el último día de la oferta. ⏰\n\n'+
+      'Tu caso ya está analizado y *procede la eliminación*.\n\n'+
+      '⚡ *$19.000 por multa — solo hoy*\n'+
+      'Mañana vuelve al precio normal de abogado.\n\n'+
+      '1️⃣ Entra al link\n'+
+      '2️⃣ Elige cuántas multas\n'+
+      '3️⃣ Firma y paga en 2 minutos\n'+
+      '4️⃣ Te enviamos el radicado por acá\n\n'+
+      '🔗 https://juridicosweb.com/pago.html\n\n'+
+      '_¿Tienes alguna duda? Respóndeme aquí._'
+    );
+  },
+  suave: function(nombre){
+    return (
+      'Hola *'+nombre+'* 😊\n\n'+
+      'Pasamos a recordarte que dejaste tus datos en *JurídicosWeb*.\n\n'+
+      'Tu multa *sigue activa en el SIMIT* — cada día que pasa puede generar intereses o bloquear tu licencia.\n\n'+
+      'La buena noticia: *ya tienes el caso analizado*, solo falta un paso.\n\n'+
+      '💚 *Elimínala por $19.000* (pago único, sin sorpresas)\n'+
+      '👉 https://juridicosweb.com/pago.html\n\n'+
+      '¿Quieres que te ayude con algo antes de continuar?'
+    );
+  }
+};
+
 function engancharlead(nombre, waNum){
   var wa = limpiarWA(waNum);
   if(!wa || wa.length < 10){ alert('Sin WhatsApp disponible.'); return; }
-  nombre = (nombre||'').split(' ')[0] || 'cliente';
-  var msg =
-    '*'+nombre+',* revisamos tu caso. ⚖️\n\n'+
-    'Esa multa *tiene una salida legal* — y muchos colombianos la pagan sin saber que podían eliminarla.\n\n'+
-    '¿La quitamos juntos?\n'+
-    '👉 https://juridicosweb.com/\n\n'+
-    '_JurídicosWeb — Paga solo si se elimina._';
-  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg), '_blank');
+  var primerNombre = (nombre||'').split(' ')[0] || 'cliente';
+
+  // Mostrar modal de selección de plantilla
+  var modal = document.getElementById('enganchar-modal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'enganchar-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML = `
+      <div style="background:#0f172a;border:1.5px solid rgba(167,139,250,0.4);border-radius:20px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <h3 style="color:#fff;font-size:1rem;font-weight:800;">💬 Elegir mensaje para <span id="em-nombre" style="color:#a78bfa;"></span></h3>
+          <button onclick="document.getElementById('enganchar-modal').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:1.3rem;cursor:pointer;">✕</button>
+        </div>
+
+        <div id="em-opciones" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;"></div>
+
+        <div style="background:#1e293b;border-radius:12px;padding:14px;margin-bottom:16px;">
+          <div style="font-size:0.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;">Vista previa del mensaje:</div>
+          <pre id="em-preview" style="white-space:pre-wrap;font-family:inherit;font-size:0.78rem;color:#cbd5e1;line-height:1.6;margin:0;"></pre>
+        </div>
+
+        <a id="em-enviar-btn" href="#" target="_blank" style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-align:center;text-decoration:none;border-radius:12px;padding:14px;font-size:0.95rem;font-weight:800;box-sizing:border-box;">
+          📲 Abrir WhatsApp y enviar
+        </a>
+        <p style="text-align:center;color:#475569;font-size:0.7rem;margin-top:8px;">Se abrirá WhatsApp Web con el mensaje listo para enviar</p>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  // Cargar datos en el modal
+  document.getElementById('em-nombre').textContent = primerNombre;
+  var opciones = document.getElementById('em-opciones');
+  var preview  = document.getElementById('em-preview');
+  var enviarBtn= document.getElementById('em-enviar-btn');
+
+  var templates = [
+    { key:'promo',    label:'🔥 Promo $19.000 · Con urgencia y beneficios',   desc:'El más efectivo · Muestra precio + garantías + link' },
+    { key:'urgencia', label:'⏰ Urgencia · Último día de oferta',               desc:'Para leads con +6h sin pagar · Presiona más' },
+    { key:'suave',    label:'💚 Recordatorio suave · Sin presión',              desc:'Para leads nuevos o que no respondieron antes' },
+  ];
+
+  var selKey = 'promo';
+  function renderOpciones(){
+    opciones.innerHTML = templates.map(function(t){
+      var active = t.key===selKey;
+      return '<div onclick="window._emSel(\''+t.key+'\')" style="cursor:pointer;padding:12px 14px;border-radius:11px;border:1.5px solid '+(active?'#a78bfa':'rgba(255,255,255,0.08)')+';background:'+(active?'rgba(167,139,250,0.12)':'rgba(255,255,255,0.03)')+';transition:.15s;">'+
+        '<div style="font-weight:800;font-size:0.85rem;color:'+(active?'#a78bfa':'#e2e8f0')+';">'+t.label+'</div>'+
+        '<div style="font-size:0.72rem;color:#64748b;margin-top:3px;">'+t.desc+'</div>'+
+      '</div>';
+    }).join('');
+    var msg = ENGANCHAR_TEMPLATES[selKey](primerNombre);
+    preview.textContent = msg;
+    enviarBtn.href = 'https://wa.me/'+wa+'?text='+encodeURIComponent(msg);
+  }
+  window._emSel = function(k){ selKey=k; renderOpciones(); };
+  renderOpciones();
+  modal.style.display = 'flex';
 }
 
 // ── Mensaje especial +24h: ofrecer plan $10k Paga Solo al Eliminar ──
