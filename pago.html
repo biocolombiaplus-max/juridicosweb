@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elimina tus Multas Hoy — JurídicosWeb | 100% Legal</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Pasarelas de pago — precargadas para máxima compatibilidad Chrome/Edge/Firefox/Safari -->
+<script src="https://checkout.epayco.co/checkout.js"></script>
+<script src="https://checkout.wompi.co/widget.js" data-render="false"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -788,6 +791,14 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div class="ssl-row">
           <span class="ssl-badge">🔒 Encriptación SSL 256 bits · Procesado por ePayco · Datos protegidos</span>
         </div>
+        <!-- Fallback cuando ePayco no carga (bloqueado por browser/red) -->
+        <div id="epayco-fallback" style="display:none;margin-top:14px;background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:16px 18px;text-align:center;">
+          <p style="color:#fbbf24;font-weight:800;font-size:0.88rem;margin-bottom:10px;">⚠️ La pasarela no pudo cargar en tu navegador</p>
+          <p style="color:#94a3b8;font-size:0.78rem;margin-bottom:14px;line-height:1.5;">Esto ocurre a veces con bloqueadores de anuncios o navegadores en modo estricto. Tienes 3 opciones:</p>
+          <button onclick="abrirEpayco(this);document.getElementById('epayco-fallback').style.display='none';" style="width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;cursor:pointer;margin-bottom:10px;">🔄 Reintentar pago con tarjeta / PSE</button>
+          <a href="https://wa.me/573159318400?text=Quiero+pagar+$19.000+por+mis+multas.+Por+favor+indíqueme+cómo." target="_blank" style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;margin-bottom:10px;box-sizing:border-box;">💬 Pagar por WhatsApp ahora</a>
+          <p style="color:#64748b;font-size:0.72rem;">También puedes desactivar tu bloqueador de anuncios y recargar la página.</p>
+        </div>
       </div>
     </div>
 
@@ -1069,14 +1080,23 @@ function enviarComprobante(){
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
-/* ── ePayco checkout ── */
+/* ── ePayco checkout — compatible Chrome / Edge / Firefox / Safari ── */
 function abrirEpayco(btn){
   var n     = _nMultas;
   var monto = 19000 * n;
-  var desc  = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb ($'+monto.toLocaleString('es-CO')+')';
+  var desc  = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb';
 
   if(btn){ btn.disabled=true; btn.style.opacity='0.7'; }
   document.getElementById('epayco-loading').classList.add('show');
+
+  function mostrarFallback(){
+    document.getElementById('epayco-loading').classList.remove('show');
+    if(btn){ btn.disabled=false; btn.style.opacity=''; }
+    // Mostrar fallback con WhatsApp y botón de reintento
+    var fb = document.getElementById('epayco-fallback');
+    if(fb) fb.style.display='block';
+    toast('Usa el botón de reintento o paga por Nequi/WhatsApp.', 'error');
+  }
 
   function lanzar(){
     document.getElementById('epayco-loading').classList.remove('show');
@@ -1088,7 +1108,7 @@ function abrirEpayco(btn){
         p_cust_id_cliente: '1595409'
       });
       handler.open({
-        name:         'JurídicosWeb',
+        name:         'JuridicosWeb',
         description:  desc,
         currency:     'cop',
         amount:       String(monto),
@@ -1101,23 +1121,35 @@ function abrirEpayco(btn){
         confirmation: 'https://juridicosweb.com/pago-ok.html'
       });
     } catch(e){
-      toast('No se pudo cargar la pasarela. Intenta de nuevo.', 'error');
+      mostrarFallback();
     }
   }
 
-  if(_epaycoLoaded){
+  // Verificar si ya está cargado (precargado en <head>)
+  if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
     lanzar();
-  } else {
-    var s = document.createElement('script');
-    s.src = 'https://checkout.epayco.co/checkout.js';
-    s.onload = function(){ _epaycoLoaded=true; lanzar(); };
-    s.onerror = function(){
-      document.getElementById('epayco-loading').classList.remove('show');
-      if(btn){ btn.disabled=false; btn.style.opacity=''; }
-      toast('Error al cargar la pasarela. Intenta de nuevo.', 'error');
-    };
-    document.head.appendChild(s);
+    return;
   }
+
+  // Esperar hasta 8s que el script del head termine de cargar (polling)
+  var intentos = 0;
+  var poll = setInterval(function(){
+    intentos++;
+    if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
+      clearInterval(poll);
+      lanzar();
+    } else if(intentos > 40){ // 40 × 200ms = 8s timeout
+      clearInterval(poll);
+      // Último intento: inyectar script dinámicamente como fallback
+      var s = document.createElement('script');
+      s.src = 'https://checkout.epayco.co/checkout.js?v='+Date.now();
+      s.onload = function(){
+        try{ lanzar(); } catch(e){ mostrarFallback(); }
+      };
+      s.onerror = function(){ mostrarFallback(); };
+      document.head.appendChild(s);
+    }
+  }, 200);
 }
 
 /* ── Toast de feedback ── */

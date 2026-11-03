@@ -3739,7 +3739,7 @@ function abrirEpayco(){
   };
   s.onerror = function(){
     if(_btn){ _btn.disabled=false; _btn.style.opacity=''; _btn.innerHTML='<span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>'; }
-    showToast('No se pudo cargar la pasarela de pago. Intenta de nuevo.','error');
+    showToast('Pasarela no disponible. Puedes pagar por Nequi o WhatsApp.','error');
   };
   document.head.appendChild(s);
 }
