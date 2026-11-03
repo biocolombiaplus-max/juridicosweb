@@ -3,134 +3,285 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pago confirmado — JurídicosWeb</title>
+<title>Verificando pago — JurídicosWeb</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#052e16,#14532d);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .card{background:#fff;border-radius:24px;padding:36px 28px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.3);}
-  .check{width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 32px rgba(22,163,74,0.45);}
-  .check svg{width:40px;height:40px;}
-  h1{font-size:1.5rem;font-weight:900;color:#052e16;margin-bottom:8px;}
-  p{color:#64748b;font-size:0.9rem;line-height:1.6;margin-bottom:20px;}
-  .info-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px;margin-bottom:20px;text-align:left;}
-  .info-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #dcfce7;font-size:0.85rem;}
-  .info-row:last-child{border-bottom:none;}
-  .info-row .label{color:#15803d;font-weight:600;}
-  .info-row .val{color:#052e16;font-weight:800;}
-  .btn-wa{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;box-shadow:0 6px 24px rgba(22,163,74,0.5);margin-bottom:12px;transition:.2s;}
-  .btn-wa:active{transform:scale(.97);}
-  .wa-icon{width:24px;height:24px;fill:#fff;}
-  .note{font-size:0.72rem;color:#94a3b8;margin:0;}
-  .spinner{display:none;width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-  .card{animation:fadeIn .5s ease;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+
+/* Fondos por estado */
+body.estado-ok      {background:linear-gradient(135deg,#052e16,#14532d);}
+body.estado-error   {background:linear-gradient(135deg,#1c0606,#450a0a);}
+body.estado-pendiente{background:linear-gradient(135deg,#1c1206,#451a03);}
+
+.card{background:#fff;border-radius:24px;padding:36px 28px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.35);animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+.icon-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.icon-circle.ok       {background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 8px 32px rgba(22,163,74,0.45);}
+.icon-circle.error    {background:linear-gradient(135deg,#dc2626,#991b1b);box-shadow:0 8px 32px rgba(220,38,38,0.45);}
+.icon-circle.pendiente{background:linear-gradient(135deg,#d97706,#b45309);box-shadow:0 8px 32px rgba(217,119,6,0.45);}
+.icon-circle svg{width:40px;height:40px;}
+
+h1{font-size:1.45rem;font-weight:900;margin-bottom:8px;}
+h1.ok        {color:#052e16;}
+h1.error     {color:#450a0a;}
+h1.pendiente {color:#451a03;}
+
+.subtitulo{color:#64748b;font-size:0.88rem;line-height:1.6;margin-bottom:20px;}
+
+.info-box{border-radius:14px;padding:14px 16px;margin-bottom:18px;text-align:left;}
+.info-box.ok        {background:#f0fdf4;border:1.5px solid #bbf7d0;}
+.info-box.error     {background:#fef2f2;border:1.5px solid #fecaca;}
+.info-box.pendiente {background:#fffbeb;border:1.5px solid #fde68a;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:0.83rem;}
+.info-row:last-child{border-bottom:none;}
+.info-row .label{color:#64748b;font-weight:600;}
+.info-row .val  {color:#0f172a;font-weight:800;}
+.estado-badge-ok       {color:#16a34a;font-weight:900;}
+.estado-badge-error    {color:#dc2626;font-weight:900;}
+.estado-badge-pendiente{color:#d97706;font-weight:900;}
+
+/* BOTONES */
+.btn-wa{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:14px;padding:16px;font-size:0.95rem;font-weight:900;box-shadow:0 6px 24px rgba(22,163,74,0.5);margin-bottom:10px;transition:.2s;cursor:pointer;border:none;width:100%;}
+.btn-wa:active{transform:scale(.97);}
+.btn-wa svg{width:22px;height:22px;fill:#fff;flex-shrink:0;}
+
+.btn-volver{display:block;background:#f1f5f9;color:#334155;text-decoration:none;border-radius:12px;padding:14px;font-size:0.88rem;font-weight:700;margin-bottom:10px;transition:.2s;}
+.btn-volver:active{background:#e2e8f0;}
+
+.note{font-size:0.7rem;color:#94a3b8;}
+
+/* Bloque multas */
+.multas-bloque{text-align:left;margin-bottom:16px;}
+.multa-chip{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 11px;margin-bottom:6px;font-size:0.78rem;color:#166534;}
+
+/* Spinner inicial */
+#spinner-init{position:fixed;inset:0;background:#0a1628;display:flex;align-items:center;justify-content:center;z-index:999;}
+.spin{width:44px;height:44px;border:4px solid rgba(255,255,255,0.15);border-top:4px solid #f59e0b;border-radius:50%;animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* oculto hasta resolver */
+.card{display:none;}
 </style>
 </head>
-<body>
-<div class="card">
-  <div class="check">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+<body id="body-page">
+
+<!-- Spinner inicial — oculto cuando se resuelve el estado -->
+<div id="spinner-init"><div class="spin"></div></div>
+
+<div class="card" id="main-card">
+
+  <div class="icon-circle" id="icono-circulo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="icono-svg">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
   </div>
-  <h1>¡Pago recibido!</h1>
-  <p>Tu pago fue procesado correctamente.<br>Ahora envíanos la confirmación por WhatsApp para activar tu trámite.</p>
+
+  <h1 id="titulo-h1">Verificando…</h1>
+  <p class="subtitulo" id="subtitulo"></p>
 
   <div class="info-box" id="info-box">
-    <div class="info-row"><span class="label">Nombre</span><span class="val" id="ok-nombre">—</span></div>
-    <div class="info-row"><span class="label">Monto pagado</span><span class="val" id="ok-monto">—</span></div>
-    <div class="info-row"><span class="label">Plan</span><span class="val" id="ok-plan">—</span></div>
-    <div class="info-row"><span class="label">Estado</span><span class="val" style="color:#16a34a;">✅ Confirmado</span></div>
+    <div class="info-row"><span class="label">Monto</span><span class="val" id="ok-monto">—</span></div>
+    <div class="info-row"><span class="label">Referencia</span><span class="val" id="ok-ref">—</span></div>
+    <div class="info-row"><span class="label">Estado</span><span class="val" id="ok-estado">—</span></div>
   </div>
-  <div id="bloque-multas" style="margin-top:0;margin-bottom:16px;text-align:left;"></div>
 
-  <a class="btn-wa" id="btn-wa" href="#" onclick="abrirWA(event)">
-    <svg class="wa-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L0 24l6.302-1.51A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.359-.213-3.721.892.934-3.626-.233-.372A9.818 9.818 0 1112 21.818z" fill="#fff"/></svg>
-    Confirmar pago por WhatsApp
-  </a>
-  <p class="note">Se abrirá WhatsApp con el mensaje listo — solo toca Enviar.</p>
+  <div class="multas-bloque" id="bloque-multas"></div>
+
+  <!-- Botones — se reemplazan según estado -->
+  <div id="acciones"></div>
+
+  <p class="note" id="nota-pie"></p>
 </div>
 
 <script>
 var WA_NUMBER = '573159318400';
-var datos = {};
 
-try {
-  datos.nombre = localStorage.getItem('jw_pago_nombre') || '';
-  datos.wa     = localStorage.getItem('jw_pago_wa')     || '';
-  datos.cedula = localStorage.getItem('jw_pago_cedula') || '';
-  datos.monto  = localStorage.getItem('jw_pago_monto')  || '';
-  datos.plan   = localStorage.getItem('jw_pago_plan')   || '';
-} catch(e){}
-
-// También leer desde params de URL (ePayco los manda)
+// ── Leer parámetros que manda ePayco en la URL ──────────────────────────────
 var params = new URLSearchParams(window.location.search);
-var ref = params.get('ref_payco') || params.get('x_ref_payco') || ('JW-'+Date.now());
 
-document.getElementById('ok-nombre').textContent = datos.nombre || 'Cliente';
-document.getElementById('ok-monto').textContent  = datos.monto  || '—';
-document.getElementById('ok-plan').textContent   = datos.plan   || '—';
+// ePayco puede enviar con prefijo x_ o sin él
+function p(k){ return params.get('x_'+k) || params.get(k) || ''; }
 
-// Mostrar multas a radicar
+var transState   = p('transaction_state');   // "Aceptada", "Rechazada", "Pendiente", "Fallida"
+var codResponse  = p('cod_response');         // "1"=ok, "2"=rechazada, "3"=pendiente, "4"=fallida
+var xResponse    = p('response');             // igual que cod_response en algunas versiones
+var refPayco     = p('ref_payco') || params.get('ref_payco') || '';
+var montoEpayco  = p('amount') || p('total_amount') || '';
+var emailEpayco  = p('customer_email') || p('email') || '';
+
+// ── Recuperar datos guardados en localStorage (del flujo del pago) ──────────
+var datosLS = {};
 try {
-  var multasJson = localStorage.getItem('jw_multas_json');
-  if(multasJson){
-    var multas = JSON.parse(multasJson);
-    if(multas && multas.length > 0){
-      var bloqueMultas = document.getElementById('bloque-multas');
-      if(bloqueMultas){
-        var mHtml = '<p style="color:#15803d;font-size:0.78rem;font-weight:700;margin-bottom:8px;">📋 Multas a radicar ('+multas.length+'):</p>';
-        multas.forEach(function(m){
-          mHtml += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:0.78rem;color:#166534;">' +
-            '📌 <strong>' + (m.infraccion || '—') + '</strong> → ' + (m.secretaria || 'Secretaría pendiente') + '</div>';
-        });
-        bloqueMultas.innerHTML = mHtml;
-      }
-    }
-  }
+  datosLS.nombre = localStorage.getItem('jw_pago_nombre') || '';
+  datosLS.wa     = localStorage.getItem('jw_pago_wa')     || '';
+  datosLS.cedula = localStorage.getItem('jw_pago_cedula') || '';
+  datosLS.monto  = localStorage.getItem('jw_pago_monto')  || '';
+  datosLS.plan   = localStorage.getItem('jw_pago_plan')   || '';
 } catch(e){}
 
-function buildMsg(){
-  var msg = '*¡Pago confirmado! ✅*\n\n' +
-    '🎉 Hola, acabo de realizar el pago en *JurídicosWeb* y quiero activar mi trámite.\n\n' +
-    '📋 *Mis datos:*\n' +
-    '👤 Nombre: ' + (datos.nombre||'—') + '\n' +
-    '🪪 Cédula / Placa: ' + (datos.cedula||'—') + '\n' +
-    '💳 Plan: ' + (datos.plan||'—') + '\n' +
-    '💰 Monto: ' + (datos.monto||'—') + '\n' +
-    '🔖 Referencia: ' + ref + '\n\n';
-  try {
-    var mj = localStorage.getItem('jw_multas_json');
-    if(mj){
-      var ml = JSON.parse(mj);
-      if(ml && ml.length){
-        msg += '📑 Multas a radicar (' + ml.length + '):\n';
-        ml.forEach(function(m,i){ msg += '  '+(i+1)+'. '+m.infraccion+' → '+m.secretaria+'\n'; });
-        msg += '\n';
-      }
-    }
-  }catch(e){}
-  msg += 'Por favor confirmenme que el pago fue recibido y cuándo radican los documentos. ✅\n\n' +
-    '_JurídicosWeb — Trámite digital_';
+// ── Determinar si el pago FUE REALMENTE ACEPTADO ───────────────────────────
+// ePayco dice "Aceptada" en x_transaction_state O "1" en x_cod_response
+var PAGADO = (
+  transState.toLowerCase() === 'aceptada' ||
+  codResponse === '1' ||
+  xResponse   === '1'
+);
+
+// Si llegó sin ningún parámetro ePayco (visita directa / URL manual) → no mostrar éxito
+var TIENE_PARAMS_EPAYCO = (transState !== '' || codResponse !== '' || xResponse !== '' || refPayco !== '');
+
+// Formatear monto
+var montoMostrar = '';
+if(montoEpayco){
+  var mn = parseFloat(montoEpayco);
+  montoMostrar = isNaN(mn) ? montoEpayco : '$'+mn.toLocaleString('es-CO');
+} else {
+  montoMostrar = datosLS.monto || '—';
+}
+
+// ── Construir mensaje WhatsApp ───────────────────────────────────────────────
+function buildMsgPagado(){
+  var msg = '✅ *¡Pago confirmado! — JurídicosWeb*\n\n'
+    + '💳 Monto: *'+montoMostrar+'*\n'
+    + (datosLS.nombre ? '👤 Nombre: '+datosLS.nombre+'\n' : '')
+    + (datosLS.cedula ? '🪪 Cédula: '+datosLS.cedula+'\n' : '')
+    + (refPayco       ? '🔖 Ref. ePayco: '+refPayco+'\n'  : '')
+    + '\nPor favor confirmar recepción del pago y cuándo radican. 🙏\n\n'
+    + '_JurídicosWeb — Trámite digital_';
   return msg;
 }
 
-function abrirWA(e){
-  e.preventDefault();
-  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(buildMsg()), '_blank');
+// ── SVG íconos ───────────────────────────────────────────────────────────────
+var ICON_OK   = '<polyline points="20 6 9 17 4 12" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+var ICON_X    = '<line x1="18" y1="6" x2="6" y2="18" stroke="#fff" stroke-width="3" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="#fff" stroke-width="3" stroke-linecap="round"/>';
+var ICON_PEND = '<circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="3" fill="none"/><line x1="12" y1="7" x2="12" y2="13" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1.2" fill="#fff"/>';
+
+var WA_SVG = '<svg class="btn-wa svg" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#fff"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L0 24l6.302-1.51A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.359-.213-3.721.892.934-3.626-.233-.372A9.818 9.818 0 1112 21.818z" fill="#fff"/></svg>';
+
+// ── Renderizar la tarjeta según el estado ────────────────────────────────────
+function render(){
+  var body   = document.getElementById('body-page');
+  var circulo= document.getElementById('icono-circulo');
+  var svg    = document.getElementById('icono-svg');
+  var h1     = document.getElementById('titulo-h1');
+  var sub    = document.getElementById('subtitulo');
+  var ibox   = document.getElementById('info-box');
+  var estadoEl= document.getElementById('ok-estado');
+  var acciones= document.getElementById('acciones');
+  var notaPie = document.getElementById('nota-pie');
+  document.getElementById('ok-monto').textContent = montoMostrar;
+  document.getElementById('ok-ref').textContent   = refPayco || '—';
+
+  // Multas (localStorage)
+  try {
+    var mj = localStorage.getItem('jw_multas_json');
+    if(mj && PAGADO){
+      var ml = JSON.parse(mj);
+      if(ml && ml.length){
+        var bm = document.getElementById('bloque-multas');
+        var html = '<p style="color:#15803d;font-size:0.76rem;font-weight:700;margin-bottom:8px;">📋 Multas a radicar ('+ml.length+'):</p>';
+        ml.forEach(function(m){ html += '<div class="multa-chip">📌 <strong>'+(m.infraccion||'—')+'</strong> → '+(m.secretaria||'Secretaría pendiente')+'</div>'; });
+        bm.innerHTML = html;
+      }
+    }
+  } catch(e){}
+
+  if(PAGADO){
+    // ══ PAGO ACEPTADO ══
+    body.className = 'estado-ok';
+    circulo.className = 'icon-circle ok';
+    svg.innerHTML = ICON_OK;
+    h1.textContent = '¡Pago confirmado!'; h1.className='ok';
+    sub.textContent = 'Tu pago fue procesado. Ahora envíanos la confirmación por WhatsApp para activar tu trámite de inmediato.';
+    ibox.className = 'info-box ok';
+    estadoEl.innerHTML = '<span class="estado-badge-ok">✅ Aceptada</span>';
+    acciones.innerHTML =
+      '<button class="btn-wa" onclick="abrirWaPagado()">'+WA_SVG+' Confirmar pago por WhatsApp</button>';
+    notaPie.textContent = 'Se abrirá WhatsApp con los datos del pago listos — solo toca Enviar.';
+    // Auto-abrir WA solo si el pago fue aceptado
+    setTimeout(function(){
+      try{ window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(buildMsgPagado()),'_blank'); }catch(e){}
+    }, 1800);
+
+  } else if(!TIENE_PARAMS_EPAYCO){
+    // ══ VISITA DIRECTA (sin parámetros de ePayco) ══
+    body.className = 'estado-pendiente';
+    circulo.className = 'icon-circle pendiente';
+    svg.innerHTML = ICON_PEND;
+    h1.textContent = 'Página de confirmación'; h1.className='pendiente';
+    sub.textContent = 'Esta página se activa automáticamente al completar el pago por ePayco. Si ya pagaste, usa el botón de WhatsApp para avisarnos.';
+    ibox.style.display='none';
+    acciones.innerHTML =
+      '<button class="btn-wa" onclick="abrirWaGeneral()">'+WA_SVG+' Ya pagué — avisar por WhatsApp</button>'
+      +'<a href="pago.html" class="btn-volver">← Volver a elegir método de pago</a>';
+    notaPie.textContent = '';
+
+  } else {
+    // ══ PAGO RECHAZADO / CANCELADO / PENDIENTE ══
+    var esPendiente = (transState.toLowerCase() === 'pendiente' || codResponse === '3' || xResponse === '3');
+    if(esPendiente){
+      body.className = 'estado-pendiente';
+      circulo.className = 'icon-circle pendiente';
+      svg.innerHTML = ICON_PEND;
+      h1.textContent = 'Pago en revisión'; h1.className='pendiente';
+      sub.textContent = 'Tu transacción quedó en estado pendiente. El banco puede tardar unos minutos en confirmar. Te avisamos por WhatsApp en cuanto se confirme.';
+      ibox.className = 'info-box pendiente';
+      estadoEl.innerHTML = '<span class="estado-badge-pendiente">⏳ Pendiente</span>';
+      acciones.innerHTML =
+        '<button class="btn-wa" onclick="abrirWaPendiente()">'+WA_SVG+' Avisar que está pendiente</button>'
+        +'<a href="pago.html" class="btn-volver">← Intentar de nuevo</a>';
+    } else {
+      // Rechazada o cancelada
+      body.className = 'estado-error';
+      circulo.className = 'icon-circle error';
+      svg.innerHTML = ICON_X;
+      h1.textContent = 'Pago no completado'; h1.className='error';
+      sub.textContent = 'El pago fue cancelado o rechazado. No se realizó ningún cargo. Puedes intentar de nuevo o usar otra forma de pago.';
+      ibox.className = 'info-box error';
+      estadoEl.innerHTML = '<span class="estado-badge-error">❌ '+(transState||'No completado')+'</span>';
+      acciones.innerHTML =
+        '<a href="pago.html" class="btn-wa" style="background:linear-gradient(135deg,#dc2626,#991b1b);box-shadow:0 6px 24px rgba(220,38,38,0.5);">← Intentar de nuevo</a>'
+        +'<button class="btn-wa" style="background:linear-gradient(135deg,#16a34a,#15803d);" onclick="abrirWaAyuda()">'+WA_SVG+' Necesito ayuda</button>';
+    }
+    notaPie.textContent = 'Si ya tienes el comprobante de pago, contáctanos por WhatsApp.';
+  }
+
+  // Mostrar tarjeta, ocultar spinner
+  document.getElementById('spinner-init').style.display='none';
+  document.getElementById('main-card').style.display='block';
+
+  // Limpiar localStorage solo si el pago fue exitoso
+  if(PAGADO){
+    setTimeout(function(){
+      try{
+        ['jw_pago_nombre','jw_pago_wa','jw_pago_cedula','jw_pago_monto','jw_pago_plan','jw_multas_json','jw_num_multas']
+          .forEach(function(k){ localStorage.removeItem(k); });
+      }catch(e){}
+    }, 6000);
+  }
 }
 
-// Auto-abrir WA después de 2 segundos
-setTimeout(function(){
-  try{ window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(buildMsg()), '_blank'); }catch(e){}
-}, 2000);
+function abrirWaPagado(){
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(buildMsgPagado()),'_blank');
+}
+function abrirWaGeneral(){
+  var msg = '✅ Hola, ya realicé mi pago en JurídicosWeb y quiero activar el trámite. Adjunto el comprobante.';
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+}
+function abrirWaPendiente(){
+  var msg = '⏳ Hola, mi pago en JurídicosWeb quedó pendiente.\n🔖 Referencia: '+(refPayco||'—')+'\n\nPor favor verificar el estado. Gracias.';
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+}
+function abrirWaAyuda(){
+  var msg = '❓ Hola, tuve un problema al pagar en JurídicosWeb.\n🔖 Referencia: '+(refPayco||'—')+'\n\nNecesito ayuda para completar el proceso.';
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+}
 
-// Limpiar localStorage
-setTimeout(function(){
-  try{
-    ['jw_pago_nombre','jw_pago_wa','jw_pago_cedula','jw_pago_monto','jw_pago_plan','jw_multas_json','jw_num_multas']
-      .forEach(function(k){ localStorage.removeItem(k); });
-  }catch(e){}
-}, 5000);
+// Ejecutar al cargar
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(render, 600); // Breve delay para mostrar el spinner
+});
 </script>
 </body>
 </html>
