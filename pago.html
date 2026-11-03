@@ -48,8 +48,8 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 .hero{
   position:relative;overflow:hidden;
   background:linear-gradient(160deg,#050e1a 0%,#0a1f3d 35%,#091830 65%,#050e1a 100%);
-  padding:52px 20px 64px;text-align:center;
-  min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px 44px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
 .hero-bg{
   position:absolute;inset:0;
@@ -558,6 +558,180 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 
 <div class="divider-gold"></div>
 
+<!-- ══════════ SELECTOR MULTAS ══════════ -->
+<div class="section-dark" id="seccion-selector">
+  <div class="wrap">
+    <div class="section-title gold">¿Cuántas multas tienes?</div>
+    <div class="section-sub">Selecciona la cantidad — el precio es el mismo por cada una</div>
+
+    <div class="selector-card">
+      <p class="sel-titulo">Selecciona la cantidad de multas</p>
+      <p class="sel-sub">$19.000 por cada multa · Sin cobros adicionales</p>
+      <div class="multas-grid">
+        <button class="multa-btn active" onclick="selMultas(1)"><span class="num">1</span><span class="lbl">multa</span></button>
+        <button class="multa-btn" onclick="selMultas(2)"><span class="num">2</span><span class="lbl">multas</span></button>
+        <button class="multa-btn" onclick="selMultas(3)"><span class="num">3</span><span class="lbl">multas</span></button>
+        <button class="multa-btn" onclick="selMultas(4)"><span class="num">4</span><span class="lbl">multas</span></button>
+        <button class="multa-btn" onclick="selMultas(5)"><span class="num">5</span><span class="lbl">multas</span></button>
+        <button class="multa-btn" onclick="selMultas(6)"><span class="num">6+</span><span class="lbl">multas</span></button>
+      </div>
+      <div class="total-wrap">
+        <div class="total-label">Total a pagar hoy</div>
+        <div class="total-val" id="total-val">$19.000</div>
+        <div class="total-desc" id="total-ahorro">Precio normal: <s style="color:#ef4444;">$98.000</s> → Hoy solo <strong style="color:var(--gold);">$19.000</strong></div>
+        <div class="ahorro-badge">✅ Ahorras <span id="ahorro-val">$79.000</span> con la oferta de hoy</div>
+      </div>
+      <button class="btn-pagar-main" onclick="irAPago()">
+        <span>⚡ ELEGIR MÉTODO DE PAGO — $<span id="btn-monto">19.000</span></span>
+        <span class="sub">Llave Breve · Tarjeta · PSE · Nequi · Bancolombia</span>
+      </button>
+    </div>
+
+    <!-- Garantías -->
+    <div class="garantias-grid">
+      <div class="garantia-card">
+        <span class="garantia-icon">✅</span>
+        <div class="garantia-title">Sin cobros ocultos</div>
+        <div class="garantia-desc">Un solo pago de $19.000. Nada más.</div>
+      </div>
+      <div class="garantia-card">
+        <span class="garantia-icon">⚖️</span>
+        <div class="garantia-title">100% Legal</div>
+        <div class="garantia-desc">Derecho de Petición amparado por la Constitución.</div>
+      </div>
+      <div class="garantia-card">
+        <span class="garantia-icon">📋</span>
+        <div class="garantia-title">Número de radicado</div>
+        <div class="garantia-desc">Soporte oficial por WhatsApp garantizado.</div>
+      </div>
+      <div class="garantia-card">
+        <span class="garantia-icon">⚡</span>
+        <div class="garantia-title">En &lt;2 minutos</div>
+        <div class="garantia-desc">Radicado ante la Secretaría de Tránsito.</div>
+      </div>
+    </div>
+
+    <!-- Escudo garantía -->
+    <div class="shield-wrap">
+      <span class="shield-icon">🛡️</span>
+      <div class="shield-title">Sin riesgo de estafa — Proceso 100% transparente</div>
+      <div class="shield-desc">Ves todo el proceso antes de pagar. Tu documento se genera frente a tus ojos, lo firmas tú mismo y recibes el número de radicado oficial. No pedimos tus contraseñas ni datos bancarios.</div>
+    </div>
+  </div>
+</div>
+
+<!-- URGENCIA 2 -->
+<div class="urgencia-bar">
+  <div class="urgencia-dot"></div>
+  <span>🔥 <strong>81% de descuento activo</strong> — El precio normal vuelve a $98.000 sin previo aviso</span>
+</div>
+
+<div class="divider-gold"></div>
+
+<!-- ══════════ SECCIÓN DE PAGO ══════════ -->
+<div class="section-darker" id="seccion-pago">
+  <div class="wrap">
+    <div class="section-title white">Elige cómo pagar</div>
+    <div class="section-sub">Ambas opciones son seguras · Radicamos el mismo día que pagas</div>
+
+    <!-- Monto dinámico -->
+    <div class="pago-monto-card">
+      <div class="pago-monto-lbl">Total a pagar por <span id="pago-n-txt">1 multa</span></div>
+      <div class="pago-monto-val" id="pago-total-txt">$19.000</div>
+      <div class="pago-monto-n">$19.000 × <span id="pago-n2">1</span> multa(s) · pago único · sin cobros adicionales</div>
+    </div>
+
+    <!-- ══ OPCIÓN 1: LLAVE BREVE ══ -->
+    <div class="pago-llave">
+      <div class="pago-llave-head">
+        <div class="llave-head-icon">📱</div>
+        <div class="llave-head-info">
+          <div class="llave-rec-badge">⭐ OPCIÓN RECOMENDADA — MÁS RÁPIDA</div>
+          <div class="llave-head-title">Nequi · Daviplata · Cualquier banco</div>
+          <div class="llave-head-sub">Transferencia con Llave Breve Transfiya — sin registros ni trámites</div>
+        </div>
+      </div>
+      <div class="pago-llave-body">
+        <!-- Llave copiable -->
+        <div class="llave-card">
+          <div class="llave-card-left">
+            <div class="llave-label">LLAVE BREVE TRANSFIYA</div>
+            <div class="llave-key">@OTO262</div>
+            <div class="titular-note">Titular: <strong style="color:#0c4a6e;">Ju... Cac...</strong> <span style="color:#94a3b8;">(verifica al pagar)</span></div>
+          </div>
+          <button class="btn-copiar-key" onclick="copiarLlave(this)">📋 Copiar llave</button>
+        </div>
+        <!-- Pasos -->
+        <div class="pasos-nequi">
+          <div class="pasos-nequi-title">📱 Cómo pagar paso a paso</div>
+          <div class="paso-row">
+            <div class="paso-num">1</div>
+            <div class="paso-txt">Abre tu app de <strong>Nequi, Daviplata, Bancolombia, Davivienda</strong> o cualquier banco colombiano.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">2</div>
+            <div class="paso-txt">Busca la opción <strong>"Enviar dinero"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">3</div>
+            <div class="paso-txt">Selecciona el tipo de destino: <strong>"Llave Breve"</strong> o <strong>"Transfiya"</strong>.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">4</div>
+            <div class="paso-txt">Ingresa la llave: <strong style="font-family:monospace;color:#1d4ed8;font-size:0.95rem;">@OTO262</strong> y confirma que el titular empiece por <strong>Ju... Cac...</strong></div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num">5</div>
+            <div class="paso-txt">Ingresa el monto exacto: <strong id="monto-paso5" style="color:#1d4ed8;">$19.000</strong> y confirma la transferencia.</div>
+          </div>
+          <div class="paso-row">
+            <div class="paso-num green">6</div>
+            <div class="paso-txt"><strong>Toma captura de pantalla</strong> del comprobante y toca el botón verde de abajo para enviárnoslo por WhatsApp.</div>
+          </div>
+        </div>
+        <!-- CTA -->
+        <button class="btn-confirmar-wa" onclick="enviarComprobante()">
+          <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — ENVIAR COMPROBANTE POR WHATSAPP</span>
+        </button>
+        <p class="nota-wa">Adjunta el comprobante y radicamos ese mismo día ⚡</p>
+      </div>
+    </div>
+
+    <!-- Separador -->
+    <div class="or-sep">
+      <div class="or-sep-line left"></div>
+      <span class="or-sep-txt">— O TAMBIÉN PUEDES PAGAR CON —</span>
+      <div class="or-sep-line right"></div>
+    </div>
+
+    <!-- ══ OPCIÓN 2: EPAYCO ══ -->
+    <div class="pago-epayco">
+      <div class="pago-epayco-head">
+        <div class="epayco-label">Opción 2 · Pago en línea seguro · SSL 256 bits</div>
+        <div class="epayco-logos">
+          <div class="logo-visa">VISA</div>
+          <div class="logo-mc"><div class="c1"></div><div class="c2"></div><span>Mastercard</span></div>
+          <div class="logo-pse">PSE</div>
+          <div class="logo-nequi">Nequi</div>
+          <div class="logo-bc">Bancolombia</div>
+        </div>
+      </div>
+      <div class="pago-epayco-body">
+        <button class="btn-epayco" onclick="abrirEpayco(this)">
+          <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE / NEQUI →</span>
+        </button>
+        <p class="nota-epayco">Pago procesado por ePayco Colombia · Al confirmar el pago te avisamos por WhatsApp y radicamos de inmediato · Sin cobros adicionales.</p>
+        <div class="ssl-row">
+          <span class="ssl-badge">🔒 Encriptación SSL 256 bits · Procesado por ePayco · Datos protegidos</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider-gold"></div>
+
 <!-- ══════════ CÓMO FUNCIONA ══════════ -->
 <div class="section-white">
   <div class="wrap">
@@ -741,180 +915,6 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div class="aplica-txt"><strong>Violación del debido proceso — Art. 29</strong> — cualquier irregularidad en el proceso sancionatorio anula la multa desde su origen.</div>
       </div>
     </div>
-  </div>
-</div>
-
-<div class="divider-gold"></div>
-
-<!-- ══════════ SELECTOR MULTAS ══════════ -->
-<div class="section-dark" id="seccion-selector">
-  <div class="wrap">
-    <div class="section-title gold">¿Cuántas multas tienes?</div>
-    <div class="section-sub">Selecciona la cantidad — el precio es el mismo por cada una</div>
-
-    <div class="selector-card">
-      <p class="sel-titulo">Selecciona la cantidad de multas</p>
-      <p class="sel-sub">$19.000 por cada multa · Sin cobros adicionales</p>
-      <div class="multas-grid">
-        <button class="multa-btn active" onclick="selMultas(1)"><span class="num">1</span><span class="lbl">multa</span></button>
-        <button class="multa-btn" onclick="selMultas(2)"><span class="num">2</span><span class="lbl">multas</span></button>
-        <button class="multa-btn" onclick="selMultas(3)"><span class="num">3</span><span class="lbl">multas</span></button>
-        <button class="multa-btn" onclick="selMultas(4)"><span class="num">4</span><span class="lbl">multas</span></button>
-        <button class="multa-btn" onclick="selMultas(5)"><span class="num">5</span><span class="lbl">multas</span></button>
-        <button class="multa-btn" onclick="selMultas(6)"><span class="num">6+</span><span class="lbl">multas</span></button>
-      </div>
-      <div class="total-wrap">
-        <div class="total-label">Total a pagar hoy</div>
-        <div class="total-val" id="total-val">$19.000</div>
-        <div class="total-desc" id="total-ahorro">Precio normal: <s style="color:#ef4444;">$98.000</s> → Hoy solo <strong style="color:var(--gold);">$19.000</strong></div>
-        <div class="ahorro-badge">✅ Ahorras <span id="ahorro-val">$79.000</span> con la oferta de hoy</div>
-      </div>
-      <button class="btn-pagar-main" onclick="irAPago()">
-        <span>⚡ ELEGIR MÉTODO DE PAGO — $<span id="btn-monto">19.000</span></span>
-        <span class="sub">Llave Breve · Tarjeta · PSE · Nequi · Bancolombia</span>
-      </button>
-    </div>
-
-    <!-- Garantías -->
-    <div class="garantias-grid">
-      <div class="garantia-card">
-        <span class="garantia-icon">✅</span>
-        <div class="garantia-title">Sin cobros ocultos</div>
-        <div class="garantia-desc">Un solo pago de $19.000. Nada más.</div>
-      </div>
-      <div class="garantia-card">
-        <span class="garantia-icon">⚖️</span>
-        <div class="garantia-title">100% Legal</div>
-        <div class="garantia-desc">Derecho de Petición amparado por la Constitución.</div>
-      </div>
-      <div class="garantia-card">
-        <span class="garantia-icon">📋</span>
-        <div class="garantia-title">Número de radicado</div>
-        <div class="garantia-desc">Soporte oficial por WhatsApp garantizado.</div>
-      </div>
-      <div class="garantia-card">
-        <span class="garantia-icon">⚡</span>
-        <div class="garantia-title">En &lt;2 minutos</div>
-        <div class="garantia-desc">Radicado ante la Secretaría de Tránsito.</div>
-      </div>
-    </div>
-
-    <!-- Escudo garantía -->
-    <div class="shield-wrap">
-      <span class="shield-icon">🛡️</span>
-      <div class="shield-title">Sin riesgo de estafa — Proceso 100% transparente</div>
-      <div class="shield-desc">Ves todo el proceso antes de pagar. Tu documento se genera frente a tus ojos, lo firmas tú mismo y recibes el número de radicado oficial. No pedimos tus contraseñas ni datos bancarios.</div>
-    </div>
-  </div>
-</div>
-
-<!-- URGENCIA 2 -->
-<div class="urgencia-bar">
-  <div class="urgencia-dot"></div>
-  <span>🔥 <strong>81% de descuento activo</strong> — El precio normal vuelve a $98.000 sin previo aviso</span>
-</div>
-
-<div class="divider-gold"></div>
-
-<!-- ══════════ SECCIÓN DE PAGO ══════════ -->
-<div class="section-darker" id="seccion-pago">
-  <div class="wrap">
-    <div class="section-title white">Elige cómo pagar</div>
-    <div class="section-sub">Ambas opciones son seguras · Radicamos el mismo día que pagas</div>
-
-    <!-- Monto dinámico -->
-    <div class="pago-monto-card">
-      <div class="pago-monto-lbl">Total a pagar por <span id="pago-n-txt">1 multa</span></div>
-      <div class="pago-monto-val" id="pago-total-txt">$19.000</div>
-      <div class="pago-monto-n">$19.000 × <span id="pago-n2">1</span> multa(s) · pago único · sin cobros adicionales</div>
-    </div>
-
-    <!-- ══ OPCIÓN 1: LLAVE BREVE ══ -->
-    <div class="pago-llave">
-      <div class="pago-llave-head">
-        <div class="llave-head-icon">📱</div>
-        <div class="llave-head-info">
-          <div class="llave-rec-badge">⭐ OPCIÓN RECOMENDADA — MÁS RÁPIDA</div>
-          <div class="llave-head-title">Nequi · Daviplata · Cualquier banco</div>
-          <div class="llave-head-sub">Transferencia con Llave Breve Transfiya — sin registros ni trámites</div>
-        </div>
-      </div>
-      <div class="pago-llave-body">
-        <!-- Llave copiable -->
-        <div class="llave-card">
-          <div class="llave-card-left">
-            <div class="llave-label">LLAVE BREVE TRANSFIYA</div>
-            <div class="llave-key">@OTO262</div>
-            <div class="titular-note">Titular: <strong style="color:#0c4a6e;">Ju... Cac...</strong> <span style="color:#94a3b8;">(verifica al pagar)</span></div>
-          </div>
-          <button class="btn-copiar-key" onclick="copiarLlave(this)">📋 Copiar llave</button>
-        </div>
-        <!-- Pasos -->
-        <div class="pasos-nequi">
-          <div class="pasos-nequi-title">📱 Cómo pagar paso a paso</div>
-          <div class="paso-row">
-            <div class="paso-num">1</div>
-            <div class="paso-txt">Abre tu app de <strong>Nequi, Daviplata, Bancolombia, Davivienda</strong> o cualquier banco colombiano.</div>
-          </div>
-          <div class="paso-row">
-            <div class="paso-num">2</div>
-            <div class="paso-txt">Busca la opción <strong>"Enviar dinero"</strong>, <strong>"Transferir"</strong> o <strong>"Pagar"</strong> dentro de la app.</div>
-          </div>
-          <div class="paso-row">
-            <div class="paso-num">3</div>
-            <div class="paso-txt">Selecciona el tipo de destino: <strong>"Llave Breve"</strong> o <strong>"Transfiya"</strong>.</div>
-          </div>
-          <div class="paso-row">
-            <div class="paso-num">4</div>
-            <div class="paso-txt">Ingresa la llave: <strong style="font-family:monospace;color:#1d4ed8;font-size:0.95rem;">@OTO262</strong> y confirma que el titular empiece por <strong>Ju... Cac...</strong></div>
-          </div>
-          <div class="paso-row">
-            <div class="paso-num">5</div>
-            <div class="paso-txt">Ingresa el monto exacto: <strong id="monto-paso5" style="color:#1d4ed8;">$19.000</strong> y confirma la transferencia.</div>
-          </div>
-          <div class="paso-row">
-            <div class="paso-num green">6</div>
-            <div class="paso-txt"><strong>Toma captura de pantalla</strong> del comprobante y toca el botón verde de abajo para enviárnoslo por WhatsApp.</div>
-          </div>
-        </div>
-        <!-- CTA -->
-        <button class="btn-confirmar-wa" onclick="enviarComprobante()">
-          <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — ENVIAR COMPROBANTE POR WHATSAPP</span>
-        </button>
-        <p class="nota-wa">Adjunta el comprobante y radicamos ese mismo día ⚡</p>
-      </div>
-    </div>
-
-    <!-- Separador -->
-    <div class="or-sep">
-      <div class="or-sep-line left"></div>
-      <span class="or-sep-txt">— O TAMBIÉN PUEDES PAGAR CON —</span>
-      <div class="or-sep-line right"></div>
-    </div>
-
-    <!-- ══ OPCIÓN 2: EPAYCO ══ -->
-    <div class="pago-epayco">
-      <div class="pago-epayco-head">
-        <div class="epayco-label">Opción 2 · Pago en línea seguro · SSL 256 bits</div>
-        <div class="epayco-logos">
-          <div class="logo-visa">VISA</div>
-          <div class="logo-mc"><div class="c1"></div><div class="c2"></div><span>Mastercard</span></div>
-          <div class="logo-pse">PSE</div>
-          <div class="logo-nequi">Nequi</div>
-          <div class="logo-bc">Bancolombia</div>
-        </div>
-      </div>
-      <div class="pago-epayco-body">
-        <button class="btn-epayco" onclick="abrirEpayco(this)">
-          <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE / NEQUI →</span>
-        </button>
-        <p class="nota-epayco">Pago procesado por ePayco Colombia · Al confirmar el pago te avisamos por WhatsApp y radicamos de inmediato · Sin cobros adicionales.</p>
-        <div class="ssl-row">
-          <span class="ssl-badge">🔒 Encriptación SSL 256 bits · Procesado por ePayco · Datos protegidos</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
