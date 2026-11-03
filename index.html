@@ -5550,29 +5550,47 @@ function descargarDerechoPeticionPDF(){
 
   // ── FOOTER: franja verde CTA + barra navy ──
   function addFooter(d, pgNum, total){
-    // ① BOTÓN VERDE — aparece en CADA página
-    var GR=[22,163,74], GR2=[34,197,94];
-    d.setFillColor(GR[0],GR[1],GR[2]);
-    d.rect(0, H-24, W, 13, 'F');
-    // brillo superior
-    d.setFillColor(GR2[0],GR2[1],GR2[2]);
-    d.rect(0, H-24, W, 4.5, 'F');
-    // icono de mano
-    d.setFont('helvetica','bold'); d.setFontSize(13); d.setTextColor(255,255,255);
-    d.text('TOQUE AQUI PARA RADICAR ESTE DOCUMENTO', W/2, H-15.5, {align:'center'});
-    d.setFont('helvetica','normal'); d.setFontSize(7.5); d.setTextColor(209,250,229);
-    d.text('juridicosweb.com  ·  $19.000 por multa  ·  pago unico', W/2, H-11.8, {align:'center'});
-    d.link(0, H-24, W, 13, { url: 'https://juridicosweb.com/pago.html' });
+    var pagoUrl = 'https://juridicosweb.com/pago.html';
+    var GR=[22,163,74], GR2=[34,197,94], GR3=[16,120,55];
 
-    // ② BARRA NAVY inferior
-    d.setFillColor(NAVY[0],NAVY[1],NAVY[2]);
-    d.rect(0,H-10,W,10,'F');
+    // ── Fondo oscuro del bloque footer ──
+    d.setFillColor(8,18,50);
+    d.rect(0, H-32, W, 32, 'F');
+    // Línea separadora dorada arriba
     d.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-    d.rect(0,H-10,W,0.6,'F');
-    d.setFont('helvetica','normal'); d.setFontSize(6); d.setTextColor(160,180,220);
-    d.text('JuridicosWeb · Asesoria Legal Especializada · www.juridicosweb.com · juridicoswebcasos@gmail.com · (+57) 315 931 8400', ML, H-5);
-    d.setFont('helvetica','bold'); d.setFontSize(6); d.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-    d.text('Pagina '+pgNum+' / '+total, W-MR, H-5, {align:'right'});
+    d.rect(0, H-32, W, 1.2, 'F');
+
+    // ── BOTÓN VERDE redondeado centrado ──
+    var bW = W - 24, bH = 14, bX = 12, bY = H-30;
+    // Sombra
+    d.setFillColor(GR3[0],GR3[1],GR3[2]);
+    d.roundedRect(bX+1, bY+1, bW, bH, 2.5, 2.5, 'F');
+    // Cuerpo verde
+    d.setFillColor(GR[0],GR[1],GR[2]);
+    d.roundedRect(bX, bY, bW, bH, 2.5, 2.5, 'F');
+    // Brillo superior
+    d.setFillColor(GR2[0],GR2[1],GR2[2]);
+    d.roundedRect(bX, bY, bW, bH/2, 2.5, 2.5, 'F');
+    d.setFillColor(GR[0],GR[1],GR[2]);
+    d.rect(bX, bY+bH/2-1, bW, bH/2-2, 'F');
+    // Borde blanco sutil
+    d.setDrawColor(255,255,255); d.setLineWidth(0.4);
+    d.roundedRect(bX, bY, bW, bH, 2.5, 2.5, 'D');
+    // Texto del botón
+    d.setFont('helvetica','bold'); d.setFontSize(11); d.setTextColor(255,255,255);
+    d.text('>> DAR CLIC AQUI PARA PAGAR Y RADICAR  -  juridicosweb.com', W/2, bY+9.5, {align:'center'});
+    // Enlace real
+    d.link(bX, bY, bW, bH, { url: pagoUrl });
+
+    // ── Barra info inferior ──
+    d.setFillColor(5,12,38);
+    d.rect(0, H-14, W, 14, 'F');
+    d.setFont('helvetica','normal'); d.setFontSize(6.2); d.setTextColor(130,160,210);
+    d.text('JuridicosWeb  |  juridicoswebtransito@gmail.com  |  (+57) 315 931 8400  |  www.juridicosweb.com', ML, H-8);
+    d.setFont('helvetica','bold'); d.setFontSize(6.5); d.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
+    d.text('Pag. '+pgNum+'/'+total, W-MR, H-8, {align:'right'});
+    d.setFont('helvetica','normal'); d.setFontSize(5.5); d.setTextColor(80,110,170);
+    d.text('NIT: 88262856-1  |  Ley 1755/2015 - Art. 23 C.P.', ML, H-3.5);
   }
 
   // ── Título de sección con subrayado dorado ──
@@ -5873,7 +5891,7 @@ function descargarDerechoPeticionPDF(){
   doc.text('JurídicosWeb — Asesoría Legal Especializada', ML, y); y+=5.5;
   doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
   doc.text('Elaborado, firmado digitalmente y radicado por: JurídicosWeb', ML, y); y+=5;
-  doc.text('www.juridicosweb.com  ·  juridicoswebcasos@gmail.com', ML, y); y+=14;
+  doc.text('www.juridicosweb.com  ·  juridicoswebtransito@gmail.com', ML, y); y+=14;
 
   // Declaración jurada
   doc.setFillColor(247,248,252); doc.setDrawColor(180,190,215); doc.setLineWidth(0.3);
@@ -6024,7 +6042,7 @@ function descargarDerechoPeticionPDF(){
   doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(NAVY[0],NAVY[1],NAVY[2]);
   doc.text('JurídicosWeb — Asesoría Legal Especializada', W/2, y, {align:'center'}); y+=5;
   doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-  doc.text('www.juridicosweb.com  ·  juridicoswebcasos@gmail.com  ·  (+57) 315 931 8400', W/2, y, {align:'center'});
+  doc.text('www.juridicosweb.com  ·  juridicoswebtransito@gmail.com  ·  (+57) 315 931 8400', W/2, y, {align:'center'});
   addFooter(doc, 5, TOTAL_PAGS);
 
   var apellido = (nombre.split(' ')[1] || nombre.split(' ')[0] || 'cliente').replace(/[^a-zA-Z]/g,'');
