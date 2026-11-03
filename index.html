@@ -5884,70 +5884,79 @@ function descargarDerechoPeticionPDF(){
   declLines.forEach(function(l){ doc.text(l, W/2, y, {align:'center'}); y+=4.5; });
   y+=10; doc.setTextColor(0,0,0);
 
-  // ── CTA REDISEÑADO: Banner rojo + botón clickeable ──
+  // ── CTA REDISEÑADO: fondo oscuro premium + botón verde grande ──
   var pagoUrl = 'https://juridicosweb.com/pago.html';
+  var waUrl   = 'https://wa.me/573159318400';
 
-  // ① Encabezado rojo de impacto — "¡LISTO PARA RADICAR!"
-  var redH = 22;
-  doc.setFillColor(185,10,10); doc.rect(ML, y, TW, redH, 'F');
-  // Brillo interno superior
-  doc.setFillColor(220,30,30); doc.rect(ML, y, TW, 4, 'F');
-  // Borde blanco fino
-  doc.setDrawColor(255,255,255); doc.setLineWidth(0.8);
-  doc.rect(ML+1, y+1, TW-2, redH-2, 'D');
-  // Texto principal grande
-  doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.setTextColor(255,255,255);
-  doc.text('¡LISTO PARA RADICAR!', W/2, y+10, {align:'center'});
-  // Subtexto pequeño
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(255,200,200);
-  doc.text('Su documento está firmado y listo — el trámite tarda menos de 2 minutos', W/2, y+17, {align:'center'});
-  y += redH;
+  // ── Contenedor principal: fondo navy oscuro con borde dorado ──
+  var ctaH = 88;
+  doc.setFillColor(8,18,50); doc.roundedRect(ML, y, TW, ctaH, 4, 4, 'F');
+  doc.setDrawColor(201,162,39); doc.setLineWidth(1.2);
+  doc.roundedRect(ML, y, TW, ctaH, 4, 4, 'D');
+  // Línea dorada superior de acento
+  doc.setFillColor(201,162,39); doc.rect(ML+4, y, TW-8, 2.5, 'F');
 
-  // ② Cuerpo navy con instrucciones compactas
-  var bodyH = 38;
-  doc.setFillColor(10,24,64); doc.rect(ML, y, TW, bodyH, 'F');
-  // Separador dorado
-  doc.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]); doc.rect(ML, y, TW, 0.8, 'F');
+  // ── Encabezado: icono de escudo + texto ──
+  var ty = y + 12;
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(255,255,255);
+  doc.text('DOCUMENTO LISTO  -  SIGUIENTE PASO: PAGAR', W/2, ty, {align:'center'});
+  ty += 7;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(180,200,240);
+  doc.text('Su escrito juridico esta firmado y preparado. El tramite se activa en menos de 2 minutos.', W/2, ty, {align:'center'});
+  ty += 10;
 
-  var instrucciones = [
-    { ico:'①', txt:'Toque el botón azul de abajo  →  pague $19.000 por multa (pago único)' },
-    { ico:'②', txt:'Envíe el comprobante por WhatsApp al +57 315 931 8400' },
-    { ico:'③', txt:'Radicamos ante la Secretaría de Tránsito ese mismo día y le enviamos el número de radicado' },
+  // ── 3 pasos en una fila ──
+  var colW = TW/3;
+  var pasos = [
+    { num:'1', titulo:'Haga clic abajo', sub:'Abra el enlace de pago' },
+    { num:'2', titulo:'Pague $19.000', sub:'Tarjeta, PSE o Nequi' },
+    { num:'3', titulo:'Recibe en WhatsApp', sub:'Documento + radicado hoy' },
   ];
-  var iy = y + 8;
-  instrucciones.forEach(function(ins){
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-    doc.text(ins.ico, ML+5, iy);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(210,220,240);
-    var tlines = doc.splitTextToSize(ins.txt, TW-18);
-    tlines.forEach(function(tl){ doc.text(tl, ML+14, iy); iy+=5; });
-    iy+=1;
+  pasos.forEach(function(p, i){
+    var cx = ML + colW*i + colW/2;
+    // Círculo numerado
+    doc.setFillColor(201,162,39); doc.circle(cx, ty+4, 5, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(8,18,50);
+    doc.text(p.num, cx, ty+6.5, {align:'center'});
+    // Título del paso
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(255,255,255);
+    doc.text(p.titulo, cx, ty+14, {align:'center'});
+    // Subtítulo
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(160,185,225);
+    doc.text(p.sub, cx, ty+19, {align:'center'});
+    // Flecha entre pasos
+    if(i < 2){
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(201,162,39);
+      doc.text('>', ML + colW*(i+1) - 4, ty+6.5, {align:'center'});
+    }
   });
-  y += bodyH;
+  ty += 28;
 
-  // ③ BOTÓN CLICKEABLE — rectángulo azul eléctrico con enlace real
-  var btnH = 20;
-  var btnW = TW;
-  // Sombra del botón
-  doc.setFillColor(0,30,100); doc.rect(ML+2, y+2, btnW, btnH, 'F');
-  // Botón principal
-  doc.setFillColor(30,100,255); doc.rect(ML, y, btnW, btnH, 'F');
+  // ── BOTÓN VERDE PRINCIPAL — redondeado, centrado, con enlace ──
+  var btnW2 = TW - 20;
+  var btnX2 = ML + 10;
+  var btnH2 = 16;
+  // Sombra sutil
+  doc.setFillColor(10,80,40); doc.roundedRect(btnX2+1.5, ty+1.5, btnW2, btnH2, 3, 3, 'F');
+  // Cuerpo verde
+  doc.setFillColor(22,163,74); doc.roundedRect(btnX2, ty, btnW2, btnH2, 3, 3, 'F');
   // Brillo superior
-  doc.setFillColor(60,130,255); doc.rect(ML, y, btnW, 4, 'F');
-  // Texto del botón
-  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
-  doc.text('▶  PAGAR Y RADICAR AHORA  —  juridicosweb.com/pago.html', W/2, y+12.5, {align:'center'});
-  // ── ENLACE CLICKEABLE (jsPDF link) ──
-  doc.link(ML, y, btnW, btnH, { url: pagoUrl });
-  y += btnH;
+  doc.setFillColor(34,197,94); doc.roundedRect(btnX2, ty, btnW2, btnH2/2, 3, 3, 'F');
+  doc.setFillColor(22,163,74); doc.rect(btnX2, ty+btnH2/2-1, btnW2, btnH2/2-2, 'F');
+  // Borde blanco sutil
+  doc.setDrawColor(255,255,255); doc.setLineWidth(0.5);
+  doc.roundedRect(btnX2, ty, btnW2, btnH2, 3, 3, 'D');
+  // Texto botón
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+  doc.text('>> TOQUE AQUI PARA PAGAR Y RADICAR  |  juridicosweb.com', W/2, ty+10, {align:'center'});
+  // Enlace clickeable real
+  doc.link(btnX2, ty, btnW2, btnH2, { url: pagoUrl });
+  ty += btnH2 + 5;
 
-  // ④ Franja inferior con datos de contacto
-  var footCtaH = 12;
-  doc.setFillColor(5,15,45); doc.rect(ML, y, TW, footCtaH, 'F');
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,180,220);
-  doc.text('Si prefiere: WhatsApp +57 315 931 8400  ·  www.juridicosweb.com  ·  juridicoswebcasos@gmail.com', W/2, y+7.5, {align:'center'});
-  // Enlace en el texto de WhatsApp también
-  doc.link(ML, y, TW, footCtaH, { url: 'https://wa.me/573159318400' });
+  // ── Contacto de respaldo ──
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(130,160,210);
+  doc.text('Prefiere WhatsApp?  +57 315 931 8400  |  juridicoswebtransito@gmail.com', W/2, ty, {align:'center'});
+  doc.link(ML, ty-5, TW, 8, { url: waUrl });
 
   doc.setTextColor(0,0,0);
   addFooter(doc, 4, TOTAL_PAGS);
