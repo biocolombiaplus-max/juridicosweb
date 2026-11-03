@@ -2044,46 +2044,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <!-- Instrucción clara -->
-        <div style="background:#fefce8;border:1.5px solid #fcd34d;border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-          <span style="font-size:1.1rem;flex-shrink:0;">👇</span>
-          <div>
-            <p style="font-size:0.8rem;font-weight:900;color:#92400e;margin:0;line-height:1.2;">Elige cómo quieres pagar</p>
-            <p style="font-size:0.68rem;color:#78350f;margin:2px 0 0;font-weight:600;">Paga → envíanos el comprobante → radicamos el mismo día</p>
-          </div>
-        </div>
-
-        <!-- BOTÓN: Llave breve -->
-        <button id="btn-metodo-llave" onclick="seleccionarMetodoPago('llave')"
-          style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0c4a6e,#0369a1,#0284c7);color:#fff;border:none;border-radius:14px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 6px 28px rgba(3,105,161,0.55);transition:.25s;">
-          <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2.5s infinite;pointer-events:none;"></div>
-          <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:9px;flex-shrink:0;font-size:1.3rem;">📱</div>
-            <div style="text-align:left;flex:1;min-width:0;">
-              <p style="font-size:0.88rem;font-weight:900;margin:0 0 2px;">Nequi · Daviplata · Cualquier banco</p>
-              <p style="font-size:0.65rem;color:#bae6fd;margin:0;font-weight:600;">Transferencia con llave breve · Más rápido</p>
+        <!-- ══ OPCIÓN 1: LLAVE BREVE — RECOMENDADO ══ -->
+        <div style="background:linear-gradient(135deg,#052e16,#14532d);border:2px solid #16a34a;border-radius:16px;margin-bottom:6px;overflow:hidden;box-shadow:0 6px 28px rgba(22,163,74,0.35);">
+          <!-- Cabecera verde -->
+          <div style="background:linear-gradient(135deg,#16a34a,#15803d);padding:12px 14px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);animation:shimmerBtn 2.5s infinite;pointer-events:none;"></div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px;font-size:1.3rem;flex-shrink:0;">📱</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="font-size:0.55rem;font-weight:900;background:#fbbf24;color:#78350f;padding:2px 7px;border-radius:999px;letter-spacing:.5px;">⭐ RECOMENDADO — MÁS RÁPIDO</span>
+              </div>
+              <p style="font-size:0.9rem;font-weight:900;color:#fff;margin:0;">Nequi · Daviplata · Cualquier banco</p>
+              <p style="font-size:0.65rem;color:#bbf7d0;margin:2px 0 0;">Paga con llave breve Transfiya — inmediato</p>
             </div>
-            <span style="flex-shrink:0;background:rgba(255,255,255,0.2);border-radius:8px;padding:4px 9px;font-size:0.65rem;font-weight:800;white-space:nowrap;">👆 TOCA AQUÍ</span>
           </div>
-          <div id="badge-llave-sel" style="display:none;position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;">SELECCIONADO ✅</div>
-        </button>
-
-        <!-- BOTÓN: Tarjeta / PSE -->
-        <button id="btn-metodo-epayco" onclick="seleccionarMetodoPago('epayco')"
-          style="width:100%;margin-bottom:12px;background:linear-gradient(135deg,#1c1917,#292524);color:#fff;border:2px solid #44403c;border-radius:14px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:.25s;">
-          <div id="badge-epayco-sel" style="display:none;position:absolute;top:8px;right:10px;background:#22c55e;color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:999px;">SELECCIONADO ✅</div>
-          <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;">
-            <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:9px;flex-shrink:0;font-size:1.3rem;">💳</div>
-            <div style="text-align:left;flex:1;min-width:0;">
-              <p style="font-size:0.88rem;font-weight:900;margin:0 0 2px;">Tarjeta débito · Crédito · PSE</p>
-              <p style="font-size:0.65rem;color:#a8a29e;margin:0;font-weight:600;">VISA · Mastercard · PSE · Nequi · Bancolombia</p>
-            </div>
-            <span style="flex-shrink:0;background:rgba(255,255,255,0.1);border-radius:8px;padding:4px 9px;font-size:0.65rem;font-weight:800;white-space:nowrap;color:#d4d4d4;">👆 TOCA AQUÍ</span>
-          </div>
-        </button>
-
-        <!-- Panel: Llave breve (oculto hasta que el usuario toque) -->
-        <div id="panel-llave" style="display:none;">
+          <!-- Contenido del panel llave — siempre visible -->
+        <div id="panel-llave" style="padding:12px 14px 14px;">
 
           <!-- Llave para copiar -->
           <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #bae6fd;border-radius:12px;padding:12px 14px;margin-bottom:10px;">
@@ -2139,16 +2115,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span style="position:relative;z-index:1;">✅ YA TRANSFERÍ — CONFIRMAR POR WHATSAPP</span>
             <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmerBtn 2s infinite;"></span>
           </button>
-          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Adjunta el comprobante por WhatsApp y radicamos ese mismo día.</p>
+          <p style="text-align:center;color:#86efac;font-size:0.7rem;margin:0;">Adjunta el comprobante por WhatsApp y radicamos ese mismo día.</p>
+        </div>
+        </div><!-- cierra panel-llave + contenedor verde llave-breve -->
+
+        <!-- Separador "— O PAGA CON —" -->
+        <div style="display:flex;align-items:center;gap:10px;margin:12px 0;">
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(148,163,184,0.4));"></div>
+          <span style="font-size:0.65rem;font-weight:800;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;">— O PAGA CON —</span>
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(148,163,184,0.4),transparent);"></div>
         </div>
 
-        <!-- Panel: ePayco -->
-        <div id="panel-epayco" style="display:none;">
-          <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #334155;border-radius:12px;padding:14px 16px;margin-bottom:10px;text-align:center;">
-            <p style="font-size:0.68rem;color:#94a3b8;margin:0 0 10px;letter-spacing:1px;text-transform:uppercase;">Pago 100% seguro · SSL · Encriptado</p>
+        <!-- ══ OPCIÓN 2: TARJETA / PSE (ePayco) — siempre visible ══ -->
+        <div id="panel-epayco" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid #334155;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+          <!-- Cabecera oscura con título -->
+          <div style="padding:10px 14px 8px;border-bottom:1px solid #1e293b;">
+            <p style="font-size:0.65rem;color:#64748b;margin:0 0 6px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Opción 2 · Pago en línea 100% seguro · SSL</p>
             <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;">
               <div style="background:#1a1f71;border-radius:6px;padding:4px 12px;font-size:0.75rem;font-weight:900;color:#fff;font-style:italic;">VISA</div>
-              <div style="display:flex;align-items:center;background:#1c1917;border-radius:6px;padding:4px 10px;gap:3px;">
+              <div style="display:flex;align-items:center;background:#2a2520;border-radius:6px;padding:4px 10px;gap:3px;">
                 <div style="width:16px;height:16px;background:#eb001b;border-radius:50%;margin-right:-6px;"></div>
                 <div style="width:16px;height:16px;background:#f79e1b;border-radius:50%;"></div>
                 <span style="font-size:0.65rem;color:#d4d4d4;font-weight:700;margin-left:4px;">Mastercard</span>
@@ -2158,12 +2143,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <div style="background:#FFCC00;border-radius:6px;padding:4px 12px;font-size:0.7rem;font-weight:900;color:#000;">Bancolombia</div>
             </div>
           </div>
-          <button onclick="abrirEpayco()"
-            style="background:linear-gradient(135deg,#f97316,#dc2626);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(249,115,22,0.55);animation:pulseOrange 1.8s infinite;margin-bottom:6px;position:relative;overflow:hidden;">
-            <span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>
-            <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmerBtn 2s infinite;"></span>
-          </button>
-          <p style="text-align:center;color:#94a3b8;font-size:0.7rem;margin:0;">Al completar el pago te confirmamos la radicación por WhatsApp.</p>
+          <!-- Botón ePayco prominente -->
+          <div style="padding:12px 14px 14px;">
+            <button onclick="abrirEpayco()"
+              style="background:linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(37,99,235,0.55);margin-bottom:8px;position:relative;overflow:hidden;transition:.2s;">
+              <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE →</span>
+              <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmerBtn 2s infinite;"></span>
+            </button>
+            <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">Al pagar te confirmamos la radicación por WhatsApp · Sin cobros adicionales.</p>
+          </div>
         </div>
       </div>
 
@@ -3670,22 +3658,9 @@ function copiarLlave(btn){
   }).catch(function(){});
 }
 
-// ── Selector método de pago ─────────────────────────────────────────────────
+// ── Selector método de pago (ambos paneles siempre visibles) ─────────────────
 function seleccionarMetodoPago(metodo){
-  var esLlave = metodo==='llave';
-  document.getElementById('panel-llave').style.display  = esLlave ? 'block' : 'none';
-  document.getElementById('panel-epayco').style.display = esLlave ? 'none'  : 'block';
-  document.getElementById('badge-llave-sel').style.display  = esLlave ? 'block' : 'none';
-  document.getElementById('badge-epayco-sel').style.display = esLlave ? 'none'  : 'block';
-  var btnL = document.getElementById('btn-metodo-llave');
-  var btnE = document.getElementById('btn-metodo-epayco');
-  if(esLlave){
-    btnL.style.boxShadow='0 6px 28px rgba(3,105,161,0.7)'; btnL.style.transform='scale(1.01)';
-    btnE.style.boxShadow='0 4px 16px rgba(0,0,0,0.3)'; btnE.style.transform='scale(1)'; btnE.style.border='2px solid #44403c';
-  } else {
-    btnE.style.boxShadow='0 6px 28px rgba(249,115,22,0.5)'; btnE.style.transform='scale(1.01)'; btnE.style.border='2px solid #f97316';
-    btnL.style.boxShadow='0 4px 16px rgba(3,105,161,0.2)'; btnL.style.transform='scale(1)';
-  }
+  // los paneles ya son siempre visibles — no-op mantenido por compatibilidad
 }
 
 function _lanzarEpayco(monto, desc){
@@ -5556,16 +5531,31 @@ function descargarDerechoPeticionPDF(){
     d.setTextColor(0,0,0);
   }
 
-  // ── FOOTER: línea + datos JurídicosWeb ──
+  // ── FOOTER: franja verde CTA + barra navy ──
   function addFooter(d, pgNum, total){
+    // ① BOTÓN VERDE — aparece en CADA página
+    var GR=[22,163,74], GR2=[34,197,94];
+    d.setFillColor(GR[0],GR[1],GR[2]);
+    d.rect(0, H-24, W, 13, 'F');
+    // brillo superior
+    d.setFillColor(GR2[0],GR2[1],GR2[2]);
+    d.rect(0, H-24, W, 4.5, 'F');
+    // icono de mano
+    d.setFont('helvetica','bold'); d.setFontSize(13); d.setTextColor(255,255,255);
+    d.text('TOQUE AQUI PARA RADICAR ESTE DOCUMENTO', W/2, H-15.5, {align:'center'});
+    d.setFont('helvetica','normal'); d.setFontSize(7.5); d.setTextColor(209,250,229);
+    d.text('juridicosweb.com  ·  $19.000 por multa  ·  pago unico', W/2, H-11.8, {align:'center'});
+    d.link(0, H-24, W, 13, { url: 'https://juridicosweb.com/pago.html' });
+
+    // ② BARRA NAVY inferior
     d.setFillColor(NAVY[0],NAVY[1],NAVY[2]);
     d.rect(0,H-10,W,10,'F');
     d.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]);
     d.rect(0,H-10,W,0.6,'F');
     d.setFont('helvetica','normal'); d.setFontSize(6); d.setTextColor(160,180,220);
-    d.text('JurídicosWeb · Asesoría Legal Especializada · www.juridicosweb.com · juridicoswebcasos@gmail.com · (+57) 315 931 8400', ML, H-5);
+    d.text('JuridicosWeb · Asesoria Legal Especializada · www.juridicosweb.com · juridicoswebcasos@gmail.com · (+57) 315 931 8400', ML, H-5);
     d.setFont('helvetica','bold'); d.setFontSize(6); d.setTextColor(GOLD2[0],GOLD2[1],GOLD2[2]);
-    d.text('Página '+pgNum+' / '+total, W-MR, H-5, {align:'right'});
+    d.text('Pagina '+pgNum+' / '+total, W-MR, H-5, {align:'right'});
   }
 
   // ── Título de sección con subrayado dorado ──
@@ -5660,7 +5650,7 @@ function descargarDerechoPeticionPDF(){
 
   // Párrafo apertura
   var apertura = 'Yo, '+nombre+', identificado/a con Cédula de Ciudadanía No. '+cedula+', mayor de edad, domiciliado/a en esta ciudad, con contacto WhatsApp (+57) '+wa+' y correo electrónico '+correo+', obrando en nombre propio y en ejercicio del DERECHO FUNDAMENTAL DE PETICIÓN consagrado en el Artículo 23 de la Constitución Política de Colombia, reglamentado por la Ley Estatutaria 1755 de 2015, respetuosamente me permito dirigirme a su despacho para formular el siguiente:';
-  y = writeText(doc, apertura, ML, y, TW, 5.5, H-15, 10, 'normal'); y+=2;
+  y = writeText(doc, apertura, ML, y, TW, 5.5, H-27, 10, 'normal'); y+=2;
 
   // Sub-encabezado centrado
   doc.setFont('times','bold'); doc.setFontSize(11.5); doc.setTextColor(NAVY[0],NAVY[1],NAVY[2]);
@@ -5669,7 +5659,7 @@ function descargarDerechoPeticionPDF(){
   // Sección I
   y = secTitle(doc, 'I.   IDENTIFICACIÓN DEL COMPARENDO', y); y+=2;
   var p1 = 'Que a mi nombre aparece(n) registrado(s) en el Sistema Integrado de Multas y Sanciones de Tránsito — SIMIT el (los) siguiente(s) comparendo(s), respecto de los cuales solicito el análisis jurídico y eliminación por las causales que se exponen en el capítulo II de este escrito:';
-  y = writeText(doc, p1, ML, y, TW, 5.5, H-15, 10, 'normal'); y+=3;
+  y = writeText(doc, p1, ML, y, TW, 5.5, H-27, 10, 'normal'); y+=3;
 
   // Tabla de datos
   var campos = [
@@ -5695,7 +5685,7 @@ function descargarDerechoPeticionPDF(){
   y = tblY+4; doc.setTextColor(0,0,0);
 
   var p2 = 'Que a la fecha de presentación del presente escrito concurren en el citado comparendo una o más de las causales de anulación, prescripción o nulidad que se exponen detalladamente en el capítulo siguiente, razón por la cual solicito respetuosamente la declaratoria correspondiente y la eliminación inmediata del registro en el SIMIT.';
-  y = writeText(doc, p2, ML, y, TW, 5.5, H-15, 10, 'normal');
+  y = writeText(doc, p2, ML, y, TW, 5.5, H-27, 10, 'normal');
   addFooter(doc, 1, TOTAL_PAGS);
 
   // ══════════════════════════════════════════════════
@@ -5713,9 +5703,9 @@ function descargarDerechoPeticionPDF(){
   y+=12; doc.setTextColor(0,0,0);
 
   var c1a = 'De conformidad con el ARTÍCULO 136 de la Ley 769 de 2002 — Código Nacional de Tránsito Terrestre, la acción sancionatoria prescribe en el término improrrogable de TRES (3) AÑOS contados desde la fecha de ocurrencia de la infracción. Vencido dicho plazo sin que la administración haya notificado debidamente el comparendo ni adelantado el proceso de cobro coactivo, la obligación queda extinguida de pleno derecho, siendo imperativo para la Secretaría de Tránsito declarar la prescripción y ordenar la eliminación del registro en el SIMIT.';
-  y = writeText(doc, c1a, ML, y, TW, 5.4, H-15, 9.5, 'normal'); y+=1;
+  y = writeText(doc, c1a, ML, y, TW, 5.4, H-27, 9.5, 'normal'); y+=1;
   var c1b = 'Base jurisprudencial: El Consejo de Estado, Sección Primera, Sentencia del 28 de julio de 2016, Exp. 11001-03-24-000-2012-00228-00, reiteró que la prescripción de sanciones de tránsito es de orden público, irrenunciable e improrrogable, y que el cobro de sanciones prescritas constituye una vía de hecho susceptible de amparo constitucional. La Corte Constitucional, en Sentencia T-760 de 2008, reforzó que la administración no puede revivir obligaciones legalmente extinguidas.';
-  y = writeText(doc, c1b, ML, y, TW, 5.4, H-15, 9.5, 'italic'); y+=5;
+  y = writeText(doc, c1b, ML, y, TW, 5.4, H-27, 9.5, 'italic'); y+=5;
 
   // Causal 2
   doc.setFillColor(240,244,255); doc.setDrawColor(BLUE[0],BLUE[1],BLUE[2]); doc.setLineWidth(0.3);
@@ -5726,10 +5716,10 @@ function descargarDerechoPeticionPDF(){
   y+=12; doc.setTextColor(0,0,0);
 
   var c2a = 'El ARTÍCULO 67 de la Ley 769 de 2002, en concordancia con el ARTÍCULO 47 del Decreto 1703 de 2019, establece que el comparendo debe ser notificado al presunto infractor dentro de los TRES (3) DÍAS HÁBILES siguientes a su imposición, mediante alguna de las siguientes modalidades: (i) entrega personal en el lugar de la infracción; (ii) correo certificado a la dirección registrada en el RUNT; o (iii) aviso fijado en lugar visible del vehículo.\n\nEl incumplimiento de este requisito de procedibilidad genera la NULIDAD ABSOLUTA del acto administrativo sancionatorio, conforme al ARTÍCULO 137 del C.P.A.C.A. — Ley 1437 de 2011, por violación flagrante del derecho fundamental al DEBIDO PROCESO consagrado en el ARTÍCULO 29 de la Constitución Política, que obliga a que toda actuación administrativa garantice el derecho de defensa, contradicción e impugnación del administrado.\n\nLa Corte Constitucional, en Sentencias T-1028 de 2010 y T-330 de 2012, declaró que la notificación irregular del comparendo lesiona directamente el debido proceso y puede ser corregida mediante acción de tutela cuando la administración persiste en el cobro de la sanción anulada.';
-  y = writeText(doc, c2a, ML, y, TW, 5.4, H-15, 9.5, 'normal'); y+=4;
+  y = writeText(doc, c2a, ML, y, TW, 5.4, H-27, 9.5, 'normal'); y+=4;
 
   // Causal 3
-  if(y > H-50){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
+  if(y > H-62){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
   doc.setFillColor(240,244,255); doc.setDrawColor(BLUE[0],BLUE[1],BLUE[2]); doc.setLineWidth(0.3);
   doc.roundedRect(ML, y-4, TW, 8, 1.5, 1.5, 'FD');
   doc.setFillColor(NAVY[0],NAVY[1],NAVY[2]); doc.rect(ML, y-4, 4, 8, 'F');
@@ -5738,10 +5728,10 @@ function descargarDerechoPeticionPDF(){
   y+=12; doc.setTextColor(0,0,0);
 
   var c3a = 'La Ley 1843 de 2017 y su Decreto Reglamentario 342 de 2019 establecen los requisitos obligatorios que deben cumplir los sistemas automáticos de detección de infracciones (fotomultas, radares de velocidad, detectores de semáforo en rojo), a saber: (i) Certificado de calibración vigente expedido por el Instituto Nacional de Metrología — INM o laboratorio acreditado por el ONAC; (ii) Aprobación técnica previa del Ministerio de Transporte; (iii) Instalación únicamente en sitios aprobados mediante resolución motivada; (iv) Publicación de la ubicación de los dispositivos en el Diario Oficial con al menos 30 días de antelación.\n\nEl incumplimiento de cualquiera de los anteriores requisitos técnicos conlleva la NULIDAD ABSOLUTA del comparendo electrónico generado, toda vez que el medio de prueba fue obtenido en violación de las normas que le sirven de fundamento. La Circular 0006 de 2020 del Ministerio de Transporte fue enfática en señalar que las Secretarías de Tránsito deben verificar la validez del certificado INM antes de imponer la sanción, y que la ausencia de dicho certificado invalida la actuación administrativa desde su origen.';
-  y = writeText(doc, c3a, ML, y, TW, 5.4, H-15, 9.5, 'normal'); y+=4;
+  y = writeText(doc, c3a, ML, y, TW, 5.4, H-27, 9.5, 'normal'); y+=4;
 
   // Causal 4
-  if(y > H-55){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
+  if(y > H-67){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
   doc.setFillColor(240,244,255); doc.setDrawColor(BLUE[0],BLUE[1],BLUE[2]); doc.setLineWidth(0.3);
   doc.roundedRect(ML, y-4, TW, 8, 1.5, 1.5, 'FD');
   doc.setFillColor(GOLD2[0],GOLD2[1],GOLD2[2]); doc.rect(ML, y-4, 4, 8, 'F');
@@ -5750,10 +5740,10 @@ function descargarDerechoPeticionPDF(){
   y+=12; doc.setTextColor(0,0,0);
 
   var c4a = 'Conforme a lo dispuesto en el ARTÍCULO 817 del Estatuto Tributario, aplicable por remisión al procedimiento administrativo de cobro coactivo en materia de multas de tránsito según el ARTÍCULO 833-1 del mismo estatuto y el ARTÍCULO 100 de la Ley 769 de 2002, la facultad de la administración para adelantar el cobro coactivo caduca en el término de CINCO (5) AÑOS contados desde la fecha en que la obligación se hizo exigible.\n\nVencido dicho término, la administración pierde definitivamente la competencia para iniciar o continuar el proceso de cobro coactivo, y el obligado tiene derecho a solicitar la declaratoria de caducidad y la consecuente eliminación del registro en el SIMIT, sin perjuicio de que la entidad haya intentado cobros informales o presiones extrajurídicas. La Sección Cuarta del Consejo de Estado ha reiterado en múltiples pronunciamientos que la caducidad del cobro coactivo no puede ser interrumpida por actuaciones administrativas no previstas en la ley y que opera de pleno derecho al vencerse el término.';
-  y = writeText(doc, c4a, ML, y, TW, 5.4, H-15, 9.5, 'normal'); y+=4;
+  y = writeText(doc, c4a, ML, y, TW, 5.4, H-27, 9.5, 'normal'); y+=4;
 
   // Causal 5
-  if(y > H-55){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
+  if(y > H-67){ addFooter(doc,2,TOTAL_PAGS); doc.addPage(); addHeader(doc,3,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
   doc.setFillColor(240,244,255); doc.setDrawColor(BLUE[0],BLUE[1],BLUE[2]); doc.setLineWidth(0.3);
   doc.roundedRect(ML, y-4, TW, 8, 1.5, 1.5, 'FD');
   doc.setFillColor(NAVY[0],NAVY[1],NAVY[2]); doc.rect(ML, y-4, 4, 8, 'F');
@@ -5762,7 +5752,7 @@ function descargarDerechoPeticionPDF(){
   y+=12; doc.setTextColor(0,0,0);
 
   var c5a = 'El ARTÍCULO 29 de la Constitución Política consagra el debido proceso como derecho fundamental aplicable a toda clase de actuaciones judiciales y administrativas, garantizando el derecho a ser oído, a presentar pruebas, a impugnar las decisiones y a obtener respuestas motivadas. Cuando la administración impone una sanción de tránsito sin garantizar el acceso del infractor a los medios de defensa — bien sea por omisión de la notificación, por falta de información sobre los recursos procedentes, por negativa injustificada a tramitar descargos o por vicio en la valoración de la prueba — la actuación adolece de NULIDAD INSANEABLE por violación al debido proceso.\n\nLa Corte Constitucional, en Sentencia SU-250 de 1998 y C-031 de 2019, estableció que ninguna sanción puede imponerse sin el previo agotamiento de un procedimiento que garantice la audiencia del afectado. La ausencia o deficiencia de este procedimiento habilita no solo la nulidad del acto sancionatorio, sino también la protección constitucional mediante acción de tutela para cesar el cobro de obligaciones cuya imposición no respetó el derecho de defensa.';
-  y = writeText(doc, c5a, ML, y, TW, 5.4, H-15, 9.5, 'normal');
+  y = writeText(doc, c5a, ML, y, TW, 5.4, H-27, 9.5, 'normal');
   addFooter(doc, 2, TOTAL_PAGS);
 
   // ══════════════════════════════════════════════════
@@ -5816,7 +5806,7 @@ function descargarDerechoPeticionPDF(){
   ];
   doc.setFont('times','normal'); doc.setFontSize(9.5);
   pets.forEach(function(p){
-    if(y > H-20){ addFooter(doc,3,TOTAL_PAGS); doc.addPage(); addHeader(doc,4,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
+    if(y > H-32){ addFooter(doc,3,TOTAL_PAGS); doc.addPage(); addHeader(doc,4,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
     doc.setFont('times','bold'); doc.setFontSize(9.5); doc.setTextColor(NAVY[0],NAVY[1],NAVY[2]);
     doc.text(p.n, ML, y);
     var lines = doc.splitTextToSize(p.t, TW-22);
@@ -5828,7 +5818,7 @@ function descargarDerechoPeticionPDF(){
   y+=2; doc.setTextColor(0,0,0);
 
   // Notificaciones
-  if(y > H-35){ addFooter(doc,3,TOTAL_PAGS); doc.addPage(); addHeader(doc,4,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
+  if(y > H-47){ addFooter(doc,3,TOTAL_PAGS); doc.addPage(); addHeader(doc,4,TOTAL_PAGS); addWatermark(doc); y=MT+4; }
   y = secTitle(doc, 'V.   NOTIFICACIONES', y); y+=2;
   doc.setFont('times','normal'); doc.setFontSize(10); doc.setTextColor(40,50,70);
   doc.text('Recibiré notificaciones en:', ML, y); y+=6;
@@ -5953,7 +5943,7 @@ function descargarDerechoPeticionPDF(){
 
   doc.setFont('times','normal'); doc.setFontSize(9.5); doc.setTextColor(40,50,70);
   var intro5 = 'Con el fin de facilitar el análisis de la presente petición y la verificación de los fundamentos invocados, se relacionan a continuación las principales normas, sentencias y circulares que soportan las causales de eliminación aquí planteadas. El peticionario solicita que estos documentos sean tenidos como parte integral del expediente administrativo:';
-  y = writeText(doc, intro5, ML, y, TW, 5.4, H-15, 9.5, 'normal'); y+=4;
+  y = writeText(doc, intro5, ML, y, TW, 5.4, H-27, 9.5, 'normal'); y+=4;
 
   var normas = [
     ['CONSTITUCIÓN POLÍTICA DE COLOMBIA', '', true],
@@ -5981,7 +5971,7 @@ function descargarDerechoPeticionPDF(){
   ];
   var nRowH = 6.5;
   normas.forEach(function(n, i){
-    if(y > H-15){ addFooter(doc,5,TOTAL_PAGS); return; }
+    if(y > H-27){ addFooter(doc,5,TOTAL_PAGS); return; }
     if(n[2]){
       doc.setFillColor(NAVY[0],NAVY[1],NAVY[2]);
       doc.rect(ML, y-3.5, TW, 7.5, 'F');
