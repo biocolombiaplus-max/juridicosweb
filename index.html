@@ -217,14 +217,14 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 }
 
 /* ===== HERO ===== */
-.hero{min-height:100vh;background:linear-gradient(160deg,#ffffff 0%,#f4f7ff 40%,#eef2ff 70%,#f8faff 100%);display:flex;align-items:center;padding:70px 5% 80px;position:relative;overflow:hidden;}
+.hero{min-height:100vh;background:linear-gradient(150deg,#fefefe 0%,#f7f9ff 25%,#f0f4ff 55%,#faf8f2 80%,#fffdf7 100%);display:flex;align-items:center;padding:70px 5% 80px;position:relative;overflow:hidden;}
 .hero-bg-img{position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=70') center/cover no-repeat;opacity:0.03;}
 .hero-orb1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,0.09) 0%,transparent 65%);top:-200px;right:-200px;pointer-events:none;}
 .hero-orb2{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(30,64,175,0.06) 0%,transparent 65%);bottom:-150px;left:-150px;pointer-events:none;}
 .hero-line-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent 0%,rgba(201,162,39,0.5) 30%,rgba(201,162,39,1) 50%,rgba(201,162,39,0.5) 70%,transparent 100%);}
 .hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;position:relative;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(10,22,40,0.06);border:1px solid rgba(10,22,40,0.15);color:var(--navy);padding:6px 14px;border-radius:6px;font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;}
-.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:ping 1.5s ease-in-out infinite;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:#fffbeb;border:1.5px solid #fcd34d;color:#92400e;padding:7px 15px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;box-shadow:0 1px 4px rgba(201,162,39,0.15);}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#d97706;animation:ping 1.5s ease-in-out infinite;}
 @keyframes ping{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.6;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes pulseGreen{0%,100%{box-shadow:0 4px 24px rgba(34,197,94,0.4);}50%{box-shadow:0 4px 40px rgba(34,197,94,0.75);}}
@@ -232,10 +232,10 @@ nav.scrolled{background:rgba(6,12,24,0.99);backdrop-filter:blur(20px);-webkit-ba
 @keyframes pulseBlue{0%,100%{box-shadow:0 6px 32px rgba(30,64,175,0.55),0 2px 8px rgba(0,0,0,0.2);}50%{box-shadow:0 8px 48px rgba(30,64,175,0.8),0 2px 12px rgba(0,0,0,0.25);}}
 @keyframes bounceDown{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
 @keyframes shimmerBtn{0%{left:-100%;}100%{left:200%;}}
-.hero h1{font-family:'Playfair Display',serif;font-size:3.1rem;color:var(--navy);line-height:1.08;margin-bottom:10px;letter-spacing:-0.5px;}
-.hero-h1-sub{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:400;color:#475569;margin-bottom:26px;line-height:1.5;letter-spacing:0;}
-.hero h1 .hl{color:var(--gold);position:relative;display:inline-block;}
-.hero h1 .hl::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),rgba(201,162,39,0.2));}
+.hero h1{font-family:'Playfair Display',serif;font-size:3.1rem;color:#0a1628;line-height:1.08;margin-bottom:10px;letter-spacing:-0.6px;text-shadow:0 1px 3px rgba(0,0,0,0.07);}
+.hero-h1-sub{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:500;color:#4b5563;margin-bottom:26px;line-height:1.6;letter-spacing:0;}
+.hero h1 .hl{color:#b45309;position:relative;display:inline-block;}
+.hero h1 .hl::after{content:'';position:absolute;bottom:-3px;left:0;width:100%;height:2.5px;background:linear-gradient(90deg,#c9a227,#e8bc3a,rgba(201,162,39,0.2));border-radius:2px;}
 .hero-price-anchor{display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;color:#475569;font-size:0.8rem;font-weight:600;margin-bottom:10px;}
 .hero-price-anchor i{color:#c9a227;}
 .hero-price-anchor strong{color:var(--gold);font-size:0.86rem;}
@@ -886,9 +886,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- Gatillos visuales bajo el título -->
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
-        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#4ade80;">✓ 100% GRATIS consultar</span>
-        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.3);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:#e8bc3a;">⭐ 4.8/5 · 847 multas eliminadas</span>
-        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 11px;font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.7);">$0 si no aplica tu caso</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:20px;padding:6px 13px;font-size:0.72rem;font-weight:800;color:#15803d;">✓ 100% GRATIS consultar</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:20px;padding:6px 13px;font-size:0.72rem;font-weight:800;color:#92400e;">⭐ 4.8/5 · 847 multas eliminadas</span>
+        <span style="display:inline-flex;align-items:center;gap:5px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:20px;padding:6px 13px;font-size:0.72rem;font-weight:800;color:#334155;">$0 si no aplica tu caso</span>
       </div>
 
       <!-- Flecha indicadora hacia el input -->
@@ -903,14 +903,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              ya está listo para consultar. Va justo después del título, sin
              nada de por medio, para que sea lo primero que el ojo encuentra. -->
         <div class="hero-consult-wrap">
-          <div class="hero-consult-card" style="border:1.5px solid rgba(201,162,39,0.22);box-shadow:0 4px 24px rgba(0,0,0,0.25);background:rgba(255,255,255,0.04);border-radius:16px;padding:22px 20px 18px;">
+          <div class="hero-consult-card" style="border:1.5px solid #e2c97a;box-shadow:0 2px 4px rgba(0,0,0,0.04),0 12px 40px rgba(10,22,40,0.1);background:#ffffff;border-radius:16px;padding:22px 20px 18px;">
 
             <!-- Label con prueba social en vivo -->
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
-              <p style="font-size:0.76rem;font-weight:800;color:rgba(201,162,39,0.95);margin:0;letter-spacing:.8px;text-transform:uppercase;">Número de cédula</p>
+              <p style="font-size:0.76rem;font-weight:800;color:#92400e;margin:0;letter-spacing:.8px;text-transform:uppercase;">Número de cédula</p>
               <div style="display:flex;align-items:center;gap:5px;">
                 <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 7px #22c55e;animation:ping 1.5s ease-in-out infinite;flex-shrink:0;"></span>
-                <span style="font-size:0.68rem;color:rgba(255,255,255,0.75);font-weight:700;white-space:nowrap;"><span id="hero-contador">4.193</span> consultas hoy</span>
+                <span style="font-size:0.68rem;color:#475569;font-weight:700;white-space:nowrap;"><span id="hero-contador">4.193</span> consultas hoy</span>
               </div>
             </div>
 
@@ -929,9 +929,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             <!-- Microtexto tranquilizador + garantía -->
             <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:10px;">
-              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#4ade80;"></i>Sin registro</span>
-              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-check" style="color:#4ade80;"></i>Datos seguros</span>
-              <span style="font-size:0.64rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:4px;"><i class="fas fa-ban" style="color:#4ade80;"></i>$0 si no aplica</span>
+              <span style="font-size:0.64rem;color:#475569;display:flex;align-items:center;gap:4px;"><i class="fas fa-lock" style="color:#16a34a;"></i>Sin registro</span>
+              <span style="font-size:0.64rem;color:#475569;display:flex;align-items:center;gap:4px;"><i class="fas fa-shield-check" style="color:#16a34a;"></i>Datos seguros</span>
+              <span style="font-size:0.64rem;color:#475569;display:flex;align-items:center;gap:4px;"><i class="fas fa-ban" style="color:#16a34a;"></i>$0 si no aplica</span>
             </div>
 
             <!-- SIMIT oficial + link placa -->
@@ -951,9 +951,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <!-- Otros casos enlace compacto -->
         <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:6px;padding:0 4px;">
-          <button onclick="openSimitModal(event,'prescripcion')" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.5);font-size:0.7rem;font-weight:600;padding:4px 8px;">⌛ +3 años sin pagar</button>
-          <button onclick="openSimitModal(event,'reciente')" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.5);font-size:0.7rem;font-weight:600;padding:4px 8px;">🔔 Mal notificada</button>
-          <button onclick="openSimitModal(event)" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.5);font-size:0.7rem;font-weight:600;padding:4px 8px;">📷 Sin INM</button>
+          <button onclick="openSimitModal(event,'prescripcion')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.7rem;font-weight:700;padding:4px 8px;">⌛ +3 años sin pagar</button>
+          <button onclick="openSimitModal(event,'reciente')" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.7rem;font-weight:700;padding:4px 8px;">🔔 Mal notificada</button>
+          <button onclick="openSimitModal(event)" style="background:none;border:none;cursor:pointer;color:#64748b;font-size:0.7rem;font-weight:700;padding:4px 8px;">📷 Sin INM</button>
         </div>
 
         <!-- placeholder to preserve DOM structure for old casos grid removal -->
