@@ -77,7 +77,6 @@ src="https://www.facebook.com/tr?id=1756287258733232&ev=PageView&noscript=1"
      falla en silencio deja al cliente sin poder firmar sin ningún aviso
      claro — mejor depender solo de que el sitio mismo cargue. -->
 <script src="vendor/jspdf.umd.min.js"></script>
-<script src="https://checkout.wompi.co/widget.js"></script>
 <style>
 /* ===== VARIABLES ===== */
 :root{
@@ -3073,8 +3072,9 @@ var SIMIT_PROXY_URL    = 'https://simit-proxy-juridicosweb.biocolombiaplus.worke
 var GUARDAR_LEAD_URL   = GOOGLE_SHEET_URL;
 // Llave PÚBLICA de Wompi (pub_prod_... o pub_test_...). Es segura de exponer en el navegador.
 // La llave PRIVADA nunca va aquí ni en ningún archivo del sitio.
-var WOMPI_PUBLIC_KEY    = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
-var WOMPI_LINK_SALDO      = 'https://checkout.wompi.co/l/ealA8Z'; // $19.000 — saldo restante, cuando ya resulta positivo
+var EPAYCO_PUBLIC_KEY = '347e56166b7cbd26c7257d8689033fba';
+var EPAYCO_P_KEY      = '1c2369a761d30551a9583239676a907f61e3a235';
+var EPAYCO_ID_CLI     = '1595409';
 // URL de un Apps Script (mismo patrón que GOOGLE_SHEET_URL) que reciba el PDF firmado en base64
 // y lo reenvíe a la secretaría de tránsito correspondiente + lo guarde en Drive.
 var RADICAR_UPLOAD_URL  = '';
