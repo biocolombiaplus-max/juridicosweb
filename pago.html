@@ -1115,6 +1115,8 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 <script>
 var _nMultas = 1;
 var _epaycoLoaded = false;
+// Leer cantidad de multas desde URL param (?multas=N)
+(function(){ try{ var p=new URLSearchParams(location.search).get('multas'); var n=parseInt(p,10); if(n>=1&&n<=6){ _nMultas=n; } }catch(e){} })();
 
 /* ── Selector del HERO (sincroniza con selector principal) ── */
 function heroSelMultas(n){
@@ -1287,6 +1289,8 @@ window.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
     animateCounter(document.getElementById('counter-multas'), 1247, 2000);
   }, 600);
+  // Aplicar multas desde URL param al selector visual
+  if(_nMultas > 1){ heroSelMultas(_nMultas); selMultas(_nMultas); }
 });
 </script>
 </body>

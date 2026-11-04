@@ -2154,12 +2154,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
           <!-- Botón ePayco prominente -->
           <div style="padding:12px 14px 14px;">
-            <button onclick="abrirEpayco()"
+            <button onclick="irAPagarOnline()"
               style="background:linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6);color:#fff;border:none;border-radius:12px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;width:100%;box-shadow:0 6px 28px rgba(37,99,235,0.55);margin-bottom:8px;position:relative;overflow:hidden;transition:.2s;">
-              <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE →</span>
+              <span style="position:relative;z-index:1;">💳 PAGAR AHORA — TARJETA / PSE →</span>
               <span style="position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmerBtn 2s infinite;"></span>
             </button>
-            <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">Al pagar te confirmamos la radicación por WhatsApp · Sin cobros adicionales.</p>
+            <p style="text-align:center;color:#64748b;font-size:0.68rem;margin:0;">Tarjeta · PSE · Nequi · Bancolombia · Al pagar radicamos de inmediato</p>
           </div>
         </div>
       </div>
@@ -3709,6 +3709,19 @@ function _lanzarEpayco(monto, desc){
     email_billing: _correoConsultante || '',
     name_billing:  _nombreConsultante || ''
   });
+}
+
+function irAPagarOnline(){
+  var n = _prNMultas || 1;
+  // Guardar datos del lead en localStorage para que pago.html los use
+  try{
+    localStorage.setItem('jw_pago_nombre', _nombreConsultante||'');
+    localStorage.setItem('jw_pago_wa',     _waConsultante||'');
+    localStorage.setItem('jw_pago_cedula', _valorConsultado||'');
+    localStorage.setItem('jw_num_multas',  n);
+  }catch(e){}
+  // Redirigir a pago.html — más robusto que abrir ePayco inline
+  window.location.href = 'pago.html?multas=' + n;
 }
 
 function abrirEpayco(){
