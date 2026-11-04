@@ -6201,7 +6201,7 @@ function descargarPDFFinal(idx){
 function _epaycoFormPost(monto, desc, ref){
   var form = document.createElement('form');
   form.method  = 'POST';
-  form.action  = 'https://checkout.epayco.co/checkout/api/pay';
+  form.action  = 'https://secure.epayco.co/checkout/api/pay';
   form.target  = '_blank';
   form.style.display = 'none';
   var campos = {
