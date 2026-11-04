@@ -3713,14 +3713,41 @@ function _lanzarEpayco(monto, desc){
 
 function irAPagarOnline(){
   var n = _prNMultas || 1;
-  // Guardar datos del lead en localStorage para que pago.html los use
+  var monto = 19000 * n;
+  // Guardar datos del lead en localStorage
   try{
     localStorage.setItem('jw_pago_nombre', _nombreConsultante||'');
     localStorage.setItem('jw_pago_wa',     _waConsultante||'');
     localStorage.setItem('jw_pago_cedula', _valorConsultado||'');
     localStorage.setItem('jw_num_multas',  n);
   }catch(e){}
-  // Redirigir a pago.html — más robusto que abrir ePayco inline
+
+  // Intentar Wompi widget inline (ya cargado en <head>)
+  if(typeof WidgetCheckout !== 'undefined'){
+    try{
+      var checkout = new WidgetCheckout({
+        currency:      'COP',
+        amountInCents: monto * 100,
+        reference:     'JW-' + Date.now(),
+        publicKey:     WOMPI_PUBLIC_KEY,
+        redirectUrl:   'https://juridicosweb.com/pago-ok.html',
+        taxInCents:    { vat: 0, consumption: 0 }
+      });
+      checkout.open(function(result){
+        var tx = result.transaction;
+        if(tx && tx.status === 'APPROVED'){
+          var msg = '✅ *JurídicosWeb — Pago aprobado*\n\n'
+            +'💳 Monto: *$'+(monto).toLocaleString('es-CO')+'* ('+n+' multa'+(n!==1?'s':'')+' × $19.000)\n'
+            +'🔖 Ref: '+tx.reference+'\n\n'
+            +'Por favor confirma para que radicemos de inmediato 🙏';
+          window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg),'_blank');
+        }
+      });
+      return;
+    } catch(e){}
+  }
+
+  // Wompi no disponible → redirigir a pago.html completo
   window.location.href = 'pago.html?multas=' + n;
 }
 

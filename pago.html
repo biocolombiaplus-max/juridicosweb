@@ -879,7 +879,7 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         </div>
       </div>
       <div class="pago-epayco-body">
-        <button class="btn-epayco" onclick="abrirEpayco(this)">
+        <button class="btn-epayco" onclick="abrirPago(this)">
           <span style="position:relative;z-index:1;">💳 PAGAR CON TARJETA / PSE / NEQUI →</span>
         </button>
         <p class="nota-epayco">Pago procesado por ePayco Colombia · Al confirmar el pago te avisamos por WhatsApp y radicamos de inmediato · Sin cobros adicionales.</p>
@@ -890,7 +890,7 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div id="epayco-fallback" style="display:none;margin-top:14px;background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:16px 18px;text-align:center;">
           <p style="color:#fbbf24;font-weight:800;font-size:0.88rem;margin-bottom:10px;">⚠️ La pasarela no pudo cargar en tu navegador</p>
           <p style="color:#94a3b8;font-size:0.78rem;margin-bottom:14px;line-height:1.5;">Esto ocurre a veces con bloqueadores de anuncios o navegadores en modo estricto. Tienes 3 opciones:</p>
-          <button onclick="abrirEpayco(this);document.getElementById('epayco-fallback').style.display='none';" style="width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;cursor:pointer;margin-bottom:10px;">🔄 Reintentar pago con tarjeta / PSE</button>
+          <button onclick="document.getElementById('epayco-fallback').style.display='none';abrirPago(this);" style="width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;cursor:pointer;margin-bottom:10px;">🔄 Reintentar pago con tarjeta / PSE / Nequi</button>
           <a href="https://wa.me/573159318400?text=Quiero+pagar+$19.000+por+mis+multas.+Por+favor+indíqueme+cómo." target="_blank" style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;margin-bottom:10px;box-sizing:border-box;">💬 Pagar por WhatsApp ahora</a>
           <p style="color:#64748b;font-size:0.72rem;">También puedes desactivar tu bloqueador de anuncios y recargar la página.</p>
         </div>
@@ -1115,6 +1115,8 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 <script>
 var _nMultas = 1;
 var _epaycoLoaded = false;
+var WOMPI_PUBLIC_KEY = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
+var WOMPI_LINK_BASE  = 'https://checkout.wompi.co/l/ealA8Z'; // link fijo $19.000 (1 multa)
 // Leer cantidad de multas desde URL param (?multas=N)
 (function(){ try{ var p=new URLSearchParams(location.search).get('multas'); var n=parseInt(p,10); if(n>=1&&n<=6){ _nMultas=n; } }catch(e){} })();
 
@@ -1192,6 +1194,66 @@ function enviarComprobante(){
     +'🔑 Pago realizado por Llave Breve @OTO262\n\n'
     +'Adjunto el comprobante. Por favor radicar de inmediato 🙏';
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
+}
+
+/* ── Pago principal: Wompi primero, ePayco fallback ── */
+function abrirPago(btn){
+  var n     = _nMultas;
+  var monto = 19000 * n; // en pesos COP
+
+  // Intentar Wompi widget (funciona en Edge/Firefox/Chrome/Safari sin extensiones)
+  if(typeof WidgetCheckout !== 'undefined'){
+    _lanzarWompi(monto, n, btn);
+    return;
+  }
+
+  // Esperar hasta 5s que el widget.js del head cargue
+  if(btn){ btn.disabled=true; btn.style.opacity='0.75'; }
+  document.getElementById('epayco-loading').classList.add('show');
+  var intentos=0;
+  var poll=setInterval(function(){
+    intentos++;
+    if(typeof WidgetCheckout !== 'undefined'){
+      clearInterval(poll);
+      document.getElementById('epayco-loading').classList.remove('show');
+      if(btn){ btn.disabled=false; btn.style.opacity=''; }
+      _lanzarWompi(monto, n, btn);
+    } else if(intentos>25){ // 5s
+      clearInterval(poll);
+      document.getElementById('epayco-loading').classList.remove('show');
+      if(btn){ btn.disabled=false; btn.style.opacity=''; }
+      // Wompi no cargó → intentar ePayco
+      abrirEpayco(btn);
+    }
+  }, 200);
+}
+
+function _lanzarWompi(monto, n, btn){
+  try{
+    var checkout = new WidgetCheckout({
+      currency:       'COP',
+      amountInCents:  monto * 100,
+      reference:      'JW-' + Date.now(),
+      publicKey:      WOMPI_PUBLIC_KEY,
+      redirectUrl:    'https://juridicosweb.com/pago-ok.html',
+      taxInCents:     { vat: 0, consumption: 0 }
+    });
+    checkout.open(function(result){
+      var tx = result.transaction;
+      if(tx && tx.status === 'APPROVED'){
+        var total = '$'+(monto).toLocaleString('es-CO');
+        var msg = '✅ *JurídicosWeb — Pago aprobado*\n\n'
+          +'💳 Monto: *'+total+'* ('+n+' multa'+(n!==1?'s':'')+' × $19.000)\n'
+          +'🔖 Ref: '+tx.reference+'\n\n'
+          +'Por favor confirma para que radicemos de inmediato 🙏';
+        window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
+        toast('✅ ¡Pago aprobado! Envíanos el comprobante por WhatsApp.', 'ok');
+      }
+    });
+  } catch(e){
+    // Widget falló → fallback a ePayco
+    abrirEpayco(btn);
+  }
 }
 
 /* ── ePayco checkout — compatible Chrome / Edge / Firefox / Safari ── */
