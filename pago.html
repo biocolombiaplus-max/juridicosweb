@@ -1115,8 +1115,9 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
 <script>
 var _nMultas = 1;
 var _epaycoLoaded = false;
-var WOMPI_PUBLIC_KEY = 'pub_prod_ePakM1CIHRH6Cg2Y7XacjvTxmLeJsEG2';
-var WOMPI_LINK_BASE  = 'https://checkout.wompi.co/l/ealA8Z'; // link fijo $19.000 (1 multa)
+var EPAYCO_PUBLIC_KEY = '347e56166b7cbd26c7257d8689033fba'; // JS widget (checkout.js)
+var EPAYCO_P_KEY      = '1c2369a761d30551a9583239676a907f61e3a235'; // Standard Checkout form POST
+var EPAYCO_ID         = '1595409';
 // Leer cantidad de multas desde URL param (?multas=N)
 (function(){ try{ var p=new URLSearchParams(location.search).get('multas'); var n=parseInt(p,10); if(n>=1&&n<=6){ _nMultas=n; } }catch(e){} })();
 
@@ -1196,137 +1197,94 @@ function enviarComprobante(){
   window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
 }
 
-/* ── Pago principal: Wompi primero, ePayco fallback ── */
+/* ── Pago ePayco: form POST — no depende del JS de ePayco, funciona en TODOS los navegadores ── */
 function abrirPago(btn){
   var n     = _nMultas;
-  var monto = 19000 * n; // en pesos COP
+  var monto = 19000 * n;
+  var desc  = 'Eliminar ' + n + ' multa' + (n!==1?'s':'') + ' - JuridicosWeb.com';
+  var ref   = 'JW-' + Date.now();
 
-  // Intentar Wompi widget (funciona en Edge/Firefox/Chrome/Safari sin extensiones)
-  if(typeof WidgetCheckout !== 'undefined'){
-    _lanzarWompi(monto, n, btn);
+  // Intentar primero el widget JS de ePayco (Chrome lo permite siempre)
+  if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
+    _abrirEpaycoWidget(monto, desc, btn);
     return;
   }
 
-  // Esperar hasta 5s que el widget.js del head cargue
-  if(btn){ btn.disabled=true; btn.style.opacity='0.75'; }
-  document.getElementById('epayco-loading').classList.add('show');
-  var intentos=0;
-  var poll=setInterval(function(){
-    intentos++;
-    if(typeof WidgetCheckout !== 'undefined'){
-      clearInterval(poll);
-      document.getElementById('epayco-loading').classList.remove('show');
-      if(btn){ btn.disabled=false; btn.style.opacity=''; }
-      _lanzarWompi(monto, n, btn);
-    } else if(intentos>25){ // 5s
-      clearInterval(poll);
-      document.getElementById('epayco-loading').classList.remove('show');
-      if(btn){ btn.disabled=false; btn.style.opacity=''; }
-      // Wompi no cargó → intentar ePayco
-      abrirEpayco(btn);
-    }
-  }, 200);
+  // Fallback universal: form POST → abre checkout ePayco en nueva pestaña
+  // No requiere que checkout.js cargue — funciona en Edge, Firefox, Safari
+  _epaycoFormPost(monto, desc, ref);
 }
 
-function _lanzarWompi(monto, n, btn){
-  try{
-    var checkout = new WidgetCheckout({
-      currency:       'COP',
-      amountInCents:  monto * 100,
-      reference:      'JW-' + Date.now(),
-      publicKey:      WOMPI_PUBLIC_KEY,
-      redirectUrl:    'https://juridicosweb.com/pago-ok.html',
-      taxInCents:     { vat: 0, consumption: 0 }
-    });
-    checkout.open(function(result){
-      var tx = result.transaction;
-      if(tx && tx.status === 'APPROVED'){
-        var total = '$'+(monto).toLocaleString('es-CO');
-        var msg = '✅ *JurídicosWeb — Pago aprobado*\n\n'
-          +'💳 Monto: *'+total+'* ('+n+' multa'+(n!==1?'s':'')+' × $19.000)\n'
-          +'🔖 Ref: '+tx.reference+'\n\n'
-          +'Por favor confirma para que radicemos de inmediato 🙏';
-        window.open('https://wa.me/573159318400?text='+encodeURIComponent(msg), '_blank');
-        toast('✅ ¡Pago aprobado! Envíanos el comprobante por WhatsApp.', 'ok');
-      }
-    });
-  } catch(e){
-    // Widget falló → fallback a ePayco
-    abrirEpayco(btn);
-  }
-}
-
-/* ── ePayco checkout — compatible Chrome / Edge / Firefox / Safari ── */
-function abrirEpayco(btn){
-  var n     = _nMultas;
-  var monto = 19000 * n;
-  var desc  = 'Radicar '+n+' multa'+(n!==1?'s':'')+' - JuridicosWeb';
-
+function _abrirEpaycoWidget(monto, desc, btn){
   if(btn){ btn.disabled=true; btn.style.opacity='0.7'; }
   document.getElementById('epayco-loading').classList.add('show');
-
-  function mostrarFallback(){
-    document.getElementById('epayco-loading').classList.remove('show');
-    if(btn){ btn.disabled=false; btn.style.opacity=''; }
-    // Mostrar fallback con WhatsApp y botón de reintento
-    var fb = document.getElementById('epayco-fallback');
-    if(fb) fb.style.display='block';
-    toast('Usa el botón de reintento o paga por Nequi/WhatsApp.', 'error');
+  try{
+    var handler = ePayco.checkout.configure({
+      key:               EPAYCO_PUBLIC_KEY,
+      test:              false,
+      p_cust_id_cliente: EPAYCO_ID
+    });
+    handler.open({
+      name:         'JuridicosWeb',
+      description:  desc,
+      currency:     'cop',
+      amount:       String(monto),
+      tax_base:     '0',
+      tax:          '0',
+      country:      'co',
+      lang:         'es',
+      external:     'false',
+      response:     'https://juridicosweb.com/pago-ok.html',
+      confirmation: 'https://juridicosweb.com/pago-ok.html'
+    });
+  } catch(e){
+    _epaycoFormPost(monto, desc, 'JW-'+Date.now());
   }
-
-  function lanzar(){
-    document.getElementById('epayco-loading').classList.remove('show');
-    if(btn){ btn.disabled=false; btn.style.opacity=''; }
-    try{
-      var handler = ePayco.checkout.configure({
-        key:               '347e56166b7cbd26c7257d8689033fba',
-        test:              false,
-        p_cust_id_cliente: '1595409'
-      });
-      handler.open({
-        name:         'JuridicosWeb',
-        description:  desc,
-        currency:     'cop',
-        amount:       String(monto),
-        tax_base:     '0',
-        tax:          '0',
-        country:      'co',
-        lang:         'es',
-        external:     'false',
-        response:     'https://juridicosweb.com/pago-ok.html',
-        confirmation: 'https://juridicosweb.com/pago-ok.html'
-      });
-    } catch(e){
-      mostrarFallback();
-    }
-  }
-
-  // Verificar si ya está cargado (precargado en <head>)
-  if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
-    lanzar();
-    return;
-  }
-
-  // Esperar hasta 8s que el script del head termine de cargar (polling)
-  var intentos = 0;
-  var poll = setInterval(function(){
-    intentos++;
-    if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
-      clearInterval(poll);
-      lanzar();
-    } else if(intentos > 40){ // 40 × 200ms = 8s timeout
-      clearInterval(poll);
-      // Último intento: inyectar script dinámicamente como fallback
-      var s = document.createElement('script');
-      s.src = 'https://checkout.epayco.co/checkout.js?v='+Date.now();
-      s.onload = function(){
-        try{ lanzar(); } catch(e){ mostrarFallback(); }
-      };
-      s.onerror = function(){ mostrarFallback(); };
-      document.head.appendChild(s);
-    }
-  }, 200);
+  document.getElementById('epayco-loading').classList.remove('show');
+  if(btn){ btn.disabled=false; btn.style.opacity=''; }
 }
+
+function _epaycoFormPost(monto, desc, ref){
+  // Construye y envía un form POST a ePayco — abre su checkout en nueva pestaña
+  // Este método no necesita JS de ePayco y funciona en cualquier navegador
+  var form = document.createElement('form');
+  form.method  = 'POST';
+  form.action  = 'https://checkout.epayco.co/checkout/api/pay';
+  form.target  = '_blank';
+  form.style.display = 'none';
+
+  var campos = {
+    p_cust_id_cliente: EPAYCO_ID,
+    p_key:             EPAYCO_P_KEY,
+    p_amount:          String(monto),
+    p_description:     desc,
+    p_currency_code:   'COP',
+    p_country:         'co',
+    p_lang:            'es',
+    p_external:        '1',
+    p_test_request:    'FALSE',
+    p_response_url:    'https://juridicosweb.com/pago-ok.html',
+    p_confirmation_url:'https://juridicosweb.com/pago-ok.html',
+    p_billing_name:    'Cliente JuridicosWeb',
+    p_id_invoice:      ref
+  };
+
+  Object.keys(campos).forEach(function(k){
+    var inp = document.createElement('input');
+    inp.type  = 'hidden';
+    inp.name  = k;
+    inp.value = campos[k];
+    form.appendChild(inp);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(function(){ document.body.removeChild(form); }, 3000);
+  toast('Abriendo pasarela de pago en nueva pestaña...', 'ok');
+}
+
+// Mantener función legacy por compatibilidad con otros lugares que la llamen
+function abrirEpayco(btn){ abrirPago(btn); }
 
 /* ── Toast de feedback ── */
 function toast(msg, type){
