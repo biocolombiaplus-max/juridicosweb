@@ -885,13 +885,31 @@ body{font-family:'Inter',sans-serif;background:var(--navy);color:var(--white);ov
         <div class="ssl-row">
           <span class="ssl-badge">🔒 Encriptación SSL 256 bits · Procesado por ePayco · Datos protegidos</span>
         </div>
-        <!-- Fallback cuando ePayco no carga (bloqueado por browser/red) -->
-        <div id="epayco-fallback" style="display:none;margin-top:14px;background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid rgba(245,158,11,0.4);border-radius:14px;padding:16px 18px;text-align:center;">
-          <p style="color:#fbbf24;font-weight:800;font-size:0.88rem;margin-bottom:10px;">⚠️ La pasarela no pudo cargar en tu navegador</p>
-          <p style="color:#94a3b8;font-size:0.78rem;margin-bottom:14px;line-height:1.5;">Esto ocurre a veces con bloqueadores de anuncios o navegadores en modo estricto. Tienes 3 opciones:</p>
-          <button onclick="document.getElementById('epayco-fallback').style.display='none';abrirPago(this);" style="width:100%;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;cursor:pointer;margin-bottom:10px;">🔄 Reintentar pago con tarjeta / PSE / Nequi</button>
-          <a href="https://wa.me/573159318400?text=Quiero+pagar+$19.000+por+mis+multas.+Por+favor+indíqueme+cómo." target="_blank" style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:10px;padding:13px;font-size:0.9rem;font-weight:800;margin-bottom:10px;box-sizing:border-box;">💬 Pagar por WhatsApp ahora</a>
-          <p style="color:#64748b;font-size:0.72rem;">También puedes desactivar tu bloqueador de anuncios y recargar la página.</p>
+        <!-- Alternativa cuando ePayco no carga en Edge/Firefox con protección estricta -->
+        <div id="epayco-fallback" style="display:none;margin-top:16px;">
+          <div style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1.5px solid rgba(245,158,11,0.3);border-radius:16px;padding:20px 18px;text-align:center;">
+            <p style="color:#f59e0b;font-weight:800;font-size:0.9rem;margin-bottom:4px;">💳 Pago en línea bloqueado por tu navegador</p>
+            <p style="color:#64748b;font-size:0.75rem;margin-bottom:16px;">Edge y Firefox bloquean algunas pasarelas. Usa Chrome, o paga instantáneo por Nequi:</p>
+
+            <!-- Opción Nequi — siempre funciona -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;margin-bottom:12px;text-align:left;">
+              <p style="color:#a78bfa;font-weight:800;font-size:0.82rem;margin-bottom:8px;">⚡ OPCIÓN MÁS RÁPIDA — Nequi / Transfiya</p>
+              <p style="color:#e2e8f0;font-size:0.85rem;margin-bottom:4px;"><strong>Llave Breve:</strong> <span style="color:#22c55e;font-weight:900;font-size:1rem;">@OTO262</span></p>
+              <p style="color:#94a3b8;font-size:0.75rem;margin-bottom:12px;">Envía $19.000 × <span id="fb-multas">1</span> = <strong style="color:#fbbf24;" id="fb-total">$19.000</strong> · Luego toca el botón verde de arriba</p>
+              <button onclick="copiarLlave(this)" style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:9px;padding:11px;font-size:0.85rem;font-weight:800;cursor:pointer;">📋 Copiar llave @OTO262</button>
+            </div>
+
+            <!-- Opción WhatsApp -->
+            <a id="fb-wa-link" href="https://wa.me/573159318400?text=Quiero+pagar+%2419.000+por+1+multa.+%C2%BFC%C3%B3mo+pago+con+tarjeta%3F" target="_blank"
+               style="display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;text-decoration:none;border-radius:12px;padding:14px;font-size:0.9rem;font-weight:800;margin-bottom:10px;box-sizing:border-box;">
+              💬 Coordinar pago por WhatsApp
+            </a>
+
+            <button onclick="document.getElementById('epayco-fallback').style.display='none';abrirPago(this);"
+                    style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#94a3b8;border-radius:9px;padding:10px;font-size:0.78rem;cursor:pointer;">
+              🔄 Reintentar con tarjeta / PSE
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1201,88 +1219,78 @@ function abrirPago(btn){
   var n     = _nMultas;
   var monto = 19000 * n;
   var desc  = 'Eliminar ' + n + ' multa' + (n!==1?'s':'') + ' - JuridicosWeb.com';
-  var ref   = 'JW-' + Date.now();
 
-  // Intentar primero el widget JS de ePayco (Chrome lo permite siempre)
-  if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
-    _abrirEpaycoWidget(monto, desc, btn);
-    return;
-  }
-
-  // Fallback universal: form POST → abre checkout ePayco en nueva pestaña
-  // No requiere que checkout.js cargue — funciona en Edge, Firefox, Safari
-  _epaycoFormPost(monto, desc, ref);
-}
-
-function _abrirEpaycoWidget(monto, desc, btn){
-  if(btn){ btn.disabled=true; btn.style.opacity='0.7'; }
+  if(btn){ btn.disabled=true; btn.style.opacity='0.75'; }
   document.getElementById('epayco-loading').classList.add('show');
-  try{
-    var handler = ePayco.checkout.configure({
-      key:               EPAYCO_PUBLIC_KEY,
-      test:              false,
-      p_cust_id_cliente: EPAYCO_ID
-    });
-    handler.open({
-      name:         'JuridicosWeb',
-      description:  desc,
-      currency:     'cop',
-      amount:       String(monto),
-      tax_base:     '0',
-      tax:          '0',
-      country:      'co',
-      lang:         'es',
-      external:     'false',
-      response:     'https://juridicosweb.com/pago-ok.html',
-      confirmation: 'https://juridicosweb.com/pago-ok.html'
-    });
-  } catch(e){
-    _epaycoFormPost(monto, desc, 'JW-'+Date.now());
+
+  function ocultar(){ document.getElementById('epayco-loading').classList.remove('show'); if(btn){btn.disabled=false;btn.style.opacity='';} }
+  function mostrarAlternativas(){
+    ocultar();
+    var fb = document.getElementById('epayco-fallback');
+    if(!fb) return;
+    // Update dynamic values
+    var n = _nMultas || 1;
+    var total = 19000 * n;
+    var elM = document.getElementById('fb-multas');
+    var elT = document.getElementById('fb-total');
+    if(elM) elM.textContent = n;
+    if(elT) elT.textContent = '$' + total.toLocaleString('es-CO');
+    var waEl = document.getElementById('fb-wa-link');
+    if(waEl){
+      var txt = encodeURIComponent('Hola, quiero pagar $'+total.toLocaleString('es-CO')+' por '+n+' multa'+(n!==1?'s':'')+'. ¿Cómo pago con Nequi o tarjeta?');
+      waEl.href = 'https://wa.me/573159318400?text=' + txt;
+    }
+    fb.style.display = 'block';
   }
-  document.getElementById('epayco-loading').classList.remove('show');
-  if(btn){ btn.disabled=false; btn.style.opacity=''; }
+
+  function lanzar(){
+    ocultar();
+    try{
+      var handler = ePayco.checkout.configure({
+        key:               EPAYCO_PUBLIC_KEY,
+        test:              false,
+        p_cust_id_cliente: EPAYCO_ID
+      });
+      handler.open({
+        name:         'JuridicosWeb',
+        description:  desc,
+        currency:     'cop',
+        amount:       String(monto),
+        tax_base:     '0',
+        tax:          '0',
+        country:      'co',
+        lang:         'es',
+        external:     'true',   // abre en nueva pestaña → más compatible con Edge
+        response:     'https://juridicosweb.com/pago-ok.html',
+        confirmation: 'https://juridicosweb.com/pago-ok.html'
+      });
+    } catch(e){
+      mostrarAlternativas();
+    }
+  }
+
+  // Si checkout.js ya cargó → lanzar widget en nueva pestaña
+  if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
+    lanzar(); return;
+  }
+
+  // Esperar hasta 6s que checkout.js del head cargue
+  var t=0, poll=setInterval(function(){
+    t++;
+    if(typeof ePayco !== 'undefined' && ePayco && ePayco.checkout){
+      clearInterval(poll); lanzar();
+    } else if(t>30){ // 6s
+      clearInterval(poll);
+      // Último intento: inyectar script fresco
+      var s=document.createElement('script');
+      s.src='https://checkout.epayco.co/checkout.js';
+      s.onload=function(){ try{ lanzar(); }catch(e){ mostrarAlternativas(); } };
+      s.onerror=function(){ mostrarAlternativas(); };
+      document.head.appendChild(s);
+    }
+  },200);
 }
 
-function _epaycoFormPost(monto, desc, ref){
-  // Construye y envía un form POST a ePayco — abre su checkout en nueva pestaña
-  // Este método no necesita JS de ePayco y funciona en cualquier navegador
-  var form = document.createElement('form');
-  form.method  = 'POST';
-  form.action  = 'https://secure.epayco.co/checkout/api/pay';
-  form.target  = '_blank';
-  form.style.display = 'none';
-
-  var campos = {
-    p_cust_id_cliente: EPAYCO_ID,
-    p_key:             EPAYCO_P_KEY,
-    p_amount:          String(monto),
-    p_description:     desc,
-    p_currency_code:   'COP',
-    p_country:         'co',
-    p_lang:            'es',
-    p_external:        '1',
-    p_test_request:    'FALSE',
-    p_response_url:    'https://juridicosweb.com/pago-ok.html',
-    p_confirmation_url:'https://juridicosweb.com/pago-ok.html',
-    p_billing_name:    'Cliente JuridicosWeb',
-    p_id_invoice:      ref
-  };
-
-  Object.keys(campos).forEach(function(k){
-    var inp = document.createElement('input');
-    inp.type  = 'hidden';
-    inp.name  = k;
-    inp.value = campos[k];
-    form.appendChild(inp);
-  });
-
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(function(){ document.body.removeChild(form); }, 3000);
-  toast('Abriendo pasarela de pago en nueva pestaña...', 'ok');
-}
-
-// Mantener función legacy por compatibilidad con otros lugares que la llamen
 function abrirEpayco(btn){ abrirPago(btn); }
 
 /* ── Toast de feedback ── */
