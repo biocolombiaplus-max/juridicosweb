@@ -6627,7 +6627,7 @@ function dpAnalizarMulta(m){
     causal += ' Adicionalmente, tampoco se surtió la notificación dentro de los 13 días hábiles exigidos por la Ley 1843 de 2017'+diasTexto+' — constituye un argumento adicional independiente.';
   }
 
-  return Object.assign({}, m, { meses:meses, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal });
+  return Object.assign({}, m, { meses:meses, posibleINM:posibleINM, estado:estado, tipoCausal:tipoCausal, causal:causal, ciudad:ciudad, secretaria:ciudad });
 }
 
 function dpFormatoTiempo(meses){
@@ -6847,14 +6847,14 @@ function dpRenderDocumentoHTML(row, multas){
   var placa = row['Placa']||'';
   var email = row['Email']||row['Correo']||row['email']||'';
   var whatsapp = row['WhatsApp']||'';
-  var ciudad = row['Ciudad']||dpCiudadesList(multas)||'Colombia';
+  var ciudad = limpiarCiudad(row['Ciudad'])||dpCiudadesList(multas)||'Colombia';
   // Intentar leer email de la primera multa si no está en el caso
   if(!email){ try{ var mm=JSON.parse(row['Multas Reportadas']||'[]'); if(mm[0]&&mm[0].email) email=mm[0].email; }catch(e){} }
 
-  // Agrupar por ciudad/secretaría
+  // Agrupar por ciudad/secretaría (usando ciudad limpia como clave)
   var grupos = {};
   multas.forEach(function(m){
-    var k = (m.ciudad||m.secretaria||ciudad).trim();
+    var k = limpiarCiudad(m.ciudad||m.secretaria||ciudad) || ciudad;
     if(!grupos[k]) grupos[k] = [];
     grupos[k].push(m);
   });
@@ -6885,7 +6885,7 @@ function dpRenderDocumentoHTML(row, multas){
   Object.keys(grupos).forEach(function(ciudadKey, gi){
     var gMultas = grupos[ciudadKey];
     var secObj = gMultas.find(function(m){return m.secretaria;});
-    var secNombre = secObj && secObj.secretaria ? secObj.secretaria : ciudadKey;
+    var secNombre = limpiarCiudad(secObj && secObj.secretaria ? secObj.secretaria : ciudadKey);
     var secretariaNombre = 'Secretaría de Tránsito y Movilidad de '+secNombre;
     var numDoc = gi+1;
 
@@ -7141,10 +7141,10 @@ function dpDescargarPDF(){
   var email = row['Email']||'';
   var whatsapp = row['WhatsApp']||'';
 
-  // Agrupar por ciudad
+  // Agrupar por ciudad (usando ciudad limpia como clave)
   var grupos = {};
   multas.forEach(function(m){
-    var k = (m.ciudad||m.secretaria||(row['Ciudad'])||'Colombia').trim();
+    var k = limpiarCiudad(m.ciudad||m.secretaria||(row['Ciudad'])||'Colombia') || (row['Ciudad']||'Colombia');
     if(!grupos[k]) grupos[k]=[];
     grupos[k].push(m);
   });
