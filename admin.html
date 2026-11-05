@@ -6717,9 +6717,23 @@ function dpRenderModal(){
     '</div>';
 
   // Estado firma
-  var sigHtml = firmado
-    ? '<div class="dp-sig-state ok"><span style="font-size:1.2rem;">✅</span><div><strong>El cliente ya firmó.</strong> El PDF firmado está en Google Drive. Puedes radicar o descargar el documento sin firma para revisión.</div>'+(row['Enlace PDF Firmado']?'<a href="'+escHtml(row['Enlace PDF Firmado'].split('|')[0].trim())+'" target="_blank" class="btn btn-success btn-sm" style="flex-shrink:0;">Ver PDF</a>':'')+'</div>'
-    : '<div class="dp-sig-state pending"><span style="font-size:1.2rem;">✍️</span><div><strong>Pendiente de firma.</strong> Envíale el link al cliente para que firme con el dedo — toma 2 minutos. Una vez firme, puedes radicar de inmediato.</div></div>';
+  var linkPdf = row['Enlace PDF Firmado'] ? row['Enlace PDF Firmado'].split('|')[0].trim() : '';
+  // Detectar si el enlace firmado es en realidad una captura SIMIT (PNG/imagen) en lugar de un PDF real
+  var esCapturaSimit = linkPdf && /Prueba_Multa|Captura|\.png|\.jpg|\.jpeg/i.test(linkPdf);
+  var sigHtml;
+  if(firmado && linkPdf && !esCapturaSimit){
+    sigHtml = '<div class="dp-sig-state ok"><span style="font-size:1.2rem;">✅</span><div><strong>El cliente ya firmó.</strong> El PDF firmado está en Google Drive. Puedes radicar o descargar el documento sin firma para revisión.</div>'
+      +'<a href="'+escHtml(linkPdf)+'" target="_blank" class="btn btn-success btn-sm" style="flex-shrink:0;">Ver PDF</a>'
+      +'<button class="btn btn-outline btn-sm" style="flex-shrink:0;font-size:0.72rem;" onclick="dpResetarFirma()" title="Corregir datos y pedir que el cliente firme de nuevo">🔄 Pedir firma nueva</button>'
+      +'</div>';
+  } else if(firmado && esCapturaSimit){
+    // Firmado=TRUE pero el enlace es una captura, no un PDF real — mostrar como pendiente
+    sigHtml = '<div class="dp-sig-state pending" style="border-color:#f59e0b;"><span style="font-size:1.2rem;">⚠️</span><div><strong>Pendiente de firma real.</strong> El registro anterior era una captura SIMIT, no un PDF firmado. Envía el link de firma al cliente.</div>'
+      +'<button class="btn btn-outline btn-sm" style="flex-shrink:0;font-size:0.72rem;" onclick="dpResetarFirma()" title="Limpiar estado de firma para reenviar">🔄 Limpiar y reenviar</button>'
+      +'</div>';
+  } else {
+    sigHtml = '<div class="dp-sig-state pending"><span style="font-size:1.2rem;">✍️</span><div><strong>Pendiente de firma.</strong> Envíale el link al cliente para que firme con el dedo — toma 2 minutos. Una vez firme, puedes radicar de inmediato.</div></div>';
+  }
   document.getElementById('dp-sig-state').innerHTML = sigHtml;
 
   // Documento HTML
@@ -6752,7 +6766,9 @@ function dpRenderModal(){
   }
   if(btnCopiarLink) btnCopiarLink.onclick = function(){ copiarEnlace(linkFirma, btnCopiarLink); };
   if(btnRadicar){
-    if(firmado && !(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true)){
+    // Solo mostrar "Radicar" si está firmado con PDF real (no captura SIMIT) y aún no radicado
+    var puedeRadicar = firmado && !esCapturaSimit && !(row['Doc Enviado']==='TRUE'||row['Doc Enviado']===true);
+    if(puedeRadicar){
       btnRadicar.style.display='';
       btnRadicar.onclick = function(){
         closeModal('modal-gen-dp');
@@ -6765,6 +6781,27 @@ function dpRenderModal(){
   }
   // Reset tab
   dpTab('preview', document.querySelector('#modal-gen-dp .dp-tab-btn'));
+}
+
+// Resetea el estado de firma para permitir que el cliente firme de nuevo
+// (útil cuando el enlace guardado era una captura SIMIT o si se corrigieron datos)
+function dpResetarFirma(){
+  if(!_dpCaso) return;
+  if(!confirm('¿Limpiar el estado de firma para que el cliente pueda firmar de nuevo?\n\nEsto NO borra el PDF firmado de Drive — solo permite reenviar el link de firma.')) return;
+  fetch(SCRIPT_URL, {method:'POST',
+    body: JSON.stringify({_accion:'resetar_firma', cedula:_dpCaso['Cédula'], email:_dpCaso['Email']||''})
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.ok){
+      showToast('✅ Estado de firma limpiado — ya puedes enviar el link de firma','success');
+      // Actualizar el modal localmente
+      _dpCaso['Firmado'] = 'FALSE';
+      _dpCaso['Enlace PDF Firmado'] = '';
+      dpRenderModal();
+    } else {
+      showToast('Error: '+(data.error||'desconocido'),'error');
+    }
+  }).catch(function(e){ showToast('Error de conexión: '+e.message,'error'); });
 }
 
 // Extrae solo el nombre real de ciudad/organismo, descartando basura concatenada

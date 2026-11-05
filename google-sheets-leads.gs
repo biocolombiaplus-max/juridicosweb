@@ -190,6 +190,7 @@ function doPost(e) {
       case 'radicar_documento':   return manejarRadicacion(datos);
       case 'enviar_documento_correo': return enviarDocumentoCorreo(datos);
       case 'marcar_firmado':      return marcarFirmado(datos);
+      case 'resetar_firma':       return resetarFirma(datos);
       case 'reenviar_firmado':    return reenviarFirmado(datos);
       case 'radicar_por_correo':  return radicarPorCorreo(datos);
       case 'link_firma_enviado':   return marcarLinkFirmaEnviado(datos);
@@ -449,15 +450,41 @@ function actualizarPorCedula(datos, valores) {
 // Guarda el PDF/foto firmado en Drive (no en la hoja, para no volverla
 // pesada) y además marca el caso como radicado — arranca el plazo de 15 días
 // automáticamente, sin que el admin tenga que hacer nada más.
+// IMPORTANTE: si datos.esPruebaMulta===true es una captura de pantalla del SIMIT
+// (prueba documental), NO un Derecho de Petición firmado — solo se guarda en Drive
+// en carpeta separada y NO se agrega a "Documentos Firmados" ni se arranca el plazo.
 function manejarRadicacion(datos) {
   var enlace = '';
   if (datos.archivoBase64 && datos.archivoNombre) {
-    var carpeta = obtenerOCrearCarpeta(CARPETA_DRIVE_FIRMAS);
+    // Las capturas SIMIT van a carpeta de pruebas, no a Documentos Firmados
+    var nombreCarpeta = datos.esPruebaMulta
+      ? 'JuridicosWeb - Capturas SIMIT'
+      : CARPETA_DRIVE_FIRMAS;
+    var carpeta = obtenerOCrearCarpeta(nombreCarpeta);
     var partes = datos.archivoBase64.split(',');
     var mime = (partes[0].match(/data:(.*);base64/) || [])[1] || 'application/pdf';
     var bytes = Utilities.base64Decode(partes[1] || partes[0]);
     var archivo = carpeta.createFile(Utilities.newBlob(bytes, mime, datos.archivoNombre));
     enlace = archivo.getUrl();
+  }
+
+  // Si es prueba/captura SIMIT: solo guardar en Drive, no tocar "Documentos Firmados"
+  if (datos.esPruebaMulta) {
+    // Guardar enlace de la captura en las notas del caso (opcional, no bloquea)
+    if (enlace && datos.cedula) {
+      try {
+        var hojaCap = obtenerOCrearHoja(SHEET_CASOS, COLUMNAS_CASOS);
+        var filaCap = buscarFilaPorCedulaOEmail(hojaCap, datos.cedula, datos.email);
+        if (filaCap !== -1) {
+          var notasActuales = obtenerValorFila(hojaCap, filaCap, 'Notas') || '';
+          var notaCap = 'Captura SIMIT: ' + enlace;
+          if (notasActuales.indexOf('Captura SIMIT') === -1) {
+            escribirFila(hojaCap, filaCap, { 'Notas': (notasActuales ? notasActuales + '\n' : '') + notaCap });
+          }
+        }
+      } catch (e) { /* no bloquea */ }
+    }
+    return respuestaJson({ ok: true, enlaceArchivo: enlace });
   }
 
   var hojaFirmados = obtenerOCrearHoja(SHEET_FIRMADOS, COLUMNAS_FIRMADOS);
@@ -569,6 +596,14 @@ function marcarFirmado(datos) {
   }
 
   return respuestaJson({ ok: true, enlaces: enlaces });
+}
+
+// Limpia el estado de firma del caso para permitir que el cliente firme
+// de nuevo (cuando se corrigen datos o el enlace firmado era una captura).
+// NO borra el PDF de Drive — solo limpia Firmado y Enlace PDF Firmado en el Sheet.
+function resetarFirma(datos) {
+  if (!datos.cedula) return respuestaJson({ ok: false, error: 'Falta la cédula' });
+  return actualizarPorCedula(datos, { 'Firmado': 'FALSE', 'Enlace PDF Firmado': '' });
 }
 
 // Botón "Reenviar documento firmado" en el panel — usa los PDF que ya están
