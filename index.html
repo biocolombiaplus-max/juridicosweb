@@ -5383,9 +5383,24 @@ function agruparPorCiudad(multas){
   return orden.map(function(ciudad){ return { ciudad: ciudad, multas: grupos[ciudad] }; });
 }
 
+function limpiarCiudad(str){
+  if(!str) return '';
+  var s = str.trim();
+  var stopWords = ['fecha','fuente','comparendo','agente','notif','secretaria','organismo','tipo','valor','numero','codigo','descripcion','placa','resolucion'];
+  var palabras = s.split(/\s+/);
+  var limpias = [];
+  for(var i=0;i<palabras.length;i++){
+    var p2 = palabras[i].toLowerCase().replace(/[^a-záéíóúñ]/gi,'');
+    if(stopWords.indexOf(p2)!==-1) break;
+    limpias.push(palabras[i]);
+    if(limpias.length>=4) break;
+  }
+  return limpias.length ? limpias.join(' ') : s.split(/\s+/).slice(0,2).join(' ');
+}
+
 function construirTextoPeticion(p, multasGrupo){
   var hoy = new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
-  var ciudadDoc = (multasGrupo && multasGrupo.length) ? multasGrupo[0].ciudad : p.ciudad;
+  var ciudadDoc = limpiarCiudad((multasGrupo && multasGrupo.length) ? multasGrupo[0].ciudad : p.ciudad);
   var secretaria = 'Secretaría de Tránsito y Movilidad – '+ciudadDoc;
 
   var aplican = multasGrupo || [];
@@ -5404,7 +5419,8 @@ function construirTextoPeticion(p, multasGrupo){
       var f = new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
       var valorTxt = m.valor ? ' por valor de $'+Number(m.valor).toLocaleString('es-CO') : '';
       var estadoTxt = (m.notaEstado && /coactiv/i.test(m.notaEstado)) ? ' El comparendo se encuentra actualmente en proceso de cobro coactivo.' : '';
-      return (i+1)+'. Comparendo de fecha '+f+valorTxt+(m.ciudad?', registrado ante '+m.ciudad:'')+'. '+m.causal+estadoTxt;
+      var ciudadM = limpiarCiudad(m.ciudad||'');
+      return (i+1)+'. Comparendo de fecha '+f+valorTxt+(ciudadM?', registrado ante '+ciudadM:'')+'. '+m.causal+estadoTxt;
     }).join('\n\n');
   } else {
     hechosMultas = '1. Tengo registrado(s) comparendo(s) en el Sistema Integrado de Información sobre Multas y Sanciones de Tránsito (SIMIT) a mi nombre y/o al de mi vehículo.';

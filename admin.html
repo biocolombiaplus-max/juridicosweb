@@ -6597,7 +6597,7 @@ function dpAnalizarMulta(m){
   var anio = parseFechaMM(m.fecha).getFullYear();
   var foto = m.foto||'nose'; // 'si'|'no'|'nose'
   var notif = m.notif||'nose'; // 'si'|'no'|'nose'
-  var ciudad = m.ciudad||m.secretaria||'';
+  var ciudad = limpiarCiudad(m.ciudad||m.secretaria||'');
   var dias = parseInt(m.diasNotif) || 0;
   var posibleINM = foto==='si' && anio>=2018 && anio<=2024 && dpCiudadINM(ciudad);
   // Notificación tardía: campo manual 'no', o días reales superan los 13 hábiles
@@ -6767,9 +6767,28 @@ function dpRenderModal(){
   dpTab('preview', document.querySelector('#modal-gen-dp .dp-tab-btn'));
 }
 
+// Extrae solo el nombre real de ciudad/organismo, descartando basura concatenada
+// (ej: "Popayan Fecha notificación Fuente comparendo Secretaria Agente" → "Popayan")
+function limpiarCiudad(str){
+  if(!str) return '';
+  var s = str.trim();
+  // Palabras que indican inicio de datos extra concatenados por error
+  var stopWords = ['fecha','fuente','comparendo','agente','notif','secretaria','organismo','tipo','valor','numero','codigo','descripcion','placa','resolucion'];
+  var palabras = s.split(/\s+/);
+  var limpias = [];
+  for(var i=0;i<palabras.length;i++){
+    var p = palabras[i].toLowerCase().replace(/[^a-záéíóúñ]/gi,'');
+    if(stopWords.indexOf(p)!==-1) break;
+    limpias.push(palabras[i]);
+    // Max 4 palabras para un nombre de ciudad/organismo razonable
+    if(limpias.length>=4) break;
+  }
+  return limpias.length ? limpias.join(' ') : s.split(/\s+/).slice(0,2).join(' ');
+}
+
 function dpCiudadesList(multas){
   var cs={};
-  multas.forEach(function(m){ var c=(m.ciudad||m.secretaria||'').trim(); if(c) cs[c]=1; });
+  multas.forEach(function(m){ var c=limpiarCiudad(m.ciudad||m.secretaria||''); if(c) cs[c]=1; });
   var arr=Object.keys(cs);
   return arr.length?arr.join(', '):'Ciudad por completar';
 }
@@ -6913,8 +6932,9 @@ function dpRenderDocumentoHTML(row, multas){
           +'</p>';
       }
 
-      if(m.secretaria){
-        html += '<p style="'+estiloPara+'"><strong>QUINTO.</strong> El comparendo aparece registrado a cargo de la <strong>Secretaría de Tránsito y Movilidad de '+escHtml(m.secretaria)+'</strong>, entidad ante quien se eleva la presente petición.</p>';
+      if(m.secretaria||m.ciudad){
+        var orgNombre = limpiarCiudad(m.secretaria||m.ciudad||'');
+        html += '<p style="'+estiloPara+'"><strong>QUINTO.</strong> El comparendo aparece registrado a cargo de la <strong>Secretaría de Tránsito y Movilidad de '+escHtml(orgNombre)+'</strong>, entidad ante quien se eleva la presente petición.</p>';
       }
 
       if(i < gMultas.length-1) html += '<hr style="border:none;border-top:1px dashed #ccc;margin:14px 0;">';
@@ -7058,7 +7078,7 @@ function dpRenderMultasDetalle(multas){
       '<div class="dp-mc-num">Multa #'+(i+1)+(m.comparendo?' · '+m.comparendo:'')+'</div>'+
       '<span class="dp-multa-badge '+b.cls+'">'+b.txt+'</span>'+
       dpMCField('Fecha infracción', fFmt)+
-      dpMCField('Ciudad', m.ciudad||m.secretaria||'—')+
+      dpMCField('Ciudad', limpiarCiudad(m.ciudad||m.secretaria||'')||'—')+
       dpMCField('Tipo', m.foto==='si'?'Fotomulta':'Comparendo'+(m.foto==='nose'?' (no especificado)':''))+
       (m.valor?dpMCField('Valor', '$'+Number(m.valor).toLocaleString('es-CO')):'')+
       (m.descripcion?dpMCField('Infracción', m.descripcion):'')+
@@ -7142,9 +7162,8 @@ function dpDescargarPDF(){
     if(gi>0) addPage();
     var gMultas = grupos[ciudadKey];
     var sec = gMultas.find(function(m){return m.secretaria;})||{};
-    var secNombre = sec.secretaria
-      ? 'Secretaría de Tránsito y Movilidad — '+sec.secretaria
-      : 'Secretaría de Tránsito y Movilidad — '+ciudadKey;
+    var _secRaw = sec.secretaria || ciudadKey;
+    var secNombre = 'Secretaría de Tránsito y Movilidad — '+limpiarCiudad(_secRaw);
 
     var hayPre = gMultas.some(function(m){return m.tipoCausal==='prescripcion';});
     var hayNot = gMultas.some(function(m){return m.tipoCausal==='notificacion_tardia';});
